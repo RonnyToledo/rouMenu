@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { HistoryProvider } from "@/context/HistoryContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-
+import Head from "next/head";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -22,6 +22,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
+      <Head>
+        <meta
+          name="google-site-verification"
+          content={process.env.NEXT_PUBLIC_GOOGLE_VERIFI}
+        />
+      </Head>
       <body className={inter.className + " flex justify-center"}>
         <HistoryProvider>
           <div className=" max-w-xl w-full">
