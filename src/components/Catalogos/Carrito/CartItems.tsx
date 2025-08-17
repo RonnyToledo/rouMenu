@@ -23,12 +23,12 @@ export default function CartItems({ count }: { count: number }) {
   };
 
   return (
-    <div id="cart-items" className="p-2 grid gap-2">
+    <div id="cart-items" className="px-2 grid ">
       {getProducts().length > 0 ? (
         getProducts().map((item, index) => (
           <div
             key={index}
-            className="flex items-center  border-b border-gray-200"
+            className="flex items-center  border-b border-gray-200 p-2"
           >
             <Image
               width={100}

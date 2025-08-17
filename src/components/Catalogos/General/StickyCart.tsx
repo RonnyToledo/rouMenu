@@ -205,7 +205,7 @@ export default function StickyCart() {
                     </ScrollArea>
                   </div>
                   <div className="px-3 py-1 bg-white border-t">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold">Total:</span>
                       <span className="font-bold text-lg">
                         ${getTotalPrice().toFixed(2)}
@@ -213,7 +213,7 @@ export default function StickyCart() {
                     </div>
                     <Button
                       className="w-full"
-                      size="sm"
+                      size="lg"
                       onClick={() =>
                         router.push(`/t/${store.sitioweb}/carrito`)
                       }
