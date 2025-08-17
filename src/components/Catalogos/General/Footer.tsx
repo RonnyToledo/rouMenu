@@ -40,22 +40,22 @@ export default function Footer() {
   const [ruta, setRuta] = useState(prevRuta);
   const pathname = usePathname();
   useEffect(() => {
-    if (store.sitioweb) {
-      const startRuta = `/t/${store.sitioweb}`;
+    if (store?.sitioweb) {
+      const startRuta = `/t/${store?.sitioweb}`;
       setRuta(
         prevRuta.map((obj) => ({ ...obj, url: startRuta.concat(obj.url) }))
       );
     }
-  }, [store.sitioweb]);
+  }, [store?.sitioweb]);
 
   return (
     <footer className="bg-[var(--background-medium)] border-t-2 border-[var(--border-gold)] p-6">
       <div className="text-center">
         <h3 className="text-2xl font-cinzel text-[var(--text-dark)] tracking-wider uppercase">
-          {store.name}
+          {store?.name}
         </h3>
         <p className="text-sm text-[var(--text-muted)] mt-2 line-clamp-5">
-          {store.parrrafo || "..."}
+          {store?.parrrafo || "..."}
         </p>
       </div>
       {/*Rutas */}
@@ -76,47 +76,57 @@ export default function Footer() {
           ))}
       </div>
       {/*Redes Sociales */}
-      <div className="flex flex-col items-start mt-4 space-y-2 ">
-        <div className="text-gray-800 uppercase text font-cinzel">
-          Redes Sociales
+      {store?.redes.length > 0 && (
+        <div className="flex flex-col items-start mt-4 space-y-2 ">
+          <div className="text-gray-800 uppercase text font-cinzel">
+            Redes Sociales
+          </div>
+          {store?.redes.map((obj, index) => (
+            <Link
+              href={obj.url}
+              key={index}
+              className="flex items-center gap-2 text-gray-700 text-base"
+            >
+              <IconSelect iconName={obj.tipo} />
+              <div className="line-clamp-1 text-sm">
+                {SelectUser(obj.tipo, obj.user)}
+              </div>
+            </Link>
+          ))}
         </div>
-        {store.redes.map((obj, index) => (
-          <Link
-            href={obj.url}
-            key={index}
-            className="flex items-center gap-2 text-gray-700 text-base"
-          >
-            <IconSelect iconName={obj.tipo} />
-            <div className="line-clamp-1 text-sm">
-              {SelectUser(obj.tipo, obj.user)}
-            </div>
-          </Link>
-        ))}
-      </div>
+      )}
       {/*Contactos */}
-      <div className="flex flex-col items-start mt-4 space-y-2 ">
-        <div className="text-gray-800 uppercase text font-cinzel">Contacto</div>
-        {[
-          { tipo: "wa", url: String(store.cell) },
-          { tipo: "mail", url: store.email },
-          ...store.contacto,
-        ].map((obj, index) => (
-          <Link
-            href={UrlContact(obj.url || "", obj.tipo)}
-            key={index}
-            className="flex items-center gap-2 text-gray-700 text-base"
-          >
-            <IconSelect iconName={obj.tipo} />
-            <div className="line-clamp-1 text-sm">
-              {userContact(obj.tipo, obj.url || "")}
-            </div>
-          </Link>
-        ))}
-      </div>
+      {[
+        { tipo: "wa", url: String(store?.cell) },
+        { tipo: "mail", url: store?.email },
+        ...store?.contacto,
+      ].length > 0 && (
+        <div className="flex flex-col items-start mt-4 space-y-2 ">
+          <div className="text-gray-800 uppercase text font-cinzel">
+            Contacto
+          </div>
+          {[
+            { tipo: "wa", url: String(store?.cell) },
+            { tipo: "mail", url: store?.email },
+            ...store?.contacto,
+          ].map((obj, index) => (
+            <Link
+              href={UrlContact(obj.url || "", obj.tipo)}
+              key={index}
+              className="flex items-center gap-2 text-gray-700 text-base"
+            >
+              <IconSelect iconName={obj.tipo} />
+              <div className="line-clamp-1 text-sm">
+                {userContact(obj.tipo, obj.url || "")}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
       <Separator className="my-2" />
       <div className="mt-6 text-center text-xs text-[var(--text-muted)]">
         <p>
-          © {new Date().getFullYear()} {store.name}. Todos los derechos
+          © {new Date().getFullYear()} {store?.name}. Todos los derechos
           reservados.
         </p>
         <p className="mt-1">

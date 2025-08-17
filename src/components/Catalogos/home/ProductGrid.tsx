@@ -5,7 +5,7 @@ import { TbShoppingCartOff } from "react-icons/tb";
 import { smartRound } from "@/functions/precios";
 import { motion } from "framer-motion";
 import { Product } from "@/context/InitialStatus";
-
+import { cn } from "@/lib/utils";
 import { MyContext } from "@/context/MyContext";
 import Link from "next/link";
 import Image from "next/image";
@@ -60,11 +60,12 @@ export default function ProductGrid({
       </Link>
       <div className="p-2 flex flex-col justify-evenly">
         <h4
-          className={`font-cinzel font-bold text-[var(--text-gold)] text-base flex items-center w-full ${
+          className={cn(
+            "font-cinzel font-bold text-[var(--text-gold)] text-base flex items-center w-full",
             store?.edit?.minimalista
               ? "line-clamp-1 h-6"
-              : `line-clamp-2 ${product.span ? "h-6" : "h-12"}`
-          }`}
+              : `line-clamp-2 ${product?.span ? "h-6" : "h-12"}`
+          )}
         >
           {product.title}
         </h4>

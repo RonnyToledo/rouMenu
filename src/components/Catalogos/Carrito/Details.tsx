@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import PhoneInput from "react-phone-input-2";
 import { CompraInterface } from "./CarritoPage";
-import { MapPin, User, Phone, AlertCircle } from "lucide-react";
+import { MapPin, User, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { smartRound } from "@/functions/precios";
@@ -32,7 +32,7 @@ export default function Details({ compra, setCompra }: Props) {
       <CardContent className="p-6 space-y-5">
         {/* Recipient Info */}
         <div className="space-y-4">
-          <div className="relative">
+          <div className="relative w-full">
             <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Nombre del destinatario"
@@ -47,7 +47,7 @@ export default function Details({ compra, setCompra }: Props) {
             />
           </div>
 
-          <div className="relative">
+          <div className="relative w-full overflow-hidden rounded-sm border border-gray-300">
             <PhoneInput
               placeholder=" Teléfono"
               containerStyle={{ width: "100%" }}
