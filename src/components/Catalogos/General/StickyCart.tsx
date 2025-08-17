@@ -101,7 +101,14 @@ export default function StickyCart() {
       {contentCart > 0 &&
         !(pathname.includes("/carrito") || pathname.includes("/producto")) && (
           // ref colocado aquí en el contenedor fijo
-          <div ref={cartRef} className="fixed bottom-0 left-0 right-0 z-50">
+          <div
+            ref={cartRef}
+            className="fixed bottom-0 left-0 right-0 z-50"
+            style={{
+              boxShadow:
+                "0px -4px 6px -1px rgba(0,0,0,0.2),0 -2px 4px -2px rgba(0,0,0,0.2)",
+            }}
+          >
             <div className="bg-white border-t shadow-lg">
               {/* Cart Toggle Button */}
               <div className="flex items-center justify-between px-4 py-1">
