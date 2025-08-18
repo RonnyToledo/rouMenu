@@ -17,7 +17,7 @@ export default function AboutMePage() {
   const { store } = useContext(MyContext);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="bg-background">
       {/* Header Section */}
       <div
         className={`bg-gradient-to-r from-black/15 to-black/20 border-b`}

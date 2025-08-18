@@ -46,7 +46,7 @@ export default function AboutPage() {
 
   return (
     <div>
-      <main className="bg-gray-50">
+      <main className="bg-gray-50 min-h-screen ">
         <AboutMePage />
 
         <div className="p-4">
@@ -369,7 +369,7 @@ const HorariosComponent: React.FC<HorariosComponentProps> = ({
   }
 
   return (
-    <div className={`${className}`}>
+    <div className={`${className} `}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-md p-1"
