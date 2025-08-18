@@ -57,17 +57,21 @@ export default function Products() {
                       {categoria.name}
                     </Link>
                   </div>
-                  <Image
-                    width={250}
-                    height={250}
-                    placeholder={"blur"}
-                    blurDataURL={categoria.image || store?.urlPoster || logoApp}
-                    alt={categoria.name || `CAtegoria ${index}`}
-                    className={`${
-                      store?.edit?.square ? "aspect-square" : "w-full h-48"
-                    } object-cover`}
-                    src={categoria.image || store?.urlPoster || logoApp}
-                  />
+                  <Link href={`/t/${store?.sitioweb}/category/${categoria.id}`}>
+                    <Image
+                      width={250}
+                      height={250}
+                      placeholder={"blur"}
+                      blurDataURL={
+                        categoria.image || store?.urlPoster || logoApp
+                      }
+                      alt={categoria.name || `CAtegoria ${index}`}
+                      className={`${
+                        store?.edit?.square ? "aspect-square" : "w-full h-48"
+                      } object-cover`}
+                      src={categoria.image || store?.urlPoster || logoApp}
+                    />
+                  </Link>
                   <div className="p-2 flex flex-col justify-evenly">
                     {!store?.edit?.minimalista && (
                       <p

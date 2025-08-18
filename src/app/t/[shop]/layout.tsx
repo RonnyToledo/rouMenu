@@ -4,9 +4,9 @@ import Header from "@/components/Catalogos/General/Header";
 import MyProvider from "@/context/MyContext";
 import { AppState } from "@/context/InitialStatus";
 import { supabase } from "@/lib/supabase";
-import StickyCart from "@/components/Catalogos/General/StickyCart";
 import { notFound } from "next/navigation";
 import Unavailable from "@/components/Catalogos/General/Unavailable";
+import DrawerCart from "@/components/Catalogos/General/DrawerCart";
 export async function generateMetadata({
   params,
 }: {
@@ -99,7 +99,7 @@ export default async function RootLayout({
         {store.active ? (
           <>
             <div className="min-h-[80vh]">{children}</div>
-            <StickyCart />
+            <DrawerCart />
           </>
         ) : (
           <Unavailable />

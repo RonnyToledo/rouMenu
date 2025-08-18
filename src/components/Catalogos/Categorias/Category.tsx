@@ -22,8 +22,8 @@ export default function Category({ categoria }: Props) {
   });
 
   useEffect(() => {
-    if (store?.categorias && store.categorias.length > 0) {
-      const newCat = store.categorias.find((obj) => obj.id === categoria);
+    if (store?.categorias && store?.categorias.length > 0) {
+      const newCat = store?.categorias.find((obj) => obj.id === categoria);
 
       if (newCat) {
         setFinCategory(newCat);
@@ -41,25 +41,25 @@ export default function Category({ categoria }: Props) {
           width={250}
           height={250}
           placeholder={"blur"}
-          blurDataURL={finCategory.image || store.urlPoster || logoApp}
-          alt={finCategory.name || `CAtegoria `}
+          blurDataURL={finCategory?.image || store?.urlPoster || logoApp}
+          alt={finCategory?.name || `CAtegoria `}
           className={`${
-            store.edit.square ? "aspect-square" : "w-full h-48"
+            store?.edit?.square ? "aspect-square" : "w-full h-48"
           } object-cover`}
-          src={finCategory.image || store.urlPoster || logoApp}
+          src={finCategory?.image || store?.urlPoster || logoApp}
         />
         <div className="p-2 flex flex-col justify-evenly">
-          {!store.edit.minimalista && (
+          {!store?.edit?.minimalista && (
             <p
               className={`text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2 whitespace-pre-line `}
             >
-              {finCategory.description}
+              {finCategory?.description}
             </p>
           )}
           <div className={`flex items-center justify-between mt-3`}>
             <p className="font-medium w-full text-10 text-gray-700">
               {
-                store.products.filter((obj) => obj.caja == finCategory.id)
+                store?.products.filter((obj) => obj.caja == finCategory?.id)
                   .length
               }{" "}
               Productos
@@ -75,10 +75,10 @@ export default function Category({ categoria }: Props) {
           {store?.products
             .filter((obj) => obj.caja == categoria)
             .sort((a, b) => {
-              const pa = a.coment.promedio;
-              const pb = b.coment.promedio;
+              const pa = a?.coment?.promedio;
+              const pb = b?.coment?.promedio;
               return pa === pb
-                ? Number(a.order ?? 0) - Number(b.order ?? 0)
+                ? Number(a?.order ?? 0) - Number(b?.order ?? 0)
                 : pb - pa;
             })
             .map((product, index) => (
