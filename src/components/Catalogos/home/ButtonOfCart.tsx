@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/context/InitialStatus";
+import { FaRegTrashCan } from "react-icons/fa6";
 
 export function ButtonOfCart({
   product,
@@ -58,7 +59,31 @@ export function ButtonOfCart({
                 }}
                 disabled={product.Cant === 0}
               >
-                <TbShoppingCartMinus className="size-4" />
+                <AnimatePresence mode="wait" initial={false}>
+                  {product.Cant === 1 ? (
+                    <motion.span
+                      key="trash"
+                      initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="inline-flex"
+                    >
+                      <FaRegTrashCan />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="chevron"
+                      initial={{ opacity: 0, scale: 0.8, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, y: 8 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="inline-flex"
+                    >
+                      <TbShoppingCartMinus className="size-4" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </Button>
             </div>
             <div className="flex items-center justify-center">

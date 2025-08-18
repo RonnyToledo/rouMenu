@@ -30,6 +30,8 @@ export default function DrawerCart() {
   const { store, dispatchStore } = useContext(MyContext);
   const [contentCart, setContentCart] = useState<number>(0);
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -59,6 +61,8 @@ export default function DrawerCart() {
     );
   }, [store.products]);
   function RedirectLink(Id: string, categoria: string) {
+    console.log("RedirectLink");
+
     if (DetectCategoria(categoria, store.categorias)) {
       //IR a categoria especifica
       if (pathname.includes("/category/")) {
@@ -84,6 +88,18 @@ export default function DrawerCart() {
     }
     setOpenDrawer(false);
   }
+  const GoToCart = async () => {
+    console.log("GoToCart");
+    setIsAddingToCart(true);
+    await new Promise((resolve) => setTimeout(resolve, 1700));
+    setIsAddingToCart(false);
+    setShowSuccess(true);
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    setShowSuccess(false);
+    router.push(`/t/${store.sitioweb}/carrito`);
+    setOpenDrawer(false);
+  };
+
   return (
     contentCart > 0 &&
     !(pathname.includes("/carrito") || pathname.includes("/producto")) && (
@@ -214,12 +230,31 @@ export default function DrawerCart() {
               </span>
             </div>
             <Button
-              className="w-full"
-              size="lg"
-              onClick={() => router.push(`/t/${store.sitioweb}/carrito`)}
+              onClick={() => GoToCart()}
+              className={`w-full h-12 text-base font-medium rounded-3xl transition-all duration-300 ${
+                showSuccess
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "hover:scale-105"
+              } ${isAddingToCart ? "scale-95" : ""}`}
             >
-              Proceder al Checkout
-              <MdOutlineShoppingCartCheckout />
+              {isAddingToCart ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Agregando porductos...
+                </div>
+              ) : showSuccess ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-green-600 rounded-full" />
+                  </div>
+                  Carrito listo
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  Proceder al Checkout
+                  <MdOutlineShoppingCartCheckout />
+                </div>
+              )}
             </Button>
           </DrawerFooter>
         </DrawerContent>

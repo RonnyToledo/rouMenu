@@ -8,6 +8,7 @@ import { logoApp } from "@/lib/image";
 import { Button } from "@/components/ui/button";
 import { FaChevronUp, FaChevronDown, FaRegTrashCan } from "react-icons/fa6";
 import CartClean from "./CartClean";
+import { motion, AnimatePresence } from "framer-motion";
 export default function CartItems({ count }: { count: number }) {
   const { store, dispatchStore } = useContext(MyContext);
 
@@ -85,11 +86,31 @@ export default function CartItems({ count }: { count: number }) {
                 }
                 className="size-8 p-0 hover:bg-red-50 hover:border-red-300 hover:scale-110 transition-all duration-200"
               >
-                {item.Cant === 1 ? (
-                  <FaRegTrashCan />
-                ) : (
-                  <FaChevronDown className="w-4 h-4" />
-                )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {item.Cant === 1 ? (
+                    <motion.span
+                      key="trash"
+                      initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
+                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="inline-flex"
+                    >
+                      <FaRegTrashCan className="text-red-700" />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="chevron"
+                      initial={{ opacity: 0, scale: 0.8, y: -8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, y: 8 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="inline-flex"
+                    >
+                      <FaChevronDown className="w-4 h-4" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </Button>
             </div>
           </div>
