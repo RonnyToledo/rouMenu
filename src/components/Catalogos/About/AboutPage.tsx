@@ -150,7 +150,7 @@ export default function AboutPage() {
                           className="w-full px-2 basis-2/3"
                         >
                           <Card className="h-full">
-                            <CardContent className="p-8 text-center">
+                            <CardContent className="h-full p-4 text-center flex flex-col items-center justify-between">
                               <div className="flex items-center justify-center gap-1 mb-4">
                                 {[...Array(testimonial.star)].map((_, i) => (
                                   <Star
