@@ -49,7 +49,7 @@ export default function Footer() {
   }, [store?.sitioweb]);
 
   return (
-    <footer className="bg-[var(--background-medium)] border-t-2 border-[var(--border-gold)] p-6">
+    <footer className="bg-gray-100 border-t-2 border-[var(--border-gold)] p-6">
       <div className="text-center">
         <h3 className="text-2xl font-cinzel text-[var(--text-dark)] tracking-wider uppercase">
           {store?.name}

@@ -53,16 +53,15 @@ export default function DrawerCart() {
     );
   };
   useEffect(() => {
-    setContentCart(
-      store.products.reduce(
-        (sum, product) => (sum = sum + (product.Cant || 0)),
-        0
-      )
+    const value = store.products.reduce(
+      (sum, product) => (sum = sum + (product.Cant || 0)),
+      0
     );
+    setContentCart(value);
+    if (value === 0) setOpenDrawer(false);
   }, [store.products]);
-  function RedirectLink(Id: string, categoria: string) {
-    console.log("RedirectLink");
 
+  function RedirectLink(Id: string, categoria: string) {
     if (DetectCategoria(categoria, store.categorias)) {
       //IR a categoria especifica
       if (pathname.includes("/category/")) {
@@ -89,7 +88,6 @@ export default function DrawerCart() {
     setOpenDrawer(false);
   }
   const GoToCart = async () => {
-    console.log("GoToCart");
     setIsAddingToCart(true);
     await new Promise((resolve) => setTimeout(resolve, 1700));
     setIsAddingToCart(false);

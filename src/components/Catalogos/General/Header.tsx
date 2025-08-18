@@ -72,8 +72,6 @@ export default function Header() {
     setisOpenStore(isOpen((store.horario || []) as ScheduleInterface[]));
   }, [store]);
 
-  console.log(store);
-
   return (
     <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between border-b-2 border-[var(--border-gold)]">
       <div className="flex items-center">

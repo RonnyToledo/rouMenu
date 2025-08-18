@@ -23,12 +23,9 @@ export type AppAction =
 export function reducerStore(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case "Add":
-      console.log("Add");
       return { ...state, ...action.payload };
 
     case "ChangeCurrent": {
-      console.log("ChangeCurrent");
-
       const newDefault = JSON.parse(action.payload) as Current;
       return {
         ...state,
@@ -58,7 +55,6 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
     }
 
     case "AddCart":
-      console.log("AddCart");
       const newDefault = JSON.parse(action.payload);
       return {
         ...state,
@@ -67,8 +63,6 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
         ),
       };
     case "AddComparar":
-      console.log("AddComparar");
-
       const newComprar = JSON.parse(action.payload);
       const newProduct = state.products.map((p) =>
         p.productId === newComprar.productId
@@ -89,8 +83,6 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
       };
 
     case "AddComent": {
-      console.log("AddComent");
-
       const key = String(action.payload.star) as keyof StarDistribution;
       const value = state.comentTienda.porEstrellas[key] + 1;
 
@@ -107,8 +99,6 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
     }
 
     case "AddComentProduct":
-      console.log("AddComentProduct");
-
       return {
         ...state,
         products: state.products.map((p) => {

@@ -77,15 +77,6 @@ export interface Coment {
   UIProduct?: string;
 }
 
-export interface DataComentTienda {
-  UIStore: string;
-  star?: number;
-  title?: string;
-  created_at: string;
-  name?: string;
-  id: number;
-  cmt?: string;
-}
 export interface StarDistribution {
   "0": number;
   "1": number;
@@ -94,10 +85,20 @@ export interface StarDistribution {
   "4": number;
   "5": number;
 }
+export interface DataComentTienda {
+  id: number;
+  cmt: string;
+  name: string;
+  star: number;
+  title: string;
+  UIStore: string;
+  created_at: string;
+}
 export interface ComentTienda {
   porEstrellas: StarDistribution;
   total: number;
   promedio: number;
+  data: DataComentTienda[];
 }
 export interface EditInterface {
   grid: 1 | 2;
@@ -134,10 +135,13 @@ export interface AppState {
   direccion?: string;
   domicilio: boolean;
   email?: string;
+  history: string;
+  country: string;
   envios?: Sends[];
   font: string;
   horario?: ScheduleInterface[];
   id: number;
+
   insta: string;
   local: boolean;
   login: boolean;
@@ -171,13 +175,17 @@ export const initialState: AppState = {
     porEstrellas: { "0": 0, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0 },
     total: 0,
     promedio: 0,
+    data: [],
   },
   font: "Inter",
   carrito: true,
   marketing: false,
   insta: "",
+  history: "",
+  country: "",
   domicilio: false,
   act_tf: false,
+  tipo: "",
   reservas: false,
   Editor: "",
   cell: 0,
