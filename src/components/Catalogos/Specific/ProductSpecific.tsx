@@ -30,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButton from "@/components/myUI/buttonShare";
 import ClipboardProduct from "@/components/myUI/clipboardProduct";
+import RelativeTime from "@/components/GeneralComponents/DateTime";
 
 export default function Product({ id }: { id: string }) {
   const { store, dispatchStore } = useContext(MyContext);
@@ -142,7 +143,7 @@ export default function Product({ id }: { id: string }) {
     },
   ];
   return (
-    <main>
+    <main className="flex items-start min-h-[100svh]">
       <div className="grid grid-cols-1  gap-2 items-start p-4">
         <BreadCrumpParent list={links} />
         <AnimatePresence>
@@ -150,11 +151,10 @@ export default function Product({ id }: { id: string }) {
             key={`Product-motion-${product?.productId}`} // Necesario para que Framer Motion detecte cambios
             initial={{
               opacity: 0,
-              x: swipeDirection === "next" ? 100 : -100,
             }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: swipeDirection === "next" ? -100 : 100 }}
-            transition={{ duration: 0.5 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
             className="relative rounded-b-2xl overflow-hidden"
             onTouchStart={handleSwipeStart}
             onTouchEnd={handleSwipeEnd}
@@ -360,7 +360,10 @@ export default function Product({ id }: { id: string }) {
             </>
           )}
           <Separator />
-          <Tabs defaultValue="description" className="min-h-[20vh]">
+          <Tabs
+            defaultValue="description"
+            className="min-h-[20vh]  text-gray-800"
+          >
             <TabsList>
               <TabsTrigger value="description">Desc</TabsTrigger>
               <TabsTrigger value="rating">Rating</TabsTrigger>
@@ -371,6 +374,8 @@ export default function Product({ id }: { id: string }) {
               <div
                 className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
               >
+                Posteado:{" "}
+                <RelativeTime datetime={product?.creado || new Date()} />
                 <ExpandableText text={product?.descripcion || "..."} />
               </div>
             </TabsContent>

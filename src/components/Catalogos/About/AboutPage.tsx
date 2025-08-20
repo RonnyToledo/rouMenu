@@ -155,7 +155,7 @@ export default function AboutPage() {
                                 {[...Array(testimonial.star)].map((_, i) => (
                                   <Star
                                     key={i}
-                                    className="h-5 w-5 fill-gray-200 text-gray-200"
+                                    className="h-5 w-5 fill-gray-300 text-gray-200"
                                   />
                                 ))}
                               </div>
