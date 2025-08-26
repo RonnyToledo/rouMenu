@@ -1,3 +1,6 @@
-export default function Loading() {
-  return null
+import LoadingComponent from "@/components/GeneralComponents/LoadingComponent";
+import React from "react";
+
+export default function CatalogLoading() {
+  return <LoadingComponent text="RouMenu" />;
 }

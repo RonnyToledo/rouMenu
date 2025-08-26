@@ -141,37 +141,35 @@ export default function AboutPage() {
                         delay: 2000,
                       }),
                     ]}
-                    className="w-full "
+                    className="w-full max-w-xs"
                   >
-                    <CarouselContent>
+                    <CarouselContent className="gap-2">
                       {store.comentTienda.data.map((testimonial, index) => (
                         <CarouselItem
                           key={index}
-                          className="w-full px-2 basis-2/3"
+                          className="basis-2/3 border rounded-2xl aspect-square"
                         >
-                          <Card className="h-full">
-                            <CardContent className="h-full p-4 text-center flex flex-col items-center justify-between">
-                              <div className="flex items-center justify-center gap-1 mb-4">
-                                {[...Array(testimonial.star)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className="h-5 w-5 fill-gray-300 text-gray-200"
-                                  />
-                                ))}
-                              </div>
-                              <p className="text-lg text-muted-foreground mb-6 italic leading-relaxed">
-                                {testimonial.cmt}
+                          <div className="flex flex-col  items-center justify-between h-full p-6">
+                            <div className="flex items-center justify-center gap-1 mb-4">
+                              {[...Array(testimonial.star)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className="h-5 w-5 fill-gray-300 text-gray-200"
+                                />
+                              ))}
+                            </div>
+                            <p className="text-lg text-muted-foreground mb-6 italic leading-relaxed">
+                              {testimonial.cmt}
+                            </p>
+                            <div className="flex items-center justify-center gap-4">
+                              <p className="font-heading font-semibold text-card-foreground">
+                                {testimonial.name}
                               </p>
-                              <div className="flex items-center justify-center gap-4">
-                                <p className="font-heading font-semibold text-card-foreground">
-                                  {testimonial.name}
-                                </p>
-                                <span className="text-sm text-muted-foreground">
-                                  {format(testimonial.created_at, "short")}
-                                </span>
-                              </div>
-                            </CardContent>
-                          </Card>
+                              <span className="text-sm text-muted-foreground">
+                                {format(testimonial.created_at, "short")}
+                              </span>
+                            </div>
+                          </div>
                         </CarouselItem>
                       ))}
                     </CarouselContent>

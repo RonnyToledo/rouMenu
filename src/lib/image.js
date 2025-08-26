@@ -1,5 +1,5 @@
 export const logoApp =
-  "https://res.cloudinary.com/dbgnyc842/image/upload/v1753624888/Identidades/rouAdmin_pjtpp2.jpg";
+  "https://res.cloudinary.com/dbgnyc842/image/upload/v1753624387/Identidades/rouMenu_cip8ci.jpg";
 export const logoAdmin =
   "https://res.cloudinary.com/dbgnyc842/image/upload/v1753624888/Identidades/rouAdmin_pjtpp2.jpg";
 export const logoUser =

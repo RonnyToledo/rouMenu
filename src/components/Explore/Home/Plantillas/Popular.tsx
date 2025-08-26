@@ -9,7 +9,7 @@ export default function Popular() {
   const { generalData } = useContext(MyGeneralContext);
 
   return (
-    <div>
+    <div className="shadow-lg">
       <h3 className="text-[#0d141c] text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-4">
         Categorias
       </h3>

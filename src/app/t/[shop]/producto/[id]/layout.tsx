@@ -21,7 +21,7 @@ export async function generateMetadata({
       openGraph: {
         type: "website",
         locale: "es_ES", // Ajusta según el idioma de tu sitio
-        url: `https://randh-menu.vercel.app/t/${shop}/producto/${id}`, // URL de la página
+        url: `https://roumenu.vercel.app/t/${shop}/producto/${id}`, // URL de la página
         title: `rouMenu | ${product[0].title}`,
         description: product[0].descripcion,
         images: [

@@ -1,5 +1,5 @@
 import type React from "react";
-import Footer from "@/components/Catalogos/General/Footer";
+import { CatalogFooter } from "@/components/Catalogos/General/Footer";
 import Header from "@/components/Catalogos/General/Header";
 import MyProvider from "@/context/MyContext";
 import { AppState } from "@/context/InitialStatus";
@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import Unavailable from "@/components/Catalogos/General/Unavailable";
 import DrawerCart from "@/components/Catalogos/General/DrawerCart";
+
 export async function generateMetadata({
   params,
 }: {
@@ -38,7 +39,7 @@ export async function generateMetadata({
       openGraph: {
         type: "website",
         locale: "es_ES", // Ajusta según el idioma de tu sitio
-        url: `https://randh-menu.vercel.app/t/${shop}`, // URL de la página
+        url: `https://roumenu.vercel.app/t/${shop}`, // URL de la página
         title: `rouMenu | ${name}`,
         description: parrrafo,
         images: [
@@ -105,7 +106,7 @@ export default async function RootLayout({
           <Unavailable />
         )}
 
-        <Footer />
+        <CatalogFooter />
       </MyProvider>
     </div>
   );

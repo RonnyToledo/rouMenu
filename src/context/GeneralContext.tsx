@@ -1,93 +1,98 @@
 "use client";
 // MyContextProvider.tsx
-import React, { ReactNode, useState, createContext } from "react";
+import React, { ReactNode, useState, createContext, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { logoApp } from "@/lib/image";
 
-type Hero = {
-  UUID: string;
-  image: string;
-  title: string;
-  visitas: number;
-  sitioweb: string;
-  description: string;
-};
-
-type Catalog = {
+export type Hero = {
   UUID?: string;
-  name: string;
-  image: string | null;
+  image?: string;
+  title?: string;
+  visitas?: number;
+  sitioweb?: string;
+  description?: string;
+};
+type Catalog = {
+  banner?: string;
+  UUID?: string;
+  name?: string;
+  image?: string | null;
   visitas?: number;
   avg_star?: number;
-  sitioweb: string;
-  provincia: string;
+  sitioweb?: string;
+  provincia?: string;
+  post?: string;
+  tipo?: string;
 };
 
 type Product = {
-  image: string;
-  price: number;
-  title: string;
+  image?: string;
+  price?: number;
+  title?: string;
   avg_star?: number;
   oldPrice?: number;
   productId?: string;
-  score: number;
-  visitas: number;
-  sitioweb: string;
-  site_uuid: string;
-  category_id: string;
+  score?: number;
+  visitas?: number;
+  sitioweb?: string;
+  site_uuid?: string;
+  category_id?: string;
   cnt_comments?: number;
-  category_name: string;
+  category_name?: string;
 };
-type TopPost = {
-  image: string;
-  price: number;
-  score: number;
-  title: string;
-  avg_star: number;
-  oldPrice: number;
-  productId: string;
-  store_logo: string;
-  store_name: string;
-  store_uuid: string;
-  category_id: string;
-  cnt_comments: number;
-  category_name: string;
-  store_sitioweb: string;
-  product_visitas: number;
-  product_created_at: string;
+export type TopPost = {
+  image?: string;
+  price?: number;
+  score?: number;
+  title?: string;
+  avg_star?: number;
+  oldPrice?: number;
+  productId?: string;
+  store_logo?: string;
+  store_name?: string;
+  store_uuid?: string;
+  category_id?: string;
+  cnt_comments?: number;
+  category_name?: string;
+  store_sitioweb?: string;
+  product_visitas?: number;
+  product_created_at?: string;
 };
 type TopSites = {
-  UUID: string;
-  name: string;
-  image: string;
-  visitas: string;
+  UUID?: string;
+  name?: string;
+  image?: string;
+  visitas?: string;
 };
-type Top_provinces = {
-  provincia: string;
+export type Top_provinces = {
+  provincia?: string;
   top_sites: TopSites[];
-  sitios_count: number;
-  total_visitas: number;
+  sitios_count?: number;
+  total_visitas?: number;
+  image?: string;
 };
 
 type PopularCatalogs = {
-  id: string;
-  name: string;
-  image: string;
-  visitas: number;
-  cat_score?: number;
+  id?: string;
+  name?: string;
+  image?: string;
+  visitas?: number;
+  cat_scored?: number;
   avg_product_star?: number;
 };
 type CatalogsYouMightLike = {
-  image: string;
-  visitas: number;
-  store_id: string;
-  category_id: string;
-  category_name: string;
-  store_sitioweb: string;
+  image?: string;
+  visitas?: number;
+  store_id?: string;
+  category_id?: string;
+  category_name?: string;
+  store_sitioweb?: string;
 };
 
-interface AppState {
+export interface AppState {
   hero: Hero[];
+  images: string[];
   catalogs: Catalog[];
   products: Product[];
   featured_catalogs: PopularCatalogs[];
@@ -95,10 +100,12 @@ interface AppState {
   popularCatalogs: PopularCatalogs[];
   top_posts: TopPost[];
   top_provinces: Top_provinces[];
+  random_title: string;
 }
 
 const data = {
   hero: [],
+  images: [logoApp, logoApp, logoApp, logoApp, logoApp],
   catalogs: [],
   products: [],
   featured_catalogs: [],
@@ -106,6 +113,7 @@ const data = {
   popularCatalogs: [],
   top_posts: [],
   top_provinces: [],
+  random_title: "",
 };
 
 interface ContextType {
@@ -128,6 +136,16 @@ export default function GeneralProvider({
 }: MyProviderProps) {
   const [generalData, setGeneralData] = useState(storeSSD ?? data);
   const pathname = usePathname();
+  console.log(storeSSD);
+  useEffect(() => {
+    // Si la URL tiene hash no hacemos scroll
+    if (typeof window !== "undefined" && window.location.hash) {
+      const el = document.getElementById(window.location.hash);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [pathname]);
 
   return (
     <MyGeneralContext.Provider value={{ generalData, setGeneralData }}>

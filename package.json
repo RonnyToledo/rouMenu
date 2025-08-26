@@ -10,8 +10,11 @@
     "post": "git add . && git commit -m \"$npm_config_message\" && git push -u origin main && vercel --prod"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@formkit/tempo": "^0.1.2",
     "@github/relative-time-element": "^4.4.8",
+    "@mui/material": "^7.3.1",
     "@next/third-parties": "^15.4.5",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-avatar": "^1.1.10",

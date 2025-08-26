@@ -55,15 +55,7 @@ export default function Header() {
     open: false,
   });
 
-  useEffect(() => {
-    // Si la URL tiene hash no hacemos scroll
-    if (typeof window !== "undefined" && window.location.hash) {
-      const el = document.getElementById(window.location.hash);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [pathname]);
+
 
   useEffect(() => {
     if (!open) setShowState("home");
