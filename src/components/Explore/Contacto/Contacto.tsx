@@ -1,3 +1,6 @@
+"use client";
+import React, { useState } from "react";
+
 import {
   Card,
   CardContent,
@@ -21,47 +24,110 @@ import {
   MessageCircle,
   Send,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { NotFoundError } from "@/lib/errors";
+import Link from "next/link";
+
+const developers = [
+  {
+    name: "Ronny Toledo",
+    role: "Full Stack Developer",
+    email: "ronnytoledo87@gmail.com",
+    phone: "+53 52489105",
+    github: "RonnyToledo",
+    linkedin: "ronny-toledo-705857259",
+    website: "roudev.vercel.app",
+    specialties: [
+      "React",
+      "Node.js",
+      "TypeScript",
+      "PostgreSQL",
+      "Next.js",
+      "React-Native",
+      "Expo",
+      "Git",
+      "Github",
+    ],
+    experience: "5+ años",
+    availability: "Lun-Vie 9:00-18:00",
+  },
+];
 
 export default function ContactoPage() {
-  const developers = [
-    {
-      name: "Ana García",
-      role: "Full Stack Developer",
-      email: "ana.garcia@dev.com",
-      phone: "+34 612 345 678",
-      github: "anagarcia-dev",
-      linkedin: "ana-garcia-fullstack",
-      website: "anagarcia.dev",
-      specialties: ["React", "Node.js", "TypeScript", "PostgreSQL"],
-      experience: "5+ años",
-      availability: "Lun-Vie 9:00-18:00",
-    },
-    {
-      name: "Carlos Rodríguez",
-      role: "Frontend Specialist",
-      email: "carlos.rodriguez@dev.com",
-      phone: "+34 687 654 321",
-      github: "carlosrod-ui",
-      linkedin: "carlos-rodriguez-frontend",
-      website: "carlosrodriguez.dev",
-      specialties: ["Next.js", "Tailwind CSS", "UI/UX", "E-commerce"],
-      experience: "4+ años",
-      availability: "Lun-Vie 10:00-19:00",
-    },
-    {
-      name: "María López",
-      role: "Backend Engineer",
-      email: "maria.lopez@dev.com",
-      phone: "+34 698 123 456",
-      github: "marialopez-backend",
-      linkedin: "maria-lopez-backend",
-      website: "marialopez.dev",
-      specialties: ["Python", "Django", "AWS", "Database Design"],
-      experience: "6+ años",
-      availability: "Lun-Vie 8:00-17:00",
-    },
-  ];
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    subject: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{
+    type: "success" | "error";
+    msg: string;
+  } | null>(null);
+  const router = useRouter();
 
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setForm((prev) => ({ ...prev, [e.target.id]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus(null);
+
+    // validación básica
+    if (!form.email || !form.name || !form.message) {
+      setStatus({
+        type: "error",
+        msg: "Por favor completa nombre, email y mensaje.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || "Error enviando el mensaje");
+      }
+
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        subject: "",
+        message: "",
+      });
+      setStatus({
+        type: "success",
+        msg: "Mensaje enviado correctamente. Te contactamos pronto.",
+      });
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        setStatus({
+          type: "error",
+          msg: error.message || "Error del servidor.",
+        });
+        console.error(`Error específico: ${error.name} - ${error.message}`);
+      } else {
+        setStatus({ type: "error", msg: "Error del servidor." });
+        console.error("Ocurrió un error inesperado:", error);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -89,7 +155,7 @@ export default function ContactoPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="grid gap-8 mb-8">
             {/* Company Contact */}
             <Card className="bg-primary/5 border-primary/20">
               <CardHeader className="text-center">
@@ -104,10 +170,10 @@ export default function ContactoPage() {
                   <div>
                     <p className="font-medium">Email Principal</p>
                     <a
-                      href="mailto:info@tiendaonline-dev.com"
+                      href="mailto:info@ronnytoledo87@proton.me"
                       className="text-sm text-muted-foreground hover:text-primary"
                     >
-                      info@tiendaonline-dev.com
+                      ronnytoledo87@proton.me
                     </a>
                   </div>
                 </div>
@@ -116,10 +182,10 @@ export default function ContactoPage() {
                   <div>
                     <p className="font-medium">Teléfono</p>
                     <a
-                      href="tel:+34900123456"
+                      href="tel:+5352489105"
                       className="text-sm text-muted-foreground hover:text-primary"
                     >
-                      +34 900 123 456
+                      +53 52489105
                     </a>
                   </div>
                 </div>
@@ -128,10 +194,10 @@ export default function ContactoPage() {
                   <div>
                     <p className="font-medium">WhatsApp</p>
                     <a
-                      href="https://wa.me/34900123456"
+                      href="https://wa.me/5352489105"
                       className="text-sm text-muted-foreground hover:text-primary"
                     >
-                      +34 900 123 456
+                      +53 52489105
                     </a>
                   </div>
                 </div>
@@ -140,9 +206,9 @@ export default function ContactoPage() {
                   <div>
                     <p className="font-medium">Ubicación</p>
                     <p className="text-sm text-muted-foreground">
-                      Calle Gran Vía 28, 4º Piso
+                      Moron
                       <br />
-                      28013 Madrid, España
+                      28013 Ciego de Avila, Cuba
                     </p>
                   </div>
                 </div>
@@ -203,42 +269,86 @@ export default function ContactoPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-4">
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="grid gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Nombre Completo</Label>
-                    <Input id="name" placeholder="Tu nombre" />
+                    <Input
+                      id="name"
+                      placeholder="Tu nombre"
+                      value={form.name}
+                      onChange={handleChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="tu@email.com" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="tu@email.com"
+                      value={form.email}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone">Teléfono</Label>
-                    <Input id="phone" placeholder="+34 600 000 000" />
+                    <Input
+                      id="phone"
+                      placeholder="+34 600 000 000"
+                      value={form.phone}
+                      onChange={handleChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="company">Empresa (Opcional)</Label>
-                    <Input id="company" placeholder="Tu empresa" />
+                    <Input
+                      id="company"
+                      placeholder="Tu empresa"
+                      value={form.company}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="subject">Asunto</Label>
-                  <Input id="subject" placeholder="¿En qué podemos ayudarte?" />
+                  <Input
+                    id="subject"
+                    placeholder="¿En qué podemos ayudarte?"
+                    value={form.subject}
+                    onChange={handleChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Mensaje</Label>
                   <Textarea
                     id="message"
-                    placeholder="Cuéntanos sobre tu proyecto, presupuesto estimado, fechas importantes, etc."
+                    placeholder="Cuéntanos sobre tu proyecto..."
                     rows={5}
+                    value={form.message}
+                    onChange={handleChange}
                   />
                 </div>
-                <Button type="submit" className="w-full" size="lg">
+                {status && (
+                  <div
+                    className={
+                      status.type === "success"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }
+                  >
+                    {status.msg}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  size="lg"
+                  disabled={loading}
+                >
                   <Send className="h-4 w-4 mr-2" />
-                  Enviar Mensaje
+                  {loading ? "Enviando..." : "Enviar Mensaje"}
                 </Button>
               </form>
             </CardContent>
@@ -250,7 +360,7 @@ export default function ContactoPage() {
           <h2 className="text-3xl font-bold text-center mb-12">
             Nuestro Equipo
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8">
             {developers.map((dev, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
@@ -296,31 +406,31 @@ export default function ContactoPage() {
                   {/* Social Links */}
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" asChild>
-                      <a
+                      <Link
                         href={`https://github.com/${dev.github}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Github className="h-4 w-4" />
-                      </a>
+                      </Link>
                     </Button>
                     <Button variant="outline" size="sm" asChild>
-                      <a
+                      <Link
                         href={`https://linkedin.com/in/${dev.linkedin}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Linkedin className="h-4 w-4" />
-                      </a>
+                      </Link>
                     </Button>
                     <Button variant="outline" size="sm" asChild>
-                      <a
+                      <Link
                         href={`https://${dev.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
                         <Globe className="h-4 w-4" />
-                      </a>
+                      </Link>
                     </Button>
                   </div>
 
@@ -357,13 +467,19 @@ export default function ContactoPage() {
                 la tienda online perfecta para tu negocio.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-primary hover:bg-primary/90">
+                <Button
+                  size="lg"
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() =>
+                    router.push("mailto:info@ronnytoledo87@gmail.com")
+                  }
+                >
                   <Mail className="h-4 w-4 mr-2" />
                   Enviar Mensaje
                 </Button>
                 <Button size="lg" variant="outline" asChild>
                   <a
-                    href="https://wa.me/34900123456"
+                    href="https://wa.me/5352489105"
                     target="_blank"
                     rel="noopener noreferrer"
                   >

@@ -55,8 +55,6 @@ export default function Header() {
     open: false,
   });
 
-
-
   useEffect(() => {
     if (!open) setShowState("home");
   }, [open]);
@@ -65,7 +63,7 @@ export default function Header() {
   }, [store]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between border-b-2 border-[var(--border-gold)]">
+    <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between">
       <div className="flex items-center">
         <Button variant="ghost" onClick={smartBack} size="icon">
           <Image
@@ -282,7 +280,7 @@ function ListSheet({ name, icon, icon2, action, className }: ListSheetProps) {
       onClick={action}
       variant="ghost"
       className={cn(
-        "w-full flex justify-between items-center h-10 text-base border-b-2 text-[var(--text-gold)]",
+        "w-full flex justify-between items-center h-10 text-base ",
         className
       )}
     >

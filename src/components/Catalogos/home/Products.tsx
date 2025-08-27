@@ -51,7 +51,7 @@ export default function Products() {
                 <div className="rounded-lg  ">
                   <div className="pb-2 ">
                     <Link
-                      className="text-sm uppercase font-cinzel text-center  text-gray-700 tracking-widest border-b-2 border-[var(--border-gold)]  line-clamp-1"
+                      className="text-sm uppercase font-cinzel text-center  text-gray-700 tracking-widest  line-clamp-1"
                       href={`/t/${store?.sitioweb}/category/${categoria.id}`}
                     >
                       {categoria.name}
@@ -141,7 +141,7 @@ function AnimatedCategorySection({
         id={categoria.id}
       >
         <Link
-          className="text-sm uppercase font-cinzel text-center text-[var(--text-gold)] tracking-widest border-b-2 border-[var(--border-gold)] pb-2 line-clamp-1"
+          className="text-sm uppercase font-cinzel text-center text-[var(--text-gold)] tracking-widest pb-2 line-clamp-1"
           href={`/t/${store?.sitioweb}/category/${categoria.id}`}
         >
           {categoria.name}

@@ -27,7 +27,7 @@ export default function ProductGrid({
   return (
     <motion.div
       id={product.productId}
-      className={`grid bg-[var(--background-light)] rounded-lg shadow-md overflow-hidden border border-[var(--border-gold)] ${
+      className={`grid  rounded-lg  overflow-hidden shadow-md ${
         store?.edit?.horizontal ? "grid-cols-2" : product.span && "col-span-2"
       }`}
       initial={{ opacity: 0, scale: 0.95 }}

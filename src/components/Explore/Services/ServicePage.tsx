@@ -1,3 +1,4 @@
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,8 +16,9 @@ import {
   CheckCircle,
   ArrowRight,
 } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 export default function ServiciosPage() {
+  const router = useRouter();
   const benefits = [
     {
       icon: TrendingUp,
@@ -86,7 +88,12 @@ export default function ServiciosPage() {
         "Optimización de velocidad para una experiencia de usuario excepcional.",
     },
   ];
-
+  function GotoSection(params: string) {
+    const element = document.getElementById(params);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
   const process = [
     {
       step: "01",
@@ -117,15 +124,15 @@ export default function ServiciosPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 border-b">
+      <section className="bg-gradient-to-br from-green-300/20 via-background to-green-300/20 border-b">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
+            <Badge className="mb-4 bg-green-900/10 text-green-900 border-primary/20">
               Servicios de E-commerce
             </Badge>
             <h1 className="text-5xl font-bold text-foreground mb-6">
               Transforma tu Negocio con una
-              <span className="text-primary"> Tienda Online</span>
+              <span className="text-green-900"> Tienda Online</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
               Descubre los beneficios de tener presencia digital y cómo una
@@ -133,11 +140,19 @@ export default function ServiciosPage() {
               multiplicar tus ventas.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Button
+                onClick={() => router.push(`https://wa.me/5352489105`)}
+                size="lg"
+                className="bg-green-900 hover:bg-green-800/90"
+              >
                 Solicitar Consulta Gratuita
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button
+                onClick={() => router.push(`/`)}
+                size="lg"
+                variant="outline"
+              >
                 Ver Portfolio
               </Button>
             </div>
@@ -158,15 +173,15 @@ export default function ServiciosPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid gap-8">
             {benefits.map((benefit, index) => (
               <Card
                 key={index}
                 className="text-center hover:shadow-lg transition-shadow"
               >
                 <CardHeader>
-                  <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-                    <benefit.icon className="h-8 w-8 text-primary" />
+                  <div className="mx-auto mb-4 p-3 bg-green-900/10 rounded-full w-fit">
+                    <benefit.icon className="h-8 w-8 text-green-900" />
                   </div>
                   <CardTitle className="text-xl">{benefit.title}</CardTitle>
                   <Badge variant="secondary" className="mx-auto">
@@ -194,13 +209,13 @@ export default function ServiciosPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <feature.icon className="h-6 w-6 text-primary" />
+                    <div className="p-2 bg-green-900/10 rounded-lg">
+                      <feature.icon className="h-6 w-6 text-green-900" />
                     </div>
                     <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </div>
@@ -226,36 +241,40 @@ export default function ServiciosPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid gap-8">
             {process.map((step, index) => (
-              <Card
+              <button
                 key={index}
-                className="relative hover:shadow-lg transition-shadow"
+                className="p-0 m-0"
+                onClick={() => GotoSection(`process_${index}`)}
+                id={`process_${index}`}
               >
-                <CardHeader>
-                  <div className="text-4xl font-bold text-primary/20 mb-2">
-                    {step.step}
-                  </div>
-                  <CardTitle className="text-xl">{step.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{step.description}</p>
-                </CardContent>
-                {index < process.length - 1 && (
-                  <div className="hidden lg:block absolute -right-4 top-1/2 transform -translate-y-1/2">
-                    <ArrowRight className="h-6 w-6 text-primary/30" />
-                  </div>
-                )}
-              </Card>
+                <Card className="relative hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="text-4xl font-bold text-green-900/20 mb-2">
+                      {step.step}
+                    </div>
+                    <CardTitle className="text-xl">{step.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{step.description}</p>
+                  </CardContent>
+                  {index < process.length - 1 && (
+                    <div className="hidden lg:block absolute right-4 top-1/2 transform -translate-y-1/2">
+                      <ArrowRight className="h-6 w-6 text-green-900/30" />
+                    </div>
+                  )}
+                </Card>
+              </button>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary/5">
+      <section className="py-16 bg-green-900/5">
         <div className="container mx-auto px-4">
-          <Card className="bg-gradient-to-r from-primary to-secondary text-primary-foreground">
+          <Card className="bg-linear-to-r from-green-700 via-green-400 to-green-700  text-green-900-foreground">
             <CardContent className="py-16 text-center">
               <h3 className="text-3xl font-bold mb-4">
                 ¿Listo para Impulsar tu Negocio?
@@ -265,16 +284,18 @@ export default function ServiciosPage() {
                 oportunidad perdida. Contacta con nosotros y descubre cómo
                 podemos transformar tu negocio.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col  gap-4 justify-center">
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="bg-white text-primary hover:bg-white/90"
+                  className="bg-white text-green-900 hover:bg-white/90"
+                  onClick={() => router.push(`https://wa.me/5352489105`)}
                 >
                   <CheckCircle className="mr-2 h-4 w-4" />
                   Consulta Gratuita
                 </Button>
                 <Button
+                  onClick={() => router.push(`/t/moondust`)}
                   size="lg"
                   variant="outline"
                   className="border-white text-white hover:bg-white/10 bg-transparent"

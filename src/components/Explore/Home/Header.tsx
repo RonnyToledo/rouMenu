@@ -19,8 +19,9 @@ import { DocsSidebar } from "@/components/Explore/Info/docs-sidebar";
 import { ExplorationFooter } from "./Footer";
 import { Input } from "@/components/ui/input";
 import { MyGeneralContext } from "@/context/GeneralContext";
-import { FaHome, FaInfo, FaSearchLocation } from "react-icons/fa";
+import { FaHome, FaInfo } from "react-icons/fa";
 import { RiCustomerServiceFill } from "react-icons/ri";
+import { MdContactPage } from "react-icons/md";
 
 const cardsinfo = [
   {
@@ -42,10 +43,10 @@ const cardsinfo = [
     icon: RiCustomerServiceFill,
   },
   {
-    path: "/buscar",
-    name: "Busqueda",
-    descripcion: "Encuentre mas rapido su objetivo",
-    icon: FaSearchLocation,
+    path: "/contact",
+    name: "Contacto",
+    descripcion: "Contactenos ante dudas o nuevas ideas",
+    icon: MdContactPage,
   },
 ];
 
@@ -102,7 +103,9 @@ export default function Header({ children }: { children: ReactNode }) {
                 />
               </div>
             )}
-            {pathname == "/" ? (
+            {pathname == "/" ||
+            pathname == "/services" ||
+            pathname == "/contact" ? (
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button variant="ghost" className="p-0 m-0">
@@ -119,19 +122,22 @@ export default function Header({ children }: { children: ReactNode }) {
                     </DrawerHeader>
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                      {cardsinfo.map((card, index) =>
-                        card.path == pathname ? (
-                          <CardDrawerActive
-                            key={`Active_${index}`}
-                            card={card}
-                          />
-                        ) : (
-                          <CardDrawer key={`No_acive_${index}`} card={card} />
-                        )
-                      )}
+                      {cardsinfo
+                        .filter((obj) => obj.path !== "/info")
+                        .map((card, index) =>
+                          card.path == pathname ? (
+                            <CardDrawerActive
+                              key={`Active_${index}`}
+                              card={card}
+                            />
+                          ) : (
+                            <CardDrawer key={`No_acive_${index}`} card={card} />
+                          )
+                        )}
                     </div>
 
-                    <div className="space-y-3">
+                    {/*  
+                     <div className="space-y-3">
                       <h3 className="text-lg font-semibold text-card-foreground mb-4">
                         Elementos Recientes
                       </h3>
@@ -153,7 +159,8 @@ export default function Header({ children }: { children: ReactNode }) {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div> 
+                    */}
                   </div>
                 </DrawerContent>
               </Drawer>

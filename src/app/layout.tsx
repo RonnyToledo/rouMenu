@@ -49,21 +49,23 @@ export default async function RootLayout({
           content={process.env.NEXT_PUBLIC_GOOGLE_VERIFI}
         />
       </Head>
-      <body className={inter.className + " flex justify-center"}>
-        <HistoryProvider>
-          <div className=" max-w-xl w-full">
-            <GeneralProvider storeSSD={newData}>
-              <Header>
-                {children}
-                <Toaster />
-              </Header>
-            </GeneralProvider>
-            <GoogleAnalytics
-              gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS || ""}
-            />
-            <SpeedInsights />
-          </div>
-        </HistoryProvider>
+      <body className={inter.className}>
+        <div className=" flex justify-center bg-gray-200">
+          <HistoryProvider>
+            <div className=" max-w-md w-full bg-white">
+              <GeneralProvider storeSSD={newData}>
+                <Header>
+                  {children}
+                  <Toaster />
+                </Header>
+              </GeneralProvider>
+              <GoogleAnalytics
+                gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS || ""}
+              />
+              <SpeedInsights />
+            </div>
+          </HistoryProvider>
+        </div>
       </body>
     </html>
   );

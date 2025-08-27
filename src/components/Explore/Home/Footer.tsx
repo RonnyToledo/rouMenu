@@ -23,7 +23,7 @@ export function ExplorationFooter() {
           </Button>
         </div>
         <Separator className="my-4" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1  gap-8 mb-8">
           <div className="space-y-6">
             <div>
               <h3 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2 uppercase">
