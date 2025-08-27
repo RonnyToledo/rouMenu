@@ -12,6 +12,7 @@ import GeneralProvider, { AppState } from "@/context/GeneralContext";
 import { logoApp } from "@/lib/image";
 import { HistoryProvider } from "@/context/HistoryContext";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -64,7 +65,7 @@ export default async function RootLayout({
 
   // newData será AppState ya resuelto
   const newData = await modifyData(data);
-
+  const GA_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALITYCS;
   return (
     <html lang="es">
       <Head>
@@ -73,6 +74,20 @@ export default async function RootLayout({
           content={process.env.NEXT_PUBLIC_GOOGLE_VERIFI}
         />
       </Head>
+
+      {/* gtag: colocar Scripts en el layout (strategy afterInteractive) */}
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="gtag-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_ID}', { anonymize_ip: true });
+        `}
+      </Script>
       <body className={inter.className}>
         <div className=" flex justify-center bg-gray-200">
           <HistoryProvider>
