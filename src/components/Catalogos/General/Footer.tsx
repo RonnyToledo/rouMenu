@@ -81,7 +81,7 @@ export function CatalogFooter() {
             asChild
             className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 hover:from-gray-300 hover:via-gray-200 hover:to-gray-300 text-white hover:text-gray-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
           >
-            <Link href={"https://rh-admin.vercel.app/createAccount"}>
+            <Link href={"https://rouadmin.vercel.app/createAccount"}>
               <Plus size={16} className="mr-2" />
               Registra tu catalogo
             </Link>

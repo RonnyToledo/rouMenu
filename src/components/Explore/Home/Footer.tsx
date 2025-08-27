@@ -16,7 +16,7 @@ export function ExplorationFooter() {
             asChild
             className="bg-gradient-to-r from-gray-800 to-gray-700 hover:from-gray-700 hover:to-gray-600 text-white px-8 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl animate-pulse"
           >
-            <Link href={"https://rh-admin.vercel.app/createAccount"}>
+            <Link href={"https://rouadmin.vercel.app/createAccount"}>
               <Plus size={16} className="mr-2 " />
               Regístrate
             </Link>
@@ -37,7 +37,7 @@ export function ExplorationFooter() {
                   </Link>
                 </div>
                 <div>
-                  <Link href={"https://rh-admin.vercel.app/createAccount"}>
+                  <Link href={"https://rouadmin.vercel.app/createAccount"}>
                     Registra tu negocio ahora en nuestro catálogo
                   </Link>
                 </div>
