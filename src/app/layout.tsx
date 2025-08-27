@@ -66,6 +66,7 @@ export default async function RootLayout({
   // newData será AppState ya resuelto
   const newData = await modifyData(data);
   const GA_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALITYCS;
+
   return (
     <html lang="es">
       <Head>

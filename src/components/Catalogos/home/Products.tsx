@@ -150,7 +150,7 @@ function AnimatedCategorySection({
 
       <div
         className={`grid  grid-flow-row-dense gap-2 p-2 ${
-          store?.edit?.grid === 1 ? "grid-cols-1" : "grid-cols-2"
+          store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
         }`}
       >
         {products

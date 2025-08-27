@@ -85,7 +85,7 @@ export default async function RootLayout({
     "get_store_with_transform",
     { tienda_slug: shop }
   );
-  const store = trasnformData(storeOne);
+  const store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
   if (error) {
     console.error("Error al obtener tienda:", error);
   } else {
@@ -114,6 +114,7 @@ export default async function RootLayout({
 function trasnformData(store: AppState): AppState {
   return {
     ...store,
+
     products: store.products.map((obj) => ({
       ...obj,
       Cant: 0,

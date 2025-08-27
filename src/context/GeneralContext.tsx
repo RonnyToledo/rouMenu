@@ -136,7 +136,6 @@ export default function GeneralProvider({
 }: MyProviderProps) {
   const [generalData, setGeneralData] = useState(storeSSD ?? data);
   const pathname = usePathname();
-  console.log(storeSSD);
   useEffect(() => {
     // Si la URL tiene hash no hacemos scroll
     if (typeof window !== "undefined" && window.location.hash) {

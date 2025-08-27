@@ -90,7 +90,6 @@ export default function BusquedaPage() {
         console.error("Error en búsqueda fuzzy:", error);
         return null;
       }
-      console.log(data);
       return data as SearchResults;
     } catch (error) {
       console.error("Error inesperado:", error);

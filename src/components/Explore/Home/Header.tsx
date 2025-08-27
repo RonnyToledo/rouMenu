@@ -58,7 +58,6 @@ export default function Header({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (pathname !== "/buscar" && !search) return;
-    console.log("search", search);
     const url = `/buscar${
       search ? `?buscar=${encodeURIComponent(search)}` : ""
     }`;

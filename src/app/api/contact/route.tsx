@@ -30,10 +30,9 @@ export async function POST(request: Request) {
         />
       ),
     });
-    console.log(data, error);
 
     if (error) {
-      console.log("error", error);
+      console.error("error", error);
       return NextResponse.json({ error }, { status: 500 });
     }
 

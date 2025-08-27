@@ -101,7 +101,7 @@ export interface ComentTienda {
   data: DataComentTienda[];
 }
 export interface EditInterface {
-  grid: 1 | 2;
+  grid: boolean;
   square: boolean;
   horizontal: boolean;
   minimalista: boolean;
@@ -164,7 +164,7 @@ export interface AppState {
 
 // Estado inicial tipado a AppState
 export const initialState: AppState = {
-  edit: { grid: 2, square: false, horizontal: false, minimalista: false },
+  edit: { grid: true, square: false, horizontal: false, minimalista: false },
   moneda_default: { valor: 0, moneda: "" },
   urlPoster: "",
   id: 0,

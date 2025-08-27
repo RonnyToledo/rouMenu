@@ -28,7 +28,11 @@ export default function ProductGrid({
     <motion.div
       id={product.productId}
       className={`grid  rounded-lg  overflow-hidden shadow-md ${
-        store?.edit?.horizontal ? "grid-cols-2" : product.span && "col-span-2"
+        store?.edit?.horizontal
+          ? "grid-cols-2"
+          : product?.span && store?.edit?.grid
+            ? "col-span-2"
+            : "col-span-1"
       }`}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -64,7 +68,7 @@ export default function ProductGrid({
             "font-cinzel font-bold text-[var(--text-gold)] text-base flex items-center w-full",
             store?.edit?.minimalista
               ? "line-clamp-1 h-6"
-              : `line-clamp-2 ${product?.span ? "h-6" : "h-12"}`
+              : `line-clamp-2 ${product?.span && store?.edit?.grid ? "h-6" : "h-12"}`
           )}
         >
           {product.title}
