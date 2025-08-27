@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase";
 import GeneralProvider, { AppState } from "@/context/GeneralContext";
 import { logoApp } from "@/lib/image";
 import { HistoryProvider } from "@/context/HistoryContext";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -62,6 +63,7 @@ export default async function RootLayout({
               <GoogleAnalytics
                 gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS || ""}
               />
+              <Analytics />
               <SpeedInsights />
             </div>
           </HistoryProvider>
@@ -102,7 +104,7 @@ async function fetchUrlByName(name: string): Promise<string | null> {
     // asumimos que la API devuelve directamente la URL como JSON (p. ej. "https://...")
     const data = await res.json();
     // si tu API devuelve { url: '...' } ajusta aquí
-    return typeof data === "string" ? data : data?.url ?? null;
+    return typeof data === "string" ? data : (data?.url ?? null);
   } catch (err) {
     console.error("fetchUrlByName error:", err);
     return null;
