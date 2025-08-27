@@ -17,6 +17,29 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "RouMenu by RouDev",
   description: "Encuentra los mejores productos a solo un click de distancia",
+  openGraph: {
+    type: "website",
+    locale: "es_ES", // Ajusta según el idioma de tu sitio
+    url: `https://roumenu.vercel.app`, // URL de la página
+    title: `rouMenu `,
+    description: "Encuentra los mejores productos a solo un click de distancia",
+    images: [
+      {
+        url: "https://res.cloudinary.com/dbgnyc842/image/upload/v1721753647/kiphxzqvoa66wisrc1qf.jpg",
+        width: 1200,
+        height: 630,
+        alt: `Imagen de vista previa`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `rouMenu`,
+    description: "Encuentra los mejores productos a solo un click de distancia",
+    images: [
+      "https://res.cloudinary.com/dbgnyc842/image/upload/v1721753647/kiphxzqvoa66wisrc1qf.jpg",
+    ],
+  },
 };
 export default async function RootLayout({
   children,
