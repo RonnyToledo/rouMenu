@@ -98,9 +98,7 @@ export default async function RootLayout({
                   <Toaster />
                 </Header>
               </GeneralProvider>
-              <GoogleAnalytics
-                gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS || ""}
-              />
+              <GoogleAnalytics gaId={GA_ID || ""} />
               <Analytics />
               <SpeedInsights />
             </div>
