@@ -1,6 +1,5 @@
 "use client";
 import React, { ReactNode, useState, createContext, useEffect } from "react";
-import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { logoApp } from "@/lib/image";
 

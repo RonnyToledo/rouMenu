@@ -207,7 +207,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
               {content?.badges.map((badge, index) => (
                 <Badge
                   key={index}
-                  variant={badge.variant || "secondary"}
+                  variant={badge?.variant || "secondary"}
                   className={badge.className}
                 >
                   {badge.icon && <span className="mr-1">{badge.icon}</span>}
@@ -248,7 +248,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
                             ? "w-full bg-transparent"
                             : "w-full"
                         }
-                        variant={link.variant || "default"}
+                        variant={link?.variant || "default"}
                         asChild
                       >
                         <a
