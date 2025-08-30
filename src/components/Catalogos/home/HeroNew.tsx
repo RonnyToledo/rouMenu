@@ -8,7 +8,7 @@ import { logoApp } from "@/lib/image";
 
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
-
+  console.log(store);
   return (
     <div className="p-3 space-y-3">
       <div className="">

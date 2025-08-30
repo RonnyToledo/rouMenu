@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import { CatalogFooter } from "@/components/Catalogos/General/Footer";
 import Header from "@/components/Catalogos/General/Header";
 import MyProvider from "@/context/MyContext";
@@ -85,7 +85,11 @@ export default async function RootLayout({
     "get_store_with_transform",
     { tienda_slug: shop }
   );
-  const store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
+
+  let store = trasnformData(storeOne);
+  if (typeof storeOne.edit == "string") {
+    store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
+  }
   if (error) {
     console.error("Error al obtener tienda:", error);
   } else {
@@ -93,22 +97,15 @@ export default async function RootLayout({
   }
   if (!store.sitioweb) notFound();
 
-  return (
-    <div>
-      <MyProvider storeSSD={store}>
-        <Header />
-        {store.active ? (
-          <>
-            <div className="min-h-[80vh]">{children}</div>
-            <DrawerCart />
-          </>
-        ) : (
-          <Unavailable />
-        )}
+  if (!storeOne.active) return <Unavailable />;
 
-        <CatalogFooter />
-      </MyProvider>
-    </div>
+  return (
+    <MyProvider storeSSD={store}>
+      <Header />
+      <div className="min-h-[80vh]">{children}</div>
+      <DrawerCart />
+      <CatalogFooter />
+    </MyProvider>
   );
 }
 function trasnformData(store: AppState): AppState {

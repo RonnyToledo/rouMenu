@@ -15,7 +15,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { HiMiniBars3BottomRight } from "react-icons/hi2";
 import { logoApp } from "@/lib/image";
 import { usePathname, useRouter } from "next/navigation";
-import { DocsSidebar } from "@/components/Explore/Info/docs-sidebar";
 import { ExplorationFooter } from "./Footer";
 import { Input } from "@/components/ui/input";
 import { MyGeneralContext } from "@/context/GeneralContext";
@@ -104,7 +103,8 @@ export default function Header({ children }: { children: ReactNode }) {
             )}
             {pathname == "/" ||
             pathname == "/services" ||
-            pathname == "/contact" ? (
+            pathname == "/contact" ||
+            pathname.includes("/info") ? (
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button variant="ghost" className="p-0 m-0">
@@ -163,8 +163,6 @@ export default function Header({ children }: { children: ReactNode }) {
                   </div>
                 </DrawerContent>
               </Drawer>
-            ) : pathname == "/info" ? (
-              <DocsSidebar />
             ) : (
               <div />
             )}

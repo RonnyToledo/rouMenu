@@ -1,6 +1,6 @@
 import React from "react";
-import { DocsContent } from "@/components/Explore/Info/docs-content";
+import HomePage from "@/components/Explore/Info/admin-catalog-content";
 
 export default function DocsPage() {
-  return <DocsContent />;
+  return <HomePage />;
 }

@@ -1,0 +1,482 @@
+{
+  "sections": [
+    {
+      "id": "introduccion",
+      "slug": "introduccion",
+      "title": "Introducción",
+      "icon": "ℹ️",
+      "description": "Guía completa para usar el sistema de administración de catálogos online",
+      "badges": [
+        {
+          "text": "rouadmin.vercel.app",
+          "icon": "🌐",
+          "variant": "secondary"
+        }
+      ],
+      "heroImage": {
+        "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756656545/previews/panel_vuw44h.png",
+        "alt": "Panel de administración RouAdmin",
+        "caption": "Interfaz principal del administrador de catálogos"
+      },
+      "sections": [
+        {
+          "id": "intro-alert",
+          "alert": {
+            "title": "¿Nuevo en el sistema?",
+            "description": "Esta guía te ayudará a configurar y administrar tu tienda online paso a paso. Visita rouadmin.vercel.app para comenzar.",
+            "className": "border-primary/20 bg-primary/5",
+            "icon": "ℹ️"
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Administrador",
+          "description": "Accede al panel de administración",
+          "url": "https://rouadmin.vercel.app",
+          "icon": "🏪",
+          "buttonText": "Ir a rouadmin.vercel.app",
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "registrarse",
+      "slug": "registrarse",
+      "title": "Registrarse",
+      "icon": "ℹ️",
+      "description": "Guía completa para usar el sistema de administración de catálogos online",
+      "badges": [
+        {
+          "text": "rouadmin.vercel.app",
+          "icon": "🌐",
+          "variant": "secondary"
+        }
+      ],
+      "heroImage": {
+        "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756656545/previews/panel_vuw44h.png",
+        "alt": "Panel de administración RouAdmin",
+        "caption": "Interfaz principal del administrador de catálogos"
+      },
+      "sections": [
+        {
+          "id": "intro-alert",
+          "alert": {
+            "title": "¿Nuevo en el sistema?",
+            "description": "Esta guía te ayudará a configurar y administrar tu tienda online paso a paso. Visita rouadmin.vercel.app para comenzar.",
+            "className": "border-primary/20 bg-primary/5",
+            "icon": "ℹ️"
+          }
+        }
+      ],
+      "links": [
+        {
+          "title": "Administrador",
+          "description": "Accede al panel de administración",
+          "url": "https://rouadmin.vercel.app",
+          "icon": "🏪",
+          "buttonText": "Ir a rouadmin.vercel.app",
+          "variant": "default"
+        }
+      ]
+    },
+    {
+      "id": "configuracion-inicial",
+      "slug": "configuracion-inicial",
+      "title": "Configuración Inicial",
+      "icon": "⚙️",
+      "description": "Primeros pasos para configurar tu tienda online",
+      "sections": [
+        {
+          "id": "flujo-trabajo",
+          "title": "Flujo de Trabajo Principal",
+          "icon": "📊",
+          "cards": [
+            {
+              "title": "1. Create una cuenta",
+              "icon": "✅",
+              "className": "border-primary/20",
+              "content": "Accede al administrador y crea una cuenta utilizando tu correo gmail"
+            },
+            {
+              "title": "2. Contraseña",
+              "icon": "⚙️",
+              "className": "border-primary/20",
+              "content": "Luego de crearte una cuenta, es necesario que ingreses una contraseña para poder acceder libremente a tu administrador"
+            },
+            {
+              "title": "3. Confirmar cuenta",
+              "icon": "📦",
+              "className": "border-primary/20",
+              "content": "Comunicarte con atencion al cliente para que se te habilite el uso de administrador"
+            },
+            {
+              "title": "3. Rellenar formulario",
+              "icon": "📦",
+              "className": "border-primary/20",
+              "content": "Una vez aporbado el rol de administrador, debes iniciar sesion para rellenar el formulario con los datos necesarios para la creacion de tu tienda online"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "categoria",
+      "slug": "categoria",
+      "title": "Editar y Crear Categoria",
+      "icon": "📦",
+      "description": "Para poder mostrar productos adecuamente es necesario organizarlos por categorias para una mejor organizacion en la vista del cliente",
+      "heroImage": {
+        "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756656540/previews/category_pzp5tq.png",
+        "alt": "Gestión de categorías",
+        "caption": "Panel de administración de categorias"
+      },
+      "sections": [
+        {
+          "id": "productos-categorias",
+          "title": "Productos y Categorías",
+          "cards": [
+            {
+              "title": "Crear categoria",
+              "icon": "🏪",
+              "description": "Pasos para crear una categoria",
+              "image": {
+                "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756657544/previews/Captura_de_pantalla_2025-08-30_100159_khbgvn.png",
+                "alt": "Gestión de categorías"
+              },
+              "items": [
+                "• En la pantalla de categorias clickar en la opcion de agregar categoria",
+                "• Rellenar el formulario de la ventana emergente",
+                "• Guardar cambios"
+              ]
+            },
+            {
+              "title": "Ordenar",
+              "icon": "📦",
+              "description": "Ordenar las categorias",
+              "items": [
+                "• Agarrando la categoria q desea reubicar",
+                "• Desplazala hasta la posicion deseada",
+                "• Guarda cambios al finalizar"
+              ]
+            },
+            {
+              "title": "Eliminar",
+              "icon": "📦",
+              "description": "Eliminar las categorias",
+              "items": [
+                "• Desplegar una ventana de dialogo en los tres puntos al final",
+                "• Seleccionar la opcion de eliminar"
+              ]
+            }
+          ]
+        }
+      ],
+      "subsections": [
+        {
+          "id": "editar-categoria",
+          "slug": "editar-categoria",
+          "title": "Editar Categoria",
+          "icon": "👤",
+          "description": "Para acceder a editar categoria es necesario",
+          "image": {
+            "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756657401/previews/specificCat_cqq3gg.png",
+            "alt": "Pantalla de modificar categorias",
+            "caption": "Pantalla de modificar categorias"
+          },
+          "sections": [
+            {
+              "id": "pasos-editar",
+              "title": "Pasos para modificar",
+              "items": [
+                {
+                  "title": "Paso 1",
+                  "description": "Visita https://rouadmin.vercel.app"
+                },
+                {
+                  "title": "Paso 2",
+                  "description": "Haz clic en 'Registrarse' si es tu primera vez"
+                },
+                {
+                  "title": "Paso 3",
+                  "description": "Completa el formulario con tus datos"
+                },
+                {
+                  "title": "Paso 4",
+                  "description": "Verifica tu email si es necesario"
+                },
+                {
+                  "title": "Paso 5",
+                  "description": "Inicia sesión con tus credenciales"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "configuracion-basica",
+          "slug": "configuracion-basica",
+          "title": "Configuración Básica de la Tienda",
+          "icon": "🏪",
+          "description": "Una vez dentro del sistema, configura la información básica:",
+          "image": {
+            "url": "/placeholder.svg",
+            "alt": "Panel de configuración de tienda",
+            "caption": "Interfaz de configuración básica"
+          },
+          "sections": [
+            {
+              "id": "pasos-configuracion",
+              "title": "Pasos de configuración",
+              "items": [
+                {
+                  "title": "Configuración",
+                  "description": "Ve a la sección 'Configuración' en el menú principal"
+                },
+                {
+                  "title": "Nombre",
+                  "description": "Agrega el nombre de tu tienda"
+                },
+                {
+                  "title": "Imágenes",
+                  "description": "Sube el logo y imágenes de marca"
+                },
+                {
+                  "title": "Contacto",
+                  "description": "Configura la información de contacto"
+                },
+                {
+                  "title": "Redes Sociales",
+                  "description": "Establece las redes sociales"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "personalizacion",
+      "slug": "personalizacion",
+      "title": "Personalización",
+      "icon": "🎨",
+      "description": "Personaliza el diseño y apariencia de tu tienda",
+      "sections": [
+        {
+          "id": "personalizacion-tienda",
+          "title": "Personalización de la Tienda",
+          "cards": [
+            {
+              "title": "Temas y Diseño",
+              "icon": "🎨",
+              "items": [
+                "• Cambiar colores de la tienda",
+                "• Seleccionar temas predefinidos",
+                "• Personalizar apariencia",
+                "• Vista previa en tiempo real"
+              ]
+            },
+            {
+              "title": "Imágenes de Marca",
+              "icon": "📷",
+              "items": [
+                "• Logo de la tienda",
+                "• Banner principal",
+                "• Imágenes de productos",
+                "• Galería de fotos"
+              ]
+            },
+            {
+              "title": "Contactos y Redes",
+              "icon": "📞",
+              "items": [
+                "• Teléfonos de contacto",
+                "• Redes sociales",
+                "• Dirección física",
+                "• Email de contacto"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "configuracion-operativa",
+      "slug": "configuracion-operativa",
+      "title": "Configuración Operativa",
+      "icon": "⚙️",
+      "description": "Configura horarios, envíos, pagos y visibilidad",
+      "sections": [
+        {
+          "id": "configuracion-operativa-cards",
+          "title": "Configuración Operativa",
+          "cards": [
+            {
+              "title": "Horarios de Atención",
+              "icon": "🕐",
+              "description": "Define cuándo está disponible tu tienda",
+              "items": [
+                "• Horarios por día de la semana",
+                "• Días de descanso",
+                "• Horarios especiales",
+                "• Zona horaria"
+              ]
+            },
+            {
+              "title": "Configuración de Envíos",
+              "icon": "🚚",
+              "description": "Gestiona las opciones de entrega",
+              "items": [
+                "• Zonas de entrega",
+                "• Costos de envío",
+                "• Tiempos de entrega",
+                "• Opciones de delivery"
+              ]
+            },
+            {
+              "title": "Métodos de Pago",
+              "icon": "💳",
+              "description": "Configura cómo recibir pagos",
+              "items": [
+                "• Efectivo",
+                "• Transferencias bancarias",
+                "• Pagos digitales",
+                "• Criptomonedas"
+              ]
+            },
+            {
+              "title": "Control de Visibilidad",
+              "icon": "👁️",
+              "description": "Gestiona qué se muestra en tu tienda",
+              "items": [
+                "• Productos visibles/ocultos",
+                "• Categorías activas",
+                "• Orden de productos",
+                "• Productos destacados"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "usuarios-sistema",
+      "slug": "usuarios-sistema",
+      "title": "Usuarios del Sistema",
+      "icon": "👥",
+      "description": "Tipos de usuarios que interactúan con el sistema",
+      "sections": [
+        {
+          "id": "tipos-usuarios",
+          "title": "Tipos de Usuarios",
+          "cards": [
+            {
+              "title": "Usuarios Finales",
+              "icon": "🛒",
+              "description": "Clientes que navegan y compran en tu tienda",
+              "className": "border-green-200 bg-green-50/50",
+              "items": [
+                "• Navegan el catálogo de productos",
+                "• Ven precios y disponibilidad",
+                "• Contactan para realizar pedidos",
+                "• Acceden desde cualquier dispositivo",
+                "• No necesitan registro para ver productos"
+              ]
+            },
+            {
+              "title": "Usuarios de Prueba",
+              "icon": "🧪",
+              "description": "Personas que quieren probar el sistema",
+              "className": "border-blue-200 bg-blue-50/50",
+              "items": [
+                "• Pueden crear cuenta demo",
+                "• Exploran todas las funcionalidades",
+                "• Prueban la administración",
+                "• Ven cómo funciona antes de decidir",
+                "• Acceso limitado en tiempo"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "capturas-pantalla",
+      "slug": "capturas-pantalla",
+      "title": "Capturas de Pantalla",
+      "icon": "📷",
+      "description": "Imágenes demostrativas del sistema en funcionamiento",
+      "sections": [
+        {
+          "id": "capturas-info",
+          "alert": {
+            "title": "Ubicación de las capturas:",
+            "description": "Las imágenes demostrativas se ubicarán en las siguientes secciones para mostrar el flujo de trabajo completo.",
+            "className": "border-amber-200 bg-amber-50",
+            "icon": "📷"
+          }
+        },
+        {
+          "id": "capturas-grid",
+          "title": "Capturas del Sistema",
+          "cards": [
+            {
+              "title": "Panel de Login",
+              "content": "Pantalla de inicio de sesión",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Panel de Login"
+              }
+            },
+            {
+              "title": "Dashboard Principal",
+              "content": "Vista general del administrador",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Dashboard Principal"
+              }
+            },
+            {
+              "title": "Gestión de Productos",
+              "content": "Crear y editar productos",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Gestión de Productos"
+              }
+            },
+            {
+              "title": "Configuración de Tienda",
+              "content": "Personalización y ajustes",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Configuración de Tienda"
+              }
+            },
+            {
+              "title": "Vista de Cliente",
+              "content": "Cómo ven los usuarios finales",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Vista de Cliente"
+              }
+            },
+            {
+              "title": "Gestión de Stock",
+              "content": "Control de inventario",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Gestión de Stock"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

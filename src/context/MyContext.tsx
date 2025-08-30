@@ -23,7 +23,7 @@ interface MyProviderProps {
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const [store, dispatchStore] = useReducer(
     reducerStore,
-    storeSSD ?? initialState
+    storeSSD || initialState
   );
   const pathname = usePathname();
 

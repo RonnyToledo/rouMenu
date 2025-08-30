@@ -12,15 +12,15 @@ import {
   MdOutlineShoppingCart,
   MdOutlineShoppingCartCheckout,
 } from "react-icons/md";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
 
 export default function StickyCart() {
   const { store, dispatchStore } = useContext(MyContext);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [manualOpen, setManualOpen] = useState(false);
   const [contentCart, setContentCart] = useState<number>(0);
-  const router = useRouter();
   const pathname = usePathname();
 
   // ref para el contenedor del carrito
@@ -43,7 +43,6 @@ export default function StickyCart() {
       0
     );
   };
-
   useEffect(() => {
     setContentCart(
       store.products.reduce(
@@ -218,15 +217,11 @@ export default function StickyCart() {
                         ${getTotalPrice().toFixed(2)}
                       </span>
                     </div>
-                    <Button
-                      className="w-full"
-                      size="lg"
-                      onClick={() =>
-                        router.push(`/t/${store.sitioweb}/carrito`)
-                      }
-                    >
-                      Proceder al Checkout
-                      <MdOutlineShoppingCartCheckout />
+                    <Button className="w-full" size="lg" asChild>
+                      <Link href={`/t/${store.sitioweb}/carrito`}>
+                        Proceder al Checkout
+                        <MdOutlineShoppingCartCheckout />
+                      </Link>
                     </Button>
                   </div>
                 </div>

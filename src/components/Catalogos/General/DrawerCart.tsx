@@ -103,7 +103,7 @@ export default function DrawerCart() {
     !(pathname.includes("/carrito") || pathname.includes("/producto")) && (
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
         <DrawerTrigger asChild>
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-10 shadow-lg  max-w-xl mx-auto">
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-10 shadow-lg  max-w-md mx-auto">
             <Button
               variant={"ghost"}
               className="flex items-center w-full justify-between py-2 px-4 h-auto"
@@ -133,7 +133,7 @@ export default function DrawerCart() {
           </div>
         </DrawerTrigger>
 
-        <DrawerContent className="max-h-[75vh] max-w-xl mx-auto">
+        <DrawerContent className="max-h-[75vh] max-w-md mx-auto">
           <DrawerHeader className="py-2 px-4">
             <DrawerTitle>
               <Button

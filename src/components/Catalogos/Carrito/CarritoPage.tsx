@@ -61,7 +61,6 @@ export default function CarritoPage() {
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   const [compra, setCompra] = useState<CompraInterface>(initialState);
-
   useEffect(() => {
     setCompra((prevCompra) => ({
       ...prevCompra,

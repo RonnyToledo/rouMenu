@@ -1,10 +1,9 @@
-import type React from "react";
-import type { Metadata } from "next";
+import React from "react";
+import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import Head from "next/head";
 import Header from "@/components/Explore/Home/Header";
 import { supabase } from "@/lib/supabase";
@@ -99,12 +98,11 @@ export default async function RootLayout({
                   <Toaster />
                 </Header>
               </GeneralProvider>
-              <GoogleAnalytics gaId={GA_ID || ""} />
-              <Analytics />
-              <SpeedInsights />
             </div>
           </HistoryProvider>
         </div>
+        <GoogleAnalytics gaId={GA_ID || ""} />
+        <Analytics />
       </body>
     </html>
   );
