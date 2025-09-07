@@ -5,7 +5,7 @@
       "slug": "introduccion",
       "title": "Introducción",
       "icon": "ℹ️",
-      "description": "Guía completa para usar el sistema de administración de catálogos online",
+      "description": "Bienvenido a la guía oficial para el sistema adminWebShop, un panel de administración de catálogos online desarrollado con Next.js. Aquí aprenderás a configurar, personalizar y administrar tu tienda virtual de principio a fin, aprovechando todas las funciones y trucos disponibles.",
       "badges": [
         {
           "text": "rouadmin.vercel.app",
@@ -23,7 +23,7 @@
           "id": "intro-alert",
           "alert": {
             "title": "¿Nuevo en el sistema?",
-            "description": "Esta guía te ayudará a configurar y administrar tu tienda online paso a paso. Visita rouadmin.vercel.app para comenzar.",
+            "description": "Esta guía te llevará paso a paso desde la creación de tu cuenta, la configuración inicial, la administración de productos y categorías, hasta la personalización y monitoreo del rendimiento de tu tienda online. Todos los procesos han sido pensados para ser simples, seguros y flexibles.",
             "className": "border-primary/20 bg-primary/5",
             "icon": "ℹ️"
           }
@@ -32,7 +32,7 @@
       "links": [
         {
           "title": "Administrador",
-          "description": "Accede al panel de administración",
+          "description": "Accede al panel de administración donde puedes gestionar toda la tienda.",
           "url": "https://rouadmin.vercel.app",
           "icon": "🏪",
           "buttonText": "Ir a rouadmin.vercel.app",
@@ -44,39 +44,55 @@
       "id": "registrarse",
       "slug": "registrarse",
       "title": "Registrarse",
-      "icon": "ℹ️",
-      "description": "Guía completa para usar el sistema de administración de catálogos online",
+      "icon": "📝",
+      "description": "Para comenzar a usar el sistema, es imprescindible crear una cuenta administrativa. El proceso es rápido y simple, asegurando que solo usuarios autorizados puedan modificar la tienda.",
       "badges": [
         {
-          "text": "rouadmin.vercel.app",
-          "icon": "🌐",
+          "text": "Acceso seguro",
+          "icon": "🔒",
           "variant": "secondary"
         }
       ],
       "heroImage": {
         "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756656545/previews/panel_vuw44h.png",
-        "alt": "Panel de administración RouAdmin",
-        "caption": "Interfaz principal del administrador de catálogos"
+        "alt": "Panel de administración RouAdmin"
       },
       "sections": [
         {
-          "id": "intro-alert",
+          "id": "registro-alert",
           "alert": {
-            "title": "¿Nuevo en el sistema?",
-            "description": "Esta guía te ayudará a configurar y administrar tu tienda online paso a paso. Visita rouadmin.vercel.app para comenzar.",
+            "title": "¿Nuevo administrador?",
+            "description": "Debes crear tu cuenta usando tu correo Gmail. El acceso es restringido: una vez registrada tu cuenta, el equipo debe aprobarte y habilitarte el perfil de administrador. Tu seguridad y la de tu tienda es prioridad.",
             "className": "border-primary/20 bg-primary/5",
             "icon": "ℹ️"
           }
-        }
-      ],
-      "links": [
+        },
         {
-          "title": "Administrador",
-          "description": "Accede al panel de administración",
-          "url": "https://rouadmin.vercel.app",
-          "icon": "🏪",
-          "buttonText": "Ir a rouadmin.vercel.app",
-          "variant": "default"
+          "id": "pasos-registro",
+          "title": "Pasos para registrarse",
+          "icon": "📝",
+          "cards": [
+            {
+              "title": "1. Accede al panel",
+              "icon": "🌐",
+              "content": "Ve a https://rouadmin.vercel.app y haz clic en 'Registrarse'."
+            },
+            {
+              "title": "2. Completa el formulario",
+              "icon": "✏️",
+              "content": "Ingresa tus datos, preferentemente un correo Gmail válido."
+            },
+            {
+              "title": "3. Espera aprobación",
+              "icon": "⏳",
+              "content": "El equipo revisará tu registro y, si todo está correcto, habilitará tu acceso."
+            },
+            {
+              "title": "4. Accede con tus credenciales",
+              "icon": "🔑",
+              "content": "Recibirás confirmación al email. Ahora puedes entrar al sistema e iniciar la configuración."
+            }
+          ]
         }
       ]
     },
@@ -85,7 +101,7 @@
       "slug": "configuracion-inicial",
       "title": "Configuración Inicial",
       "icon": "⚙️",
-      "description": "Primeros pasos para configurar tu tienda online",
+      "description": "Antes de lanzar tu tienda online, es fundamental que completes correctamente la configuración principal. Esto garantizará una experiencia óptima tanto para ti como para tus clientes.",
       "sections": [
         {
           "id": "flujo-trabajo",
@@ -93,28 +109,41 @@
           "icon": "📊",
           "cards": [
             {
-              "title": "1. Create una cuenta",
+              "title": "1. Registro y aprobación",
               "icon": "✅",
-              "className": "border-primary/20",
-              "content": "Accede al administrador y crea una cuenta utilizando tu correo gmail"
+              "content": "Crea tu cuenta como se describe anteriormente y espera la activación del equipo de soporte."
             },
             {
-              "title": "2. Contraseña",
-              "icon": "⚙️",
-              "className": "border-primary/20",
-              "content": "Luego de crearte una cuenta, es necesario que ingreses una contraseña para poder acceder libremente a tu administrador"
+              "title": "2. Completa tu perfil",
+              "icon": "🧑‍💻",
+              "content": "Entra al sistema, navega a la sección de configuración y rellena todos los campos de tu tienda: nombre, descripción, imágenes de logo/banner, info de contacto y redes sociales."
             },
             {
-              "title": "3. Confirmar cuenta",
-              "icon": "📦",
-              "className": "border-primary/20",
-              "content": "Comunicarte con atencion al cliente para que se te habilite el uso de administrador"
+              "title": "3. Define horarios y métodos de pago",
+              "icon": "⏰",
+              "content": "Configura los días y horas en los que tu tienda operará; agrega los métodos de pago disponibles (efectivo, transferencias, digitales, cripto) y los ajustes de envíos."
             },
             {
-              "title": "3. Rellenar formulario",
-              "icon": "📦",
-              "className": "border-primary/20",
-              "content": "Una vez aporbado el rol de administrador, debes iniciar sesion para rellenar el formulario con los datos necesarios para la creacion de tu tienda online"
+              "title": "4. Personaliza la apariencia",
+              "icon": "🎨",
+              "content": "Elige colores, tema y organiza las imágenes principales. Así das identidad visual a tu marca."
+            }
+          ]
+        },
+        {
+          "id": "tips-configuracion",
+          "title": "Recomendaciones",
+          "icon": "💡",
+          "cards": [
+            {
+              "title": "Datos completos",
+              "icon": "📋",
+              "content": "Un perfil completo da mayor confianza y claridad a tus clientes."
+            },
+            {
+              "title": "Verifica tu información",
+              "icon": "🔎",
+              "content": "Antes de publicar tu tienda, revisa que todo esté correcto y actualizado."
             }
           ]
         }
@@ -123,50 +152,45 @@
     {
       "id": "categoria",
       "slug": "categoria",
-      "title": "Editar y Crear Categoria",
+      "title": "Editar y Crear Categoría",
       "icon": "📦",
-      "description": "Para poder mostrar productos adecuamente es necesario organizarlos por categorias para una mejor organizacion en la vista del cliente",
+      "description": "Las categorías son esenciales para organizar tus productos y facilitar a los clientes la navegación de tu catálogo. Un correcto uso de las categorías mejora la experiencia y aumenta la conversión.",
       "heroImage": {
         "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756656540/previews/category_pzp5tq.png",
         "alt": "Gestión de categorías",
-        "caption": "Panel de administración de categorias"
+        "caption": "Panel de administración de categorías"
       },
       "sections": [
         {
           "id": "productos-categorias",
-          "title": "Productos y Categorías",
+          "title": "Gestión de Categorías",
           "cards": [
             {
-              "title": "Crear categoria",
-              "icon": "🏪",
-              "description": "Pasos para crear una categoria",
-              "image": {
-                "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756657544/previews/Captura_de_pantalla_2025-08-30_100159_khbgvn.png",
-                "alt": "Gestión de categorías"
-              },
+              "title": "Agregar categoría",
+              "icon": "➕",
+              "description": "Divide tu catálogo en rubros claros y específicos. Así tus productos serán más fáciles de filtrar.",
               "items": [
-                "• En la pantalla de categorias clickar en la opcion de agregar categoria",
-                "• Rellenar el formulario de la ventana emergente",
-                "• Guardar cambios"
+                "Pulsa 'Agregar categoría' en la sección correspondiente.",
+                "Rellena nombre, color, icono y descripción.",
+                "Guarda los cambios y repite el proceso para todas las categorías necesarias."
               ]
             },
             {
-              "title": "Ordenar",
-              "icon": "📦",
-              "description": "Ordenar las categorias",
+              "title": "Editar u ordenar",
+              "icon": "🔄",
+              "description": "Ajusta nombre, icono o posición arrastrando la categoría en la lista.",
               "items": [
-                "• Agarrando la categoria q desea reubicar",
-                "• Desplazala hasta la posicion deseada",
-                "• Guarda cambios al finalizar"
+                "Haz clic sobre la categoría a modificar.",
+                "Edita los campos requeridos o arrástrala para reordenar.",
+                "Guarda los cambios."
               ]
             },
             {
               "title": "Eliminar",
-              "icon": "📦",
-              "description": "Eliminar las categorias",
+              "icon": "🗑️",
+              "description": "Si una categoría ya no es relevante, elimínala para mantener tu catálogo organizado.",
               "items": [
-                "• Desplegar una ventana de dialogo en los tres puntos al final",
-                "• Seleccionar la opcion de eliminar"
+                "Abre el menú de opciones (tres puntos) y selecciona 'Eliminar'."
               ]
             }
           ]
@@ -176,38 +200,34 @@
         {
           "id": "editar-categoria",
           "slug": "editar-categoria",
-          "title": "Editar Categoria",
-          "icon": "👤",
-          "description": "Para acceder a editar categoria es necesario",
+          "title": "Editar Categoría",
+          "icon": "✏️",
+          "description": "Ajusta los atributos de cada categoría cuando lo necesites. Puedes editar campos clave o reordenar jerarquías tantas veces como quieras, sin afectar la visibilidad de los productos.",
           "image": {
             "url": "https://res.cloudinary.com/dbgnyc842/image/upload/v1756657401/previews/specificCat_cqq3gg.png",
-            "alt": "Pantalla de modificar categorias",
-            "caption": "Pantalla de modificar categorias"
+            "alt": "Pantalla de modificar categorías",
+            "caption": "Pantalla de modificar categorías"
           },
           "sections": [
             {
               "id": "pasos-editar",
-              "title": "Pasos para modificar",
+              "title": "Pasos detallados",
               "items": [
                 {
-                  "title": "Paso 1",
-                  "description": "Visita https://rouadmin.vercel.app"
+                  "title": "1. Lleva al menú de categorías",
+                  "description": "Ubica la sección de categorías en el panel lateral izquierdo."
                 },
                 {
-                  "title": "Paso 2",
-                  "description": "Haz clic en 'Registrarse' si es tu primera vez"
+                  "title": "2. Selecciona la categoría",
+                  "description": "Haz clic para abrir el panel de edición."
                 },
                 {
-                  "title": "Paso 3",
-                  "description": "Completa el formulario con tus datos"
+                  "title": "3. Modifica los datos",
+                  "description": "Cambia los campos y observa la vista previa."
                 },
                 {
-                  "title": "Paso 4",
-                  "description": "Verifica tu email si es necesario"
-                },
-                {
-                  "title": "Paso 5",
-                  "description": "Inicia sesión con tus credenciales"
+                  "title": "4. Guarda y verifica los cambios",
+                  "description": "Confirma y revisa que el cambio esté reflejado en el catálogo público."
                 }
               ]
             }
@@ -218,37 +238,120 @@
           "slug": "configuracion-basica",
           "title": "Configuración Básica de la Tienda",
           "icon": "🏪",
-          "description": "Una vez dentro del sistema, configura la información básica:",
-          "image": {
-            "url": "/placeholder.svg",
-            "alt": "Panel de configuración de tienda",
-            "caption": "Interfaz de configuración básica"
-          },
+          "description": "Antes de publicar productos, asegúrate de que la información esencial de tu tienda esté completa y bien presentada. Esto genera confianza y refuerza el profesionalismo de tu marca.",
           "sections": [
             {
               "id": "pasos-configuracion",
-              "title": "Pasos de configuración",
+              "title": "Configura toda tu tienda fácilmente",
               "items": [
                 {
-                  "title": "Configuración",
-                  "description": "Ve a la sección 'Configuración' en el menú principal"
+                  "title": "Ubica el área de configuración",
+                  "description": "Accede a 'Configuración' en el menú lateral."
                 },
                 {
-                  "title": "Nombre",
-                  "description": "Agrega el nombre de tu tienda"
+                  "title": "Edita nombre y descripción",
+                  "description": "Pon un nombre reconocible y una descripción breve de tu negocio."
                 },
                 {
-                  "title": "Imágenes",
-                  "description": "Sube el logo y imágenes de marca"
+                  "title": "Carga imágenes de marca",
+                  "description": "Usa logos y banners de alta calidad que refuercen la identidad visual."
                 },
                 {
-                  "title": "Contacto",
-                  "description": "Configura la información de contacto"
-                },
-                {
-                  "title": "Redes Sociales",
-                  "description": "Establece las redes sociales"
+                  "title": "Completa los datos de contacto y redes sociales",
+                  "description": "Un contacto claro inspira confianza. Si usas Instagram, Facebook u otra red, añádela para acercarte a tus clientes."
                 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gestion-productos",
+      "slug": "gestion-productos",
+      "title": "Gestión de Productos",
+      "icon": "🛍️",
+      "description": "El núcleo del sistema: podrás crear, editar y administrar productos en tiempo real. Cada producto puede tener características detalladas, imágenes, variantes, precios y stock individual.",
+      "sections": [
+        {
+          "id": "productos-flujo",
+          "title": "¿Cómo añadir y administrar productos?",
+          "icon": "🛠️",
+          "cards": [
+            {
+              "title": "Agregar productos nuevos",
+              "icon": "➕",
+              "items": [
+                "Selecciona 'Nuevo Producto' desde la barra o menú lateral.",
+                "Completa todos los datos: nombre, descripción, precio, stock, categoría y sube varias imágenes si es necesario.",
+                "Agrega características estructuradas si ofreces variantes (ej: color, talla...)."
+              ]
+            },
+            {
+              "title": "Editar productos existentes",
+              "icon": "✏️",
+              "items": [
+                "Selecciona el producto que desees modificar.",
+                "Actualiza cualquier campo: contenido, precio, inventario, fotos, categoría, detalles.",
+                "Guarda y los cambios se reflejarán automáticamente."
+              ]
+            },
+            {
+              "title": "Control y visibilidad de inventario",
+              "icon": "📦",
+              "items": [
+                "Monitorea stock en tiempo real.",
+                "Oculta productos sin stock o retíralos del catálogo hasta reponerlos."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "finanzas-pedidos",
+      "slug": "finanzas-pedidos",
+      "title": "Finanzas y Pedidos",
+      "icon": "💰",
+      "description": "El sistema te permite llevar registro y control automático de todos los pedidos realizados, aplicar descuentos y visualizar reportes de ventas.",
+      "sections": [
+        {
+          "id": "pedidos-y-cupones",
+          "title": "Administrando pedidos, cupones y descuentos",
+          "icon": "📝",
+          "cards": [
+            {
+              "title": "Gestión de pedidos",
+              "icon": "🗂️",
+              "items": [
+                "Consulta el historial de pedidos y su estado (pendiente, enviado, entregado, cancelado).",
+                "Cada pedido almacena datos del cliente, dirección de entrega y resumen de los productos adquiridos.",
+                "Filtra, busca y actualiza estados fácilmente."
+              ]
+            },
+            {
+              "title": "Cupones y descuentos",
+              "icon": "🏷️",
+              "items": [
+                "Crea cupones en la sección de Marketing con condiciones personalizadas (porcentaje, fecha de validez, mínimo de compra...).",
+                "Aplica descuentos automáticos en compras elegibles.",
+                "Exporta reportes completos en CSV o PDF según necesidades contables."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "reporte-ventas",
+          "title": "Panel de Analíticas y Reportes",
+          "icon": "📈",
+          "cards": [
+            {
+              "title": "Gráficos y métricas",
+              "icon": "📊",
+              "items": [
+                "Panel con gráficos interactivos sobre ventas diarias, semanales y mensuales.",
+                "Ranking de productos más vendidos.",
+                "Análisis de ingresos y conversión."
               ]
             }
           ]
@@ -260,40 +363,35 @@
       "slug": "personalizacion",
       "title": "Personalización",
       "icon": "🎨",
-      "description": "Personaliza el diseño y apariencia de tu tienda",
+      "description": "La identidad visual es la cara de tu marca online. Aprovecha la personalización integrada para destacar y diferenciarte.",
       "sections": [
         {
           "id": "personalizacion-tienda",
-          "title": "Personalización de la Tienda",
+          "title": "Opciones de personalización disponibles",
           "cards": [
             {
-              "title": "Temas y Diseño",
+              "title": "Diseño y Temas",
               "icon": "🎨",
               "items": [
-                "• Cambiar colores de la tienda",
-                "• Seleccionar temas predefinidos",
-                "• Personalizar apariencia",
-                "• Vista previa en tiempo real"
+                "Cambia el color principal y los acentos de la tienda.",
+                "Activa temas claros, oscuros o personalizados.",
+                "Visualiza cada cambio en tiempo real para validar tu selección antes de publicarla."
               ]
             },
             {
-              "title": "Imágenes de Marca",
-              "icon": "📷",
+              "title": "Carga de imágenes y multimedia",
+              "icon": "🖼️",
               "items": [
-                "• Logo de la tienda",
-                "• Banner principal",
-                "• Imágenes de productos",
-                "• Galería de fotos"
+                "Sube fotografías de alta calidad, logotipo y banners.",
+                "Selecciona o actualiza las imágenes de productos según temporada o promociones."
               ]
             },
             {
-              "title": "Contactos y Redes",
+              "title": "Personalización de contacto",
               "icon": "📞",
               "items": [
-                "• Teléfonos de contacto",
-                "• Redes sociales",
-                "• Dirección física",
-                "• Email de contacto"
+                "Edita teléfonos, emails y direcciones físicas desde la configuración general.",
+                "Añade y gestiona enlaces a todas tus redes sociales para estar más cerca de tus clientes."
               ]
             }
           ]
@@ -305,54 +403,43 @@
       "slug": "configuracion-operativa",
       "title": "Configuración Operativa",
       "icon": "⚙️",
-      "description": "Configura horarios, envíos, pagos y visibilidad",
+      "description": "Adapta el flujo de trabajo y los servicios de tu tienda. El sistema es flexible y puede operar en distintos formatos y horarios según tu negocio.",
       "sections": [
         {
           "id": "configuracion-operativa-cards",
-          "title": "Configuración Operativa",
+          "title": "Optimiza la operación",
           "cards": [
             {
-              "title": "Horarios de Atención",
-              "icon": "🕐",
-              "description": "Define cuándo está disponible tu tienda",
+              "title": "Horarios y reglas de atención",
+              "icon": "⏰",
               "items": [
-                "• Horarios por día de la semana",
-                "• Días de descanso",
-                "• Horarios especiales",
-                "• Zona horaria"
+                "Define días y horarios exactos de atención.",
+                "Añade horarios especiales, días festivos o cambios temporales.",
+                "Establece la zona horaria predeterminada para coincidir con tu público objetivo."
               ]
             },
             {
-              "title": "Configuración de Envíos",
+              "title": "Envíos y delivery",
               "icon": "🚚",
-              "description": "Gestiona las opciones de entrega",
               "items": [
-                "• Zonas de entrega",
-                "• Costos de envío",
-                "• Tiempos de entrega",
-                "• Opciones de delivery"
+                "Personaliza zonas de reparto, tiempo estimado y costo de envío.",
+                "Ofrece opciones como recojo en local o envíos a domicilio."
               ]
             },
             {
-              "title": "Métodos de Pago",
+              "title": "Formas de pago amplias",
               "icon": "💳",
-              "description": "Configura cómo recibir pagos",
               "items": [
-                "• Efectivo",
-                "• Transferencias bancarias",
-                "• Pagos digitales",
-                "• Criptomonedas"
+                "Configura efectivamente pago en efectivo, transferencia, aplicaciones digitales y criptomonedas.",
+                "Visualiza reportes de pagos filtrando por método."
               ]
             },
             {
-              "title": "Control de Visibilidad",
+              "title": "Gestión de visibilidad",
               "icon": "👁️",
-              "description": "Gestiona qué se muestra en tu tienda",
               "items": [
-                "• Productos visibles/ocultos",
-                "• Categorías activas",
-                "• Orden de productos",
-                "• Productos destacados"
+                "Decide qué productos o categorías estarán visibles en el escaparate.",
+                "Destaca productos estrella y oculta temporalmente los que quieras sacar de promoción."
               ]
             }
           ]
@@ -364,36 +451,42 @@
       "slug": "usuarios-sistema",
       "title": "Usuarios del Sistema",
       "icon": "👥",
-      "description": "Tipos de usuarios que interactúan con el sistema",
+      "description": "La plataforma contempla distintos tipos de usuarios, cada uno con permisos y finalidad específica:",
       "sections": [
         {
           "id": "tipos-usuarios",
-          "title": "Tipos de Usuarios",
+          "title": "Roles de usuarios",
           "cards": [
             {
               "title": "Usuarios Finales",
               "icon": "🛒",
-              "description": "Clientes que navegan y compran en tu tienda",
+              "description": "Clientes estándar que pueden navegar y comprar sin crear cuenta, viendo catálogo, precios y ofertas activas.",
               "className": "border-green-200 bg-green-50/50",
               "items": [
-                "• Navegan el catálogo de productos",
-                "• Ven precios y disponibilidad",
-                "• Contactan para realizar pedidos",
-                "• Acceden desde cualquier dispositivo",
-                "• No necesitan registro para ver productos"
+                "Visualizan el catálogo de productos actualizado.",
+                "No requieren registro para consultar productos.",
+                "Pueden contactar fácilmente a la tienda tanto por email, teléfono o redes."
               ]
             },
             {
-              "title": "Usuarios de Prueba",
+              "title": "Administradores (dueños de tienda)",
+              "icon": "🧑‍💼",
+              "description": "Dueños o gestores, con acceso total al panel y todas las herramientas de configuración, reporte y personalización.",
+              "className": "border-orange-200 bg-orange-50/50",
+              "items": [
+                "Pueden crear, actualizar o eliminar productos.",
+                "Administran pedidos, finanzas y estadísticas.",
+                "Editan la configuración y la apariencia de la tienda."
+              ]
+            },
+            {
+              "title": "Usuarios Demo (prueba/soporte)",
               "icon": "🧪",
-              "description": "Personas que quieren probar el sistema",
+              "description": "Usuarios temporales que exploran todas las funciones del sistema sin afectar datos reales, para pruebas y capacitación.",
               "className": "border-blue-200 bg-blue-50/50",
               "items": [
-                "• Pueden crear cuenta demo",
-                "• Exploran todas las funcionalidades",
-                "• Prueban la administración",
-                "• Ven cómo funciona antes de decidir",
-                "• Acceso limitado en tiempo"
+                "Pueden experimentar y configurar sin comprometer inventario real.",
+                "Acceso restringido en el tiempo y funcionalidades avanzadas."
               ]
             }
           ]
@@ -405,24 +498,24 @@
       "slug": "capturas-pantalla",
       "title": "Capturas de Pantalla",
       "icon": "📷",
-      "description": "Imágenes demostrativas del sistema en funcionamiento",
+      "description": "Consulta ejemplos visuales del sistema en funcionamiento para familiarizarte con la interfaz.",
       "sections": [
         {
           "id": "capturas-info",
           "alert": {
-            "title": "Ubicación de las capturas:",
-            "description": "Las imágenes demostrativas se ubicarán en las siguientes secciones para mostrar el flujo de trabajo completo.",
+            "title": "¿Dónde ver las capturas?",
+            "description": "Explora a lo largo de esta guía imágenes reales del panel, formularios, dashboards y vistas de usuario final para obtener una visión realista del flujo de trabajo y la estética del sistema.",
             "className": "border-amber-200 bg-amber-50",
             "icon": "📷"
           }
         },
         {
           "id": "capturas-grid",
-          "title": "Capturas del Sistema",
+          "title": "Galería de Vistas",
           "cards": [
             {
               "title": "Panel de Login",
-              "content": "Pantalla de inicio de sesión",
+              "content": "Pantalla donde administradores y testers acceden al sistema.",
               "className": "border-dashed border-2 border-muted-foreground/30",
               "image": {
                 "url": "/placeholder.svg",
@@ -431,7 +524,7 @@
             },
             {
               "title": "Dashboard Principal",
-              "content": "Vista general del administrador",
+              "content": "Vista central de gestión y resumen de estadísticas más relevantes del negocio.",
               "className": "border-dashed border-2 border-muted-foreground/30",
               "image": {
                 "url": "/placeholder.svg",
@@ -440,7 +533,7 @@
             },
             {
               "title": "Gestión de Productos",
-              "content": "Crear y editar productos",
+              "content": "Formulario y lista de productos disponibles, incluye herramientas de búsqueda, filtro y edición.",
               "className": "border-dashed border-2 border-muted-foreground/30",
               "image": {
                 "url": "/placeholder.svg",
@@ -449,7 +542,7 @@
             },
             {
               "title": "Configuración de Tienda",
-              "content": "Personalización y ajustes",
+              "content": "Panel dedicado a la información general, imágenes, contacto y preferencias particulares de la tienda.",
               "className": "border-dashed border-2 border-muted-foreground/30",
               "image": {
                 "url": "/placeholder.svg",
@@ -458,7 +551,7 @@
             },
             {
               "title": "Vista de Cliente",
-              "content": "Cómo ven los usuarios finales",
+              "content": "La visualización pública en donde los clientes navegan el catálogo y contactan la tienda.",
               "className": "border-dashed border-2 border-muted-foreground/30",
               "image": {
                 "url": "/placeholder.svg",
@@ -467,11 +560,20 @@
             },
             {
               "title": "Gestión de Stock",
-              "content": "Control de inventario",
+              "content": "Pantallas de control y actualización de stock, que permiten una administración rápida y efectiva del inventario.",
               "className": "border-dashed border-2 border-muted-foreground/30",
               "image": {
                 "url": "/placeholder.svg",
                 "alt": "Gestión de Stock"
+              }
+            },
+            {
+              "title": "Panel de Reportes",
+              "content": "Sección de métricas, analíticas, y exportación de reportes en PDF/CSV.",
+              "className": "border-dashed border-2 border-muted-foreground/30",
+              "image": {
+                "url": "/placeholder.svg",
+                "alt": "Panel de Reportes"
               }
             }
           ]

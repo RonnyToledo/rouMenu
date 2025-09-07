@@ -133,7 +133,10 @@ export default function BusquedaPage() {
 
   const renderProductCard = (product: ProductResult) => (
     <Card key={`product-${product.productId}`} className="w-full">
-      <Link href={`/t/${product.storeSitioWeb}/producto/${product.productId}`}>
+      <Link
+        href={`/t/${product.storeSitioWeb}/producto/${product.productId}`}
+        target="_blank"
+      >
         <CardContent className="pt-0 flex  items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <Image
@@ -171,7 +174,10 @@ export default function BusquedaPage() {
 
   const renderCategoriaCard = (categoria: CategoriaResult) => (
     <Card key={`categoria-${categoria.id}`} className="w-full">
-      <Link href={`/t/${categoria.sitioweb}/category/${categoria.id}`}>
+      <Link
+        href={`/t/${categoria.sitioweb}/category/${categoria.id}`}
+        target="_blank"
+      >
         <CardContent className="pt-0 flex  items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <Image
@@ -204,7 +210,7 @@ export default function BusquedaPage() {
 
   const renderSitioCard = (sitio: SitioResult) => (
     <Card key={`sitio-${sitio.UUID}`} className="w-full">
-      <Link href={`/t/${sitio.sitioweb}`}>
+      <Link href={`/t/${sitio.sitioweb}`} target="_blank">
         <CardContent className="pt-0 flex  items-center w-full justify-between">
           <div className="flex items-center gap-2 w-full">
             <Image
@@ -293,7 +299,7 @@ export default function BusquedaPage() {
 
             {/* Resultados - Todo */}
             <TabsContent value="all">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4">
                 {getAllResults().map((item) => {
                   if (item.type === "producto") {
                     return renderProductCard(item as ProductResult);
@@ -315,7 +321,7 @@ export default function BusquedaPage() {
 
             {/* Resultados de Productos */}
             <TabsContent value="productos">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4">
                 {results.productos.map(renderProductCard)}
               </div>
               {results.productos.length === 0 && (
@@ -330,7 +336,7 @@ export default function BusquedaPage() {
 
             {/* Resultados de Categorías */}
             <TabsContent value="categorias">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4">
                 {results.categorias.map(renderCategoriaCard)}
               </div>
               {results.categorias.length === 0 && (
@@ -345,7 +351,7 @@ export default function BusquedaPage() {
 
             {/* Resultados de Sitios */}
             <TabsContent value="sitios">
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4">
                 {results.sitios.map(renderSitioCard)}
               </div>
               {results.sitios.length === 0 && (

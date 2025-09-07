@@ -15,7 +15,7 @@ import RatingSection from "./RatingSection";
 import { smartRound } from "@/functions/precios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Star, Minus, Plus, ShoppingCart } from "lucide-react";
+import { Star, Minus, Plus, ShoppingCart, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ExpandableText from "./truncateText";
 import Link from "next/link";
@@ -31,7 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButton from "@/components/myUI/buttonShare";
 import ClipboardProduct from "@/components/myUI/clipboardProduct";
 import RelativeTime from "@/components/GeneralComponents/DateTime";
-
+import { Card } from "@/components/ui/card";
 export default function Product({ id }: { id: string }) {
   const { store, dispatchStore } = useContext(MyContext);
   const searchParams = useSearchParams();
@@ -142,6 +142,7 @@ export default function Product({ id }: { id: string }) {
       link: `/t/${store.sitioweb}/producto/${product?.productId}`,
     },
   ];
+
   return (
     <main className="flex items-start min-h-[100svh]">
       <div className="grid grid-cols-1  gap-2 items-start p-4">
@@ -185,7 +186,7 @@ export default function Product({ id }: { id: string }) {
           </div>
         </AnimatePresence>
         <div
-          className={`space-y-3 animate-in ${swipeComponents.corto} duration-700`}
+          className={`space-y-4 animate-in ${swipeComponents.corto} duration-700`}
         >
           {/* Título y precio */}
           <div className="flex flex-col items-start justify-between space-y-1">
@@ -194,91 +195,180 @@ export default function Product({ id }: { id: string }) {
             >
               {product?.title}
             </h1>
-            <div
-              className={`flex justify-between items-center w-full gap-2 animate-in ${swipeComponents.corto} duration-500 delay-300`}
-            >
-              <div className="flex gap-2">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(product?.coment?.promedio || 0)
-                          ? "text-yellow-400 fill-current"
-                          : "text-gray-500"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">
-                  {product?.coment?.promedio || 0} ({product?.coment.total}{" "}
-                  reseñas)
-                </span>
-              </div>
-
-              <div className="flex ">
-                <ClipboardProduct
-                  title={`${product?.title || ""}`}
-                  descripcion={product?.descripcion || ""}
-                  url={product?.image}
-                  price={product?.price || 0}
-                  oldPrice={product?.oldPrice || 0}
-                  className="p-0 m-0"
-                />
-                <ShareButton
-                  title={`${product?.title || ""}`}
-                  text={product?.descripcion}
-                  url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Precio */}
-          <div className="flex items-center justify-between">
-            <div
-              className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-gray-900`}
-            >
-              <p className="leading-relaxed text-gray-900">
-                ${smartRound(product?.price || 0)} {store.moneda_default.moneda}
-              </p>
-              {(product?.oldPrice || 0) > (product?.price || 0) && (
-                <p className=" text-gray-500 line-through">
-                  ${product?.oldPrice}
-                </p>
-              )}
-              {(product?.oldPrice || 0) > (product?.price || 0) && (
-                <Badge variant="destructive" className="animate-pulse">
-                  {Math.round(
-                    ((product?.oldPrice || 0 - (product?.price || 0)) /
-                      (product?.oldPrice || 0)) *
-                      100
-                  )}
-                  % OFF
-                </Badge>
-              )}
-            </div>
-
-            <div className="flex gap-1">
+            {product?.venta && (
               <div
-                className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
+                className={`flex justify-between items-center w-full gap-2 animate-in ${swipeComponents.corto} duration-500 delay-300`}
               >
-                {!product?.agotado ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                    <span className="text-sm font-medium">En stock</span>
+                <div className="flex gap-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(product?.coment?.promedio || 0)
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-500"
+                        }`}
+                      />
+                    ))}
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-red-600">
-                    <div className="w-2 h-2 bg-red-600 rounded-full" />
-                    <span className="text-sm font-medium">Agotado</span>
-                  </div>
+                  <span className="text-sm text-gray-600">
+                    {product?.coment?.promedio || 0} ({product?.coment.total}{" "}
+                    reseñas)
+                  </span>
+                </div>
+
+                <div className="flex ">
+                  <ClipboardProduct
+                    title={`${product?.title || ""}`}
+                    descripcion={product?.descripcion || ""}
+                    url={product?.image}
+                    price={product?.price || 0}
+                    oldPrice={product?.oldPrice || 0}
+                    className="p-0 m-0"
+                  />
+                  <ShareButton
+                    title={`${product?.title || ""}`}
+                    text={product?.descripcion}
+                    url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Precio */}
+          {product?.venta && (
+            <div className="flex items-center justify-between">
+              <div
+                className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-gray-900`}
+              >
+                <p className="leading-relaxed text-gray-900">
+                  ${smartRound(product?.price || 0)}{" "}
+                  {store.moneda_default.moneda}
+                </p>
+                {(product?.oldPrice || 0) > (product?.price || 0) && (
+                  <p className=" text-gray-500 line-through">
+                    ${product?.oldPrice}
+                  </p>
+                )}
+                {(product?.oldPrice || 0) > (product?.price || 0) && (
+                  <Badge variant="destructive" className="animate-pulse">
+                    {Math.round(
+                      (((product?.oldPrice || 0) - (product?.price || 0)) /
+                        (product?.oldPrice || 0)) *
+                        100
+                    )}
+                    % OFF
+                  </Badge>
                 )}
               </div>
-            </div>
-          </div>
 
-          {store.carrito && (
+              <div className="flex gap-1">
+                <div
+                  className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
+                >
+                  {!product?.agotado ? (
+                    <div className="flex items-center gap-2 text-green-600">
+                      <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                      <span className="text-sm font-medium">En stock</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-red-600">
+                      <div className="w-2 h-2 bg-red-600 rounded-full" />
+                      <span className="text-sm font-medium">Agotado</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Packaging */}
+          {(product?.embalaje || 0) > 0 && (
+            <div className="mb-4 space-y-1">
+              <h3 className="font-medium">Embalaje</h3>
+              <Card className="p-3 border-gray-900">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div>
+                      <div className="font-medium">Costo</div>
+                      <div className="text-sm text-gray-9bg-gray-900">
+                        {smartRound(product?.embalaje || 0).toFixed(2)}{" "}
+                        {store.moneda_default.moneda}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-900 rounded-full ">
+                    <Check className="m-2 text-white fill-white size-3.5" />
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+          {/* Extras */}
+          {(product?.agregados?.length || 0 > 0) && (
+            <div className="mb-4  space-y-1">
+              <h3 className="font-medium">Extras</h3>
+              <p className="text-sm text-gray-500 ">
+                Agregados para su encargo
+              </p>
+
+              {product?.agregados.map((extra) => (
+                <Card key={extra.id} className="p-3 mb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium">{extra.name}</div>
+                      <div className="text-sm text-gray-500">
+                        {smartRound(extra?.price || 0).toFixed(2)}{" "}
+                        {store.moneda_default.moneda}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {extra.cant > 0 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setProduct({
+                                ...product,
+                                agregados: product.agregados.map((obj) =>
+                                  obj.id === extra.id
+                                    ? { ...obj, cant: obj.cant - 1 }
+                                    : obj
+                                ),
+                              })
+                            }
+                            className={"bg-blue-50 rounded-full p-1 m-1"}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <Badge variant={"outline"}>{extra.cant}</Badge>
+                        </>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          setProduct({
+                            ...product,
+                            agregados: product.agregados.map((obj) =>
+                              obj.id === extra.id
+                                ? { ...obj, cant: obj.cant + 1 }
+                                : obj
+                            ),
+                          })
+                        }
+                        className={"bg-blue-50 rounded-full p-1 m-1"}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+          {product?.venta && store.carrito && (
             <>
               <div className="flex flex-col h-full">
                 {/* Cantidad */}
@@ -344,7 +434,15 @@ export default function Product({ id }: { id: string }) {
                     <div className="flex items-center gap-2">
                       <ShoppingCart className="w-4 h-4" />
                       Agregar al carrito - $
-                      {((product?.price || 0) * countAddCart).toFixed(2)}
+                      {(
+                        ((product?.price || 0) +
+                          (product?.agregados.reduce(
+                            (sum, agg) => (sum = sum + agg.price * agg.cant),
+                            0
+                          ) || 0)) *
+                          countAddCart +
+                        (product?.embalaje || 0)
+                      ).toFixed(2)}
                     </div>
                   )}
                 </Button>
@@ -359,51 +457,60 @@ export default function Product({ id }: { id: string }) {
               </div>
             </>
           )}
-          <Separator />
-          <Tabs
-            defaultValue="description"
-            className="min-h-[20vh]  text-gray-800"
-          >
-            <TabsList>
-              <TabsTrigger value="description">Desc</TabsTrigger>
-              <TabsTrigger value="rating">Rating</TabsTrigger>
-              <TabsTrigger value="details">Detalles</TabsTrigger>
-            </TabsList>
-            <TabsContent value="description">
-              {/* Descripción */}
-              <div
-                className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
+          {product?.venta ? (
+            <>
+              <Separator />
+              <Tabs
+                defaultValue="description"
+                className="min-h-[20vh]  text-gray-800"
               >
-                Posteado:{" "}
-                <RelativeTime datetime={product?.creado || new Date()} />
-                <ExpandableText text={product?.descripcion || "..."} />
-              </div>
-            </TabsContent>
-            <TabsContent value="rating">
-              {/* Estado de stock */}
+                <TabsList>
+                  <TabsTrigger value="description">Desc</TabsTrigger>
+                  <TabsTrigger value="rating">Rating</TabsTrigger>
+                  <TabsTrigger value="details">Detalles</TabsTrigger>
+                </TabsList>
+                <TabsContent value="description">
+                  {/* Descripción */}
+                  <div
+                    className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
+                  >
+                    Posteado:{" "}
+                    <RelativeTime datetime={product?.creado || new Date()} />
+                    <ExpandableText text={product?.descripcion || "..."} />
+                  </div>
+                </TabsContent>
+                <TabsContent value="rating">
+                  {/* Estado de stock */}
 
-              <RatingSection
-                specific={product?.productId || id}
-                sitioweb={store.sitioweb || ""}
-              />
-            </TabsContent>
-            <TabsContent value="details">
-              {(product?.caracteristicas?.length || 0) > 0 ? (
-                <ul className="space-y-3">
-                  {product?.caracteristicas.map((obj, index) => (
-                    <li className="flex items-center text-gray-700" key={index}>
-                      <span className="w-2 h-2 bg-primary rounded-full mr-3 text-gray-700"></span>
-                      {obj}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <div className="flex items-center  text-gray-700">
-                  No hay detalles para mostrar
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+                  <RatingSection
+                    specific={product?.productId || id}
+                    sitioweb={store.sitioweb || ""}
+                  />
+                </TabsContent>
+                <TabsContent value="details">
+                  {(product?.caracteristicas?.length || 0) > 0 ? (
+                    <ul className="space-y-3">
+                      {product?.caracteristicas.map((obj, index) => (
+                        <li
+                          className="flex items-center text-gray-700"
+                          key={index}
+                        >
+                          <span className="w-2 h-2 bg-primary rounded-full mr-3 text-gray-700"></span>
+                          {obj}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="flex items-center  text-gray-700">
+                      No hay detalles para mostrar
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </>
+          ) : (
+            <p className="text-base text-gray-700">{product?.descripcion}</p>
+          )}
         </div>
       </div>
     </main>

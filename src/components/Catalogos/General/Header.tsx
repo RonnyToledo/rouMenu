@@ -54,6 +54,7 @@ export default function Header() {
     week: 1,
     open: false,
   });
+
   useEffect(() => {
     if (!open) setShowState("home");
   }, [open]);

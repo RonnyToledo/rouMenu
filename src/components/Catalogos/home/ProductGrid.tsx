@@ -11,6 +11,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ButtonOfCart } from "./ButtonOfCart";
+import { ChevronRightIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface ProductGridInterface {
   product: Product;
@@ -24,6 +26,7 @@ export default function ProductGrid({
   i,
 }: ProductGridInterface) {
   const { store } = useContext(MyContext);
+  const router = useRouter();
   return (
     <motion.div
       id={product.productId}
@@ -83,11 +86,29 @@ export default function ProductGrid({
           </p>
         )}
         <div className={`flex items-center justify-between mt-3`}>
-          <p className="font-bold w-full text-[10px] text-[var(--text-light)] ">
-            ${smartRound(product.price || 0)} {store?.moneda_default?.moneda}
-          </p>
+          {product.venta ? (
+            <p className="font-bold w-full text-[10px] text-[var(--text-light)] ">
+              ${smartRound(product.price || 0)} {store?.moneda_default?.moneda}
+            </p>
+          ) : (
+            <div />
+          )}
           <div className="relative h-9 w-full flex justify-end items-center">
-            {store?.carrito &&
+            {!product.venta || product.agregados.length > 0 ? (
+              <Button
+                size="icon"
+                type="button"
+                className="size-8 flex justify-center items-center rounded-full "
+                onClick={() =>
+                  router.push(
+                    `/t/${store.sitioweb}/producto/${product.productId}`
+                  )
+                }
+              >
+                <ChevronRightIcon className="size-4" />
+              </Button>
+            ) : (
+              store?.carrito &&
               (product.agotado ? (
                 <Button
                   size="icon"
@@ -100,7 +121,8 @@ export default function ProductGrid({
                 </Button>
               ) : (
                 <ButtonOfCart product={product} />
-              ))}
+              ))
+            )}
           </div>
         </div>
       </div>

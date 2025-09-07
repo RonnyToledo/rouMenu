@@ -96,16 +96,18 @@ export default async function RootLayout({
     console.info("Store listo");
   }
   if (!store.sitioweb) notFound();
+  console.log(store);
 
   if (!storeOne.active) return <Unavailable />;
-
   return (
-    <MyProvider storeSSD={store}>
-      <Header />
-      <div className="min-h-[80vh]">{children}</div>
-      <DrawerCart />
-      <CatalogFooter />
-    </MyProvider>
+    <div>
+      <MyProvider storeSSD={store}>
+        <Header />
+        <div className="min-h-[80vh]">{children}</div>
+        <DrawerCart />
+        <CatalogFooter />
+      </MyProvider>
+    </div>
   );
 }
 function trasnformData(store: AppState): AppState {

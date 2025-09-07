@@ -20,8 +20,17 @@ export interface Product {
   span?: boolean;
   coment: ComentGeneral;
   imagesecondary: string[];
+  embalaje: number;
+  venta: boolean;
+  agregados: AgregadosInterface[];
 }
 
+export interface AgregadosInterface {
+  id: string;
+  name: string;
+  price: number;
+  cant: number;
+}
 export interface ScheduleInterface {
   dia: string;
   apertura: string;

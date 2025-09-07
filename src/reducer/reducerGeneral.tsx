@@ -51,6 +51,10 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
         products: state.products.map((p) => ({
           ...p,
           price: redondearAMultiploDe5((p.price ?? 0) / newDefault.valor),
+          agregados: p.agregados.map((obj) => ({
+            ...obj,
+            price: redondearAMultiploDe5((obj.price ?? 0) / newDefault.valor),
+          })),
         })),
       };
     }

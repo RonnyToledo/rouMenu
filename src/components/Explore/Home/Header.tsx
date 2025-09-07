@@ -92,9 +92,9 @@ export default function Header({ children }: { children: ReactNode }) {
             ) : (
               <div className="flex w-full flex-1 items-stretch rounded-2xl h-full overflow-hidden">
                 <Input
-                  placeholder={`Buscar ${
+                  placeholder={`Buscar "${
                     generalData.random_title?.toLowerCase() ?? ""
-                  }`}
+                  }"`}
                   onChange={(e) => setSearch(e.target.value)}
                   className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
                   value={search}

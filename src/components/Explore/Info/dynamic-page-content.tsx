@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ChevronRight, Home } from "lucide-react";
+import { Home } from "lucide-react";
 import { StepByStepSheet } from "./step-by-step-sheet";
 import Link from "next/link";
 import {
@@ -22,8 +22,21 @@ import {
   SectionsInterace,
   SubsectionsInterace,
 } from "./json/interfaceTsx";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { flattenSections } from "@/lib/flatitem";
+import { getPrevNext } from "@/lib/prevNext";
+import { FlatItem } from "@/lib/types";
+import adminCatalogData from "@/components/Explore/Info/json/data.json";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const flat = flattenSections(
+  (adminCatalogData as unknown as DataInterface)?.sections || [],
+  {
+    basePath: "/info",
+    includeNoSlug: false,
+  }
+);
 interface DynamicPageContentProps {
   allData: DataInterface;
 }
@@ -34,6 +47,11 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
   const [content, setContent] = useState<
     ContectDataInterace | SubsectionsInterace | null
   >();
+  const [prevNextState, setPrevNextState] = useState<{
+    index: number;
+    prev: FlatItem | null;
+    next: FlatItem | null;
+  }>(getPrevNext(flat, "introduccion"));
 
   const params = useParams();
   const { slug } = params;
@@ -47,6 +65,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         setContent(section);
         if (section.slug) {
           setActiveSection(section?.slug || "");
+          setPrevNextState(getPrevNext(flat, section?.slug));
         }
         setBreadcrumb([section.title || ""]);
       }
@@ -59,6 +78,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
               notFound();
             } else {
               setActiveSection(subsection?.slug || "");
+              setPrevNextState(getPrevNext(flat, subsection?.slug));
             }
             setBreadcrumb([section.title || "", subsection.title || ""]);
             break;
@@ -68,6 +88,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
     }
   }, [allData?.sections, slug]);
 
+  console.log(prevNextState);
   const renderImage = (imageData: ImageInterface) => {
     if (!imageData) return null;
 
@@ -122,7 +143,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         )}
 
         {section.cards && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          <div className="grid gap-6 mt-6">
             {section.cards.map((card, index) => (
               <Card key={index} className={card.className || ""}>
                 <CardHeader>
@@ -170,7 +191,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
   };
 
   return (
-    <main className="flex-1 p-6 lg:p-8">
+    <main className="flex-1 p-6 ">
       <div className="max-w-4xl mx-auto">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-primary ">
@@ -225,7 +246,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         {content?.links && (
           <div className="mt-12">
             <h3 className="text-xl font-semibold mb-6">Enlaces Importantes</h3>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid gap-6">
               {(content?.links || ([] as LinkInterace[])).map(
                 (link, index: number) => (
                   <Card
@@ -267,6 +288,23 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
           </div>
         )}
       </div>
+      <div className="flex flex-col p-2 gap-2">
+        {prevNextState.prev && (
+          <ButtonPrevNext
+            title="Anterior"
+            prevNextState={prevNextState.prev}
+            link={prevNextState.prev.path}
+          />
+        )}
+        {prevNextState.next && (
+          <ButtonPrevNext
+            title="Siguiente"
+            prevNextState={prevNextState.next}
+            link={prevNextState.next.path}
+            align={false}
+          />
+        )}
+      </div>
 
       <StepByStepSheet
         data={allData}
@@ -274,5 +312,41 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         onSectionChange={setActiveSection}
       />
     </main>
+  );
+}
+function ButtonPrevNext({
+  prevNextState,
+  title,
+  link,
+  align = true,
+}: {
+  prevNextState: FlatItem;
+  title: string;
+  link: string;
+  align?: boolean;
+}) {
+  const router = useRouter();
+
+  return (
+    <Button
+      className={`h-auto ${align ? "justify-start text-start mr-8 " : "justify-end text-end ml-8 "}`}
+      variant={"outline"}
+      onClick={() => router.push(link)}
+    >
+      <div
+        className={`flex ${align ? "flex-row-reverse" : "flex-row"} items-center`}
+      >
+        <div>
+          <h4 className="text-sm text-gray-600">{title}</h4>
+          <h2 className="text-lg text-gray-900">{prevNextState?.title}</h2>
+        </div>
+
+        {align ? (
+          <ChevronLeft className="size-8 text-gray-700" />
+        ) : (
+          <ChevronRight className="size-8 text-gray-700" />
+        )}
+      </div>
+    </Button>
   );
 }
