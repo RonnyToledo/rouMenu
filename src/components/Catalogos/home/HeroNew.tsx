@@ -5,7 +5,8 @@ import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
 import { logoApp } from "@/lib/image";
-
+import { MdDeliveryDining } from "react-icons/md";
+import { FaShop } from "react-icons/fa6";
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
   console.log(store);
@@ -19,7 +20,7 @@ export default function HeroNew({}) {
             alt={store?.name || "Store"}
             width={400}
             height={500}
-            className="w-full h-80 object-cover"
+            className="w-full aspect-square object-cover"
           />
         </div>
       </div>
@@ -35,14 +36,6 @@ export default function HeroNew({}) {
           <span className="text-gray-300">•</span>
           <span>$ {store?.moneda_default?.moneda}</span>
         </div>
-
-        {/* Description */}
-        <div>
-          <p className="text-gray-600 leading-relaxed text-sm line-clamp-2">
-            {store?.parrrafo || "Store?..."}
-          </p>
-        </div>
-
         {/* Location */}
         <Link
           className="inline-flex gap-2 items-center bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-2 px-4 rounded-full border border-[var(--border-gold)]"
@@ -51,6 +44,33 @@ export default function HeroNew({}) {
           <MapPin className="size-3.5" />
           {store?.municipio}, {store?.Provincia}
         </Link>
+
+        {/* Description */}
+        <div>
+          <p className="text-gray-600 leading-relaxed text-sm line-clamp-2">
+            {store?.parrrafo || "Store?..."}
+          </p>
+        </div>
+        <div className="flex items-center justify-start gap-2">
+          {store.domicilio && (
+            <div className="inline-flex gap-4 items-center bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-2 px-4 rounded-full border border-[var(--border-gold)]">
+              <MdDeliveryDining className="size-5" />
+              <div>
+                <h5 className="text-gray-600 text-[10px]">Entrega</h5>
+                <h2 className="text-gray-800 text-base">Delivery</h2>
+              </div>
+            </div>
+          )}
+          {store.local && (
+            <div className="inline-flex gap-4 items-center px-4 bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-1 rounded-full border border-[var(--border-gold)]">
+              <FaShop className="size-5" />
+              <div>
+                <h5 className="text-gray-600 text-[10px]">Entrega</h5>
+                <h2 className="text-gray-800 text-base">Tienda</h2>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
