@@ -9,7 +9,6 @@ import { MdDeliveryDining } from "react-icons/md";
 import { FaShop } from "react-icons/fa6";
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
-  console.log(store);
 
   return (
     <div className="p-3 space-y-3">
@@ -28,7 +27,7 @@ export default function HeroNew({}) {
       <div className="space-y-3">
         {/* Rating */}
         <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Star className="w-4 h-4 fill-current text-amber-400" />
+          <Star className="w-4 h-4 fill-current text-gray-700" />
           <span className="font-medium text-gray-900">
             {store?.comentTienda.promedio.toFixed(1)}
           </span>
@@ -53,7 +52,7 @@ export default function HeroNew({}) {
         </div>
         <div className="flex items-center justify-start gap-2">
           {store.domicilio && (
-            <div className="inline-flex gap-4 items-center bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-2 px-4 rounded-full border border-[var(--border-gold)]">
+            <div className="inline-flex gap-4 items-center px-4 bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-1 rounded-full border border-[var(--border-gold)]">
               <MdDeliveryDining className="size-5" />
               <div>
                 <h5 className="text-gray-600 text-[10px]">Entrega</h5>

@@ -88,7 +88,6 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
     }
   }, [allData?.sections, slug]);
 
-  console.log(prevNextState);
   const renderImage = (imageData: ImageInterface) => {
     if (!imageData) return null;
 

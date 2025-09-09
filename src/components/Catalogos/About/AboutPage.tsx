@@ -138,7 +138,7 @@ export default function AboutPage() {
                   <Carousel
                     plugins={[
                       Autoplay({
-                        delay: 2000,
+                        delay: 5000,
                       }),
                     ]}
                     className="w-full max-w-xs"
@@ -147,10 +147,10 @@ export default function AboutPage() {
                       {store.comentTienda.data.map((testimonial, index) => (
                         <CarouselItem
                           key={index}
-                          className="basis-2/3 border rounded-2xl aspect-square"
+                          className="basis-2/3 border rounded-2xl aspect-square p-0"
                         >
-                          <div className="flex flex-col  items-center justify-between h-full p-6">
-                            <div className="flex items-center justify-center gap-1 mb-4">
+                          <div className="flex flex-col  items-center justify-between h-full p-4">
+                            <div className="flex items-center justify-center gap-1 ">
                               {[...Array(testimonial.star)].map((_, i) => (
                                 <Star
                                   key={i}
@@ -158,11 +158,11 @@ export default function AboutPage() {
                                 />
                               ))}
                             </div>
-                            <p className="text-lg text-muted-foreground mb-6 italic leading-relaxed">
+                            <p className="text-xs text-muted-foreground  italic leading-relaxed line-clamp-4 text-center">
                               {testimonial.cmt}
                             </p>
                             <div className="flex items-center justify-center gap-4">
-                              <p className="font-heading font-semibold text-card-foreground">
+                              <p className="font-heading text-sm font-semibold text-card-foreground line-clamp-1">
                                 {testimonial.name}
                               </p>
                               <span className="text-sm text-muted-foreground">

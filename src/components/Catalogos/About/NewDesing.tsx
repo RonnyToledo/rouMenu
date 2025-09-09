@@ -96,16 +96,13 @@ export default function AboutMePage() {
             name: "Delivery",
             description: "Envio a Domicilio disponible",
           },
-          store.domicilio && {
+          store.act_tf && {
             icon: BanknoteArrowUp,
             name: "Pago",
             description: "Permitido pago en transferencia",
           },
         ].length > 0 && (
           <div className="bg-accent/5 rounded-lg p-2">
-            <h2 className="font-heading text-2xl font-bold text-center mb-4">
-              Caracteristicas
-            </h2>
             <div className="grid grid-cols-2 gap-2">
               {(
                 [
@@ -114,7 +111,7 @@ export default function AboutMePage() {
                     name: "Delivery",
                     description: "Envio a Domicilio disponible",
                   },
-                  store.domicilio && {
+                  store.act_tf && {
                     icon: BanknoteArrowUp,
                     name: "Pago",
                     description: "Permitido pago en transferencia",
@@ -123,10 +120,10 @@ export default function AboutMePage() {
               ).map((skill, index) => (
                 <Card
                   key={index}
-                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-105"
+                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 py-2"
                 >
                   <CardContent className="p-2 text-center">
-                    <skill.icon className="h-12 w-12 text-gray-700 mx-auto mb-4" />
+                    <skill.icon className="h-8 w-8 text-gray-700 mx-auto mb-4" />
                     <h3 className="font-heading font-semibold mb-2">
                       {skill.name}
                     </h3>

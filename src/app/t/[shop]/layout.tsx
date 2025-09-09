@@ -96,7 +96,6 @@ export default async function RootLayout({
     console.info("Store listo");
   }
   if (!store.sitioweb) notFound();
-  console.log(store);
 
   if (!storeOne.active) return <Unavailable />;
   return (

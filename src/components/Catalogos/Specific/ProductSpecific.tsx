@@ -465,24 +465,38 @@ export default function Product({ id }: { id: string }) {
             <>
               <Separator />
               <Tabs
-                defaultValue="description"
+                defaultValue={product?.descripcion ? "description" : "rating"}
                 className="min-h-96  text-gray-800"
               >
                 <TabsList>
-                  <TabsTrigger value="description">Desc</TabsTrigger>
-                  <TabsTrigger value="rating">Rating</TabsTrigger>
-                  <TabsTrigger value="details">Detalles</TabsTrigger>
-                </TabsList>
-                <TabsContent value="description">
-                  {/* Descripción */}
-                  <div
-                    className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
+                  <TabsTrigger
+                    value="description"
+                    disabled={!product?.descripcion}
                   >
-                    Posteado:{" "}
-                    <RelativeTime datetime={product?.creado || new Date()} />
-                    <ExpandableText text={product?.descripcion || "..."} />
-                  </div>
-                </TabsContent>
+                    Desc
+                  </TabsTrigger>
+
+                  <TabsTrigger value="rating">Rating</TabsTrigger>
+
+                  <TabsTrigger
+                    value="details"
+                    disabled={product.caracteristicas.length == 0}
+                  >
+                    Detalles
+                  </TabsTrigger>
+                </TabsList>
+                {product?.descripcion && (
+                  <TabsContent value="description">
+                    {/* Descripción */}
+                    <div
+                      className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
+                    >
+                      Posteado:{" "}
+                      <RelativeTime datetime={product?.creado || new Date()} />
+                      <ExpandableText text={product?.descripcion || "..."} />
+                    </div>
+                  </TabsContent>
+                )}
                 <TabsContent value="rating">
                   {/* Estado de stock */}
 
@@ -491,25 +505,27 @@ export default function Product({ id }: { id: string }) {
                     sitioweb={store.sitioweb || ""}
                   />
                 </TabsContent>
-                <TabsContent value="details">
-                  {(product?.caracteristicas?.length || 0) > 0 ? (
-                    <ul className="space-y-3">
-                      {product?.caracteristicas.map((obj, index) => (
-                        <li
-                          className="flex items-center text-gray-700"
-                          key={index}
-                        >
-                          <span className="w-2 h-2 bg-primary rounded-full mr-3 text-gray-700"></span>
-                          {obj}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <div className="flex items-center  text-gray-700">
-                      No hay detalles para mostrar
-                    </div>
-                  )}
-                </TabsContent>
+                {product.caracteristicas.length !== 0 && (
+                  <TabsContent value="details">
+                    {(product?.caracteristicas?.length || 0) > 0 ? (
+                      <ul className="space-y-3">
+                        {product?.caracteristicas.map((obj, index) => (
+                          <li
+                            className="flex items-center text-gray-700"
+                            key={index}
+                          >
+                            <span className="w-2 h-2 bg-primary rounded-full mr-3 text-gray-700"></span>
+                            {obj}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="flex items-center  text-gray-700">
+                        No hay detalles para mostrar
+                      </div>
+                    )}
+                  </TabsContent>
+                )}
               </Tabs>
             </>
           ) : (

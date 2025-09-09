@@ -24,7 +24,6 @@ export type AppAction =
 export function reducerStore(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case "Add":
-      console.log("aaa");
       return { ...state, ...action.payload };
 
     case "ChangeCurrent": {
@@ -69,8 +68,6 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
     }
 
     case "AddCart":
-      console.log("e");
-
       const newDefault = JSON.parse(action.payload);
       return {
         ...state,
