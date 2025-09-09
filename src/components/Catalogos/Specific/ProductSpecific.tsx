@@ -164,9 +164,7 @@ export default function Product({ id }: { id: string }) {
               width={500}
               height={500}
               alt={product?.title || "Product"}
-              className={`w-full rounded-lg shadow-lg border border-[var(--border-gold)] ${
-                product?.span ? "aspect-video" : "aspect-square"
-              }`}
+              className={`w-full rounded-lg shadow-lg object-cover object-center aspect-square`}
               src={product?.image || store.urlPoster || logoApp}
             />
           </motion.div>
@@ -468,7 +466,7 @@ export default function Product({ id }: { id: string }) {
               <Separator />
               <Tabs
                 defaultValue="description"
-                className="min-h-[20vh]  text-gray-800"
+                className="min-h-96  text-gray-800"
               >
                 <TabsList>
                   <TabsTrigger value="description">Desc</TabsTrigger>

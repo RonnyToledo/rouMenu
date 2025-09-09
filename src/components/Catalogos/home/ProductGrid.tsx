@@ -11,7 +11,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ButtonOfCart } from "./ButtonOfCart";
-import { ChevronRightIcon } from "lucide-react";
+import { TbShoppingCartPlus } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 
 interface ProductGridInterface {
@@ -105,7 +105,11 @@ export default function ProductGrid({
                   )
                 }
               >
-                <ChevronRightIcon className="size-4" />
+                {product.Cant > 0 ? (
+                  product.Cant
+                ) : (
+                  <TbShoppingCartPlus className="size-5" />
+                )}
               </Button>
             ) : (
               store?.carrito &&

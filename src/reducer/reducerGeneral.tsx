@@ -1,5 +1,6 @@
 // reducerGeneral.ts
 import { StarDistribution, AppState, Current } from "@/context/InitialStatus";
+import { smartRound } from "@/functions/precios";
 import { toast } from "sonner";
 
 // Acciones tipadas
@@ -35,22 +36,33 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
         envios:
           state.envios?.map((env) => ({
             ...env,
-            price: redondearAMultiploDe5(env.precio / newDefault.valor),
+            precio: smartRound(
+              redondearAMultiploDe5(env.precio / newDefault.valor)
+            ),
           })) ?? [],
 
         moneda: (state?.moneda || []).map((obj) => {
           return {
             ...obj,
-            valor: redondearAMultiploDe5(obj.valor / newDefault.valor),
+            valor: smartRound(
+              redondearAMultiploDe5(obj.valor / newDefault.valor)
+            ),
           };
         }),
         // re-calcula precios globales
         products: state.products.map((p) => ({
           ...p,
-          price: redondearAMultiploDe5((p.price ?? 0) / newDefault.valor),
+          price: smartRound(
+            redondearAMultiploDe5((p.price ?? 0) / newDefault.valor)
+          ),
+          embalaje: smartRound(
+            redondearAMultiploDe5((p.embalaje ?? 0) / newDefault.valor)
+          ),
           agregados: p.agregados.map((obj) => ({
             ...obj,
-            price: redondearAMultiploDe5((obj.price ?? 0) / newDefault.valor),
+            price: smartRound(
+              redondearAMultiploDe5((obj.price ?? 0) / newDefault.valor)
+            ),
           })),
         })),
       };

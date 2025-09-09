@@ -47,7 +47,7 @@ export default function Products() {
         .map((categoria, index) => (
           <div key={index}>
             {categoria.subtienda ? (
-              <div className="p-2 mb-2  bg-white/85">
+              <div className="p-2 mb-2 ">
                 <div className="rounded-lg  ">
                   <div className="pb-2 ">
                     <Link

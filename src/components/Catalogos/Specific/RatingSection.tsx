@@ -27,14 +27,14 @@ export default function RatingSection({
       {store.products
         .filter((env) => env.productId === specific)
         .map((obj, ind) => (
-          <div key={ind} className="max-w-xl mx-auto p-6 ">
-            <p className="text-gray-500 mb-6 text-sm">
+          <div key={ind} className="max-w-xl mx-auto px-6 py-2 ">
+            <p className="text-gray-500 mb-2 text-sm">
               {obj.coment?.total == 0
                 ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
                 : "Las calificaciones y opiniones provienen de personas que usan el mismo tipo de dispositivo que tú."}
             </p>
 
-            <div className="grid grid-cols-2 items-center gap-2 mb-8">
+            <div className="grid grid-cols-2 items-center gap-2 mb-2">
               <div className="flex flex-col items-center">
                 <div className="text-6xl font-light">
                   {(obj?.coment?.promedio).toFixed(1)}
@@ -70,7 +70,7 @@ export default function RatingSection({
               </Button>
             </div>
 
-            <div className="border-t border-gray-800 pt-6">
+            <div className="border-t border-gray-800 pt-2">
               <h3 className="text-xl mb-2">Califica este producto</h3>
               <p className="text-gray-400 mb-4">
                 Comparte tu opinión con otros usuarios
