@@ -122,10 +122,7 @@ function trasnformData(store: AppState): AppState {
     envios:
       (store.envios || [])?.map((env) => ({
         ...env,
-        municipios: env.municipios.map((m) => ({
-          ...m,
-          price: Number(m.price),
-        })),
+        precio: Number(env.precio),
       })) ?? [],
   };
 }

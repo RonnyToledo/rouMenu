@@ -34,19 +34,39 @@ export default function StickyCart() {
   };
 
   const getTotalItems = () => {
-    return store.products.reduce((total, item) => total + item.Cant, 0);
+    return store.products.reduce(
+      (total, item) =>
+        total +
+        item.Cant +
+        (item?.agregados.reduce((sum, agg) => (sum = sum + agg.cant), 0) || 0),
+      0
+    );
   };
 
   const getTotalPrice = () => {
     return store.products.reduce(
-      (total, item) => total + (item.price || 0) * item.Cant,
+      (total, item) =>
+        total +
+        (item.price || 0) * item.Cant +
+        item.embalaje +
+        (item?.agregados.reduce(
+          (sum, agg) => (sum = sum + agg.price * agg.cant),
+          0
+        ) || 0),
       0
     );
   };
   useEffect(() => {
     setContentCart(
       store.products.reduce(
-        (sum, product) => (sum = sum + (product.Cant || 0)),
+        (total, item) =>
+          total +
+          (item.price || 0) * item.Cant +
+          item.embalaje +
+          (item?.agregados.reduce(
+            (sum, agg) => (sum = sum + agg.price * agg.cant),
+            0
+          ) || 0),
         0
       )
     );

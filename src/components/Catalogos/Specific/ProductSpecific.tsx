@@ -286,18 +286,18 @@ export default function Product({ id }: { id: string }) {
           {(product?.embalaje || 0) > 0 && (
             <div className="mb-4 space-y-1">
               <h3 className="font-medium">Embalaje</h3>
-              <Card className="p-3 border-gray-900">
+              <Card className="p-3 border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div>
                       <div className="font-medium">Costo</div>
-                      <div className="text-sm text-gray-9bg-gray-900">
+                      <div className="text-sm text-gray-800">
                         {smartRound(product?.embalaje || 0).toFixed(2)}{" "}
                         {store.moneda_default.moneda}
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-900 rounded-full ">
+                  <div className="bg-gray-500 rounded-full ">
                     <Check className="m-2 text-white fill-white size-3.5" />
                   </div>
                 </div>
@@ -366,6 +366,9 @@ export default function Product({ id }: { id: string }) {
                   </div>
                 </Card>
               ))}
+              <p className="text-xs text-gray-700 text-center w-full">
+                *El extra es el producto con el agregado incluido
+              </p>
             </div>
           )}
           {product?.venta && store.carrito && (
@@ -435,13 +438,16 @@ export default function Product({ id }: { id: string }) {
                       <ShoppingCart className="w-4 h-4" />
                       Agregar al carrito - $
                       {(
-                        ((product?.price || 0) +
-                          (product?.agregados.reduce(
-                            (sum, agg) => (sum = sum + agg.price * agg.cant),
-                            0
-                          ) || 0)) *
+                        ((product?.price || 0) + (product?.embalaje || 0)) *
                           countAddCart +
-                        (product?.embalaje || 0)
+                        (product?.agregados.reduce(
+                          (sum, agg) =>
+                            (sum =
+                              sum +
+                              (agg.price + (product?.embalaje || 0)) *
+                                agg.cant),
+                          0
+                        ) || 0)
                       ).toFixed(2)}
                     </div>
                   )}

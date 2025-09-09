@@ -1,24 +1,15 @@
 "use client";
 import { MyContext } from "@/context/MyContext";
-import { Sends } from "@/context/InitialStatus";
-
 import React, { useContext } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import PhoneInput from "react-phone-input-2";
 import { CompraInterface } from "./CarritoPage";
-import { MapPin, User, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Switch } from "@/components/ui/switch";
+import { MapPin } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import style from "./style.module.css";
 import { smartRound } from "@/functions/precios";
+import { Sends } from "@/context/InitialStatus";
 
 export type Props = {
   compra: CompraInterface;
@@ -26,17 +17,17 @@ export type Props = {
 };
 export default function Details({ compra, setCompra }: Props) {
   const { store } = useContext(MyContext);
-
   return (
-    <Card className="border-0 shadow-sm">
-      <CardContent className="p-6 space-y-5">
-        {/* Recipient Info */}
+    <div>
+      <div className="bg-white rounded-lg p-4">
+        <h3 className="font-medium text-gray-900 mb-3">
+          ¿Quién recibe el pedido?
+        </h3>
         <div className="space-y-4">
-          <div className="relative w-full">
-            <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <div>
+            <Label className="text-sm text-gray-700 mb-1 block">Nombre</Label>
             <Input
-              placeholder="Nombre del destinatario"
-              className="pl-10 border-gray-200 focus:border-blue-500"
+              className="w-full text-gray-700 "
               value={compra.people}
               onChange={(e) =>
                 setCompra({
@@ -45,11 +36,14 @@ export default function Details({ compra, setCompra }: Props) {
                 })
               }
             />
+            <p className="text-xs text-gray-500 mt-1">
+              El nombre de la persona que recibe el pedido.
+            </p>
           </div>
-
-          <div className="relative w-full overflow-hidden rounded-sm border border-gray-300">
+          <div>
+            <Label className="text-sm text-gray-700 mb-1 block">Teléfono</Label>
             <PhoneInput
-              placeholder=" Teléfono"
+              placeholder="Teléfono"
               containerStyle={{ width: "100%" }}
               country={"cu"}
               value={compra.phonenumber}
@@ -59,98 +53,95 @@ export default function Details({ compra, setCompra }: Props) {
                   phonenumber: e,
                 })
               }
-              inputClass="pl-10 border-gray-200 focus:border-blue-500"
-            />
+              dropdownClass={style.dropdownClass}
+              inputClass={style.inputClass}
+              buttonClass={style.ButtonClass}
+            />{" "}
+            <p className="text-xs text-gray-500 mt-1 ">
+              El número de teléfono de la persona que recibe el pedido.
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Location */}
-        {(store.envios || []).length > 0 && (
-          <div className="space-y-4">
-            <div className="text-gray-500 flex items-center justify-between">
-              <div className="flex items-center justify-start gap-2">
-                <MapPin className="size-4" />
-                Domicilio
-              </div>
-              <Switch
-                checked={compra.envio === "delivery"}
-                onCheckedChange={(checked: boolean) =>
-                  setCompra((prev) => ({
-                    ...prev,
-                    envio: checked ? "delivery" : "pickup",
-                  }))
-                }
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Select
-                required={compra.envio === "delivery"}
-                disabled={compra.envio !== "delivery"}
-                value={compra.provincia}
-                onValueChange={(value) => {
-                  const auxVal =
-                    (store.envios || ([] as Sends[])).find(
-                      (obj) => obj.nombre === value
-                    )?.municipios || [];
-                  setCompra({
-                    ...compra,
-                    provincia: value,
-                    shipping: auxVal[0]?.price || 0,
-                    municipio: auxVal[0]?.name || "",
-                  });
-                }}
-              >
-                <SelectTrigger className="border-gray-200 focus:border-blue-500 w-full truncate">
-                  <SelectValue placeholder="Provincia" />
-                </SelectTrigger>
-                <SelectContent className="w-full truncate">
-                  {(store.envios || ([] as Sends[])).map((obj, ind) => (
-                    <SelectItem key={ind} value={obj.nombre}>
-                      {obj.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                required={compra.envio === "delivery"}
-                disabled={compra.envio !== "delivery" || !compra.provincia}
-                onValueChange={(value) => {
-                  const auxVal = (
-                    (store.envios || ([] as Sends[])).find(
-                      (obj) => obj.nombre === compra.provincia
-                    )?.municipios || []
-                  ).find((municipio) => municipio.name.includes(value));
-
-                  setCompra((prev) => ({
-                    ...prev,
-                    municipio: value,
-                    shipping: auxVal?.price || 0,
-                  }));
-                }}
-                value={compra.municipio}
-              >
-                <SelectTrigger className="border-gray-200 focus:border-blue-500 w-full truncate">
-                  <SelectValue placeholder="Municipio" />
-                </SelectTrigger>
-                <SelectContent className="w-full">
-                  {(store.envios || ([] as Sends[]))
-                    .find((obj) => obj.nombre === compra.provincia)
-                    ?.municipios.map((obj, ind) => (
-                      <SelectItem key={ind} value={obj.name}>
-                        {obj.name}- ${smartRound(obj.price)}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+      <div className="bg-white rounded-lg p-4">
+        <h3 className="font-medium text-gray-900 mb-3">
+          ¿Dónde la entregamos?
+        </h3>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-sm text-gray-700 mb-2 block">
+              Selecciona la zona de tu dirección
+            </Label>
+            <div className="space-y-2">
+              {[
+                ...(store.local
+                  ? [{ lugar: "Local", precio: 0 } as Sends]
+                  : []),
+                ...(store.envios ?? []),
+              ].map((obj, index) => (
+                <label
+                  key={index}
+                  className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="radio"
+                    name="deliveryZone"
+                    value={obj.lugar}
+                    checked={compra.lugar === obj.lugar}
+                    onChange={(e) =>
+                      setCompra({
+                        ...compra,
+                        shipping: obj.precio,
+                        lugar: e.target.value,
+                      })
+                    }
+                    className="text-gray-800"
+                  />
+                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">
+                      {obj.lugar}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {smartRound(obj.precio).toFixed(2)}{" "}
+                      {store.moneda_default.moneda}
+                    </p>
+                  </div>
+                </label>
+              ))}
             </div>
           </div>
-        )}
 
-        {/* Special Instructions */}
+          <div>
+            <Label className="text-sm text-gray-700 mb-1 block">
+              Tu dirección exacta
+            </Label>
+            <Textarea
+              className="w-full min-h-[80px] text-xs"
+              placeholder="Escribe tu dirección completa..."
+              value={compra.direccion}
+              onChange={(e) =>
+                setCompra({
+                  ...compra,
+                  direccion: e.target.value,
+                })
+              }
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              La dirección donde se entregará el pedido.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg p-4">
+        <h3 className="font-medium text-gray-900 mb-3">
+          ¿Quieres aclararnos algo?
+        </h3>
         <Textarea
-          placeholder="Instrucciones especiales (opcional)"
-          className="border-gray-200 focus:border-blue-500 resize-none h-20"
+          className="w-full min-h-[80px] text-xs"
+          placeholder="Ej: Toque el timbre varias veces..."
           value={compra.descripcion}
           onChange={(e) =>
             setCompra({
@@ -159,16 +150,10 @@ export default function Details({ compra, setCompra }: Props) {
             })
           }
         />
-
-        {/* Warning */}
-        <Alert className="border-orange-200 bg-orange-50">
-          <AlertCircle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800 text-xs">
-            Algunas características específicas en su pedido que no pudo ser
-            reflejada...
-          </AlertDescription>
-        </Alert>
-      </CardContent>
-    </Card>
+        <p className="text-xs text-gray-500 mt-1">
+          Información adicional sobre tu pedido o dirección.
+        </p>
+      </div>
+    </div>
   );
 }

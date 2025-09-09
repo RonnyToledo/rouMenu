@@ -52,22 +52,28 @@ export default function CodeDiscount({ compra, setCompra }: Props) {
 
   return (
     <>
-      <Card>
+      <Card className="gap-2 py-4">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Tag className="w-5 h-5" />
-            Código de Descuento
+            Cupón de Descuento
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           {!appliedCoupon ? (
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 p-1 border rounded-xl">
               <Input
-                placeholder="Ingresa tu código"
+                placeholder="Tienes algun cupón?"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
               />
-              <Button onClick={applyCoupon} variant="outline">
+              <Button
+                onClick={applyCoupon}
+                variant="outline"
+                className=" rounded-full"
+                disabled={!couponCode}
+              >
                 Aplicar
               </Button>
             </div>

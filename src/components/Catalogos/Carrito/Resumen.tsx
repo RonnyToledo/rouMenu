@@ -23,7 +23,17 @@ export default function Resumen({
 
   const getTotalPrice = () => {
     return store.products.reduce(
-      (total, item) => total + (item.price || 0) * item.Cant,
+      (total, item) =>
+        total +
+        ((item.price || 0) + (item.embalaje == 0 ? 1 : item.embalaje)) *
+          item.Cant +
+        (item?.agregados.reduce(
+          (sum, agg) =>
+            (sum =
+              sum + (agg.price + (item.embalaje == 0 ? 1 : item.embalaje))) *
+            agg.cant,
+          0
+        ) || 0),
       0
     );
   };
@@ -35,7 +45,20 @@ export default function Resumen({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span>Subtotal ({compra.pedido.length} productos)</span>
+            <span>
+              Subtotal (
+              {store.products.reduce(
+                (total, item) =>
+                  total +
+                  item.Cant +
+                  (item?.agregados.reduce(
+                    (sum, agg) => (sum = sum + agg.cant),
+                    0
+                  ) || 0),
+                0
+              )}{" "}
+              productos)
+            </span>
             <span>${getTotalPrice().toFixed(2)}</span>
           </div>
 

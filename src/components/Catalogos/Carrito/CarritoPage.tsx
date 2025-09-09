@@ -1,8 +1,7 @@
 "use client";
 import React, { useContext, useState, useEffect } from "react";
 import { MyContext } from "@/context/MyContext";
-import { Product, Sends } from "@/context/InitialStatus";
-
+import { Product } from "@/context/InitialStatus";
 import { toast } from "sonner";
 import "react-phone-input-2/lib/style.css";
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -15,17 +14,20 @@ import CartItems from "./CartItems";
 import { v4 as uuidv4 } from "uuid";
 import { Rating } from "../About/RatingModal";
 import { smartRound } from "@/functions/precios";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import CartClean from "./CartClean";
 
 export interface CompraInterface {
   envio: string;
   pago: string;
   pedido: Product[];
   total: number;
-  provincia: string;
+  lugar: string;
   phonenumber: string;
-  municipio: string;
   shipping: number;
   descripcion: string;
+  direccion: string;
   code: { discount: number; name: string };
   people: string;
 }
@@ -44,16 +46,17 @@ const initialState = {
   pago: "cash",
   pedido: [],
   total: 0,
-  provincia: "",
+  lugar: "Local",
   phonenumber: "",
   descripcion: "",
-  municipio: "",
+  direccion: "",
   shipping: 0,
   code: { discount: 0, name: "" },
   people: "",
 };
 export default function CarritoPage() {
   const newUID = uuidv4();
+  const [currentStep, setCurrentStep] = useState(1);
   const { store, dispatchStore } = useContext(MyContext);
   const router = useRouter();
   const [count, setCount] = useState<number>(3);
@@ -61,16 +64,24 @@ export default function CarritoPage() {
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   const [compra, setCompra] = useState<CompraInterface>(initialState);
+  console.log(compra);
   useEffect(() => {
     setCompra((prevCompra) => ({
       ...prevCompra,
-      provincia:
-        prevCompra.provincia == ""
-          ? (store.envios || ([] as Sends[]))[0]?.nombre
-          : prevCompra.provincia,
+      lugar: "",
       pedido: store.products.filter((obj) => obj.Cant > 0),
       total: store.products.reduce(
-        (total, item) => total + (item.price || 0) * item.Cant,
+        (total, item) =>
+          total +
+          ((item.price || 0) + (item.embalaje == 0 ? 1 : item.embalaje)) *
+            item.Cant +
+          (item?.agregados.reduce(
+            (sum, agg) =>
+              (sum =
+                sum + (agg.price + (item.embalaje == 0 ? 1 : item.embalaje))) *
+              agg.cant,
+            0
+          ) || 0),
         0
       ),
     }));
@@ -118,7 +129,7 @@ export default function CarritoPage() {
     }
     if (
       compra.envio === "pickup" ||
-      (compra.envio === "delivery" && compra.provincia && compra.municipio)
+      (compra.envio === "delivery" && compra.lugar)
     ) {
       if (store.sitioweb) {
         // Inicializa Analytics
@@ -164,23 +175,31 @@ export default function CarritoPage() {
     // Abrir WhatsApp
 
     let mensaje = `Hola, Quiero realizar este pedido:\n- Metodo de envio: ${
-      compra.envio === "pickup" ? "Recoger en Tienda" : "Envío a Domicilio"
-    }\n- Tipo de Pago: ${
-      compra.pago === "cash" ? "Efectivo" : "Transferencia"
-    }\n${
-      compra.envio !== "pickup"
-        ? `- Provincia: ${compra.provincia}\n- Municipio: ${compra.municipio}\n`
-        : ""
-    }- ID de Venta: ${newUID}\n\n- Productos:\n`;
+      compra.lugar
+    }\n- ID de Venta: ${newUID}\n
+    - Direccion: ${compra.direccion}\n
+    - Extra: ${compra.descripcion}\n
+    \n- Productos:\n`;
 
     compra.pedido.forEach((producto, index) => {
       if (producto.Cant > 0) {
         mensaje += `   ${index + 1}. ${producto.title} x${producto.Cant}: ${(
           producto.Cant *
-          producto.price *
-          (1 / store.moneda_default.valor)
-        ).toFixed(2)}\n`;
+          (producto.price + producto.embalaje)
+        ).toFixed(
+          2
+        )} - ${producto.embalaje > 0 && `Embalaje:${producto.embalaje}`}\n`;
       }
+      producto.agregados
+        .filter((o) => o.cant > 0)
+        .map((obj) => {
+          mensaje += `   ${index + 1}. ${producto.title}-${obj.name} x${obj.cant}: ${(
+            obj.cant *
+            (obj.price + producto.embalaje)
+          ).toFixed(
+            2
+          )} - ${producto.embalaje > 0 && `Embalaje:${producto.embalaje}`}\n`;
+        });
     });
     const discountTotal =
       smartRound(compra.total) * (1 - compra.code.discount / 100);
@@ -200,25 +219,77 @@ export default function CarritoPage() {
     window.open(urlWhatsApp, "_blank");
   };
 
-  return (
+  const StepIndicator = () => (
+    <div className="flex items-center justify-center mb-2">
+      <div className="flex items-center rounded-full p-1">
+        <div className="flex items-center">
+          <Button
+            className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 ${
+              currentStep >= 1
+                ? "bg-gray-800 text-white shadow-sm"
+                : "bg-transparent text-gray-400"
+            }`}
+            onClick={() => setCurrentStep(1)}
+          >
+            1
+          </Button>
+          <div
+            className={`w-20 h-0.5 mx-3 transition-colors duration-300 ${currentStep >= 2 ? "bg-gray-800" : "bg-gray-200"}`}
+          ></div>
+          <Button
+            className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 ${
+              currentStep >= 2
+                ? "bg-gray-800 text-white shadow-sm"
+                : "bg-transparent text-gray-400"
+            }`}
+          >
+            2
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return compra.pedido.length > 0 ? (
     <div>
-      <main className="p-4 space-y-4">
+      <div className=" px-4 py-4">
+        <StepIndicator />
+
         {/* Items de la Compra*/}
-        <CartItems count={count} />
-
-        {/* Detalles de la compra*/}
-        <Details compra={compra} setCompra={setCompra} />
-        {/* Codigo Descuento */}
-        {store.marketing && store.codeDiscount && (
-          <CodeDiscount compra={compra} setCompra={setCompra} />
+        {currentStep === 1 && (
+          <>
+            <div className="min-h-screen space-y-2">
+              <CartItems />
+              {store.marketing && store.codeDiscount && (
+                <CodeDiscount compra={compra} setCompra={setCompra} />
+              )}
+            </div>
+            <div className="sticky bottom-0 flex justify-between items-center p-2 ">
+              <Button
+                onClick={() => setCurrentStep(2)}
+                className="bg-gray-800 w-full hover:bg-gray-900 text-white py-4 rounded-full font-medium transition-all duration-200"
+              >
+                {compra.pedido.length === 0
+                  ? "Explorar Productos"
+                  : "Continuar"}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </>
         )}
-        {/* Order Summary */}
-        <Resumen
-          compra={compra}
-          handleOrderClick={handleOrderClick}
-          downloading={downloading}
-        />
 
+        {currentStep === 2 && (
+          <>
+            {/* Detalles de la compra*/}
+            <Details compra={compra} setCompra={setCompra} />
+            {/* Order Summary */}
+            <Resumen
+              compra={compra}
+              handleOrderClick={handleOrderClick}
+              downloading={downloading}
+            />
+          </>
+        )}
         <Rating
           isOpen={showRatingModal}
           onClose={() => {
@@ -230,7 +301,7 @@ export default function CarritoPage() {
           userName="User"
           setIsModalOpen={setShowRatingModal}
         />
-      </main>
+      </div>
       <style jsx>{`
         @keyframes slideInUp {
           0% {
@@ -259,6 +330,8 @@ export default function CarritoPage() {
         }
       `}</style>
     </div>
+  ) : (
+    <CartClean count={count} />
   );
 }
 const getLocalISOString = () => {

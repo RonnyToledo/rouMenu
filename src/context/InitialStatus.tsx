@@ -40,14 +40,11 @@ export interface Current {
   valor: number;
   moneda: string;
 }
-export interface Municipios {
-  name: string;
-  price: number;
-}
 export interface Sends {
-  nombre: string;
-  municipios: Municipios[];
+  lugar: string;
+  precio: number;
 }
+
 export interface UbicacionInterface {
   latitude: number;
   longitude: number;

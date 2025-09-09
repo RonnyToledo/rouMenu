@@ -57,7 +57,7 @@ export default function HeroNew({}) {
               <MdDeliveryDining className="size-5" />
               <div>
                 <h5 className="text-gray-600 text-[10px]">Entrega</h5>
-                <h2 className="text-gray-800 text-base">Delivery</h2>
+                <h2 className="text-gray-800 text-sm">Delivery</h2>
               </div>
             </div>
           )}
@@ -66,7 +66,7 @@ export default function HeroNew({}) {
               <FaShop className="size-5" />
               <div>
                 <h5 className="text-gray-600 text-[10px]">Entrega</h5>
-                <h2 className="text-gray-800 text-base">Tienda</h2>
+                <h2 className="text-gray-800 text-sm">Tienda</h2>
               </div>
             </div>
           )}

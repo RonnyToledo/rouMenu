@@ -36,7 +36,7 @@ export default function Category({ categoria }: Props) {
   return (
     <div>
       {/* Hero Section */}
-      <section className=" border border-[var(--border-gold)]">
+      <section className=" ">
         <Image
           width={250}
           height={250}

@@ -23,7 +23,6 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     reducerStore,
     storeSSD || initialState
   );
-  console.log(storeSSD);
 
   return (
     <MyContext.Provider value={{ store, dispatchStore }}>

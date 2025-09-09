@@ -57,7 +57,10 @@ export default function Products() {
                       {categoria.name}
                     </Link>
                   </div>
-                  <Link href={`/t/${store?.sitioweb}/category/${categoria.id}`}>
+                  <Link
+                    href={`/t/${store?.sitioweb}/category/${categoria.id}`}
+                    className="flex items-center justify-center"
+                  >
                     <Image
                       width={250}
                       height={250}
@@ -66,9 +69,7 @@ export default function Products() {
                         categoria.image || store?.urlPoster || logoApp
                       }
                       alt={categoria.name || `CAtegoria ${index}`}
-                      className={`${
-                        store?.edit?.square ? "aspect-square" : "w-full h-48"
-                      } object-cover`}
+                      className={`aspect-square object-cover rounded-lg`}
                       src={categoria.image || store?.urlPoster || logoApp}
                     />
                   </Link>

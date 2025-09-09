@@ -7,9 +7,8 @@ import { smartRound } from "@/functions/precios";
 import { logoApp } from "@/lib/image";
 import { Button } from "@/components/ui/button";
 import { FaChevronUp, FaChevronDown, FaRegTrashCan } from "react-icons/fa6";
-import CartClean from "./CartClean";
 import { motion, AnimatePresence } from "framer-motion";
-export default function CartItems({ count }: { count: number }) {
+export default function CartItems() {
   const { store, dispatchStore } = useContext(MyContext);
 
   const getProducts = () => {
@@ -24,100 +23,171 @@ export default function CartItems({ count }: { count: number }) {
   };
 
   return (
-    <div id="cart-items" className="px-2 grid ">
-      {getProducts().length > 0 ? (
-        getProducts().map((item, index) => (
-          <div
-            key={index}
-            className="flex items-center  border-b border-gray-200 p-2"
-          >
-            <Image
-              width={100}
-              height={100}
-              alt={item.title || "Producto"}
-              className="w-24 h-24 object-cover rounded-lg border-2 border-[var(--border-gold)]"
-              src={item.image || store.urlPoster || logoApp}
+    <div id="cart-items" className="px-2 grid mb-4">
+      {getProducts().map((item, index) => (
+        <div key={index}>
+          {" "}
+          {item.Cant > 0 && (
+            <ItemCard
+              title={item.title || "Producto"}
+              imagen={item.image || store.urlPoster || logoApp}
+              price={smartRound(item.price || 0)}
+              moneda={store.moneda_default?.moneda}
+              id={item.id}
+              embalaje={item.embalaje}
+              camtidad={item.Cant}
+              handleToCart={() =>
+                handleToCart({
+                  ...item,
+                  Cant: (item.Cant || 0) + 1,
+                })
+              }
+              handleToCartMinus={() =>
+                handleToCart({
+                  ...item,
+                  Cant: (item.Cant || 0) + 1,
+                })
+              }
             />
-            <div className="ml-4 flex-grow">
-              <h4 className="font-bold font-cinzel line-clamp-1 text-[var(--text-dark)] text-lg">
-                {item.title}
-              </h4>
-              <p className="font-bold text-lg text-[var(--text-dark)] mt-1">
-                ${smartRound(item.price || 0)} {store.moneda_default?.moneda}
-              </p>
-            </div>
-            <div className="flex flex-col items-center ">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
+          )}
+          {item.agregados
+            .filter((agg) => agg.cant > 0)
+            .map((agg) => (
+              <ItemCard
+                key={index}
+                title={`${item.title}-${agg.name}` || "Producto"}
+                imagen={item.image || store.urlPoster || logoApp}
+                price={smartRound(agg.price || 0)}
+                moneda={store.moneda_default?.moneda}
+                id={item.id}
+                embalaje={item.embalaje}
+                camtidad={agg.cant}
+                handleToCart={() =>
                   handleToCart({
                     ...item,
-                    Cant: (item.Cant || 0) + 1,
+                    agregados: item.agregados.map((obj) =>
+                      obj.id === agg.id ? { ...obj, cant: obj.cant + 1 } : obj
+                    ),
                   })
                 }
-                className="size-8 p-0 hover:bg-green-50 hover:border-green-300 hover:scale-110 transition-all duration-200"
-              >
-                <FaChevronUp className="w-4 h-4" />
-              </Button>
-
-              <div className="relative overflow-hidden size-8 flex items-center justify-center">
-                <span
-                  key={`${item.id}-${item.Cant}`}
-                  className="font-bold text-lg text-center animate-in slide-in-from-bottom-5 duration-500 ease-out"
-                  style={{
-                    animation:
-                      "slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                  }}
-                >
-                  {item.Cant}
-                </span>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={item.Cant == 0}
-                onClick={() =>
+                handleToCartMinus={() =>
                   handleToCart({
                     ...item,
-                    Cant: (item.Cant || 0) - 1,
+                    agregados: item.agregados.map((obj) =>
+                      obj.id === agg.id ? { ...obj, cant: obj.cant - 1 } : obj
+                    ),
                   })
                 }
-                className="size-8 p-0 hover:bg-red-50 hover:border-red-300 hover:scale-110 transition-all duration-200"
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {item.Cant === 1 ? (
-                    <motion.span
-                      key="trash"
-                      initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
-                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="inline-flex"
-                    >
-                      <FaRegTrashCan className="text-red-700" />
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="chevron"
-                      initial={{ opacity: 0, scale: 0.8, y: -8 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, y: 8 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="inline-flex"
-                    >
-                      <FaChevronDown className="w-4 h-4" />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </Button>
-            </div>
+              />
+            ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface ItemCardInterface {
+  title: string;
+  imagen: string;
+  price: number;
+  moneda: string;
+  id: number;
+  embalaje: number;
+  camtidad: number;
+  handleToCart: () => void;
+  handleToCartMinus: () => void;
+}
+
+function ItemCard({
+  title,
+  imagen,
+  price,
+  moneda,
+  id,
+  embalaje,
+
+  camtidad,
+  handleToCart,
+  handleToCartMinus,
+}: ItemCardInterface) {
+  return (
+    <div className="shadow-xs space-y-1">
+      <div className="flex items-center  border-b border-b-gray-200 p-2">
+        <Image
+          width={100}
+          height={100}
+          alt={title}
+          className="w-16 h-16 object-cover rounded-lg border-2 border-[var(--border-gold)]"
+          src={imagen}
+        />
+        <div className="ml-4 flex-grow">
+          <h4 className="font-bold font-cinzel line-clamp-1 text-[var(--text-dark)] text-lg">
+            {title}
+          </h4>
+          <p className=" text-sm text-gray-700 mt-1">
+            ${price} {moneda}
+          </p>
+        </div>
+        <div className="flex flex-col items-center ">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToCart}
+            className="size-6 p-0 hover:bg-green-50 hover:border-green-300 hover:scale-110 transition-all duration-200"
+          >
+            <FaChevronUp className="w-4 h-4" />
+          </Button>
+
+          <div className="relative overflow-hidden size-6 flex items-center justify-center">
+            <span
+              key={`${id}-${camtidad}`}
+              className="font-bold text-lg text-center animate-in slide-in-from-bottom-5 duration-500 ease-out"
+              style={{
+                animation: "slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              }}
+            >
+              {camtidad}
+            </span>
           </div>
-        ))
-      ) : (
-        <CartClean count={count} />
-      )}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            disabled={camtidad == 0}
+            onClick={handleToCartMinus}
+            className="size-6 p-0 hover:bg-red-50 hover:border-red-300 hover:scale-110 transition-all duration-200"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {camtidad === 1 ? (
+                <motion.span
+                  key="trash"
+                  initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="inline-flex"
+                >
+                  <FaRegTrashCan className="text-red-700" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="chevron"
+                  initial={{ opacity: 0, scale: 0.8, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, y: 8 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
+                  className="inline-flex"
+                >
+                  <FaChevronDown className="w-4 h-4" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Button>
+        </div>
+      </div>
+      <div className="text-gray-700 text-xs">
+        <p>{embalaje > 0 && `Embalaje P/U: ${embalaje}`}</p>
+      </div>
     </div>
   );
 }

@@ -35,10 +35,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
         envios:
           state.envios?.map((env) => ({
             ...env,
-            municipios: env.municipios.map((m) => ({
-              ...m,
-              price: redondearAMultiploDe5(m.price / newDefault.valor),
-            })),
+            price: redondearAMultiploDe5(env.price / newDefault.valor),
           })) ?? [],
 
         moneda: (state?.moneda || []).map((obj) => {
