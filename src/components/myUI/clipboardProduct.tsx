@@ -59,7 +59,7 @@ export default function ClipboardProduct({
           "text/plain": new Blob([text], { type: "text/plain" }),
         });
 
-        toast("Informacion Copiada");
+        toast.success("Informacion Copiada");
 
         await navigator.clipboard.write([item]);
       } else {

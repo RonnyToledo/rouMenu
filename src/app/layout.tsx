@@ -95,7 +95,7 @@ export default async function RootLayout({
               <GeneralProvider storeSSD={newData}>
                 <Header>
                   {children}
-                  <Toaster />
+                  <Toaster richColors position="top-center" />
                 </Header>
               </GeneralProvider>
             </div>

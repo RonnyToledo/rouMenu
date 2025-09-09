@@ -8,7 +8,7 @@ import { CompraInterface } from "./CarritoPage";
 import { Button } from "@/components/ui/button";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { smartRound } from "@/functions/precios";
-
+import { GrCurrency } from "react-icons/gr";
 type Props = {
   compra: CompraInterface;
   handleOrderClick: () => void;
@@ -25,69 +25,74 @@ export default function Resumen({
     return store.products.reduce(
       (total, item) =>
         total +
-        ((item.price || 0) + (item.embalaje == 0 ? 1 : item.embalaje)) *
-          item.Cant +
+        ((item.price || 0) + item.embalaje) * item.Cant +
         (item?.agregados.reduce(
-          (sum, agg) =>
-            (sum =
-              sum + (agg.price + (item.embalaje == 0 ? 1 : item.embalaje))) *
-            agg.cant,
+          (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
           0
         ) || 0),
       0
     );
   };
   return (
-    <Card>
-      <CardHeader>
+    <Card className="p-2 gap-2">
+      <CardHeader className="p-2 gap-0">
         <CardTitle className="text-lg">Resumen del Pedido</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-2 px-4">
         <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>
-              Subtotal (
-              {store.products.reduce(
-                (total, item) =>
-                  total +
-                  item.Cant +
-                  (item?.agregados.reduce(
-                    (sum, agg) => (sum = sum + agg.cant),
-                    0
-                  ) || 0),
-                0
-              )}{" "}
-              productos)
-            </span>
-            <span>${getTotalPrice().toFixed(2)}</span>
-          </div>
+          <div className="text-sm space-y-1">
+            <div className="flex justify-between text-gray-700">
+              <span>
+                Subtotal (
+                {store.products.reduce(
+                  (total, item) =>
+                    total +
+                    item.Cant +
+                    (item?.agregados.reduce(
+                      (sum, agg) => (sum = sum + agg.cant),
+                      0
+                    ) || 0),
+                  0
+                )}{" "}
+                productos)
+              </span>
+              <span>${getTotalPrice().toFixed(2)}</span>
+            </div>
 
-          {/*savings > 0 && (
+            {/*savings > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Ahorros</span>
                       <span>-${savings.toFixed(2)}</span>
                     </div>
                   )*/}
 
-          {compra.code.discount > 0 && (
-            <div className="flex justify-between text-green-600">
-              <span>Descuento ({compra.code.discount}%)</span>
+            {compra.code.discount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span>Descuento ({compra.code.discount}%)</span>
+                <span>
+                  -${((compra.total * compra.code.discount) / 100).toFixed(2)}
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-between text-gray-700">
+              <div className="flex items-center gap-1">
+                <Truck className="w-4 h-4" />
+                <span>Envío</span>
+              </div>
               <span>
-                -${((compra.total * compra.code.discount) / 100).toFixed(2)}
+                {compra.shipping === 0
+                  ? "GRATIS"
+                  : `$${smartRound(compra.shipping).toFixed(2)}`}
               </span>
             </div>
-          )}
-
-          <div className="flex justify-between">
-            <div className="flex items-center gap-1">
-              <Truck className="w-4 h-4" />
-              <span>Envío</span>
+            <div className="flex justify-between text-gray-700">
+              <div className="flex items-center gap-1">
+                <GrCurrency className="w-4 h-4" />
+                <span>Moneda</span>
+              </div>
+              <span>{compra.moneda}</span>
             </div>
-            <span>
-              {compra.shipping === 0
-                ? "GRATIS"
-                : `$${smartRound(compra.shipping).toFixed(2)}`}
-            </span>
           </div>
         </div>
 

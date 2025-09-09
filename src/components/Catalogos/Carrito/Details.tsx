@@ -75,7 +75,7 @@ export default function Details({ compra, setCompra }: Props) {
             </Label>
             <div className="space-y-2">
               {[
-                ...(store.local
+                ...(store.local || store.envios?.length == 0
                   ? [{ lugar: "Local", precio: 0 } as Sends]
                   : []),
                 ...(store.envios ?? []),

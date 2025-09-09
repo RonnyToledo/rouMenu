@@ -114,54 +114,56 @@ export const Rating: FC<RatingModalProps> = ({
               </div>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               className="text-blue-400"
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "Publicando..." : "Publicar"}
+              {loading ? "Enviando..." : "Enviar"}
             </Button>
           </div>
         </DialogHeader>
-        <Input
-          placeholder="Nombre"
-          className="bg-transparent border-gray-700"
-          value={rating.nombre}
-          onChange={(e) =>
-            setRating({ ...rating, nombre: e.currentTarget.value })
-          }
-        />
+        <div className="space-y-2">
+          <Input
+            placeholder="Nombre"
+            className="bg-transparent border-gray-300 text-sm"
+            value={rating.nombre}
+            onChange={(e) =>
+              setRating({ ...rating, nombre: e.currentTarget.value })
+            }
+          />
 
-        <div className="flex gap-1 my-4">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onClick={() => setRating({ ...rating, selectedRating: star })}
-              className="hover:scale-110 transition-transform"
-              type="button"
-            >
-              <Star
-                className={`w-12 h-12 ${
-                  star <= rating.selectedRating
-                    ? "fill-blue-600 text-blue-600"
-                    : "text-gray-400"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
+          <div className="flex gap-1 my-4 justify-center items-center">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating({ ...rating, selectedRating: star })}
+                className="hover:scale-110 transition-transform "
+                type="button"
+              >
+                <Star
+                  className={`w-8 h-8 ${
+                    star <= rating.selectedRating
+                      ? "fill-blue-600 text-blue-600"
+                      : "text-gray-400"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
 
-        <Textarea
-          placeholder="Describe tu experiencia (opcional)"
-          className="bg-transparent border-gray-700"
-          value={rating.description}
-          onChange={(e) =>
-            setRating({ ...rating, description: e.currentTarget.value })
-          }
-          maxLength={500}
-        />
-        <div className="text-right text-xs text-gray-400">
-          {rating.description.length}/500
+          <Textarea
+            placeholder="Describe tu experiencia (opcional)"
+            className="bg-transparent border-gray-300 text-xs"
+            value={rating.description}
+            onChange={(e) =>
+              setRating({ ...rating, description: e.currentTarget.value })
+            }
+            maxLength={500}
+          />
+          <div className="text-right text-xs text-gray-400">
+            {rating.description.length}/500
+          </div>
         </div>
       </DialogContent>
     </Dialog>

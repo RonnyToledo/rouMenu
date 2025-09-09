@@ -19,7 +19,6 @@ import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
 
 export interface CompraInterface {
-  envio: string;
   pago: string;
   pedido: Product[];
   total: number;
@@ -29,6 +28,8 @@ export interface CompraInterface {
   descripcion: string;
   direccion: string;
   code: { discount: number; name: string };
+
+  moneda: string;
   people: string;
 }
 export interface UploadCompraInterface {
@@ -42,7 +43,6 @@ export interface UploadCompraInterface {
   phonenumber: string;
 }
 const initialState = {
-  envio: "pickup",
   pago: "cash",
   pedido: [],
   total: 0,
@@ -53,6 +53,7 @@ const initialState = {
   shipping: 0,
   code: { discount: 0, name: "" },
   people: "",
+  moneda: "",
 };
 export default function CarritoPage() {
   const newUID = uuidv4();
@@ -64,28 +65,28 @@ export default function CarritoPage() {
   const [showRatingModal, setShowRatingModal] = useState(false);
 
   const [compra, setCompra] = useState<CompraInterface>(initialState);
-  console.log(compra);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
   useEffect(() => {
     setCompra((prevCompra) => ({
       ...prevCompra,
-      lugar: "",
+      moneda: store.moneda_default.moneda,
       pedido: store.products.filter((obj) => obj.Cant > 0),
       total: store.products.reduce(
         (total, item) =>
           total +
-          ((item.price || 0) + (item.embalaje == 0 ? 1 : item.embalaje)) *
-            item.Cant +
+          ((item.price || 0) + item.embalaje) * item.Cant +
           (item?.agregados.reduce(
-            (sum, agg) =>
-              (sum =
-                sum + (agg.price + (item.embalaje == 0 ? 1 : item.embalaje))) *
-              agg.cant,
+            (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
             0
           ) || 0),
         0
       ),
     }));
-  }, [store.envios, store.products]);
+  }, [store.envios, store.products, store.moneda_default]);
 
   //Detectar si no  hay productos en el carrito
   useEffect(() => {
@@ -109,32 +110,24 @@ export default function CarritoPage() {
   }, [compra.pedido.length, store.sitioweb, router]);
 
   const handleOrderClick = async () => {
+    if (compra.people === "") {
+      toast.error("Tiene que introducir un encargado de su compra");
+      return;
+    }
     if (isValidPhoneNumber(`+${compra.phonenumber}`) === false) {
-      toast("Error", {
-        description: "El numero proporcionado es incorrecto",
-      });
+      toast.error("El numero proporcionado es incorrecto");
       return;
     }
     if (compra.total === 0) {
-      toast("Error", {
-        description: "No hay productos en su carrito",
-      });
+      toast.error("No hay productos en su carrito");
       return;
     }
-    if (compra.people === "") {
-      toast("Error", {
-        description: "Tiene que introducir un encargado de su compra",
-      });
-      return;
-    }
-    if (
-      compra.envio === "pickup" ||
-      (compra.envio === "delivery" && compra.lugar)
-    ) {
-      if (store.sitioweb) {
-        // Inicializa Analytics
+
+    if (store.sitioweb) {
+      // Inicializa Analytics
+      const uploadFlow = async () => {
+        setDownloading(true);
         try {
-          setDownloading(true);
           await UploadPedido({
             UUID_Shop: store.UUID,
             events: "compra",
@@ -146,7 +139,7 @@ export default function CarritoPage() {
             phonenumber: compra.phonenumber,
           });
 
-          // Pausa para calificar la tienda
+          // Pausa para calificar la tienda (lógica después de subir)
           const saved = window.localStorage.getItem(
             `${store.sitioweb}-userRating`
           );
@@ -155,18 +148,22 @@ export default function CarritoPage() {
           } else {
             setShowRatingModal(true);
           }
-          // Muestra una alerta con la calificación o realiza alguna acción
-        } catch (error) {
-          toast(`Error`, {
-            description: `No ha declarado la ubicación de su domicilio ${error}`,
-          });
+
+          // Devuelvo un objeto con info útil para el mensaje de éxito
+          return { name: compra.people || "Pedido" };
+        } catch (err) {
+          // Vuelvo a lanzar para que toast.promise muestre el error
+          throw err;
         } finally {
           setDownloading(false);
         }
-      }
-    } else {
-      toast(`Error `, {
-        description: "Ha ocurrido un error inesperado",
+      };
+
+      toast.promise(uploadFlow(), {
+        loading: "Enviando pedido...",
+        success: (data) => `${data.name} — pedido enviado correctamente.`,
+        error: (err) =>
+          `No ha declarado la ubicación de su domicilio. ${err?.message || err}`,
       });
     }
   };
@@ -205,9 +202,10 @@ export default function CarritoPage() {
       smartRound(compra.total) * (1 - compra.code.discount / 100);
 
     mensaje += `- Total de la orden: ${discountTotal} ${store.moneda_default.moneda}\n`;
-    if (compra.envio !== "pickup") {
+    if (compra.lugar !== "Local") {
       mensaje += `- Domicilio: $${compra.shipping}`;
     }
+    mensaje += `- Moneda: $${compra.moneda}`;
     if (compra.code.name) {
       mensaje += `- Codigo de Descuento: ${compra.code.name}\n`;
     }
@@ -220,7 +218,7 @@ export default function CarritoPage() {
   };
 
   const StepIndicator = () => (
-    <div className="flex items-center justify-center mb-2">
+    <div className="flex items-center justify-center mb-2 sticky top-12 backdrop-blur-lg z-10">
       <div className="flex items-center rounded-full p-1">
         <div className="flex items-center">
           <Button
@@ -242,6 +240,7 @@ export default function CarritoPage() {
                 ? "bg-gray-800 text-white shadow-sm"
                 : "bg-transparent text-gray-400"
             }`}
+            onClick={() => setCurrentStep(2)}
           >
             2
           </Button>
@@ -252,7 +251,7 @@ export default function CarritoPage() {
 
   return compra.pedido.length > 0 ? (
     <div>
-      <div className=" px-4 py-4">
+      <div className=" px-4">
         <StepIndicator />
 
         {/* Items de la Compra*/}
@@ -267,7 +266,7 @@ export default function CarritoPage() {
             <div className="sticky bottom-0 flex justify-between items-center p-2 ">
               <Button
                 onClick={() => setCurrentStep(2)}
-                className="bg-gray-800 w-full hover:bg-gray-900 text-white py-4 rounded-full font-medium transition-all duration-200"
+                className="py-5 rounded-full w-full"
               >
                 {compra.pedido.length === 0
                   ? "Explorar Productos"

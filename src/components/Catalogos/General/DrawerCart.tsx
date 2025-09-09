@@ -55,13 +55,9 @@ export default function DrawerCart() {
     return store.products.reduce(
       (total, item) =>
         total +
-        ((item.price || 0) + (item.embalaje == 0 ? 1 : item.embalaje)) *
-          item.Cant +
+        ((item.price || 0) + item.embalaje) * item.Cant +
         (item?.agregados.reduce(
-          (sum, agg) =>
-            (sum =
-              sum + (agg.price + (item.embalaje == 0 ? 1 : item.embalaje))) *
-            agg.cant,
+          (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
           0
         ) || 0),
       0
@@ -71,13 +67,9 @@ export default function DrawerCart() {
     const value = store.products.reduce(
       (total, item) =>
         total +
-        ((item.price || 0) + (item.embalaje == 0 ? 1 : item.embalaje)) *
-          item.Cant +
+        ((item.price || 0) + item.embalaje) * item.Cant +
         (item?.agregados.reduce(
-          (sum, agg) =>
-            (sum =
-              sum + (agg.price + (item.embalaje == 0 ? 1 : item.embalaje))) *
-            agg.cant,
+          (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
           0
         ) || 0),
       0
@@ -322,7 +314,7 @@ function ListCard({
               {title}
             </p>
             <p className="text-xs text-gray-500 text-center">
-              ${price} ×{cantidad} + {embalaje > 0 ? embalaje : ""}
+              ${price} ×{cantidad} {embalaje > 0 ? `+ ${embalaje}` : ""}
             </p>
           </div>
         </Button>
