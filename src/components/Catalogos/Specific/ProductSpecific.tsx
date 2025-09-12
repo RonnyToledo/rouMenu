@@ -15,7 +15,16 @@ import RatingSection from "./RatingSection";
 import { smartRound } from "@/functions/precios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Star, Minus, Plus, ShoppingCart, Check } from "lucide-react";
+import {
+  Star,
+  Minus,
+  Plus,
+  ShoppingCart,
+  Check,
+  Truck,
+  Shield,
+  RotateCcw,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ExpandableText from "./truncateText";
 import Link from "next/link";
@@ -172,14 +181,28 @@ export default function Product({ id }: { id: string }) {
           {/* Miniaturas */}
           <div className="grid grid-cols-3 gap-2">
             {product?.imagesecondary.map((image, index) => (
-              <Image
+              <Button
                 key={index}
-                width={100}
-                height={100}
-                src={image || store.urlPoster || logoApp}
-                alt={`${product?.title} vista ${index + 1}`}
-                className="w-full h-full object-cover rounded-lg"
-              />
+                className="p-0 m-0 aspect-square h-auto"
+                variant={"ghost"}
+                onClick={() =>
+                  setProduct({
+                    ...product,
+                    image,
+                    imagesecondary: product.imagesecondary.map((obj) =>
+                      obj == image ? product.image || store.urlPoster : obj
+                    ),
+                  })
+                }
+              >
+                <Image
+                  width={100}
+                  height={100}
+                  src={image || store.urlPoster || logoApp}
+                  alt={`${product?.title} vista ${index + 1}`}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+              </Button>
             ))}
           </div>
         </AnimatePresence>
@@ -236,49 +259,61 @@ export default function Product({ id }: { id: string }) {
           </div>
           {/* Precio */}
           {product?.venta && (
-            <div className="flex items-center justify-between">
-              <div
-                className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-gray-900`}
-              >
-                <p className="leading-relaxed text-gray-900">
-                  ${smartRound(product?.price || 0)}{" "}
-                  {store.moneda_default.moneda}
-                </p>
-                {(product?.oldPrice || 0) > (product?.price || 0) && (
-                  <p className=" text-gray-500 line-through">
-                    ${product?.oldPrice}
-                  </p>
-                )}
-                {(product?.oldPrice || 0) > (product?.price || 0) && (
-                  <Badge variant="destructive" className="animate-pulse">
-                    {Math.round(
-                      (((product?.oldPrice || 0) - (product?.price || 0)) /
-                        (product?.oldPrice || 0)) *
-                        100
-                    )}
-                    % OFF
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex gap-1">
+            <>
+              <div className="flex items-center justify-between">
                 <div
-                  className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
+                  className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-gray-900`}
                 >
-                  {!product?.agotado ? (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                      <span className="text-sm font-medium">En stock</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-red-600">
-                      <div className="w-2 h-2 bg-red-600 rounded-full" />
-                      <span className="text-sm font-medium">Agotado</span>
-                    </div>
+                  <p className="leading-relaxed text-gray-900">
+                    ${smartRound(product?.price || 0)}{" "}
+                    {store.moneda_default.moneda}
+                  </p>
+                  {(product?.oldPrice || 0) > (product?.price || 0) && (
+                    <p className=" text-gray-500 line-through">
+                      ${product?.oldPrice}
+                    </p>
+                  )}
+                  {(product?.oldPrice || 0) > (product?.price || 0) && (
+                    <Badge variant="destructive" className="animate-pulse">
+                      {Math.round(
+                        (((product?.oldPrice || 0) - (product?.price || 0)) /
+                          (product?.oldPrice || 0)) *
+                          100
+                      )}
+                      % OFF
+                    </Badge>
                   )}
                 </div>
+
+                <div className="flex gap-1">
+                  <div
+                    className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
+                  >
+                    {!product?.agotado ? (
+                      <div className="flex items-center gap-2 text-green-600">
+                        <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                        <span className="text-sm font-medium">En stock</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-red-600">
+                        <div className="w-2 h-2 bg-red-600 rounded-full" />
+                        <span className="text-sm font-medium">Agotado</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+              {/* Tags */}
+              {product.caracteristicas.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {product.caracteristicas.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </>
           )}
           {/* Packaging */}
           {(product?.embalaje || 0) > 0 && (
@@ -458,6 +493,21 @@ export default function Product({ id }: { id: string }) {
                 >
                   Comprar ahora
                 </Button>
+              </div>
+              {/* Features */}
+              <div className="space-y-2 pt-4 border-t">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Truck className="w-4 h-4" />
+                  Envío gratis en pedidos mayores a $50
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="w-4 h-4" />
+                  Garantía de 1 año
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RotateCcw className="w-4 h-4" />
+                  Devoluciones gratuitas en 30 días
+                </div>
               </div>
             </>
           )}
