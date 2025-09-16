@@ -15,16 +15,7 @@ import RatingSection from "./RatingSection";
 import { smartRound } from "@/functions/precios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import {
-  Star,
-  Minus,
-  Plus,
-  ShoppingCart,
-  Check,
-  Truck,
-  Shield,
-  RotateCcw,
-} from "lucide-react";
+import { Star, Minus, Plus, ShoppingCart, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ExpandableText from "./truncateText";
 import Link from "next/link";
@@ -494,8 +485,7 @@ export default function Product({ id }: { id: string }) {
                   Comprar ahora
                 </Button>
               </div>
-              {/* Features */}
-              <div className="space-y-2 pt-4 border-t">
+              {/* Features <div className="space-y-2 pt-4 border-t">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Truck className="w-4 h-4" />
                   Envío gratis en pedidos mayores a $50
@@ -508,7 +498,7 @@ export default function Product({ id }: { id: string }) {
                   <RotateCcw className="w-4 h-4" />
                   Devoluciones gratuitas en 30 días
                 </div>
-              </div>
+              </div> */}
             </>
           )}
           {product?.venta ? (

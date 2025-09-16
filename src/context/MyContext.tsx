@@ -3,6 +3,7 @@
 import React, { createContext, useReducer, ReactNode, Dispatch } from "react";
 import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
 import { AppState, initialState } from "./InitialStatus";
+import SitioRealtime from "@/components/Catalogos/General/RealTime";
 
 interface ContextType {
   store: AppState;
@@ -26,6 +27,7 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
 
   return (
     <MyContext.Provider value={{ store, dispatchStore }}>
+      <SitioRealtime uuid={storeSSD.UUID || ""} />
       {children}
     </MyContext.Provider>
   );
