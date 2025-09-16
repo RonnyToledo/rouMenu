@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/realtime-js";
@@ -13,28 +13,14 @@ interface Props {
 export default function SitioRealtime({ uuid }: Props) {
   const router = useRouter();
 
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "subscribing" | "subscribed" | "error" | "missing-uuid"
-  >("idle");
-  const [statusProducts, setStatusProducts] = useState<
-    "idle" | "loading" | "subscribing" | "subscribed" | "error" | "missing-uuid"
-  >("idle");
-
   const channelRef = useRef<RealtimeChannel | null>(null);
   const channelRefProducts = useRef<RealtimeChannel | null>(null);
   const lastToastAtRef = useRef<number>(0); // para evitar spam de toasts
 
-  console.log(statusProducts);
-  console.log(status);
   useEffect(() => {
     if (!uuid) {
-      setStatus("missing-uuid");
-      setStatusProducts("missing-uuid");
       return;
     }
-
-    setStatus("loading");
-    setStatusProducts("loading");
 
     // --- Sitios ---
     try {
@@ -49,7 +35,7 @@ export default function SitioRealtime({ uuid }: Props) {
           table: "Sitios",
           filter: filterSitios,
         },
-        (payload) => {
+        () => {
           // Mostrar toast con dedupe
           const now = Date.now();
           if (now - lastToastAtRef.current > 3000) {
@@ -64,7 +50,6 @@ export default function SitioRealtime({ uuid }: Props) {
               }
             );
           }
-          console.log("[Sitios realtime]", payload.eventType, payload);
         }
       );
 
@@ -73,12 +58,9 @@ export default function SitioRealtime({ uuid }: Props) {
       // Suscribir y actualizar estado (dependiendo de la versión de @supabase/supabase-js
       // .subscribe() puede aceptar un callback o devolver una promesa; esta forma es genérica)
       channel.subscribe();
-      setStatus("subscribing");
       // Si quieres, podrías inspeccionar channel.state o manejar eventos de suscripción.
-      setStatus("subscribed");
     } catch (err) {
-      console.error("Error al suscribir Sitios", err);
-      setStatus("error");
+      console.error(err);
     }
 
     // --- Products ---
@@ -106,17 +88,13 @@ export default function SitioRealtime({ uuid }: Props) {
               },
             });
           }
-          console.log("[Products realtime]", payload.eventType, payload);
         }
       );
 
       channelRefProducts.current = channelP;
       channelP.subscribe();
-      setStatusProducts("subscribing");
-      setStatusProducts("subscribed");
     } catch (err) {
-      console.error("Error al suscribir Products", err);
-      setStatusProducts("error");
+      console.error(err);
     }
 
     // Cleanup: quitar canales correctamente
@@ -131,7 +109,7 @@ export default function SitioRealtime({ uuid }: Props) {
           channelRefProducts.current = null;
         }
       } catch (err) {
-        console.warn("Error al limpiar canales", err);
+        console.error(err);
       }
     };
   }, [uuid, router]);

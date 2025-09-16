@@ -22,8 +22,8 @@ export default function AboutMePage() {
         {/* Profile Section */}
         <Card className="overflow-hidden p-0">
           <CardContent className="p-0">
-            <div className="md:flex">
-              <div className="md:w-1/3 bg-gradient-to-br from-primary/10 to-accent/10 p-4 flex items-center justify-center">
+            <div className="">
+              <div className=" bg-gradient-to-br from-primary/10 to-accent/10 p-4 flex items-center justify-center">
                 <Image
                   height={200}
                   width={200}
@@ -32,15 +32,17 @@ export default function AboutMePage() {
                   className="w-44 h-44 rounded-full object-cover"
                 />
               </div>
-              <div className="md:w-2/3 p-8 space-y-2">
-                <h2 className="font-heading text-2xl font-bold text-card-foreground ">
-                  Sobre Mí
-                </h2>
+              <div className=" p-8 space-y-2">
                 {store.history && (
-                  <ExpandableText text={store.history || "..."} lines={6} />
+                  <>
+                    <h2 className="font-heading text-2xl font-bold text-card-foreground ">
+                      Sobre Mí
+                    </h2>
+                    <ExpandableText text={store.history || "..."} lines={6} />
+                  </>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1  gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <MapPin className="size-6 text-gray-700" />
                     <span>

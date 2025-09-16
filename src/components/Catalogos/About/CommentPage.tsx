@@ -6,6 +6,19 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { MyContext } from "@/context/MyContext";
 import { ReviewCard } from "./ReviewCard";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+
+const loadingStates = [
+  {
+    text: "Cargando comentarios",
+  },
+  {
+    text: "Seleccionando comentarios",
+  },
+  {
+    text: "Renderizando",
+  },
+];
 
 // --- Tipos ---
 export interface Review {
@@ -108,12 +121,6 @@ export default function CommentsPage() {
         ))}
       </div>
 
-      {loading && (
-        <p className="text-center text-gray-600 mt-8">
-          Cargando comentarios...
-        </p>
-      )}
-
       {!loading && reviews.length === 0 && (
         <p className="text-center text-gray-600 mt-8">
           No se encontraron comentarios que coincidan con tu búsqueda.
@@ -139,6 +146,11 @@ export default function CommentsPage() {
           <ChevronRight />
         </Button>
       </div>
+      <MultiStepLoader
+        loadingStates={loadingStates}
+        loading={loading}
+        duration={500}
+      />
     </div>
   );
 }

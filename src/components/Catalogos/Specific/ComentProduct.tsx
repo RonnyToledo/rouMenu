@@ -5,6 +5,19 @@ import { Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { ReviewCard } from "../About/ReviewCard";
+import { MultiStepLoader } from "@/components/ui/multi-step-loader";
+
+const loadingStates = [
+  {
+    text: "Cargando comentarios",
+  },
+  {
+    text: "Seleccionando comentarios",
+  },
+  {
+    text: "Renderizando",
+  },
+];
 
 // --- Tipos ---
 export interface Review {
@@ -73,6 +86,12 @@ export default function CommentsPage({ id }: { id: string }) {
     setSelectedRating((prev) => (prev === rating ? 0 : rating));
     setPage(1);
   };
+
+  <MultiStepLoader
+    loadingStates={loadingStates}
+    loading={loading}
+    duration={500}
+  />;
 
   return (
     <div className="max-w-xl mx-auto p-6 min-h-screen">

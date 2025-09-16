@@ -105,8 +105,11 @@ export default function ProductGrid({
                   )
                 }
               >
-                {product.Cant > 0 ? (
-                  product.Cant
+                {product.Cant +
+                  product.agregados.reduce((sum, obj) => sum + obj.cant, 0) >
+                0 ? (
+                  product.Cant +
+                  product.agregados.reduce((sum, obj) => sum + obj.cant, 0)
                 ) : (
                   <TbShoppingCartPlus className="size-5" />
                 )}
