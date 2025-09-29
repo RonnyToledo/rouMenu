@@ -33,6 +33,7 @@ export default function Resumen({
       0
     );
   };
+  console.log(compra);
   return (
     <Card className="p-2 gap-2">
       <CardHeader className="p-2 gap-0">
@@ -58,13 +59,6 @@ export default function Resumen({
               </span>
               <span>${getTotalPrice().toFixed(2)}</span>
             </div>
-
-            {/*savings > 0 && (
-                    <div className="flex justify-between text-green-600">
-                      <span>Ahorros</span>
-                      <span>-${savings.toFixed(2)}</span>
-                    </div>
-                  )*/}
 
             {compra.code.discount > 0 && (
               <div className="flex justify-between text-green-600">
@@ -101,7 +95,12 @@ export default function Resumen({
         <div className="flex justify-between text-lg font-semibold">
           <span>Total</span>
           <span>
-            ${(getTotalPrice() + smartRound(compra.shipping)).toFixed(2)}
+            $
+            {(
+              getTotalPrice() +
+              smartRound(compra.shipping) -
+              (compra.total * compra.code.discount) / 100
+            ).toFixed(2)}
           </span>
         </div>
 

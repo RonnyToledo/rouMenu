@@ -14,7 +14,7 @@ import CartItems from "./CartItems";
 import { v4 as uuidv4 } from "uuid";
 import { Rating } from "../About/RatingModal";
 import { smartRound } from "@/functions/precios";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
 
@@ -71,8 +71,20 @@ export default function CarritoPage() {
   }, [currentStep]);
 
   useEffect(() => {
+    const code = store.afiliate
+      ? {
+          discount:
+            store.codeDiscount.find((code) => code.code === store.afiliate)
+              ?.discount || 0,
+          name:
+            store.codeDiscount.find((code) => code.code === store.afiliate)
+              ?.code || "",
+        }
+      : { discount: 0, name: "" };
+
     setCompra((prevCompra) => ({
       ...prevCompra,
+      code,
       moneda: store.moneda_default.moneda,
       pedido: store.products.filter((obj) => obj.Cant > 0),
       total: store.products.reduce(
@@ -86,7 +98,7 @@ export default function CarritoPage() {
         0
       ),
     }));
-  }, [store.envios, store.products, store.moneda_default]);
+  }, [store.envios, store.products, store.moneda_default, store.afiliate]);
 
   //Detectar si no  hay productos en el carrito
   useEffect(() => {
@@ -173,16 +185,16 @@ export default function CarritoPage() {
 
     let mensaje = `Hola, Quiero realizar este pedido:\n- Metodo de envio: ${
       compra.lugar
-    }\n- ID de Venta: ${newUID}\n
-    - Direccion: ${compra.direccion}\n
-    - Extra: ${compra.descripcion}\n
-    \n- Productos:\n`;
+    }\n`;
+    mensaje += `- ID de Venta: ${newUID}\n`;
+    if (compra.direccion) mensaje += `- Direccion: ${compra.direccion}\n`;
+    if (compra.descripcion) mensaje += `- Extra: ${compra.descripcion}\n`;
 
+    mensaje += `\n- Productos:\n`;
     compra.pedido.forEach((producto, index) => {
       if (producto.Cant > 0) {
         mensaje += `   ${index + 1}. ${producto.title} x${producto.Cant}: ${(
-          producto.Cant *
-          (producto.price + producto.embalaje)
+          producto.Cant * producto.price
         ).toFixed(
           2
         )} - ${producto.embalaje > 0 && `Embalaje:${producto.embalaje}`}\n`;
@@ -191,8 +203,7 @@ export default function CarritoPage() {
         .filter((o) => o.cant > 0)
         .map((obj) => {
           mensaje += `   ${index + 1}. ${producto.title}-${obj.name} x${obj.cant}: ${(
-            obj.cant *
-            (obj.price + producto.embalaje)
+            obj.cant * obj.price
           ).toFixed(
             2
           )} - ${producto.embalaje > 0 && `Embalaje:${producto.embalaje}`}\n`;
@@ -207,9 +218,8 @@ export default function CarritoPage() {
     }
     mensaje += `- Moneda: $${compra.moneda}`;
     if (compra.code.name) {
-      mensaje += `- Codigo de Descuento: ${compra.code.name}\n`;
+      mensaje += `- Codigo de ${store.afiliate ? "Afilado" : "Descuento"}: ${compra.code.name}\n`;
     }
-    mensaje += `- Identificador ${newUID}\n`;
 
     const mensajeCodificado = encodeURIComponent(mensaje);
     const urlWhatsApp = `https://wa.me/${store.cell}?text=${mensajeCodificado}`;
@@ -259,7 +269,7 @@ export default function CarritoPage() {
           <>
             <div className="min-h-screen space-y-2">
               <CartItems />
-              {store.marketing && store.codeDiscount && (
+              {store.marketing && store.codeDiscount && !store.afiliate && (
                 <CodeDiscount compra={compra} setCompra={setCompra} />
               )}
             </div>

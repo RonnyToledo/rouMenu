@@ -230,7 +230,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
       } catch (error) {
         console.error("Error clearing localStorage:", error);
       }
-      return { ...state, products: [] };
+      return state;
 
     default:
       return state;

@@ -2,8 +2,10 @@
 // MyContextProvider.tsx
 import React, { createContext, useReducer, ReactNode, Dispatch } from "react";
 import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
-import { AppState, initialState, Product } from "./InitialStatus";
+import { AppState, CodeDiscount, initialState, Product } from "./InitialStatus";
 import SitioRealtime from "@/components/Catalogos/General/RealTime";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 interface ContextType {
   store: AppState;
@@ -20,25 +22,44 @@ interface MyProviderProps {
   storeSSD: AppState;
 }
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
+  //Crear estado gloabal
   let storeArregaldo = storeSSD ?? initialState;
+
+  //Buscar afiliado
+  const searchParams = useSearchParams();
+  const afiliate = searchParams.get("afiliate");
+
+  //Verificar, salvar o buscar afiliado
+  let afiliateNew = afiliate;
+  if (afiliate) {
+    afiliateNew = verifyAndSavedAfiliate(
+      storeSSD.sitioweb || "",
+      storeSSD.codeDiscount,
+      afiliate
+    );
+  } else {
+    afiliateNew = getAfiliate(storeSSD.sitioweb || "");
+  }
+
+  //Buscar datos de los productos existentes
   if (storeSSD.products) {
     const savedCart = loadCartFromLocalStorage(storeSSD.sitioweb || "");
     const productsWithCartData = mergeCartDataWithProducts(
       storeSSD.products,
       savedCart
     );
-
     storeArregaldo = {
       ...storeSSD,
       products: productsWithCartData,
     };
   }
+  //Crear el estado global
+  const [store, dispatchStore] = useReducer(reducerStore, {
+    ...(storeArregaldo || initialState),
+    afiliate: afiliateNew,
+  });
 
-  const [store, dispatchStore] = useReducer(
-    reducerStore,
-    storeArregaldo || initialState
-  );
-
+  console.log("Afiliate Context", store.afiliate);
   return (
     <MyContext.Provider value={{ store, dispatchStore }}>
       <SitioRealtime uuid={store.UUID || ""} />
@@ -49,9 +70,7 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
 function loadCartFromLocalStorage(shopName: string): Product[] {
   try {
     const cartKey = `cart_${shopName}`;
-    console.log(cartKey);
     const savedCart = localStorage.getItem(cartKey);
-    console.log(savedCart);
     return savedCart ? JSON.parse(savedCart) : [];
   } catch (error) {
     console.error("Error loading from localStorage:", error);
@@ -64,7 +83,6 @@ function mergeCartDataWithProducts(
   products: Product[],
   savedCart: Product[]
 ): Product[] {
-  console.log(savedCart);
   return products.map((product) => {
     const savedProduct = savedCart.find(
       (saved) => saved.productId === product.productId
@@ -96,4 +114,34 @@ function mergeCartDataWithProducts(
 
     return product;
   });
+}
+function verifyAndSavedAfiliate(
+  shopName: string,
+  codeDiscount: CodeDiscount[],
+  afiliate: string
+): string {
+  try {
+    const cartKey = `afiliate_${shopName}`;
+    if (codeDiscount.some((code) => code.code == afiliate)) {
+      localStorage.setItem(cartKey, afiliate);
+      toast("Codigo de afiliado aplicado con exito");
+      return afiliate;
+    } else {
+      toast.error("Error con el codigo de afiliado");
+      return "";
+    }
+  } catch (error) {
+    console.error("Error loading from localStorage:", error);
+    toast.error("Error inesperado");
+    return "";
+  }
+}
+function getAfiliate(shopName: string): string {
+  try {
+    const cartKey = `afiliate_${shopName}`;
+    return localStorage.getItem(cartKey) || "";
+  } catch (error) {
+    console.error("Error loading from localStorage:", error);
+    return "";
+  }
 }

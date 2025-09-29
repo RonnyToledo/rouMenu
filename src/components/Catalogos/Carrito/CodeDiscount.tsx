@@ -61,17 +61,19 @@ export default function CodeDiscount({ compra, setCompra }: Props) {
         </CardHeader>
         <CardContent>
           {!appliedCoupon ? (
-            <div className="flex items-center gap-2 p-1 border rounded-xl">
-              <Input
-                placeholder="Tienes algun cupón?"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
-              />
+            <div className=" rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2">
+              <div className="flex w-full flex-1 items-stretch rounded-2xl h-full overflow-hidden">
+                <Input
+                  placeholder="Tienes algun cupón?"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
+                />
+              </div>
               <Button
                 onClick={applyCoupon}
-                variant="outline"
-                className=" rounded-full"
+                variant="ghost"
+                className="rounded-full"
                 disabled={!couponCode}
               >
                 Aplicar

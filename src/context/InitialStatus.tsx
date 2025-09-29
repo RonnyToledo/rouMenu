@@ -147,7 +147,6 @@ export interface AppState {
   font: string;
   horario?: ScheduleInterface[];
   id: number;
-
   insta: string;
   local: boolean;
   login: boolean;
@@ -166,6 +165,7 @@ export interface AppState {
   edit: EditInterface;
   redes: RedesInterface[];
   contacto: ContactInterface[];
+  afiliate: string | null;
 }
 
 // Estado inicial tipado a AppState
@@ -246,6 +246,7 @@ export const initialState: AppState = {
   local: false,
   municipio: "",
   moneda: [],
+  afiliate: "",
   redes: [],
   contacto: [],
 };
