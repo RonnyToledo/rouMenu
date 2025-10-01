@@ -12,7 +12,9 @@ export default function CartItems() {
   const { store, dispatchStore } = useContext(MyContext);
 
   const getProducts = () => {
-    return store.products.filter((item) => item.Cant > 0);
+    return store.products.filter(
+      (obj) => obj.Cant > 0 || obj.agregados.some((agg) => agg.cant > 0)
+    );
   };
 
   const handleToCart = (productToCart: Product) => {
@@ -36,6 +38,7 @@ export default function CartItems() {
               id={item.id}
               embalaje={item.embalaje}
               camtidad={item.Cant}
+              top={item.stock || 0}
               handleToCart={() =>
                 handleToCart({
                   ...item,
@@ -59,6 +62,7 @@ export default function CartItems() {
                 imagen={item.image || store.urlPoster || logoApp}
                 price={smartRound(agg.price || 0)}
                 moneda={store.moneda_default?.moneda}
+                top={(item.stock || 0) - (item.Cant || 0)}
                 id={item.id}
                 embalaje={item.embalaje}
                 camtidad={agg.cant}
@@ -92,6 +96,7 @@ interface ItemCardInterface {
   price: number;
   moneda: string;
   id: number;
+  top: number;
   embalaje: number;
   camtidad: number;
   handleToCart: () => void;
@@ -105,7 +110,7 @@ function ItemCard({
   moneda,
   id,
   embalaje,
-
+  top,
   camtidad,
   handleToCart,
   handleToCartMinus,
@@ -133,6 +138,7 @@ function ItemCard({
             variant="ghost"
             size="icon"
             onClick={handleToCart}
+            disabled={camtidad >= top}
             className="size-6 p-0 hover:bg-green-50 hover:border-green-300 hover:scale-110 transition-all duration-200"
           >
             <FaChevronUp className="w-4 h-4" />

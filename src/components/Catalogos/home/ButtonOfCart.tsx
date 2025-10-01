@@ -15,7 +15,7 @@ export function ButtonOfCart({
   product: Product;
   variant?: "outline" | "default";
 }) {
-  const { dispatchStore } = useContext(MyContext);
+  const { store, dispatchStore } = useContext(MyContext);
   const [slideOpen, setSlideOpen] = useState(false);
 
   const handleToCart = useCallback(
@@ -96,6 +96,7 @@ export function ButtonOfCart({
         size="icon"
         type="button"
         variant={variant || "default"}
+        disabled={store.stocks && product.Cant >= (product.stock || 0)}
         className="size-8 flex justify-center items-center rounded-full"
         onClick={() => {
           const el = document.getElementById(product.productId);

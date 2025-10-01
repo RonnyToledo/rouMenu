@@ -12,7 +12,7 @@ export interface Product {
   id: number;
   oldPrice: number;
   price: number;
-  agotado?: boolean;
+  stock?: number;
   creado: string;
   order: number;
   storeId?: string;
@@ -165,6 +165,7 @@ export interface AppState {
   edit: EditInterface;
   redes: RedesInterface[];
   contacto: ContactInterface[];
+  stocks: boolean;
   afiliate: string | null;
 }
 
@@ -247,6 +248,7 @@ export const initialState: AppState = {
   municipio: "",
   moneda: [],
   afiliate: "",
+  stocks: false,
   redes: [],
   contacto: [],
 };

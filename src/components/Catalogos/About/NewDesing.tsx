@@ -52,7 +52,7 @@ export default function AboutMePage() {
                   <div className="flex items-center gap-2">
                     <Award className="size-6 text-gray-700" />
                     <span>
-                      +{store.products.filter((obj) => !obj.agotado).length}{" "}
+                      +{store.products.filter((obj) => obj.stock).length}{" "}
                       Productos
                     </span>
                   </div>

@@ -90,14 +90,10 @@ export default function ComparePage() {
         (a.coment?.promedio ?? 0) > (b.coment?.promedio ?? 0)
           ? "left"
           : (a.coment?.promedio ?? 0) < (b.coment?.promedio ?? 0)
-          ? "right"
-          : "tie",
+            ? "right"
+            : "tie",
       stock:
-        !a.agotado && b.agotado
-          ? "left"
-          : a.agotado && !b.agotado
-          ? "right"
-          : "tie",
+        a.stock && !b.stock ? "left" : !a.stock && b.stock ? "right" : "tie",
       discount: (() => {
         const da = a.oldPrice > 0 ? (a.oldPrice - a.price) / a.oldPrice : 0;
         const db = b.oldPrice > 0 ? (b.oldPrice - b.price) / b.oldPrice : 0;
@@ -117,8 +113,8 @@ export default function ComparePage() {
       points.left > points.right
         ? "left"
         : points.right > points.left
-        ? "right"
-        : "tie";
+          ? "right"
+          : "tie";
 
     return { winners, points, global };
   }
@@ -321,8 +317,8 @@ export default function ComparePage() {
             <div className="grid grid-cols-2 border-b border-gray-100">
               <div className={cellClass("left", "stock")}>
                 {left ? (
-                  <Badge variant={!left.agotado ? "default" : "secondary"}>
-                    {!left.agotado ? "En stock" : "Agotado"}
+                  <Badge variant={left.stock ? "default" : "secondary"}>
+                    {left.stock ? "En stock" : "Agotado"}
                   </Badge>
                 ) : (
                   <Skeleton className="w-full h-7 " />
@@ -330,8 +326,8 @@ export default function ComparePage() {
               </div>
               <div className={cellClass("right", "stock")}>
                 {right ? (
-                  <Badge variant={!right.agotado ? "default" : "secondary"}>
-                    {!right.agotado ? "En stock" : "Agotado"}
+                  <Badge variant={right.stock ? "default" : "secondary"}>
+                    {right.stock ? "En stock" : "Agotado"}
                   </Badge>
                 ) : (
                   <Skeleton className="w-full h-7 " />
@@ -388,7 +384,7 @@ export default function ComparePage() {
                     <Button
                       variant={"outline"}
                       className="text-xs w-full"
-                      disabled={left.agotado}
+                      disabled={!left.stock}
                       onClick={() =>
                         handleToCart({
                           ...left,
@@ -397,7 +393,7 @@ export default function ComparePage() {
                       }
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      {!left.agotado ? "Agg Carrito" : "No disponible"}
+                      {left.stock ? "Agg Carrito" : "No disponible"}
                     </Button>
                   ) : (
                     <div className="flex items-center justify-center gap-3">
@@ -439,7 +435,7 @@ export default function ComparePage() {
                     <Button
                       variant={"outline"}
                       className="text-xs w-full"
-                      disabled={right.agotado}
+                      disabled={!right.stock}
                       onClick={() =>
                         handleToCart({
                           ...right,
@@ -448,7 +444,7 @@ export default function ComparePage() {
                       }
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      {!right.agotado ? "Agg Carrito" : "No disponible"}
+                      {right.stock ? "Agg Carrito" : "No disponible"}
                     </Button>
                   ) : (
                     <div className="flex items-center justify-center gap-3">

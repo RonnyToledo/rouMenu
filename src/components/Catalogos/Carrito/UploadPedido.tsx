@@ -1,22 +1,29 @@
+// UploadPedido.ts (TypeScript)
 import { createClient } from "@/lib/supabase";
-import { UploadCompraInterface } from "./CarritoPage";
+import type { UploadCompraInterface } from "./CarritoPage";
 
 export async function UploadPedido(dato: UploadCompraInterface) {
   const supabase = createClient();
+  // Si antes hacías JSON.stringify(compra) ahora envía el objeto JS directamente
+  // p_desc debe ser jsonb; supabase lo convertirá automáticamente
+  // asegúrate de que dato.desc sea un objeto (no string)
+  const safeDesc =
+    typeof dato.desc === "string" ? JSON.parse(dato.desc) : dato.desc;
 
-  const { error } = await supabase
-    .from("Events")
-    .insert({
-      uid: dato.UUID_Shop,
-      events: dato.events,
-      created_at: dato.date,
-      descripcion: dato.descripcion,
-      desc: dato.desc,
-      UID_Venta: dato.uid,
-      nombre: dato.nombre,
-      phonenumber: dato.phonenumber,
-    })
-    .select();
-  console.info("Tarea lista");
-  if (error) console.error(error);
+  const params = {
+    p_uid: dato.UUID_Shop,
+    p_events: dato.events,
+    p_desc: safeDesc, // objeto JS -> supabase lo pasará como jsonb
+    p_uid_venta: dato.uid,
+    p_nombre: dato.nombre,
+    p_phonenumber: Number(dato.phonenumber) || 0,
+    p_descripcion: dato.descripcion,
+    p_created_at: dato.date,
+  };
+
+  console.log(params);
+  const { data, error } = await supabase.rpc("create_order_event", params);
+  if (error) throw new Error(error.message);
+
+  return data;
 }

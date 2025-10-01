@@ -50,7 +50,16 @@ export default function Product({ id }: { id: string }) {
       : { amplio: "slide-in-from-left-4", corto: "slide-in-from-left-2" };
 
   useEffect(() => {
-    setProduct(store.products.find((obj) => obj.productId == id));
+    const value = store.products.find((obj) => obj.productId == id);
+    setProduct(value);
+    const initialCount =
+      (value?.stock || 0) -
+        (value?.Cant || 0) -
+        (value?.agregados?.reduce((sum, agg) => sum + agg.cant, 0) || 0) >
+      1
+        ? 1
+        : 0;
+    setCountAddCart(initialCount);
   }, [store.products, id]);
 
   const handleToCart = (productToCart: ProductInterface) => {
@@ -88,7 +97,7 @@ export default function Product({ id }: { id: string }) {
       }
     }
   };
-
+  console.log(product);
   const navigateToProduct = useCallback(
     (direction: string) => {
       const currentIndex = store.products.findIndex((p) => p.productId === id);
@@ -280,11 +289,40 @@ export default function Product({ id }: { id: string }) {
                   <div
                     className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
                   >
-                    {!product?.agotado ? (
-                      <div className="flex items-center gap-2 text-green-600">
-                        <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                        <span className="text-sm font-medium">En stock</span>
-                      </div>
+                    {product?.stock ? (
+                      store.stocks ? (
+                        <>
+                          <div className="flex items-center gap-2 text-green-600">
+                            <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                            <span className="text-sm font-medium">
+                              Quedan {product.stock} unidades
+                            </span>
+                          </div>
+                          {product.Cant +
+                            product.agregados.reduce(
+                              (sum, agg) => sum + agg.cant,
+                              0
+                            ) >
+                            0 && (
+                            <div className="flex items-center gap-2 text-green-600">
+                              <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                              <span className="text-xs font-medium text-green-700">
+                                Pedidas{" "}
+                                {product.Cant +
+                                  product.agregados.reduce(
+                                    (sum, agg) => sum + agg.cant,
+                                    0
+                                  )}{" "}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 text-green-600">
+                          <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
+                          <span className="text-sm font-medium">En stock</span>
+                        </div>
+                      )
                     ) : (
                       <div className="flex items-center gap-2 text-red-600">
                         <div className="w-2 h-2 bg-red-600 rounded-full" />
@@ -329,7 +367,7 @@ export default function Product({ id }: { id: string }) {
             </div>
           )}
           {/* Extras */}
-          {(product?.agregados?.length || 0 > 0) && (
+          {(product?.agregados?.length || 0 > 0) && product?.stock && (
             <div className="mb-4  space-y-1">
               <h3 className="font-medium">Extras</h3>
               <p className="text-sm text-gray-500 ">
@@ -372,6 +410,9 @@ export default function Product({ id }: { id: string }) {
                       <Button
                         variant="outline"
                         size="sm"
+                        disabled={
+                          (product.stock || 0) - product.Cant <= extra.cant
+                        }
                         onClick={() =>
                           setProduct({
                             ...product,
@@ -406,7 +447,7 @@ export default function Product({ id }: { id: string }) {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={countAddCart === 0 || product?.agotado}
+                      disabled={countAddCart === 0 || !product?.stock}
                       onClick={() => setCountAddCart(countAddCart - 1)}
                       className="hover:scale-105 transition-transform duration-200"
                     >
@@ -418,7 +459,10 @@ export default function Product({ id }: { id: string }) {
                     <Button
                       variant="outline"
                       size="sm"
-                      disabled={product?.agotado}
+                      disabled={
+                        store.stocks &&
+                        (product.stock || 0) - product.Cant <= countAddCart
+                      }
                       onClick={() => setCountAddCart(countAddCart + 1)}
                       className="hover:scale-105 transition-transform duration-200"
                     >
@@ -432,7 +476,7 @@ export default function Product({ id }: { id: string }) {
                 className={`space-y-3 animate-in ${swipeComponents.corto} duration-500 delay-1000`}
               >
                 <Button
-                  disabled={product?.agotado}
+                  disabled={(product.stock || 0) - product.Cant <= countAddCart}
                   onClick={() => {
                     handleToCart({
                       ...product,
@@ -517,13 +561,6 @@ export default function Product({ id }: { id: string }) {
                   </TabsTrigger>
 
                   <TabsTrigger value="rating">Rating</TabsTrigger>
-
-                  <TabsTrigger
-                    value="details"
-                    disabled={product.caracteristicas.length == 0}
-                  >
-                    Detalles
-                  </TabsTrigger>
                 </TabsList>
                 {product?.descripcion && (
                   <TabsContent value="description">
@@ -545,27 +582,6 @@ export default function Product({ id }: { id: string }) {
                     sitioweb={store.sitioweb || ""}
                   />
                 </TabsContent>
-                {product.caracteristicas.length !== 0 && (
-                  <TabsContent value="details">
-                    {(product?.caracteristicas?.length || 0) > 0 ? (
-                      <ul className="space-y-3">
-                        {product?.caracteristicas.map((obj, index) => (
-                          <li
-                            className="flex items-center text-gray-700"
-                            key={index}
-                          >
-                            <span className="w-2 h-2 bg-primary rounded-full mr-3 text-gray-700"></span>
-                            {obj}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="flex items-center  text-gray-700">
-                        No hay detalles para mostrar
-                      </div>
-                    )}
-                  </TabsContent>
-                )}
               </Tabs>
             </>
           ) : (

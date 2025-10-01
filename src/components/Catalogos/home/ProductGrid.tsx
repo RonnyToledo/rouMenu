@@ -56,9 +56,10 @@ export default function ProductGrid({
           } object-cover`}
           src={product.image || banner}
           style={{
-            filter: product.agotado ? "grayscale(1)" : "initial",
+            filter: product.stock ? "initial" : "grayscale(1)",
           }}
         />
+
         {isNewProduct(product.creado) && (
           <div className="absolute top-2 left-2 backdrop-blur-3xl rounded-full">
             <MdNewReleases className="fill-red-600 shadow-md h-4 w-4" />
@@ -116,7 +117,9 @@ export default function ProductGrid({
               </Button>
             ) : (
               store?.carrito &&
-              (product.agotado ? (
+              (product.stock ? (
+                <ButtonOfCart product={product} />
+              ) : (
                 <Button
                   size="icon"
                   variant="ghost"
@@ -126,8 +129,6 @@ export default function ProductGrid({
                 >
                   <TbShoppingCartOff className="size-4" />
                 </Button>
-              ) : (
-                <ButtonOfCart product={product} />
               ))
             )}
           </div>

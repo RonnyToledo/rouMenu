@@ -59,7 +59,6 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     afiliate: afiliateNew,
   });
 
-  console.log("Afiliate Context", store.afiliate);
   return (
     <MyContext.Provider value={{ store, dispatchStore }}>
       <SitioRealtime uuid={store.UUID || ""} />
@@ -93,7 +92,10 @@ function mergeCartDataWithProducts(
 
       // Restaurar cantidad del producto
       if (savedProduct.Cant) {
-        updatedProduct.Cant = savedProduct.Cant;
+        updatedProduct.Cant =
+          (product?.stock || 0) < savedProduct.Cant
+            ? product?.stock || 0
+            : savedProduct.Cant || 0;
       }
 
       // Restaurar cantidades de agregados
@@ -123,7 +125,7 @@ function verifyAndSavedAfiliate(
   try {
     const cartKey = `afiliate_${shopName}`;
     if (codeDiscount.some((code) => code.code == afiliate)) {
-      localStorage.setItem(cartKey, afiliate);
+      window.localStorage.setItem(cartKey, afiliate);
       toast("Codigo de afiliado aplicado con exito");
       return afiliate;
     } else {
@@ -139,7 +141,7 @@ function verifyAndSavedAfiliate(
 function getAfiliate(shopName: string): string {
   try {
     const cartKey = `afiliate_${shopName}`;
-    return localStorage.getItem(cartKey) || "";
+    return window.localStorage.getItem(cartKey) || "";
   } catch (error) {
     console.error("Error loading from localStorage:", error);
     return "";

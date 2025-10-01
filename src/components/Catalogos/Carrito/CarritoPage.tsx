@@ -14,7 +14,7 @@ import CartItems from "./CartItems";
 import { v4 as uuidv4 } from "uuid";
 import { Rating } from "../About/RatingModal";
 import { smartRound } from "@/functions/precios";
-import { ArrowRight, Code } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
 
@@ -66,6 +66,8 @@ export default function CarritoPage() {
 
   const [compra, setCompra] = useState<CompraInterface>(initialState);
 
+  console.log(compra);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentStep]);
@@ -86,7 +88,9 @@ export default function CarritoPage() {
       ...prevCompra,
       code,
       moneda: store.moneda_default.moneda,
-      pedido: store.products.filter((obj) => obj.Cant > 0),
+      pedido: store.products.filter(
+        (obj) => obj.Cant > 0 || obj.agregados.some((agg) => agg.cant > 0)
+      ),
       total: store.products.reduce(
         (total, item) =>
           total +
@@ -138,6 +142,7 @@ export default function CarritoPage() {
     if (store.sitioweb) {
       // Inicializa Analytics
       const uploadFlow = async () => {
+        console.log("AA");
         setDownloading(true);
         try {
           await UploadPedido({
@@ -156,7 +161,7 @@ export default function CarritoPage() {
             `${store.sitioweb}-userRating`
           );
           if (saved !== null) {
-            sendToWhatsapp();
+            await sendToWhatsapp();
           } else {
             setShowRatingModal(true);
           }
@@ -174,13 +179,15 @@ export default function CarritoPage() {
       toast.promise(uploadFlow(), {
         loading: "Enviando pedido...",
         success: (data) => `${data.name} — pedido enviado correctamente.`,
-        error: (err) =>
-          `No ha declarado la ubicación de su domicilio. ${err?.message || err}`,
+        error: (err) => {
+          console.log(err?.message || err);
+          return err?.message || err;
+        },
       });
     }
   };
 
-  const sendToWhatsapp = () => {
+  const sendToWhatsapp = async () => {
     // Abrir WhatsApp
 
     let mensaje = `Hola, Quiero realizar este pedido:\n- Metodo de envio: ${

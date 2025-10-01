@@ -33,7 +33,6 @@ export type AppAction =
 function saveCartToLocalStorage(shopName: string, products: Product[]) {
   try {
     const cartKey = `cart_${shopName}`;
-    console.log(products);
     // Filtrar productos que tienen cantidad > 0 o agregados con cantidad > 0
     const productsToSave = products
       .filter((product) => {
@@ -86,12 +85,9 @@ function saveCartToLocalStorage(shopName: string, products: Product[]) {
 
         return productToSave;
       });
-    console.log(productsToSave);
     // Solo guardar si hay productos válidos
     if (productsToSave.length > 0) {
-      console.log(cartKey);
       localStorage.setItem(cartKey, JSON.stringify(productsToSave));
-      console.log(localStorage.getItem(cartKey));
     } else {
       // Limpiar localStorage si no hay productos en el carrito
       localStorage.removeItem(cartKey);
@@ -227,6 +223,22 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
       try {
         const cartKey = `cart_${state.sitioweb}`;
         localStorage.removeItem(cartKey);
+        const updatedProducts = state.products.map((p) => ({
+          ...p,
+          stock:
+            (p.stock || 0) -
+            p.Cant -
+            p.agregados.reduce((sum, agg) => sum + agg.cant, 0),
+          Cant: 0,
+          agregados: p.agregados.map((agg) => ({ ...agg, cant: 0 })),
+        }));
+
+        // Guardar en localStorage después de actualizar
+
+        return {
+          ...state,
+          products: updatedProducts,
+        };
       } catch (error) {
         console.error("Error clearing localStorage:", error);
       }

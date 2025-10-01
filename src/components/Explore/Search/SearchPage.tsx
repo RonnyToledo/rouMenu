@@ -26,7 +26,7 @@ interface ProductResult {
   descripcion?: string;
   storeId: string;
   storeName?: string;
-  agotado: boolean;
+  stock: number;
   score: number;
   storeSitioWeb?: string;
 }
@@ -163,8 +163,8 @@ export default function BusquedaPage() {
             </div>
           </div>
           <div className="flex items-center justify-center">
-            <Badge variant={product.agotado ? "destructive" : "secondary"}>
-              {product.agotado ? "Agotado" : `$${product.price}`}
+            <Badge variant={product.stock ? "secondary" : "destructive"}>
+              {product.stock ? `$${product.price}` : "Agotado"}
             </Badge>
           </div>
         </CardContent>

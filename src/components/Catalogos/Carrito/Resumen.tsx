@@ -33,7 +33,6 @@ export default function Resumen({
       0
     );
   };
-  console.log(compra);
   return (
     <Card className="p-2 gap-2">
       <CardHeader className="p-2 gap-0">
