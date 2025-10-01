@@ -21,7 +21,6 @@ export async function UploadPedido(dato: UploadCompraInterface) {
     p_created_at: dato.date,
   };
 
-  console.log(params);
   const { data, error } = await supabase.rpc("create_order_event", params);
   if (error) throw new Error(error.message);
 

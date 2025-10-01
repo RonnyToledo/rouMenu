@@ -97,7 +97,6 @@ export default function Product({ id }: { id: string }) {
       }
     }
   };
-  console.log(product);
   const navigateToProduct = useCallback(
     (direction: string) => {
       const currentIndex = store.products.findIndex((p) => p.productId === id);
@@ -290,7 +289,7 @@ export default function Product({ id }: { id: string }) {
                     className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
                   >
                     {product?.stock ? (
-                      store.stocks ? (
+                      store.stocks && product?.stock <= 10 ? (
                         <>
                           <div className="flex items-center gap-2 text-green-600">
                             <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />

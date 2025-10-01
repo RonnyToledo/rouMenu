@@ -66,8 +66,6 @@ export default function CarritoPage() {
 
   const [compra, setCompra] = useState<CompraInterface>(initialState);
 
-  console.log(compra);
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentStep]);
@@ -142,7 +140,6 @@ export default function CarritoPage() {
     if (store.sitioweb) {
       // Inicializa Analytics
       const uploadFlow = async () => {
-        console.log("AA");
         setDownloading(true);
         try {
           await UploadPedido({
@@ -180,7 +177,6 @@ export default function CarritoPage() {
         loading: "Enviando pedido...",
         success: (data) => `${data.name} — pedido enviado correctamente.`,
         error: (err) => {
-          console.log(err?.message || err);
           return err?.message || err;
         },
       });

@@ -9,7 +9,7 @@ import { MdDeliveryDining } from "react-icons/md";
 import { FaShop } from "react-icons/fa6";
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
-  console.log(store);
+
   return (
     <div className="p-3 space-y-3">
       <div className="">
