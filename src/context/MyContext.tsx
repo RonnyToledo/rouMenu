@@ -31,7 +31,7 @@ interface MyProviderProps {
 }
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   //Crear estado global base
-  let storeArregaldo = storeSSD ?? initialState;
+  const storeArregaldo = storeSSD ?? initialState;
 
   //Buscar afiliado
   const searchParams = useSearchParams();

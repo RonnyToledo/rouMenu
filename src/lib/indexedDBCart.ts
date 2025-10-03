@@ -1,9 +1,22 @@
 // src/lib/indexedDBCart.ts
-// Utilidades simples y seguras para usar IndexedDB (no depende de librerías externas)
+// Utilidades para IndexedDB (sin `any`)
+
+export type SavedAgregado = {
+  id: string;
+  cant: number;
+  price?: number;
+  name?: string;
+};
+
+export type SavedProduct = {
+  productId: string;
+  Cant?: number;
+  agregados?: SavedAgregado[];
+};
 
 export type IDBCartEntry = {
   key: string; // ej: cart_mitienda
-  value: any; // guardamos el array serializado (objetos JS)
+  value: SavedProduct[]; // guardamos el array con la forma esperada
 };
 
 const DB_NAME = "roudev_cart_db";
@@ -12,7 +25,7 @@ const STORE_NAME = "carts";
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    if (!("indexedDB" in window)) {
+    if (!(window && "indexedDB" in window)) {
       reject(new Error("IndexedDB no está disponible en este navegador."));
       return;
     }
@@ -40,9 +53,12 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
+/**
+ * Guarda un array de SavedProduct bajo la key `cart_<shopKey>`
+ */
 export async function saveCartToIDB(
   shopKey: string,
-  cartData: any[]
+  cartData: SavedProduct[]
 ): Promise<void> {
   try {
     const db = await openDB();
@@ -53,18 +69,24 @@ export async function saveCartToIDB(
     await txComplete(tx);
     db.close();
   } catch (err) {
+    // Capturamos errores pero re-lanzamos para que el llamador pueda manejarlos si quiere.
     console.error("saveCartToIDB error:", err);
     throw err;
   }
 }
 
-export async function loadCartFromIDB(shopKey: string): Promise<any[] | null> {
+/**
+ * Devuelve el array SavedProduct guardado o null si no existe
+ */
+export async function loadCartFromIDB(
+  shopKey: string
+): Promise<SavedProduct[] | null> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, "readonly");
     const store = tx.objectStore(STORE_NAME);
     const req = store.get(`cart_${shopKey}`);
-    const value = await reqToPromise(req);
+    const value = await reqToPromise<IDBCartEntry | undefined>(req);
     await txComplete(tx);
     db.close();
     return value ? value.value : null;
@@ -97,9 +119,13 @@ function txComplete(tx: IDBTransaction): Promise<void> {
   });
 }
 
-function reqToPromise<T = any>(req: IDBRequest): Promise<T> {
+/**
+ * Convierte un IDBRequest a Promise tipada.
+ * No usamos `any` — usamos genéricos.
+ */
+function reqToPromise<T>(req: IDBRequest): Promise<T> {
   return new Promise((resolve, reject) => {
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => resolve(req.result as T);
     req.onerror = () => reject(req.error);
   });
 }
