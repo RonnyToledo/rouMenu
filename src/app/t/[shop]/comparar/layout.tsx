@@ -26,7 +26,7 @@ export async function generateMetadata({
     const { name, parrrafo, urlPoster } = product;
 
     return {
-      title: `rouMenu | ${name} -> Comparar`,
+      title: `rouMenu | Comparar by ${name}`,
       description: parrrafo,
       openGraph: {
         type: "website",

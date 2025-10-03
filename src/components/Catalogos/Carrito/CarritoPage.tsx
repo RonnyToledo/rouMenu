@@ -36,7 +36,7 @@ export interface UploadCompraInterface {
   UUID_Shop: string;
   events: string;
   date: string;
-  desc: string;
+  desc: CompraInterface;
   descripcion: string;
   uid: string;
   nombre: string;
@@ -147,7 +147,7 @@ export default function CarritoPage() {
             events: "compra",
             descripcion: compra.descripcion,
             date: getLocalISOString(),
-            desc: JSON.stringify(compra),
+            desc: compra,
             uid: newUID,
             nombre: compra.people,
             phonenumber: compra.phonenumber,

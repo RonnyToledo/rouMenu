@@ -4,16 +4,11 @@ import type { UploadCompraInterface } from "./CarritoPage";
 
 export async function UploadPedido(dato: UploadCompraInterface) {
   const supabase = createClient();
-  // Si antes hacías JSON.stringify(compra) ahora envía el objeto JS directamente
-  // p_desc debe ser jsonb; supabase lo convertirá automáticamente
-  // asegúrate de que dato.desc sea un objeto (no string)
-  const safeDesc =
-    typeof dato.desc === "string" ? JSON.parse(dato.desc) : dato.desc;
 
   const params = {
     p_uid: dato.UUID_Shop,
     p_events: dato.events,
-    p_desc: safeDesc, // objeto JS -> supabase lo pasará como jsonb
+    p_desc: dato.desc, // objeto JS -> supabase lo pasará como jsonb
     p_uid_venta: dato.uid,
     p_nombre: dato.nombre,
     p_phonenumber: Number(dato.phonenumber) || 0,

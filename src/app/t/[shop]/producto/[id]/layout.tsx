@@ -7,6 +7,12 @@ export async function generateMetadata({
 }) {
   const { shop, id } = await params;
   try {
+    const { data: store, error: error1 } = await supabase
+      .from("Sitios")
+      .select()
+      .eq("sitioweb", shop)
+      .single();
+
     const { data: product, error } = await supabase
       .from("Products")
       .select()
@@ -14,9 +20,12 @@ export async function generateMetadata({
     if (error) {
       throw error;
     }
+    if (error1) {
+      throw error1;
+    }
 
     return {
-      title: `rouMenu | ${product[0].title}`,
+      title: `RouMenu| ${product[0].title} by ${store.name}`,
       description: product[0].descripcion,
       openGraph: {
         type: "website",

@@ -1,11 +1,19 @@
 "use client";
 // MyContextProvider.tsx
-import React, { createContext, useReducer, ReactNode, Dispatch } from "react";
+import React, {
+  createContext,
+  useReducer,
+  ReactNode,
+  Dispatch,
+  useEffect,
+} from "react";
 import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
 import { AppState, CodeDiscount, initialState, Product } from "./InitialStatus";
 import SitioRealtime from "@/components/Catalogos/General/RealTime";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+
+import { loadCartFromIDB } from "@/lib/indexedDBCart"; // <-- cargar desde IDB
 
 interface ContextType {
   store: AppState;
@@ -22,7 +30,7 @@ interface MyProviderProps {
   storeSSD: AppState;
 }
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
-  //Crear estado gloabal
+  //Crear estado global base
   let storeArregaldo = storeSSD ?? initialState;
 
   //Buscar afiliado
@@ -41,23 +49,31 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     afiliateNew = getAfiliate(storeSSD.sitioweb || "");
   }
 
-  //Buscar datos de los productos existentes
-  if (storeSSD.products) {
-    const savedCart = loadCartFromLocalStorage(storeSSD.sitioweb || "");
-    const productsWithCartData = mergeCartDataWithProducts(
-      storeSSD.products,
-      savedCart
-    );
-    storeArregaldo = {
-      ...storeSSD,
-      products: productsWithCartData,
-    };
-  }
-  //Crear el estado global
+  // Nota: ya NO cargamos el carrito desde localStorage aquí.
+  // Inicializamos el reducer con los productos del servidor (storeSSD)
   const [store, dispatchStore] = useReducer(reducerStore, {
     ...(storeArregaldo || initialState),
     afiliate: afiliateNew,
   });
+
+  // Hidratar carrito desde IndexedDB después del mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const savedCart = await loadCartFromIDB(store.sitioweb || "");
+        if (savedCart && Array.isArray(savedCart) && savedCart.length > 0) {
+          // dispatch HydrateCart con el array (no serializado)
+          dispatchStore({
+            type: "HydrateCart",
+            payload: savedCart as Product[],
+          });
+        }
+      } catch (err) {
+        console.error("Error cargando carrito desde IDB:", err);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.sitioweb]); // se ejecuta cuando tenemos el sitio
 
   return (
     <MyContext.Provider value={{ store, dispatchStore }}>
@@ -66,57 +82,7 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     </MyContext.Provider>
   );
 }
-function loadCartFromLocalStorage(shopName: string): Product[] {
-  try {
-    const cartKey = `cart_${shopName}`;
-    const savedCart = localStorage.getItem(cartKey);
-    return savedCart ? JSON.parse(savedCart) : [];
-  } catch (error) {
-    console.error("Error loading from localStorage:", error);
-    return [];
-  }
-}
 
-// Función para restaurar datos del localStorage en los productos
-function mergeCartDataWithProducts(
-  products: Product[],
-  savedCart: Product[]
-): Product[] {
-  return products.map((product) => {
-    const savedProduct = savedCart.find(
-      (saved) => saved.productId === product.productId
-    );
-
-    if (savedProduct) {
-      const updatedProduct = { ...product };
-
-      // Restaurar cantidad del producto
-      if (savedProduct.Cant) {
-        updatedProduct.Cant =
-          (product?.stock || 0) < savedProduct.Cant
-            ? product?.stock || 0
-            : savedProduct.Cant || 0;
-      }
-
-      // Restaurar cantidades de agregados
-      if (savedProduct.agregados && product.agregados) {
-        updatedProduct.agregados = product.agregados.map((agregado) => {
-          const savedAgregado = savedProduct.agregados.find(
-            (saved) => saved.id === agregado.id
-          );
-
-          return savedAgregado
-            ? { ...agregado, cant: savedAgregado.cant }
-            : agregado;
-        });
-      }
-
-      return updatedProduct;
-    }
-
-    return product;
-  });
-}
 function verifyAndSavedAfiliate(
   shopName: string,
   codeDiscount: CodeDiscount[],
