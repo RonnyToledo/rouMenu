@@ -19,6 +19,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { initialState, RatingInterface } from "../About/RatingModal";
 import { logoUser } from "@/lib/image";
+import { IoIosSend } from "react-icons/io";
+import { Spinner } from "@/components/ui/spinner";
 
 interface RatingModalProps {
   isOpen: boolean;
@@ -26,6 +28,9 @@ interface RatingModalProps {
   userName: string;
   starsSelected: number;
   id: string;
+  imageUser: string;
+  user: string;
+  uuid: string;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -35,17 +40,26 @@ export const RatingModalProduct: FC<RatingModalProps> = ({
   starsSelected,
   userName,
   id,
+  imageUser = logoUser,
+  user,
+  uuid,
   setIsModalOpen,
 }) => {
   const { store, dispatchStore } = useContext(MyContext);
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState<Product>();
-  const [rating, setRating] = useState<RatingInterface>(initialState);
+  const [rating, setRating] = useState<RatingInterface>({
+    ...initialState,
+    nombre: user || initialState.nombre,
+  });
 
   useEffect(() => {
     setProduct(store.products.find((obj) => obj.productId == id));
   }, [store.products, id]);
 
+  useEffect(() => {
+    if (user) setRating((prev) => ({ ...prev, nombre: user }));
+  }, [user]);
   useEffect(() => {
     setRating((prev) => ({ ...prev, selectedRating: starsSelected }));
   }, [starsSelected]);
@@ -61,12 +75,13 @@ export const RatingModalProduct: FC<RatingModalProps> = ({
             star: rating.selectedRating,
             name: rating.nombre,
           },
+          uuid,
         },
         { headers: { "Content-Type": "application/json" } } // Cambia a application/json
       );
 
       if (res.status === 200 || res.status === 201) {
-        toast("Tarea Ejecutada", {
+        toast.success("Tarea Ejecutada", {
           description: "Comentario realizado",
         });
         dispatchStore({
@@ -92,7 +107,7 @@ export const RatingModalProduct: FC<RatingModalProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <Avatar className="w-10 h-10">
-                <Image src={logoUser} alt={userName} width={40} height={40} />
+                <Image src={imageUser} alt={userName} width={40} height={40} />
               </Avatar>
               <div className="flex flex-col">
                 <DialogTitle className="text-base">{userName}</DialogTitle>
@@ -108,7 +123,7 @@ export const RatingModalProduct: FC<RatingModalProps> = ({
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "Publicando..." : "Publicar"}
+              {loading ? <Spinner /> : <IoIosSend />}
             </Button>
           </div>
         </DialogHeader>
@@ -116,6 +131,7 @@ export const RatingModalProduct: FC<RatingModalProps> = ({
           placeholder="Nombre"
           className="bg-transparent border-gray-700"
           value={rating.nombre}
+          readOnly={!!user}
           onChange={(e) =>
             setRating({ ...rating, nombre: e.currentTarget.value })
           }

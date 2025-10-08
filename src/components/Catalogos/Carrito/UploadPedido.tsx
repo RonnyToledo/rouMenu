@@ -14,6 +14,7 @@ export async function UploadPedido(dato: UploadCompraInterface) {
     p_phonenumber: Number(dato.phonenumber) || 0,
     p_descripcion: dato.descripcion,
     p_created_at: dato.date,
+    p_user: dato.user_id,
   };
 
   const { data, error } = await supabase.rpc("create_order_event", params);

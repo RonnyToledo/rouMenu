@@ -12,6 +12,7 @@ import { logoApp } from "@/lib/image";
 import { HistoryProvider } from "@/context/HistoryContext";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -89,18 +90,20 @@ export default async function RootLayout({
         `}
       </Script>
       <body className={inter.className}>
-        <div className=" flex justify-center bg-gray-200">
-          <HistoryProvider>
-            <div className=" max-w-md w-full bg-white">
-              <GeneralProvider storeSSD={newData}>
-                <Header>
-                  {children}
-                  <Toaster richColors position="top-center" />
-                </Header>
-              </GeneralProvider>
-            </div>
-          </HistoryProvider>
-        </div>
+        <AuthProvider>
+          <div className=" flex justify-center bg-gray-200">
+            <HistoryProvider>
+              <div className=" max-w-md w-full bg-white">
+                <GeneralProvider storeSSD={newData}>
+                  <Header>
+                    {children}
+                    <Toaster richColors position="top-center" />
+                  </Header>
+                </GeneralProvider>
+              </div>
+            </HistoryProvider>
+          </div>
+        </AuthProvider>
         <GoogleAnalytics gaId={GA_ID || ""} />
         <Analytics />
       </body>

@@ -2,7 +2,7 @@
 import { MyContext } from "@/context/MyContext";
 import Image from "next/image";
 import React, { useContext, useEffect, useState } from "react";
-import { logoAdmin } from "@/lib/image";
+import { logoAdmin, logoUser } from "@/lib/image";
 import { Map, Marker } from "pigeon-maps";
 import { FaLocationDot } from "react-icons/fa6";
 import { GrSchedule } from "react-icons/gr";
@@ -29,16 +29,30 @@ import {
 } from "@/components/ui/carousel";
 import { format } from "@formkit/tempo";
 import Autoplay from "embla-carousel-autoplay";
+import LoginPopover from "@/components/GeneralComponents/LoginPopover";
+import { AuthContext } from "@/context/AuthContext";
+import { usePathname } from "next/navigation";
 
 export default function AboutPage() {
   const { store } = useContext(MyContext);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const context = useContext(AuthContext);
+  const pathname = usePathname();
   const [selectedRating, setSelectedRating] = useState<number>(0);
   const [isOpenStore, setIsOpenStore] = useState<IsOpenStoreInteface>();
+  // nuevo: control del popover de login y del modal de reseña
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
 
   const handleStarClick = (rating: number) => {
     setSelectedRating(rating);
-    setIsModalOpen(true);
+
+    if (context?.user && context?.loading === false) {
+      setReviewOpen(true);
+      return;
+    }
+
+    // Si no está logueado -> marcar pending y abrir LoginPopover
+    setIsLoginOpen(true);
   };
   useEffect(() => {
     setIsOpenStore(isOpen((store.horario || []) as ScheduleInterface[]));
@@ -215,12 +229,29 @@ export default function AboutPage() {
                     ))}
                   </div>
                 </div>
+                <LoginPopover
+                  isOpen={isLoginOpen}
+                  onClose={() => {
+                    setIsLoginOpen(false);
+                    // Si el usuario cerró el popover sin loguearse, desistimos de la intención
+                  }}
+                  redirectTo={pathname} // Ruta dinámica
+                />
+
+                {/* Modal de reseña: ajusta props/import si tu componente es distinto */}
                 <Rating
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  starsSelected={selectedRating}
+                  isOpen={reviewOpen}
+                  onClose={() => setReviewOpen(false)}
+                  starsSelected={5}
                   userName={"Usuario"}
-                  setIsModalOpen={setIsModalOpen}
+                  user={context?.user?.user_metadata.full_name || "user"}
+                  imageUser={
+                    context?.user?.user_metadata.avatar_url ||
+                    context?.user?.user_metadata.avatar_url ||
+                    logoUser
+                  }
+                  uuid={context?.user?.id || ""}
+                  setIsModalOpen={setReviewOpen}
                 />
               </CardContent>
             </Card>
@@ -318,8 +349,7 @@ const HorariosComponent: React.FC<HorariosComponentProps> = ({
 
       // Verificar si está cerrado
       const isCerrado =
-        aperturaDate.getHours() === 0 &&
-        cierreDate.getHours() === 0 &&
+        aperturaDate.getHours() === cierreDate.getHours() &&
         aperturaDate.getDate() === cierreDate.getDate();
 
       if (isCerrado) {

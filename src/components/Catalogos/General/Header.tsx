@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,15 +19,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import "@github/relative-time-element";
 import { CiMenuFries } from "react-icons/ci";
-import { MdCategory, MdCurrencyExchange } from "react-icons/md";
+import { MdCategory, MdCurrencyExchange, MdRateReview } from "react-icons/md";
 import { IoStorefrontOutline, IoSearch } from "react-icons/io5";
 import { isOpen, IsOpenStoreInteface } from "@/functions/time";
 import OpenClose from "./OpenClose";
 import { useHistory } from "@/context/HistoryContext";
 import ShareButton from "@/components/myUI/buttonShare";
 import { FaBalanceScale } from "react-icons/fa";
+import LoginPopover from "../../GeneralComponents/LoginPopover";
+import { AuthContext } from "@/context/AuthContext";
+import { LiaSignInAltSolid } from "react-icons/lia";
+import { Separator } from "@/components/ui/separator";
+import { logoUser } from "@/lib/image";
 
-// Motion variants for page transitions
+// IMPORTA tu modal de reseña (ajusta la ruta/nombre si es distinto)
+import { Rating } from "../About/RatingModal";
+
 const containerVariants = {
   hidden: { opacity: 0, x: 50 },
   visible: {
@@ -45,6 +52,7 @@ const itemVariants = {
 
 export default function Header() {
   const { store, dispatchStore } = useContext(MyContext);
+  const context = useContext(AuthContext);
   const { smartBack } = useHistory();
   const router = useRouter();
   const pathname = usePathname();
@@ -55,15 +63,148 @@ export default function Header() {
     open: false,
   });
 
+  // nuevo: control del popover de login y del modal de reseña
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
+
   useEffect(() => {
     if (!open) setShowState("home");
   }, [open]);
+
   useEffect(() => {
     setisOpenStore(isOpen((store.horario || []) as ScheduleInterface[]));
   }, [store]);
 
+  console.log(context);
+  const profile = useMemo(
+    () =>
+      context?.user
+        ? {
+            name: context.user.user_metadata.full_name || "Perfil",
+            icon: (
+              <Image
+                width={100}
+                height={100}
+                src={
+                  context.user.user_metadata.avatar_url ||
+                  context.user.user_metadata.avatar_url ||
+                  logoUser
+                }
+                className="size-8 rounded-full"
+                alt={context.user.user_metadata.full_name || "Avatar"}
+              />
+            ),
+            action: () => {
+              context.signOut();
+              setOpen(false);
+            },
+          }
+        : {
+            name: "Registrarse / Iniciar Sesión",
+            icon: <LiaSignInAltSolid />,
+            action: () => {
+              setIsLoginOpen(true);
+              setOpen(false);
+            },
+          },
+    [context?.user, setIsLoginOpen, setOpen]
+  );
+
+  // homeItems ahora depende también de context / states relacionados con reseñas
+  const homeItems = useMemo(
+    () => [
+      {
+        name: "Buscar",
+        icon: <IoSearch />,
+        action: () => {
+          router.push(`/t/${store.sitioweb}/search`);
+          setOpen(false);
+        },
+      },
+      {
+        name: "Info",
+        icon: <IoStorefrontOutline />,
+        action: () => {
+          router.push(`/t/${store.sitioweb}/about`);
+          setOpen(false);
+        },
+      },
+      {
+        name: "Categorias",
+        icon: <MdCategory />,
+        action: () => setShowState("categories"),
+      },
+      {
+        name: "Moneda de Compra",
+        icon: <MdCurrencyExchange />,
+        action: () => setShowState("coins"),
+      },
+      {
+        // === CAMBIO: dejar reseña ===
+        name: "Dejar una reseña",
+        icon: <MdRateReview />,
+        action: () => {
+          // Si ya está logueado y no está cargando -> abrir modal de reseña
+          if (context?.user && context?.loading === false) {
+            setReviewOpen(true);
+            setOpen(false);
+            return;
+          }
+
+          // Si no está logueado -> marcar pending y abrir LoginPopover
+          setIsLoginOpen(true);
+          setOpen(false);
+        },
+      },
+      {
+        name: "Comparar produtos",
+        icon: <FaBalanceScale />,
+        action: () => {
+          router.push(`/t/${store.sitioweb}/comparar`);
+
+          setOpen(false);
+        },
+      },
+    ],
+    [
+      store?.sitioweb,
+      router,
+      setOpen,
+      context?.user,
+      context?.loading,
+      setIsLoginOpen,
+      setReviewOpen,
+    ]
+  );
+
   return (
     <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between">
+      {/* LoginPopover: seguirá abriéndose cuando isLoginOpen = true */}
+      <LoginPopover
+        isOpen={isLoginOpen}
+        onClose={() => {
+          setIsLoginOpen(false);
+          // Si el usuario cerró el popover sin loguearse, desistimos de la intención
+        }}
+        redirectTo={pathname} // Ruta dinámica
+      />
+
+      {/* Modal de reseña: ajusta props/import si tu componente es distinto */}
+      <Rating
+        isOpen={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        starsSelected={5}
+        userName={"Usuario"}
+        user={context?.user?.user_metadata.full_name || "user"}
+        imageUser={
+          context?.user?.user_metadata.avatar_url ||
+          context?.user?.user_metadata.avatar_url ||
+          logoUser
+        }
+        uuid={context?.user?.id || ""}
+        setIsModalOpen={setReviewOpen}
+      />
+
       <div className="flex items-center">
         <Button variant="ghost" onClick={smartBack} size="icon">
           <Image
@@ -96,7 +237,6 @@ export default function Header() {
             url={`https://roumenu.vercel.app/t/${store.sitioweb}`}
           />
         )}
-
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger>
             <CiMenuFries
@@ -124,54 +264,29 @@ export default function Header() {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="p-2 w-full"
+                  className="p-2 w-full h-full flex flex-col justify-between"
                 >
-                  {[
-                    {
-                      name: "Buscar",
-                      icon: <IoSearch />,
-                      action: () => {
-                        router.push(`/t/${store.sitioweb}/search`);
-                        setOpen(false);
-                      },
-                    },
-                    {
-                      name: "Info",
-                      icon: <IoStorefrontOutline />,
-                      action: () => {
-                        router.push(`/t/${store.sitioweb}/about`);
-                        setOpen(false);
-                      },
-                    },
-                    {
-                      name: "Categorias",
-                      icon: <MdCategory />,
-                      action: () => setShowState("categories"),
-                    },
-                    {
-                      name: "Monedas",
-                      icon: <MdCurrencyExchange />,
-                      action: () => setShowState("coins"),
-                    },
-                    {
-                      name: "Comprar produtos",
-                      icon: <FaBalanceScale />,
-                      action: () => {
-                        router.push(`/t/${store.sitioweb}/comparar`);
+                  <div>
+                    {homeItems.map((item) => (
+                      <motion.div key={item.name} variants={containerVariants}>
+                        <ListSheet
+                          name={item.name}
+                          icon={item.icon}
+                          icon2={<ChevronRight />}
+                          action={item.action}
+                        />
+                      </motion.div>
+                    ))}
+                  </div>
 
-                        setOpen(false);
-                      },
-                    },
-                  ].map((item) => (
-                    <motion.div key={item.name} variants={containerVariants}>
-                      <ListSheet
-                        name={item.name}
-                        icon={item.icon}
-                        icon2={<ChevronRight />}
-                        action={item.action}
-                      />
-                    </motion.div>
-                  ))}
+                  <motion.div variants={containerVariants}>
+                    <ListSheet
+                      name={profile.name}
+                      icon={profile.icon}
+                      icon2={<ChevronRight />}
+                      action={profile.action}
+                    />
+                  </motion.div>
                 </motion.div>
               )}
 
@@ -272,23 +387,34 @@ interface ListSheetProps {
   icon2?: React.ReactNode;
   action?: () => void;
   className?: string;
+  final?: boolean;
 }
 
-function ListSheet({ name, icon, icon2, action, className }: ListSheetProps) {
+function ListSheet({
+  name,
+  icon,
+  icon2,
+  action,
+  className,
+  final = false,
+}: ListSheetProps) {
   return (
-    <Button
-      onClick={action}
-      variant="ghost"
-      className={cn(
-        "w-full flex justify-between items-center h-10 text-base ",
-        className
-      )}
-    >
-      <div className="flex items-center gap-2 truncate line-clamp-1 justify-between">
-        {icon}
-        {name}
-      </div>
-      {icon2}
-    </Button>
+    <>
+      <Button
+        onClick={action}
+        variant="ghost"
+        className={cn(
+          "w-full flex justify-between items-center h-10 text-base ",
+          className
+        )}
+      >
+        <div className="flex items-center gap-2 truncate line-clamp-1 justify-between">
+          {icon}
+          {name}
+        </div>
+        {icon2}
+      </Button>
+      {final ? <Separator /> : <></>}
+    </>
   );
 }

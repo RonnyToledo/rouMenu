@@ -15,11 +15,13 @@ export async function POST(request: NextRequest) {
 
   let comentario: Comentario;
   let uid: string;
+  let user_id: string;
 
   try {
     const body = await request.json();
     comentario = body.comentario;
     uid = body.uid;
+    user_id = body.uuid;
     if (typeof comentario !== "object" || typeof comentario.star !== "number") {
       throw new Error("Payload de comentario inválido");
     }
@@ -29,10 +31,10 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-
+  console.log({ ...comentario, UIStore: uid, user_id });
   const { data: tienda, error } = await supabase
     .from("comentTienda")
-    .insert({ ...comentario, UIStore: uid })
+    .insert({ ...comentario, UIStore: uid, user_id })
     .select("star")
     .single();
 

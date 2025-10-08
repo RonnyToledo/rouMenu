@@ -34,7 +34,7 @@ export async function generateMetadata({
     const { name, parrrafo, urlPoster } = product;
 
     return {
-      title: `rouMenu | Search by ${name}`,
+      title: `rouMenu | ${name}`,
       description: parrrafo,
       openGraph: {
         type: "website",
@@ -86,14 +86,15 @@ export default async function RootLayout({
     { tienda_slug: shop }
   );
 
-  let store = trasnformData(storeOne);
-  if (typeof storeOne.edit == "string") {
-    store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
-  }
   if (error) {
     console.error("Error al obtener tienda:", error);
   } else {
     console.info("Store listo");
+  }
+  console.log(storeOne);
+  let store = trasnformData(storeOne);
+  if (typeof storeOne.edit == "string") {
+    store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
   }
   if (!store.sitioweb) notFound();
 
@@ -113,7 +114,7 @@ function trasnformData(store: AppState): AppState {
   return {
     ...store,
 
-    products: store.products.map((obj) => ({
+    products: (store.products || []).map((obj) => ({
       ...obj,
       Cant: 0,
       comparar: false,

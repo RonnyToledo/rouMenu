@@ -5,7 +5,7 @@ import { Product } from "@/context/InitialStatus";
 import { toast } from "sonner";
 import "react-phone-input-2/lib/style.css";
 import { isValidPhoneNumber } from "libphonenumber-js";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { UploadPedido } from "./UploadPedido";
 import Details from "./Details";
 import Resumen from "./Resumen";
@@ -17,6 +17,7 @@ import { smartRound } from "@/functions/precios";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
+import { useAuth } from "@/context/AuthContext";
 
 export interface CompraInterface {
   pago: string;
@@ -41,6 +42,7 @@ export interface UploadCompraInterface {
   uid: string;
   nombre: string;
   phonenumber: string;
+  user_id: string;
 }
 const initialState = {
   pago: "cash",
@@ -56,15 +58,32 @@ const initialState = {
   moneda: "",
 };
 export default function CarritoPage() {
+  const params = useParams();
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const shopName = params.shop as string;
+
   const newUID = uuidv4();
   const [currentStep, setCurrentStep] = useState(1);
   const { store, dispatchStore } = useContext(MyContext);
-  const router = useRouter();
   const [count, setCount] = useState<number>(3);
   const [downloading, setDownloading] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const data = GetInformationCart(store.sitioweb || "");
+  const [compra, setCompra] = useState<CompraInterface>({
+    ...initialState,
+    people: data.nombre,
+    phonenumber: data.phone.startsWith("+") ? data.phone.slice(1) : data.phone,
+  });
 
-  const [compra, setCompra] = useState<CompraInterface>(initialState);
+  // Protección adicional en el cliente (por si el middleware falla)
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push(
+        `/t/${shopName}?showLogin=true&message=Debes iniciar sesión para ver el carrito`
+      );
+    }
+  }, [user, loading, shopName, router]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -151,6 +170,7 @@ export default function CarritoPage() {
             uid: newUID,
             nombre: compra.people,
             phonenumber: compra.phonenumber,
+            user_id: user?.id || "",
           });
 
           // Pausa para calificar la tienda (lógica después de subir)
@@ -219,16 +239,33 @@ export default function CarritoPage() {
     if (compra.lugar !== "Local") {
       mensaje += `- Domicilio: $${compra.shipping}`;
     }
-    mensaje += `- Moneda: $${compra.moneda}`;
+    mensaje += `- Moneda: $${compra.moneda}\n`;
     if (compra.code.name) {
       mensaje += `- Codigo de ${store.afiliate ? "Afilado" : "Descuento"}: ${compra.code.name}\n`;
     }
+    SavedInformationCart(
+      store.sitioweb || "",
+      compra.people,
+      compra.phonenumber
+    );
 
     const mensajeCodificado = encodeURIComponent(mensaje);
     const urlWhatsApp = `https://wa.me/${store.cell}?text=${mensajeCodificado}`;
     dispatchStore({ type: "Clean" });
     window.open(urlWhatsApp, "_blank");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Se está redirigiendo
+  }
 
   const StepIndicator = () => (
     <div className="flex items-center justify-center mb-2 sticky top-12 backdrop-blur-lg z-10">
@@ -303,6 +340,11 @@ export default function CarritoPage() {
           </>
         )}
         <Rating
+          uuid={user?.id || ""}
+          user={user?.user_metadata.full_name || "user"}
+          imageUser={
+            user?.user_metadata.avatar_url || user?.user_metadata.avatar_url
+          }
           isOpen={showRatingModal}
           onClose={() => {
             setShowRatingModal(false);
@@ -352,3 +394,21 @@ const getLocalISOString = () => {
   const localDate = new Date(now.getTime() - offset * 60000);
   return localDate.toISOString().slice(0, 19);
 };
+function SavedInformationCart(sitioweb: string, nombre: string, phone: string) {
+  window.localStorage.setItem(
+    `${sitioweb}-informationCart`,
+    JSON.stringify({ nombre, phone })
+  );
+}
+function GetInformationCart(sitioweb: string): {
+  nombre: string;
+  phone: string;
+} {
+  const saved =
+    window.localStorage.getItem(`${sitioweb}-informationCart`) || "";
+  if (saved) {
+    return JSON.parse(saved);
+  } else {
+    return { nombre: "", phone: "" };
+  }
+}

@@ -1,7 +1,15 @@
 "use client";
-import React, { ReactNode, useState, createContext, useEffect } from "react";
+import React, {
+  ReactNode,
+  useState,
+  createContext,
+  useEffect,
+  useContext,
+} from "react";
 import { usePathname } from "next/navigation";
 import { logoApp } from "@/lib/image";
+import { AuthContext } from "@/context/AuthContext";
+import LoginPopover from "@/components/GeneralComponents/LoginPopover"; // <-- import del popover
 
 export type Hero = {
   UUID?: string;
@@ -132,8 +140,12 @@ export default function GeneralProvider({
   children,
   storeSSD,
 }: MyProviderProps) {
+  const { user } = useContext(AuthContext);
   const [generalData, setGeneralData] = useState(storeSSD ?? data);
   const pathname = usePathname();
+  // Estado para controlar el LoginPopover
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const LOGIN_SHOWN_KEY = "rou_login_shown_v1";
 
   useEffect(() => {
     // Si la URL tiene hash no hacemos scroll
@@ -144,9 +156,44 @@ export default function GeneralProvider({
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname]);
+  console.log(isLoginOpen);
+  // Abrir el popover la primera vez que el usuario entra si no hay user
+  useEffect(() => {
+    // solo en cliente
+    console.log("A");
+
+    if (typeof window === "undefined") return;
+    console.log("B");
+
+    // Si ya hay usuario, aseguramos que el popover esté cerrado y marcamos como mostrado
+    if (user) {
+      console.log(user);
+      setIsLoginOpen(false);
+
+      return;
+    }
+
+    // Si no hay usuario, solo abrir si no se ha mostrado antes
+    try {
+      console.log("C");
+      setIsLoginOpen(true);
+    } catch (e) {
+      // Si localStorage falla, aún abrimos para no bloquear la UX
+      setIsLoginOpen(true);
+    }
+  }, [user]);
+
+  const handleCloseLogin = () => {
+    setIsLoginOpen(false);
+  };
 
   return (
     <MyGeneralContext.Provider value={{ generalData, setGeneralData }}>
+      <LoginPopover
+        isOpen={isLoginOpen}
+        onClose={handleCloseLogin}
+        redirectTo={pathname ?? "/"}
+      />
       <main>{children}</main>
     </MyGeneralContext.Provider>
   );

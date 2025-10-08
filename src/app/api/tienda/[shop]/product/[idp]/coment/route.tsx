@@ -20,9 +20,11 @@ export async function POST(
 
   // 1. Parsear el body como JSON
   let comentario: ComentarioPayload;
+  let user_id: string;
   try {
     const body = await request.json();
     comentario = body.comentario;
+    user_id = body.uuid;
     if (typeof comentario !== "object" || typeof comentario.star !== "number") {
       throw new Error("Payload de comentario inválido");
     }
@@ -36,7 +38,7 @@ export async function POST(
   // 2. Insertar en Supabase
   const { data: inserted, error } = await supabase
     .from("coment")
-    .insert({ ...comentario, UIProduct: idp })
+    .insert({ ...comentario, UIProduct: idp, user_id })
     .select("star")
     .single(); // devuelve los registros insertados
 

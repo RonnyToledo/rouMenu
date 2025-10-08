@@ -38,6 +38,7 @@ export default function Product({ id }: { id: string }) {
   const router = useRouter();
   const [product, setProduct] = useState<ProductInterface>();
   const [countAddCart, setCountAddCart] = useState<number>(1);
+  const [buttonClick, setButtonClick] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const touchStartX = useRef<number>(0);
@@ -61,6 +62,13 @@ export default function Product({ id }: { id: string }) {
         : 0;
     setCountAddCart(initialCount);
   }, [store.products, id]);
+
+  useEffect(() => {
+    (product?.agregados.reduce((sum, agg) => sum + agg.cant, 0) || 0) > 0 &&
+    !buttonClick
+      ? setCountAddCart(0)
+      : setCountAddCart(countAddCart);
+  }, [product?.agregados]);
 
   const handleToCart = (productToCart: ProductInterface) => {
     setIsAddingToCart(true);
@@ -460,9 +468,18 @@ export default function Product({ id }: { id: string }) {
                       size="sm"
                       disabled={
                         store.stocks &&
-                        (product.stock || 0) - product.Cant <= countAddCart
+                        (product.stock || 0) -
+                          product.Cant -
+                          product.agregados.reduce(
+                            (sum, agg) => sum + agg.cant,
+                            0
+                          ) <=
+                          countAddCart
                       }
-                      onClick={() => setCountAddCart(countAddCart + 1)}
+                      onClick={() => {
+                        setCountAddCart(countAddCart + 1);
+                        setButtonClick(true);
+                      }}
                       className="hover:scale-105 transition-transform duration-200"
                     >
                       <Plus className="w-4 h-4" />
@@ -556,7 +573,7 @@ export default function Product({ id }: { id: string }) {
                     value="description"
                     disabled={!product?.descripcion}
                   >
-                    Desc
+                    Detalles
                   </TabsTrigger>
 
                   <TabsTrigger value="rating">Rating</TabsTrigger>

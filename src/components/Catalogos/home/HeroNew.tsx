@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
@@ -7,8 +7,41 @@ import { MyContext } from "@/context/MyContext";
 import { logoApp } from "@/lib/image";
 import { MdDeliveryDining } from "react-icons/md";
 import { FaShop } from "react-icons/fa6";
+import { useAuth } from "@/context/AuthContext";
+import { useParams, useSearchParams } from "next/navigation";
+import LoginPopover from "@/components/GeneralComponents/LoginPopover";
+
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
+  const searchParams = useSearchParams();
+  const params = useParams();
+  const { user } = useAuth();
+
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginMessage, setLoginMessage] = useState("");
+  const [redirectTo, setRedirectTo] = useState("");
+
+  const shopName = params.shop as string;
+
+  useEffect(() => {
+    // Verificar si debe mostrar el login
+    const shouldShowLogin = searchParams.get("showLogin") === "true";
+    const message = searchParams.get("message");
+    const redirect = searchParams.get("redirectTo");
+
+    if (shouldShowLogin && !user) {
+      setShowLogin(true);
+      setLoginMessage(message || "Debes iniciar sesión para continuar");
+      setRedirectTo(redirect || `/t/${shopName}/carrito`);
+
+      // Limpiar los parámetros de la URL sin recargar
+      const url = new URL(window.location.href);
+      url.searchParams.delete("showLogin");
+      url.searchParams.delete("message");
+      url.searchParams.delete("redirectTo");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams, user, shopName]);
 
   return (
     <div className="p-3 space-y-3">
@@ -71,6 +104,13 @@ export default function HeroNew({}) {
           )}
         </div>
       </div>
+      {/* Popover de Login */}
+      <LoginPopover
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        redirectTo={redirectTo || `/t/${shopName}/carrito`}
+        message={loginMessage}
+      />
     </div>
   );
 }

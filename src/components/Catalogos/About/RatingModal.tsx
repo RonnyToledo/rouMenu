@@ -17,14 +17,19 @@ import { MyContext } from "@/context/MyContext";
 import axios from "axios";
 import { toast } from "sonner";
 import { logoUser } from "@/lib/image";
+import { IoIosSend } from "react-icons/io";
+import { Spinner } from "@/components/ui/spinner";
 
 interface RatingModalProps {
   isOpen: boolean;
   onClose: (open: boolean) => void;
   userName: string;
+  user?: string;
   starsSelected: number;
+  imageUser?: string;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   sendToWhatsapp?: () => void;
+  uuid: string;
 }
 export interface RatingInterface {
   nombre: string;
@@ -43,11 +48,20 @@ export const Rating: FC<RatingModalProps> = ({
   starsSelected,
   userName,
   setIsModalOpen,
+  imageUser = logoUser,
+  user,
+  uuid,
   sendToWhatsapp,
 }) => {
   const { store, dispatchStore } = useContext(MyContext);
   const [loading, setLoading] = useState(false);
-  const [rating, setRating] = useState<RatingInterface>(initialState);
+  const [rating, setRating] = useState<RatingInterface>({
+    ...initialState,
+    nombre: user || initialState.nombre,
+  });
+  useEffect(() => {
+    if (user) setRating((prev) => ({ ...prev, nombre: user }));
+  }, [user]);
 
   useEffect(() => {
     setRating((prev) => ({ ...prev, selectedRating: starsSelected }));
@@ -56,6 +70,9 @@ export const Rating: FC<RatingModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      if (!uuid) {
+        throw new Error("No existe el usuario");
+      }
       if (!rating.nombre) {
         throw new Error("No existe el campo de nombre");
       }
@@ -68,13 +85,14 @@ export const Rating: FC<RatingModalProps> = ({
             name: rating.nombre,
           },
           uid: store.UUID,
+          uuid,
         },
         { headers: { "Content-Type": "application/json" } } // Cambia a application/json
       );
 
       if (res.status === 200 || res.status === 201) {
         window.localStorage.setItem(`${store.sitioweb}-userRating`, "ok");
-        toast("Tarea Ejecutada", {
+        toast.success("Tarea Ejecutada", {
           description: "Comentario realizado",
         });
         dispatchStore({
@@ -95,7 +113,6 @@ export const Rating: FC<RatingModalProps> = ({
       setLoading(false);
     }
   };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -103,7 +120,7 @@ export const Rating: FC<RatingModalProps> = ({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-3">
               <Avatar className="w-10 h-10">
-                <Image src={logoUser} alt={userName} width={40} height={40} />
+                <Image src={imageUser} alt={userName} width={40} height={40} />
               </Avatar>
               <div className="flex flex-col">
                 <DialogTitle className="text-base">{userName}</DialogTitle>
@@ -119,7 +136,7 @@ export const Rating: FC<RatingModalProps> = ({
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "Enviando..." : "Enviar"}
+              {loading ? <Spinner /> : <IoIosSend />}
             </Button>
           </div>
         </DialogHeader>
@@ -127,6 +144,7 @@ export const Rating: FC<RatingModalProps> = ({
           <Input
             placeholder="Nombre"
             className="bg-transparent border-gray-300 text-sm"
+            readOnly={!!user}
             value={rating.nombre}
             onChange={(e) =>
               setRating({ ...rating, nombre: e.currentTarget.value })

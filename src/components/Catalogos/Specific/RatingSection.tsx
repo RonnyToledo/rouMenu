@@ -7,19 +7,34 @@ import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { RatingModalProduct } from "./RatingModalProduct";
+import { useAuth } from "@/context/AuthContext";
+import { usePathname } from "next/navigation";
+import LoginPopover from "@/components/GeneralComponents/LoginPopover";
+
 export default function RatingSection({
   specific,
 }: {
   specific: string;
   sitioweb: string;
 }) {
+  const pathname = usePathname();
   const { store } = useContext(MyContext);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user, loading } = useAuth();
   const [selectedRating, setSelectedRating] = useState(0);
+
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
 
   const handleStarClick = (rating: number) => {
     setSelectedRating(rating);
-    setIsModalOpen(true);
+
+    if (user && loading === false) {
+      setReviewOpen(true);
+      return;
+    }
+
+    // Si no está logueado -> marcar pending y abrir LoginPopover
+    setIsLoginOpen(true);
   };
 
   return (
@@ -71,8 +86,10 @@ export default function RatingSection({
             </div>
 
             <div className="border-t border-gray-800 pt-2">
-              <h3 className="text-xl mb-2">Califica este producto</h3>
-              <p className="text-gray-400 mb-4">
+              <h3 className="text-lg mb-1 text-center">
+                Califica este producto
+              </h3>
+              <p className="text-gray-400 mb-4 text-base text-center">
                 Comparte tu opinión con otros usuarios
               </p>
               <div className="flex gap-2 justify-center">
@@ -93,14 +110,26 @@ export default function RatingSection({
                 ))}
               </div>
             </div>
-
+            <LoginPopover
+              isOpen={isLoginOpen}
+              onClose={() => {
+                setIsLoginOpen(false);
+                // Si el usuario cerró el popover sin loguearse, desistimos de la intención
+              }}
+              redirectTo={pathname} // Ruta dinámica
+            />
             <RatingModalProduct
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
+              isOpen={reviewOpen}
+              onClose={() => setReviewOpen(false)}
               id={specific}
               userName="Usuario"
-              setIsModalOpen={setIsModalOpen}
+              setIsModalOpen={setReviewOpen}
               starsSelected={selectedRating}
+              user={user?.user_metadata.full_name}
+              imageUser={
+                user?.user_metadata.avatar_url || user?.user_metadata.avatar_url
+              }
+              uuid={user?.id || ""}
             />
           </div>
         ))}
@@ -131,7 +160,7 @@ function StarSpecifications({ datos }: { datos: StarDistribution }) {
         // evita dividir por cero
         const porcentaje = totalVotos > 0 ? (votos * 100) / totalVotos : 0;
         return (
-          <div key={item} className="flex items-center gap-2 mb-1">
+          <div key={item} className="flex items-center gap-1">
             <span className="w-3">{item}</span>
             <div className="flex-1 h-2 bg-gray-400 rounded-full overflow-hidden">
               <div

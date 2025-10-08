@@ -57,14 +57,14 @@ export default function Header({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (pathname !== "/buscar" && !search) return;
-    const url = `/buscar${
-      search ? `?buscar=${encodeURIComponent(search)}` : ""
-    }`;
+    const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
     router.replace(url);
   }, [search, pathname, router]);
 
   return (
     <div className="">
+      {/* LoginPopover: se abrirá si no hay user y no se mostró antes */}
+
       {!pathname.includes("/t/") && (
         <div className="sticky top-0 flex items-center bg-gray-100 p-2 gap-2 justify-between z-50 shadow-lg">
           <div className="bg-white rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2">
@@ -92,9 +92,7 @@ export default function Header({ children }: { children: ReactNode }) {
             ) : (
               <div className="flex w-full flex-1 items-stretch rounded-2xl h-full overflow-hidden">
                 <Input
-                  placeholder={`Buscar "${
-                    generalData.random_title?.toLowerCase() ?? ""
-                  }"`}
+                  placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
                   onChange={(e) => setSearch(e.target.value)}
                   className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
                   value={search}
@@ -134,32 +132,6 @@ export default function Header({ children }: { children: ReactNode }) {
                           )
                         )}
                     </div>
-
-                    {/*  
-                     <div className="space-y-3">
-                      <h3 className="text-lg font-semibold text-card-foreground mb-4">
-                        Elementos Recientes
-                      </h3>
-                      {Array.from({ length: 8 }, (_, i) => (
-                        <div
-                          key={i}
-                          className="bg-muted/50 p-4 rounded-xl border border-border hover:bg-muted transition-colors"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium text-card-foreground">
-                                Elemento {i + 1}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                Descripción del elemento
-                              </p>
-                            </div>
-                            <div className="w-2 h-2 bg-secondary rounded-full" />
-                          </div>
-                        </div>
-                      ))}
-                    </div> 
-                    */}
                   </div>
                 </DrawerContent>
               </Drawer>
