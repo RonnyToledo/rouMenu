@@ -75,7 +75,6 @@ export default function Header() {
     setisOpenStore(isOpen((store.horario || []) as ScheduleInterface[]));
   }, [store]);
 
-  console.log(context);
   const profile = useMemo(
     () =>
       context?.user

@@ -156,18 +156,13 @@ export default function GeneralProvider({
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname]);
-  console.log(isLoginOpen);
   // Abrir el popover la primera vez que el usuario entra si no hay user
   useEffect(() => {
     // solo en cliente
-    console.log("A");
-
     if (typeof window === "undefined") return;
-    console.log("B");
 
     // Si ya hay usuario, aseguramos que el popover esté cerrado y marcamos como mostrado
     if (user) {
-      console.log(user);
       setIsLoginOpen(false);
 
       return;
@@ -175,7 +170,6 @@ export default function GeneralProvider({
 
     // Si no hay usuario, solo abrir si no se ha mostrado antes
     try {
-      console.log("C");
       setIsLoginOpen(true);
     } catch (e) {
       // Si localStorage falla, aún abrimos para no bloquear la UX

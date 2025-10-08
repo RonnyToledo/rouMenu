@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  console.log({ ...comentario, UIStore: uid, user_id });
   const { data: tienda, error } = await supabase
     .from("comentTienda")
     .insert({ ...comentario, UIStore: uid, user_id })

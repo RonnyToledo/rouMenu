@@ -91,7 +91,6 @@ export default async function RootLayout({
   } else {
     console.info("Store listo");
   }
-  console.log(storeOne);
   let store = trasnformData(storeOne);
   if (typeof storeOne.edit == "string") {
     store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });

@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 export default function PopupCallbackPage() {
-  console.log("PopupCallbackPage loaded");
   useEffect(() => {
     const run = async () => {
       const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
