@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Minus, Plus, Trash2, ArrowLeft, Save } from "lucide-react";
+import Image from "next/image";
 
 interface OrderItem {
   id: string;
@@ -203,7 +204,8 @@ export default function EditOrderPage() {
                     className="p-6 hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center gap-6">
-                      <img
+                      <Image
+                        fill
                         src={item.image || "/placeholder.svg"}
                         alt={item.name}
                         className="h-24 w-24 rounded-lg object-cover bg-muted"

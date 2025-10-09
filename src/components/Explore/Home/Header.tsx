@@ -142,9 +142,9 @@ export default function Header({ children }: { children: ReactNode }) {
         </div>
       )}
       {children}
-      {!pathname.includes("/t/") && !pathname.includes("/buscar") && (
-        <ExplorationFooter />
-      )}
+      {!pathname.includes("/t/") &&
+        !pathname.includes("/buscar") &&
+        !pathname.includes("/user") && <ExplorationFooter />}
     </div>
   );
 }

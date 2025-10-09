@@ -18,6 +18,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
 import { useAuth } from "@/context/AuthContext";
+import { redondearAMultiploDe5 } from "@/reducer/reducerGeneral";
 
 export interface CompraInterface {
   pago: string;
@@ -69,13 +70,12 @@ export default function CarritoPage() {
   const [count, setCount] = useState<number>(3);
   const [downloading, setDownloading] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
-  const data = GetInformationCart(store.sitioweb || "");
+  const [data, setData] = useState(GetInformationCart(store.sitioweb || ""));
   const [compra, setCompra] = useState<CompraInterface>({
     ...initialState,
     people: data.nombre,
     phonenumber: data.phone.startsWith("+") ? data.phone.slice(1) : data.phone,
   });
-
   // Protección adicional en el cliente (por si el middleware falla)
   useEffect(() => {
     if (!loading && !user) {
@@ -101,28 +101,109 @@ export default function CarritoPage() {
         }
       : { discount: 0, name: "" };
 
-    setCompra((prevCompra) => ({
-      ...prevCompra,
-      code,
-      moneda: store.moneda_default.moneda,
-      pedido: store.products.filter(
-        (obj) => obj.Cant > 0 || obj.agregados.some((agg) => agg.cant > 0)
-      ),
-      total: store.products.reduce(
-        (total, item) =>
-          total +
-          ((item.price || 0) + item.embalaje) * item.Cant +
-          (item?.agregados.reduce(
-            (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
-            0
-          ) || 0),
-        0
-      ),
-    }));
-  }, [store.envios, store.products, store.moneda_default, store.afiliate]);
+    // Uso dentro de setCompra
+    setCompra((prevCompra) => {
+      // 1) moneda destino (la del store marcada como defecto)
+      const monedaDestino = store.moneda.find((m) => m.defecto) ?? {
+        id: 0,
+        valor: 1,
+        nombre: "",
+      };
+      const valorDestino = monedaDestino.valor ?? 1;
+      const nombreDestino = monedaDestino.nombre ?? "";
+
+      // 2) construir pedido convertido (usamos product.default_moneda como moneda origen si existe)
+      const pedido = store.products
+        .filter(
+          (obj) => obj.Cant > 0 || obj.agregados.some((agg) => agg.cant > 0)
+        )
+        .map((p) => {
+          // encontrar valor origen (si product tiene default_moneda)
+          const monedaOrigen =
+            store.moneda.find((m) => m.id === p.default_moneda) ??
+            monedaDestino;
+          const valorOrigen = monedaOrigen?.valor ?? 1;
+
+          const convertedPrice = convertirYRedondear(
+            p.price ?? 0,
+            valorOrigen,
+            valorDestino
+          );
+          const convertedEmbalaje = convertirYRedondear(
+            p.embalaje ?? 0,
+            valorOrigen,
+            valorDestino
+          );
+          const convertedPriceCompra = convertirYRedondear(
+            p.priceCompra ?? 0,
+            valorOrigen,
+            valorDestino
+          );
+
+          const agregados = (p.agregados ?? []).map((a) => {
+            const aPrice = convertirYRedondear(
+              a.price ?? 0,
+              valorOrigen,
+              valorDestino
+            );
+            return {
+              ...a,
+              price: aPrice,
+            };
+          });
+
+          return {
+            ...p,
+            price: convertedPrice,
+            embalaje: convertedEmbalaje,
+            priceCompra: convertedPriceCompra,
+            default_moneda: monedaDestino.id ?? 0, // ahora indicamos que mostramos en monedaDestino
+            agregados,
+          };
+        });
+
+      // 3) calcular total usando los valores convertidos
+      const total = pedido.reduce((acc, item) => {
+        const qty = item.Cant ?? 0;
+
+        // total por producto: (precio + embalaje) * cantidad
+        const productLine = ((item.price ?? 0) + (item.embalaje ?? 0)) * qty;
+
+        // agregados: sumar (precio_agregado + embalaje_por_producto) * cantidad_agregado
+        // Nota: conservo tu intención original de sumar embalaje por cada agregado; si no lo quieres, quita +(item.embalaje ?? 0)
+        const agregadosSum =
+          (item.agregados ?? []).reduce((sum, agg) => {
+            const aggQty = agg.cant ?? 0;
+            return sum + ((agg.price ?? 0) + (item.embalaje ?? 0)) * aggQty;
+          }, 0) || 0;
+
+        return acc + productLine + agregadosSum;
+      }, 0);
+
+      // opcional: redondear total final a moneda
+      const totalRedondeado = smartRound(total);
+
+      return {
+        ...prevCompra,
+        code,
+        moneda: nombreDestino,
+        pedido,
+        total: totalRedondeado,
+      };
+    });
+  }, [
+    store.envios,
+    store.products,
+    store.moneda,
+    store.afiliate,
+    store.codeDiscount,
+  ]);
 
   //Detectar si no  hay productos en el carrito
   useEffect(() => {
+    if (store.sitioweb) {
+      setData(GetInformationCart(store.sitioweb || ""));
+    }
     if (compra.pedido.length === 0 && store.sitioweb) {
       // Iniciar el contador regresivo
       const interval = setInterval(() => {
@@ -235,7 +316,7 @@ export default function CarritoPage() {
     const discountTotal =
       smartRound(compra.total) * (1 - compra.code.discount / 100);
 
-    mensaje += `- Total de la orden: ${discountTotal} ${store.moneda_default.moneda}\n`;
+    mensaje += `- Total de la orden: ${discountTotal} ${store.moneda.find((m) => m.defecto)?.nombre || ""}\n`;
     if (compra.lugar !== "Local") {
       mensaje += `- Domicilio: $${compra.shipping}`;
     }
@@ -308,7 +389,7 @@ export default function CarritoPage() {
         {currentStep === 1 && (
           <>
             <div className="min-h-screen space-y-2">
-              <CartItems />
+              <CartItems compra={compra} setCompra={setCompra} />
               {store.marketing && store.codeDiscount && !store.afiliate && (
                 <CodeDiscount compra={compra} setCompra={setCompra} />
               )}
@@ -404,11 +485,23 @@ function GetInformationCart(sitioweb: string): {
   nombre: string;
   phone: string;
 } {
-  const saved =
-    window.localStorage.getItem(`${sitioweb}-informationCart`) || "";
+  const saved = localStorage.getItem(`${sitioweb}-informationCart`) || "";
   if (saved) {
     return JSON.parse(saved);
   } else {
     return { nombre: "", phone: "" };
   }
+}
+export function convertirYRedondear(
+  amount: number,
+  valorSrc: number,
+  valorDst: number
+) {
+  const a = Number(amount ?? 0);
+  if (!isFinite(a)) return 0;
+  const vs = Number(valorSrc ?? 1) || 1;
+  const vd = Number(valorDst ?? 1) || 1;
+  if (vd === 0) return smartRound(redondearAMultiploDe5(a * vs)); // fallback defensivo
+  const converted = (a * vs) / vd;
+  return smartRound(redondearAMultiploDe5(converted));
 }

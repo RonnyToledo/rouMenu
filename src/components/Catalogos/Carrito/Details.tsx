@@ -105,7 +105,7 @@ export default function Details({ compra, setCompra }: Props) {
                     </p>
                     <p className="text-xs text-gray-500">
                       {smartRound(obj.precio).toFixed(2)}{" "}
-                      {store.moneda_default.moneda}
+                      {store.moneda.find((m) => m.defecto)?.nombre || ""}
                     </p>
                   </div>
                 </label>

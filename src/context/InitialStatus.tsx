@@ -2,8 +2,10 @@ export interface Product {
   productId: string;
   title: string;
   image?: string;
+  creado: string;
   favorito?: boolean;
   descripcion?: string;
+  default_moneda: number;
   Cant: number;
   caja?: string;
   visible: boolean;
@@ -13,7 +15,7 @@ export interface Product {
   oldPrice: number;
   price: number;
   stock?: number;
-  creado: string;
+  priceCompra: number;
   order: number;
   storeId?: string;
   visitas: number;
@@ -37,8 +39,11 @@ export interface ScheduleInterface {
   cierre: string;
 }
 export interface Current {
+  id: number;
   valor: number;
-  moneda: string;
+  nombre: string;
+  ui_store: string;
+  defecto: boolean;
 }
 export interface Sends {
   lugar: string;
@@ -152,7 +157,6 @@ export interface AppState {
   login: boolean;
   marketing: boolean;
   moneda: Current[];
-  moneda_default: Current;
   municipio?: string;
   name?: string; // Nombre de la tienda
   parrrafo?: string; // Nombre de la tienda
@@ -172,7 +176,6 @@ export interface AppState {
 // Estado inicial tipado a AppState
 export const initialState: AppState = {
   edit: { grid: true, square: false, horizontal: false, minimalista: false },
-  moneda_default: { valor: 0, moneda: "" },
   urlPoster: "",
   id: 0,
   products: [],

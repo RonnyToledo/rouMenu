@@ -145,7 +145,6 @@ export default function GeneralProvider({
   const pathname = usePathname();
   // Estado para controlar el LoginPopover
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const LOGIN_SHOWN_KEY = "rou_login_shown_v1";
 
   useEffect(() => {
     // Si la URL tiene hash no hacemos scroll
@@ -173,6 +172,7 @@ export default function GeneralProvider({
       setIsLoginOpen(true);
     } catch (e) {
       // Si localStorage falla, aún abrimos para no bloquear la UX
+      console.error("Error accediendo a localStorage", e);
       setIsLoginOpen(true);
     }
   }, [user]);

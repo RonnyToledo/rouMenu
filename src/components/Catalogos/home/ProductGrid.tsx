@@ -89,7 +89,9 @@ export default function ProductGrid({
         <div className={`flex items-center justify-between mt-3`}>
           {product.venta ? (
             <p className="font-bold w-full text-[10px] text-[var(--text-light)] ">
-              ${smartRound(product.price || 0)} {store?.moneda_default?.moneda}
+              ${smartRound(product.price || 0)}{" "}
+              {store.moneda.find((m) => m.id == product.default_moneda)
+                ?.nombre || ""}{" "}
             </p>
           ) : (
             <div />

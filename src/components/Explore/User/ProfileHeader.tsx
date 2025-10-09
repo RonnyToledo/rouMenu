@@ -1,13 +1,11 @@
 "use client";
 import React, { useContext } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Settings, LogOut } from "lucide-react";
 import { AuthContext } from "@/context/AuthContext";
 import { logoUser } from "@/lib/image";
 
 export function ProfileHeader() {
-  const { user, loading } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   return (
     <div className="mb-12">
       <div className="flex  items-start justify-center">

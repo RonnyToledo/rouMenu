@@ -24,6 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { Trash2 } from "lucide-react";
+import { getTotalFinal } from "@/functions/getTotalPedido";
 
 export default function DrawerCart() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -51,18 +52,6 @@ export default function DrawerCart() {
     );
   };
 
-  const getTotalPrice = () => {
-    return store.products.reduce(
-      (total, item) =>
-        total +
-        ((item.price || 0) + item.embalaje) * item.Cant +
-        (item?.agregados.reduce(
-          (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
-          0
-        ) || 0),
-      0
-    );
-  };
   useEffect(() => {
     const value = store.products.reduce(
       (total, item) =>
@@ -138,7 +127,7 @@ export default function DrawerCart() {
                     {getTotalItems() === 1 ? "producto" : "productos"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    Total: ${getTotalPrice().toFixed(2)}
+                    Total: ${getTotalFinal(store, store.products)}
                   </p>
                 </div>
               </div>
@@ -170,7 +159,7 @@ export default function DrawerCart() {
                       {getTotalItems() === 1 ? "producto" : "productos"}
                     </p>
                     <p className="text-xs text-gray-500">
-                      Total: ${getTotalPrice().toFixed(2)}
+                      Total: ${getTotalFinal(store, store.products)}
                     </p>
                   </div>
                 </div>
@@ -188,6 +177,7 @@ export default function DrawerCart() {
                     <ListCard
                       productId={item.productId || ""}
                       caja={item.caja || ""}
+                      default_moneda={item.default_moneda}
                       RedirectLink={RedirectLink}
                       title={item.title || "Producto"}
                       image={item.image || store.urlPoster || logoApp}
@@ -209,6 +199,7 @@ export default function DrawerCart() {
                           productId={item.productId || ""}
                           caja={item.caja || ""}
                           key={index}
+                          default_moneda={item.default_moneda}
                           embalaje={item.embalaje}
                           RedirectLink={RedirectLink}
                           title={`${item.title}-${agg.name}` || "Producto"}
@@ -235,7 +226,7 @@ export default function DrawerCart() {
             <div className="flex items-center justify-between mb-1">
               <span className="font-semibold">Total:</span>
               <span className="font-bold text-lg">
-                ${getTotalPrice().toFixed(2)}
+                ${getTotalFinal(store, store.products)}
               </span>
             </div>
             <Button
@@ -276,6 +267,7 @@ interface ListCardInterface {
   productId: string;
   caja: string;
   image: string;
+  default_moneda: number;
   title: string;
   price: number;
   embalaje: number;
@@ -289,11 +281,12 @@ function ListCard({
   image,
   title,
   price,
-
+  default_moneda,
   embalaje,
   cantidad,
   handleToCart,
 }: ListCardInterface) {
+  const { store } = useContext(MyContext);
   return (
     <div className="shadow-sm">
       <div className="flex justify-between items-center px-3 py-2 ">
@@ -314,7 +307,11 @@ function ListCard({
               {title}
             </p>
             <p className="text-xs text-gray-500 text-center">
-              ${price} ×{cantidad} {embalaje > 0 ? `+ ${embalaje}` : ""}
+              ${price}
+              {" × "}
+              {cantidad} {embalaje > 0 ? ` + ${embalaje} embalaje` : ""}
+              {} {" - "}
+              {store.moneda.find((m) => m.id == default_moneda)?.nombre || ""}
             </p>
           </div>
         </Button>

@@ -2,7 +2,6 @@
 import {
   StarDistribution,
   AppState,
-  Current,
   Product,
   AgregadosInterface,
 } from "@/context/InitialStatus";
@@ -14,7 +13,7 @@ import { saveCartToIDB, clearCartFromIDB } from "@/lib/indexedDBCart"; // <-- im
 // Acciones tipadas
 export type AppAction =
   | { type: "Add"; payload: Partial<AppState> }
-  | { type: "ChangeCurrent"; payload: string } // JSON de Current
+  | { type: "ChangeCurrent"; payload: number } // JSON de Current
   | { type: "Clean" }
   | { type: "AddCart"; payload: string }
   | { type: "AddComparar"; payload: string }
@@ -222,41 +221,73 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
       };
 
     case "ChangeCurrent": {
-      const newDefault = JSON.parse(action.payload) as Current;
+      const id = action.payload as number;
+      // moneda destino
+      const newDefault = state.moneda.find((m) => m.id === id);
+      if (!newDefault) return state; // id inválido
+
+      // moneda que estaba marcada como defecto antes del cambio (si existe)
+      const oldDefault = state.moneda.find((m) => m.defecto) ?? { valor: 1 };
+
+      const valorNew = Number(newDefault.valor ?? 1) || 1;
+      const valorOld = Number(oldDefault.valor ?? 1) || 1;
+
+      // mapa id -> moneda (para resolver origenes de cada producto)
+      const monedaMap = (state.moneda || []).reduce<
+        Record<number, (typeof state.moneda)[0]>
+      >((acc, m) => {
+        acc[m.id] = m;
+        return acc;
+      }, {});
+
+      // factor general para envios (asumimos env.precio estaba en la moneda que se estaba mostrando: oldDefault)
+      const envFactor = valorOld / valorNew;
+
       return {
         ...state,
-        moneda_default: newDefault,
-        envios:
-          state.envios?.map((env) => ({
-            ...env,
-            precio: smartRound(
-              redondearAMultiploDe5(env.precio / newDefault.valor)
-            ),
-          })) ?? [],
 
-        moneda: (state?.moneda || []).map((obj) => {
+        // envios: rebase desde la moneda visible previa -> nueva moneda
+        envios: (state.envios ?? []).map((env) => ({
+          ...env,
+          precio: smartRound(
+            redondearAMultiploDe5((env.precio ?? 0) * envFactor)
+          ),
+        })),
+
+        // moneda: sólo actualizar el flag defecto; recomendamos NO sobrescribir valores absolutos
+        moneda: (state.moneda || []).map((obj) => ({
+          ...obj,
+          defecto: obj.id === id,
+          // si quieres rebasear valores aquí, coméntalo y usa la variante abajo (opcional)
+          // valor: smartRound(redondearAMultiploDe5(obj.valor / valorNew))
+        })),
+
+        // products: convertir cada product desde su moneda origen (product.default_moneda) -> newDefault
+        products: (state.products || []).map((p) => {
+          // determinar valor origen: si product tiene default_moneda y existe en el mapa, usarlo;
+          // si no, asumimos que estaba en la moneda visible anterior (oldDefault)
+          const monedaOrigen = monedaMap[p.default_moneda] ?? oldDefault;
+          const valorOrigen = Number(monedaOrigen?.valor ?? 1) || 1;
+
+          const factor = valorOrigen / valorNew;
+
           return {
-            ...obj,
-            valor: smartRound(
-              redondearAMultiploDe5(obj.valor / newDefault.valor)
+            ...p,
+            price: smartRound(redondearAMultiploDe5((p.price ?? 0) * factor)),
+            embalaje: smartRound(
+              redondearAMultiploDe5((p.embalaje ?? 0) * factor)
             ),
+            // Si quieres indicar que ahora el producto se muestra en la moneda destino,
+            // asigna default_moneda = newDefault.id; si prefieres conservar el id origen, no lo cambies.
+            default_moneda: newDefault.id,
+            agregados: (p.agregados ?? []).map((obj) => ({
+              ...obj,
+              price: smartRound(
+                redondearAMultiploDe5((obj.price ?? 0) * factor)
+              ),
+            })),
           };
         }),
-        products: state.products.map((p) => ({
-          ...p,
-          price: smartRound(
-            redondearAMultiploDe5((p.price ?? 0) / newDefault.valor)
-          ),
-          embalaje: smartRound(
-            redondearAMultiploDe5((p.embalaje ?? 0) / newDefault.valor)
-          ),
-          agregados: p.agregados.map((obj) => ({
-            ...obj,
-            price: smartRound(
-              redondearAMultiploDe5((obj.price ?? 0) / newDefault.valor)
-            ),
-          })),
-        })),
       };
     }
 
@@ -304,7 +335,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
   }
 }
 
-function redondearAMultiploDe5(valor: number): number {
+export function redondearAMultiploDe5(valor: number): number {
   if (valor < 5) {
     return parseFloat(valor.toFixed(6));
   } else {

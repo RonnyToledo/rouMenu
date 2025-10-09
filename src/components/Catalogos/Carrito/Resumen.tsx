@@ -22,7 +22,7 @@ export default function Resumen({
   const { store } = useContext(MyContext);
 
   const getTotalPrice = () => {
-    return store.products.reduce(
+    return compra.pedido.reduce(
       (total, item) =>
         total +
         ((item.price || 0) + item.embalaje) * item.Cant +

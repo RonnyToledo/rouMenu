@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import Image from "next/image";
 
 interface OrderItem {
   id: string;
@@ -124,7 +125,8 @@ export function EditOrderDialog({
               {items.map((item) => (
                 <Card key={item.id} className="p-4">
                   <div className="flex items-center gap-4">
-                    <img
+                    <Image
+                      fill
                       src={item.image || "/placeholder.svg"}
                       alt={item.name}
                       className="h-20 w-20 rounded-lg object-cover bg-muted"

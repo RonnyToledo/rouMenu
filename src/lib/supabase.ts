@@ -16,7 +16,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 declare global {
   // Evita crear múltiples instancias cuando Vite/Next.js re-hota en desarrollo (HMR)
-  // eslint-disable-next-line no-var
   var __supabase_singleton__: SupabaseClient | undefined;
 }
 

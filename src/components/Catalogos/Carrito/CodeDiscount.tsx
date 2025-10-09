@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type Props = {
+export type Props = {
   compra: CompraInterface;
   setCompra: React.Dispatch<React.SetStateAction<CompraInterface>>;
 };

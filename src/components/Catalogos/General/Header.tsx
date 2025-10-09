@@ -15,7 +15,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
 import { ScheduleInterface } from "@/context/InitialStatus";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import "@github/relative-time-element";
 import { CiMenuFries } from "react-icons/ci";
@@ -34,21 +33,6 @@ import { logoUser } from "@/lib/image";
 
 // IMPORTA tu modal de reseña (ajusta la ruta/nombre si es distinto)
 import { Rating } from "../About/RatingModal";
-
-const containerVariants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { when: "beforeChildren", staggerChildren: 0.1 },
-  },
-  exit: { opacity: 0, x: -50, transition: { when: "afterChildren" } },
-};
-const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-};
 
 export default function Header() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -94,7 +78,7 @@ export default function Header() {
               />
             ),
             action: () => {
-              context.signOut();
+              router.push(`/user`);
               setOpen(false);
             },
           }
@@ -106,7 +90,7 @@ export default function Header() {
               setOpen(false);
             },
           },
-    [context?.user, setIsLoginOpen, setOpen]
+    [setIsLoginOpen, setOpen, context.user, router]
   );
 
   // homeItems ahora depende también de context / states relacionados con reseñas
@@ -255,124 +239,99 @@ export default function Header() {
               </SheetDescription>
             </SheetHeader>
 
-            <AnimatePresence>
-              {showState === "home" && (
-                <motion.div
-                  key="home"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="p-2 w-full h-full flex flex-col justify-between"
-                >
-                  <div>
-                    {homeItems.map((item) => (
-                      <motion.div key={item.name} variants={containerVariants}>
-                        <ListSheet
-                          name={item.name}
-                          icon={item.icon}
-                          icon2={<ChevronRight />}
-                          action={item.action}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
+            {showState === "home" && (
+              <div className="p-2 w-full h-full flex flex-col justify-between">
+                <div>
+                  {homeItems.map((item) => (
+                    <div key={item.name}>
+                      <ListSheet
+                        name={item.name}
+                        icon={item.icon}
+                        icon2={<ChevronRight />}
+                        action={item.action}
+                      />
+                    </div>
+                  ))}
+                </div>
 
-                  <motion.div variants={containerVariants}>
-                    <ListSheet
-                      name={profile.name}
-                      icon={profile.icon}
-                      icon2={<ChevronRight />}
-                      action={profile.action}
-                    />
-                  </motion.div>
-                </motion.div>
-              )}
-
-              {showState === "categories" && (
-                <motion.div
-                  key="categories"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="p-2 w-full"
-                >
+                <div>
                   <ListSheet
-                    name="Atrás"
-                    icon2={<ChevronLeft />}
-                    action={() => setShowState("home")}
-                    className="shadow-md"
+                    name={profile.name}
+                    icon={profile.icon}
+                    icon2={<ChevronRight />}
+                    action={profile.action}
                   />
-                  <ScrollArea className="h-[70vh] rounded-md border">
-                    <ListSheet
-                      name="Todas"
-                      icon2={<ChevronLeft />}
-                      action={() => {
-                        router.push(`/t/${store?.sitioweb}/category`);
-                        setOpen(false);
-                      }}
-                    />
-                    {store?.categorias?.map((category) => (
-                      <motion.div key={category.id} variants={itemVariants}>
-                        <ListSheet
-                          name={category.name || ""}
-                          icon2={<ChevronRight />}
-                          action={() => {
-                            if (category.subtienda) {
-                              router.push(
-                                `/t/${store?.sitioweb}/category/${category.id}`
-                              );
-                            } else {
-                              router.push(
-                                `/t/${store?.sitioweb}#${category.id}`
-                              );
-                            }
-                            setOpen(false);
-                          }}
-                        />
-                      </motion.div>
-                    ))}
-                  </ScrollArea>
-                </motion.div>
-              )}
+                </div>
+              </div>
+            )}
 
-              {showState === "coins" && (
-                <motion.div
-                  key="coins"
-                  variants={containerVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="p-2 w-full"
-                >
+            {showState === "categories" && (
+              <div className="p-2 w-full">
+                <ListSheet
+                  name="Atrás"
+                  icon2={<ChevronLeft />}
+                  action={() => setShowState("home")}
+                  className="shadow-md"
+                />
+                <ScrollArea className="h-[70vh] rounded-md border">
                   <ListSheet
-                    name="Atrás"
+                    name="Todas"
                     icon2={<ChevronLeft />}
-                    action={() => setShowState("home")}
-                    className="shadow-md"
+                    action={() => {
+                      router.push(`/t/${store?.sitioweb}/category`);
+                      setOpen(false);
+                    }}
                   />
-                  <ScrollArea className="h-[70vh] rounded-md border">
-                    {store?.moneda?.map((coin, i) => (
-                      <motion.div key={i} variants={itemVariants}>
-                        <ListSheet
-                          name={coin.moneda || ""}
-                          icon2={<MdCurrencyExchange />}
-                          action={() => {
-                            setOpen(false);
-                            dispatchStore({
-                              type: "ChangeCurrent",
-                              payload: JSON.stringify(coin),
-                            });
-                            /* cambiar moneda aquí */
-                          }}
-                        />
-                      </motion.div>
-                    ))}
-                  </ScrollArea>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {store?.categorias?.map((category) => (
+                    <div key={category.id}>
+                      <ListSheet
+                        name={category.name || ""}
+                        icon2={<ChevronRight />}
+                        action={() => {
+                          if (category.subtienda) {
+                            router.push(
+                              `/t/${store?.sitioweb}/category/${category.id}`
+                            );
+                          } else {
+                            router.push(`/t/${store?.sitioweb}#${category.id}`);
+                          }
+                          setOpen(false);
+                        }}
+                      />
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+            )}
+
+            {showState === "coins" && (
+              <div className="p-2 w-full">
+                <ListSheet
+                  name="Atrás"
+                  icon2={<ChevronLeft />}
+                  action={() => setShowState("home")}
+                  className="shadow-md"
+                />
+                <ScrollArea className="h-[70vh] rounded-md border">
+                  {store?.moneda?.map((coin, i) => (
+                    <div key={i}>
+                      <ListSheet
+                        name={coin.nombre || ""}
+                        icon2={<MdCurrencyExchange />}
+                        action={() => {
+                          setOpen(false);
+                          dispatchStore({
+                            type: "ChangeCurrent",
+                            payload: coin.id,
+                          });
+                          /* cambiar moneda aquí */
+                        }}
+                      />
+                    </div>
+                  ))}
+                </ScrollArea>
+              </div>
+            )}
           </SheetContent>
         </Sheet>
       </div>

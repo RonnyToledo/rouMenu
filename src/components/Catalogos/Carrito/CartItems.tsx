@@ -8,14 +8,10 @@ import { logoApp } from "@/lib/image";
 import { Button } from "@/components/ui/button";
 import { FaChevronUp, FaChevronDown, FaRegTrashCan } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
-export default function CartItems() {
-  const { store, dispatchStore } = useContext(MyContext);
+import { Props } from "./CodeDiscount";
 
-  const getProducts = () => {
-    return store.products.filter(
-      (obj) => obj.Cant > 0 || obj.agregados.some((agg) => agg.cant > 0)
-    );
-  };
+export default function CartItems({ compra }: Props) {
+  const { store, dispatchStore } = useContext(MyContext);
 
   const handleToCart = (productToCart: Product) => {
     dispatchStore({
@@ -26,7 +22,7 @@ export default function CartItems() {
 
   return (
     <div id="cart-items" className="px-2 grid mb-4">
-      {getProducts().map((item, index) => (
+      {compra.pedido.map((item, index) => (
         <div key={index}>
           {" "}
           {item.Cant > 0 && (
@@ -34,7 +30,7 @@ export default function CartItems() {
               title={item.title || "Producto"}
               imagen={item.image || store.urlPoster || logoApp}
               price={smartRound(item.price || 0)}
-              moneda={store.moneda_default?.moneda}
+              moneda={store.moneda.find((m) => m.defecto)?.nombre || ""}
               id={item.id}
               embalaje={item.embalaje}
               camtidad={item.Cant}
@@ -61,7 +57,7 @@ export default function CartItems() {
                 title={`${item.title}-${agg.name}` || "Producto"}
                 imagen={item.image || store.urlPoster || logoApp}
                 price={smartRound(agg.price || 0)}
-                moneda={store.moneda_default?.moneda}
+                moneda={store.moneda.find((m) => m.defecto)?.nombre || ""}
                 top={(item.stock || 0) - (item.Cant || 0)}
                 id={item.id}
                 embalaje={item.embalaje}

@@ -184,7 +184,9 @@ export default function SearchPage() {
                     <div className="flex items-center justify-between">
                       <p className="font-bold text-xs text-[var(--text-dark)] mt-2">
                         ${smartRound(product.price || 0)}{" "}
-                        {store.moneda_default?.moneda}
+                        {store.moneda.find(
+                          (m) => m.id == product.default_moneda
+                        )?.nombre || ""}
                       </p>
                       <div>
                         <div className="flex items-center justify-center gap-1">

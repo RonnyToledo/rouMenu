@@ -66,7 +66,7 @@ export default function HeroNew({}) {
           </span>
           <span>({store?.comentTienda.total} reseñas)</span>
           <span className="text-gray-300">•</span>
-          <span>$ {store?.moneda_default?.moneda}</span>
+          <span>$ {store.moneda.find((m) => m.defecto)?.nombre || ""}</span>
         </div>
         {/* Location */}
         <Link

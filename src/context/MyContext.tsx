@@ -32,7 +32,6 @@ interface MyProviderProps {
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   //Crear estado global base
   const storeArregaldo = storeSSD ?? initialState;
-
   //Buscar afiliado
   const searchParams = useSearchParams();
   const afiliate = searchParams.get("afiliate");
@@ -72,7 +71,6 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
         console.error("Error cargando carrito desde IDB:", err);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.sitioweb]); // se ejecuta cuando tenemos el sitio
 
   return (

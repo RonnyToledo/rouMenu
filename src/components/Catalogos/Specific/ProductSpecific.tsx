@@ -62,13 +62,14 @@ export default function Product({ id }: { id: string }) {
         : 0;
     setCountAddCart(initialCount);
   }, [store.products, id]);
-
   useEffect(() => {
-    (product?.agregados.reduce((sum, agg) => sum + agg.cant, 0) || 0) > 0 &&
-    !buttonClick
-      ? setCountAddCart(0)
-      : setCountAddCart(countAddCart);
-  }, [product?.agregados]);
+    const totalAgregados =
+      product?.agregados?.reduce((sum, agg) => sum + (agg.cant || 0), 0) || 0;
+
+    if (totalAgregados > 0 && !buttonClick) {
+      setCountAddCart(0);
+    }
+  }, [product?.agregados, buttonClick]);
 
   const handleToCart = (productToCart: ProductInterface) => {
     setIsAddingToCart(true);
@@ -158,7 +159,6 @@ export default function Product({ id }: { id: string }) {
       link: `/t/${store.sitioweb}/producto/${product?.productId}`,
     },
   ];
-
   return (
     <main className="flex items-start min-h-[100svh]">
       <div className="grid grid-cols-1  gap-2 items-start p-4">
@@ -273,7 +273,8 @@ export default function Product({ id }: { id: string }) {
                 >
                   <p className="leading-relaxed text-gray-900">
                     ${smartRound(product?.price || 0)}{" "}
-                    {store.moneda_default.moneda}
+                    {store.moneda.find((m) => m.id == product.default_moneda)
+                      ?.nombre || ""}
                   </p>
                   {(product?.oldPrice || 0) > (product?.price || 0) && (
                     <p className=" text-gray-500 line-through">
@@ -302,7 +303,7 @@ export default function Product({ id }: { id: string }) {
                           <div className="flex items-center gap-2 text-green-600">
                             <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
                             <span className="text-sm font-medium">
-                              Quedan {product.stock} unidades
+                              {product.stock} u.
                             </span>
                           </div>
                           {product.Cant +
@@ -362,7 +363,9 @@ export default function Product({ id }: { id: string }) {
                       <div className="font-medium">Costo</div>
                       <div className="text-sm text-gray-800">
                         {smartRound(product?.embalaje || 0).toFixed(2)}{" "}
-                        {store.moneda_default.moneda}
+                        {store.moneda.find(
+                          (m) => m.id == product?.default_moneda
+                        )?.nombre || ""}
                       </div>
                     </div>
                   </div>
@@ -388,7 +391,9 @@ export default function Product({ id }: { id: string }) {
                       <div className="font-medium">{extra.name}</div>
                       <div className="text-sm text-gray-500">
                         {smartRound(extra?.price || 0).toFixed(2)}{" "}
-                        {store.moneda_default.moneda}
+                        {store.moneda.find(
+                          (m) => m.id == product.default_moneda
+                        )?.nombre || ""}
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -418,7 +423,8 @@ export default function Product({ id }: { id: string }) {
                         variant="outline"
                         size="sm"
                         disabled={
-                          (product.stock || 0) - product.Cant <= extra.cant
+                          (product.stock || 0) - product.Cant - countAddCart <=
+                          extra.cant
                         }
                         onClick={() =>
                           setProduct({
@@ -492,7 +498,7 @@ export default function Product({ id }: { id: string }) {
                 className={`space-y-3 animate-in ${swipeComponents.corto} duration-500 delay-1000`}
               >
                 <Button
-                  disabled={(product.stock || 0) - product.Cant <= countAddCart}
+                  disabled={(product.stock || 0) - product.Cant < countAddCart}
                   onClick={() => {
                     handleToCart({
                       ...product,
