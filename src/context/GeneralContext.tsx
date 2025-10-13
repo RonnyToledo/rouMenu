@@ -140,7 +140,7 @@ export default function GeneralProvider({
   children,
   storeSSD,
 }: MyProviderProps) {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
   const [generalData, setGeneralData] = useState(storeSSD ?? data);
   const pathname = usePathname();
   // Estado para controlar el LoginPopover
@@ -161,7 +161,7 @@ export default function GeneralProvider({
     if (typeof window === "undefined") return;
 
     // Si ya hay usuario, aseguramos que el popover esté cerrado y marcamos como mostrado
-    if (user) {
+    if (user && !loading) {
       setIsLoginOpen(false);
 
       return;

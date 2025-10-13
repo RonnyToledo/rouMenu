@@ -44,7 +44,7 @@ export default function CartItems({ compra }: Props) {
               handleToCartMinus={() =>
                 handleToCart({
                   ...item,
-                  Cant: (item.Cant || 0) + 1,
+                  Cant: (item.Cant || 0) - 1,
                 })
               }
             />
