@@ -1,5 +1,11 @@
 "use client";
-import React, { useContext, useEffect, useState, useMemo } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -14,7 +20,12 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
-import { ScheduleInterface } from "@/context/InitialStatus";
+import {
+  AppState,
+  Categoria,
+  Current,
+  ScheduleInterface,
+} from "@/context/InitialStatus";
 import { cn } from "@/lib/utils";
 import "@github/relative-time-element";
 import { CiMenuFries } from "react-icons/ci";
@@ -30,9 +41,9 @@ import { AuthContext } from "@/context/AuthContext";
 import { LiaSignInAltSolid } from "react-icons/lia";
 import { Separator } from "@/components/ui/separator";
 import { logoUser } from "@/lib/image";
-
-// IMPORTA tu modal de reseña (ajusta la ruta/nombre si es distinto)
 import { Rating } from "../About/RatingModal";
+
+type SheetView = "home" | "categories" | "coins";
 
 export default function Header() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -40,60 +51,81 @@ export default function Header() {
   const { smartBack } = useHistory();
   const router = useRouter();
   const pathname = usePathname();
-  const [showState, setShowState] = useState<string>("home");
+
+  const [showState, setShowState] = useState<SheetView>("home");
   const [open, setOpen] = useState(false);
-  const [isOpenStore, setisOpenStore] = useState<IsOpenStoreInteface>({
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [isOpenStore, setIsOpenStore] = useState<IsOpenStoreInteface>({
     week: 1,
     open: false,
   });
 
-  // nuevo: control del popover de login y del modal de reseña
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
-
+  // Reset view when sheet closes
   useEffect(() => {
     if (!open) setShowState("home");
   }, [open]);
 
+  // Update store open status
   useEffect(() => {
-    setisOpenStore(isOpen((store.horario || []) as ScheduleInterface[]));
-  }, [store]);
+    setIsOpenStore(isOpen((store.horario || []) as ScheduleInterface[]));
+  }, [store.horario]);
 
-  const profile = useMemo(
-    () =>
-      context?.user
-        ? {
-            name: context.user.user_metadata.full_name || "Perfil",
-            icon: (
-              <Image
-                width={100}
-                height={100}
-                src={
-                  context.user.user_metadata.avatar_url ||
-                  context.user.user_metadata.avatar_url ||
-                  logoUser
-                }
-                className="size-8 rounded-full"
-                alt={context.user.user_metadata.full_name || "Avatar"}
-              />
-            ),
-            action: () => {
-              router.push(`/user`);
-              setOpen(false);
-            },
-          }
-        : {
-            name: "Registrarse / Iniciar Sesión",
-            icon: <LiaSignInAltSolid />,
-            action: () => {
-              setIsLoginOpen(true);
-              setOpen(false);
-            },
-          },
-    [setIsLoginOpen, setOpen, context.user, router]
+  // Memoized handlers
+  const closeSheet = useCallback(() => setOpen(false), []);
+  const closeLogin = useCallback(() => setIsLoginOpen(false), []);
+  const closeReview = useCallback(() => setReviewOpen(false), []);
+
+  const handleReviewAction = useCallback(() => {
+    if (context?.user && !context.loading) {
+      setReviewOpen(true);
+      closeSheet();
+    } else {
+      setIsLoginOpen(true);
+      closeSheet();
+    }
+  }, [context?.user, context?.loading, closeSheet]);
+
+  const handleCoinChange = useCallback(
+    (coinId: number) => {
+      closeSheet();
+      dispatchStore({ type: "ChangeCurrent", payload: coinId });
+    },
+    [closeSheet, dispatchStore]
   );
 
-  // homeItems ahora depende también de context / states relacionados con reseñas
+  // Profile configuration
+  const profile = useMemo(() => {
+    if (context?.user) {
+      const userMeta = context.user.user_metadata;
+      return {
+        name: userMeta.full_name || "Perfil",
+        icon: (
+          <Image
+            width={100}
+            height={100}
+            src={userMeta.avatar_url || logoUser}
+            className="size-8 rounded-full"
+            alt={userMeta.full_name || "Avatar"}
+          />
+        ),
+        action: () => {
+          router.push(`/user`);
+          closeSheet();
+        },
+      };
+    }
+    return {
+      name: "Registrarse / Iniciar Sesión",
+      icon: <LiaSignInAltSolid />,
+      action: () => {
+        setIsLoginOpen(true);
+        closeSheet();
+      },
+    };
+  }, [context?.user, router, closeSheet]);
+
+  // Home menu items
   const homeItems = useMemo(
     () => [
       {
@@ -101,7 +133,7 @@ export default function Header() {
         icon: <IoSearch />,
         action: () => {
           router.push(`/t/${store.sitioweb}/search`);
-          setOpen(false);
+          closeSheet();
         },
       },
       {
@@ -109,7 +141,7 @@ export default function Header() {
         icon: <IoStorefrontOutline />,
         action: () => {
           router.push(`/t/${store.sitioweb}/about`);
-          setOpen(false);
+          closeSheet();
         },
       },
       {
@@ -123,75 +155,49 @@ export default function Header() {
         action: () => setShowState("coins"),
       },
       {
-        // === CAMBIO: dejar reseña ===
         name: "Dejar una reseña",
         icon: <MdRateReview />,
-        action: () => {
-          // Si ya está logueado y no está cargando -> abrir modal de reseña
-          if (context?.user && context?.loading === false) {
-            setReviewOpen(true);
-            setOpen(false);
-            return;
-          }
-
-          // Si no está logueado -> marcar pending y abrir LoginPopover
-          setIsLoginOpen(true);
-          setOpen(false);
-        },
+        action: handleReviewAction,
       },
       {
         name: "Comparar produtos",
         icon: <FaBalanceScale />,
         action: () => {
           router.push(`/t/${store.sitioweb}/comparar`);
-
-          setOpen(false);
+          closeSheet();
         },
       },
     ],
-    [
-      store?.sitioweb,
-      router,
-      setOpen,
-      context?.user,
-      context?.loading,
-      setIsLoginOpen,
-      setReviewOpen,
-    ]
+    [store.sitioweb, router, closeSheet, handleReviewAction]
   );
+
+  const userAvatar = context?.user?.user_metadata.avatar_url || logoUser;
+  const userName = context?.user?.user_metadata.full_name || "user";
+  const userId = context?.user?.id || "";
 
   return (
     <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between">
-      {/* LoginPopover: seguirá abriéndose cuando isLoginOpen = true */}
       <LoginPopover
         isOpen={isLoginOpen}
-        onClose={() => {
-          setIsLoginOpen(false);
-          // Si el usuario cerró el popover sin loguearse, desistimos de la intención
-        }}
-        redirectTo={pathname} // Ruta dinámica
+        onClose={closeLogin}
+        redirectTo={pathname}
       />
 
-      {/* Modal de reseña: ajusta props/import si tu componente es distinto */}
       <Rating
         isOpen={reviewOpen}
-        onClose={() => setReviewOpen(false)}
+        onClose={closeReview}
         starsSelected={5}
-        userName={"Usuario"}
-        user={context?.user?.user_metadata.full_name || "user"}
-        imageUser={
-          context?.user?.user_metadata.avatar_url ||
-          context?.user?.user_metadata.avatar_url ||
-          logoUser
-        }
-        uuid={context?.user?.id || ""}
+        userName="Usuario"
+        user={userName}
+        imageUser={userAvatar}
+        uuid={userId}
         setIsModalOpen={setReviewOpen}
       />
 
       <div className="flex items-center">
         <Button variant="ghost" onClick={smartBack} size="icon">
           <Image
-            alt={(store?.name || "Rou-Menu") + " Logo"}
+            alt={`${store?.name || "Rou-Menu"} Logo`}
             width={100}
             height={100}
             className="rounded-full w-8 h-8"
@@ -203,32 +209,36 @@ export default function Header() {
             {store?.name || "Rou-Menu"}
           </h1>
           <div className="flex text-[8px] text-[var(--text-muted)] gap-1">
-            {isOpenStore?.open ? (
-              <span className="text-green-400 font-bold">ABIERTO</span>
-            ) : (
-              <span className="text-red-400 font-bold">CERRADO</span>
-            )}{" "}
-            · <OpenClose open={isOpenStore} newHorario={store.horario || []} />
+            <span
+              className={
+                isOpenStore.open
+                  ? "text-green-400 font-bold"
+                  : "text-red-400 font-bold"
+              }
+            >
+              {isOpenStore.open ? "ABIERTO" : "CERRADO"}
+            </span>
+            {" · "}
+            <OpenClose open={isOpenStore} newHorario={store.horario || []} />
           </div>
         </div>
       </div>
+
       <div className="flex gap-2">
         {pathname.includes("/about") && (
           <ShareButton
-            title={`${store.name}`}
+            title={store.name}
             text={store.parrrafo}
             url={`https://roumenu.vercel.app/t/${store.sitioweb}`}
           />
         )}
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger>
-            <CiMenuFries
-              className="text-[var(--text-gold)] cursor-pointer"
-              onClick={() => setOpen(true)}
-            />
+          <SheetTrigger asChild>
+            <button aria-label="Abrir menú">
+              <CiMenuFries className="text-[var(--text-gold)] cursor-pointer" />
+            </button>
           </SheetTrigger>
 
-          {/* Animated sheet content */}
           <SheetContent className="overflow-hidden">
             <SheetHeader>
               <SheetTitle className="text-[var(--text-gold)] line-clamp-1">
@@ -240,102 +250,131 @@ export default function Header() {
             </SheetHeader>
 
             {showState === "home" && (
-              <div className="p-2 w-full h-full flex flex-col justify-between">
-                <div>
-                  {homeItems.map((item) => (
-                    <div key={item.name}>
-                      <ListSheet
-                        name={item.name}
-                        icon={item.icon}
-                        icon2={<ChevronRight />}
-                        action={item.action}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div>
-                  <ListSheet
-                    name={profile.name}
-                    icon={profile.icon}
-                    icon2={<ChevronRight />}
-                    action={profile.action}
-                  />
-                </div>
-              </div>
+              <HomeView items={homeItems} profile={profile} />
             )}
 
             {showState === "categories" && (
-              <div className="p-2 w-full">
-                <ListSheet
-                  name="Atrás"
-                  icon2={<ChevronLeft />}
-                  action={() => setShowState("home")}
-                  className="shadow-md"
-                />
-                <ScrollArea className="h-[70vh] rounded-md border">
-                  <ListSheet
-                    name="Todas"
-                    icon2={<ChevronLeft />}
-                    action={() => {
-                      router.push(`/t/${store?.sitioweb}/category`);
-                      setOpen(false);
-                    }}
-                  />
-                  {store?.categorias?.map((category) => (
-                    <div key={category.id}>
-                      <ListSheet
-                        name={category.name || ""}
-                        icon2={<ChevronRight />}
-                        action={() => {
-                          if (category.subtienda) {
-                            router.push(
-                              `/t/${store?.sitioweb}/category/${category.id}`
-                            );
-                          } else {
-                            router.push(`/t/${store?.sitioweb}#${category.id}`);
-                          }
-                          setOpen(false);
-                        }}
-                      />
-                    </div>
-                  ))}
-                </ScrollArea>
-              </div>
+              <CategoriesView
+                store={store}
+                onBack={() => setShowState("home")}
+                onClose={closeSheet}
+              />
             )}
 
             {showState === "coins" && (
-              <div className="p-2 w-full">
-                <ListSheet
-                  name="Atrás"
-                  icon2={<ChevronLeft />}
-                  action={() => setShowState("home")}
-                  className="shadow-md"
-                />
-                <ScrollArea className="h-[70vh] rounded-md border">
-                  {store?.moneda?.map((coin, i) => (
-                    <div key={i}>
-                      <ListSheet
-                        name={coin.nombre || ""}
-                        icon2={<MdCurrencyExchange />}
-                        action={() => {
-                          setOpen(false);
-                          dispatchStore({
-                            type: "ChangeCurrent",
-                            payload: coin.id,
-                          });
-                          /* cambiar moneda aquí */
-                        }}
-                      />
-                    </div>
-                  ))}
-                </ScrollArea>
-              </div>
+              <CoinsView
+                coins={store?.moneda || []}
+                onBack={() => setShowState("home")}
+                onSelectCoin={handleCoinChange}
+              />
             )}
           </SheetContent>
         </Sheet>
       </div>
     </header>
+  );
+}
+
+// Subcomponents
+interface HomeViewProps {
+  items: Array<{ name: string; icon: React.ReactNode; action: () => void }>;
+  profile: { name: string; icon: React.ReactNode; action: () => void };
+}
+
+function HomeView({ items, profile }: HomeViewProps) {
+  return (
+    <div className="p-2 w-full h-full flex flex-col justify-between">
+      <div>
+        {items.map((item) => (
+          <ListSheet
+            key={item.name}
+            name={item.name}
+            icon={item.icon}
+            icon2={<ChevronRight />}
+            action={item.action}
+          />
+        ))}
+      </div>
+      <ListSheet
+        name={profile.name}
+        icon={profile.icon}
+        icon2={<ChevronRight />}
+        action={profile.action}
+      />
+    </div>
+  );
+}
+
+interface CategoriesViewProps {
+  store: AppState;
+  onBack: () => void;
+  onClose: () => void;
+}
+
+function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
+  const router = useRouter();
+  return (
+    <div className="p-2 w-full">
+      <ListSheet
+        name="Atrás"
+        icon2={<ChevronLeft />}
+        action={onBack}
+        className="shadow-md"
+      />
+      <ScrollArea className="h-[70vh] rounded-md border">
+        <ListSheet
+          name="Todas"
+          icon2={<ChevronLeft />}
+          action={() => {
+            router.push(`/t/${store?.sitioweb}/category`);
+            onClose();
+          }}
+        />
+        {store?.categorias?.map((category: Categoria) => (
+          <ListSheet
+            key={category.id}
+            name={category.name || ""}
+            icon2={<ChevronRight />}
+            action={() => {
+              const url = category.subtienda
+                ? `/t/${store?.sitioweb}/category/${category.id}`
+                : `/t/${store?.sitioweb}#${category.id}`;
+              router.push(url);
+              onClose();
+            }}
+          />
+        ))}
+      </ScrollArea>
+    </div>
+  );
+}
+
+interface CoinsViewProps {
+  coins: Current[];
+  onBack: () => void;
+  onSelectCoin: (id: number) => void;
+}
+
+function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
+  return (
+    <div className="p-2 w-full">
+      <ListSheet
+        name="Atrás"
+        icon2={<ChevronLeft />}
+        action={onBack}
+        className="shadow-md"
+      />
+      <ScrollArea className="h-[70vh] rounded-md border">
+        {coins.map((coin) => (
+          <ListSheet
+            key={coin.id}
+            name={coin.nombre || ""}
+            icon2={<MdCurrencyExchange />}
+            action={() => onSelectCoin(coin.id)}
+          />
+        ))}
+      </ScrollArea>
+    </div>
   );
 }
 
@@ -348,7 +387,7 @@ interface ListSheetProps {
   final?: boolean;
 }
 
-function ListSheet({
+const ListSheet = React.memo(function ListSheet({
   name,
   icon,
   icon2,
@@ -362,7 +401,7 @@ function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex justify-between items-center h-10 text-base ",
+          "w-full flex justify-between items-center h-10 text-base",
           className
         )}
       >
@@ -372,7 +411,7 @@ function ListSheet({
         </div>
         {icon2}
       </Button>
-      {final ? <Separator /> : <></>}
+      {final && <Separator />}
     </>
   );
-}
+});

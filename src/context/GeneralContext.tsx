@@ -175,7 +175,7 @@ export default function GeneralProvider({
       console.error("Error accediendo a localStorage", e);
       setIsLoginOpen(true);
     }
-  }, [user]);
+  }, [loading, user]);
 
   const handleCloseLogin = () => {
     setIsLoginOpen(false);

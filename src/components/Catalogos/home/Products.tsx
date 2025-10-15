@@ -1,29 +1,17 @@
 "use client";
 import Image from "next/image";
-import React, { useContext } from "react";
+import React, { useContext, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
 import { ExtraerCategorias } from "@/functions/extraerCategoriass";
 import { logoApp } from "@/lib/image";
-import { Categoria, Product } from "@/context/InitialStatus";
-
+import { AppState, Categoria, Product } from "@/context/InitialStatus";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import ProductGrid from "./ProductGrid";
-/**
- * Variants para animar sección entera:
- * - hidden: desplazada abajo y transparente
- * - visible: en su posición y opaca
- */
 
-/**
- * Variants para animar el header sticky:
- * - normal: escala 1, sin sombra
- * - sticky: escala 0.95, con sombra y fondo más opaco
- */
 const headerVariants = {
   normal: {
     scale: 1,
@@ -39,100 +27,163 @@ const headerVariants = {
 
 export default function Products() {
   const { store } = useContext(MyContext);
-  const router = useRouter();
+
+  // Memoizar categorías ordenadas
+  const sortedCategories = useMemo(() => {
+    if (!store?.categorias || !store?.products) return [];
+    return ExtraerCategorias(store.categorias, store.products).sort(
+      (a, b) => (a.order || 0) - (b.order || 0)
+    );
+  }, [store?.categorias, store?.products]);
+
   return (
     <div className="bg-[var(--background-dark)] mt-5">
-      {ExtraerCategorias(store?.categorias, store?.products)
-        .sort((a, b) => (a.order || 0) - (b.order || 0))
-        .map((categoria, index) => (
-          <div key={index}>
-            {categoria.subtienda ? (
-              <div className="p-2 mb-2 ">
-                <div className="rounded-lg  ">
-                  <div className="pb-2 ">
-                    <Link
-                      className="text-sm uppercase font-cinzel text-center  text-gray-700 tracking-widest  line-clamp-1"
-                      href={`/t/${store?.sitioweb}/category/${categoria.id}`}
-                    >
-                      {categoria.name}
-                    </Link>
-                  </div>
-                  <Link
-                    href={`/t/${store?.sitioweb}/category/${categoria.id}`}
-                    className="flex items-center justify-center"
-                  >
-                    <Image
-                      width={250}
-                      height={250}
-                      placeholder={"blur"}
-                      blurDataURL={
-                        categoria.image || store?.urlPoster || logoApp
-                      }
-                      alt={categoria.name || `CAtegoria ${index}`}
-                      className={`aspect-square object-cover rounded-lg`}
-                      src={categoria.image || store?.urlPoster || logoApp}
-                    />
-                  </Link>
-                  <div className="p-2 flex flex-col justify-evenly">
-                    {!store?.edit?.minimalista && (
-                      <p
-                        className={`text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2 whitespace-pre-line `}
-                      >
-                        {categoria.description}
-                      </p>
-                    )}
-                    <div className={`flex items-center justify-between mt-3`}>
-                      <p className="font-medium w-full text-10 text-gray-700">
-                        {
-                          store?.products.filter(
-                            (obj) => obj.caja == categoria.id
-                          ).length
-                        }{" "}
-                        Productos
-                      </p>
-                      <div className="relative h-9 w-full flex justify-end items-center">
-                        <Button
-                          size="icon"
-                          type="button"
-                          className="size-8 flex justify-center items-center rounded-full "
-                          onClick={() =>
-                            router.push(
-                              `/t/${store?.sitioweb}/category/${categoria.id}`
-                            )
-                          }
-                        >
-                          <FaArrowRight className="size-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <AnimatedCategorySection
-                categoria={categoria}
-                banner={store?.urlPoster || logoApp}
-                products={store?.products.filter(
-                  (p) => p.caja === categoria.id
-                )}
-              />
-            )}
-          </div>
-        ))}
+      {sortedCategories.map((categoria) => (
+        <CategoryItem key={categoria.id} categoria={categoria} store={store} />
+      ))}
     </div>
   );
 }
 
-function AnimatedCategorySection({
+interface CategoryItemProps {
+  categoria: Categoria;
+  store: AppState;
+}
+
+const CategoryItem = React.memo(function CategoryItem({
   categoria,
-  banner,
-  products,
-}: {
+  store,
+}: CategoryItemProps) {
+  const router = useRouter();
+
+  // Memoizar productos filtrados
+  const categoryProducts = useMemo(
+    () =>
+      store?.products?.filter((p: Product) => p.caja === categoria.id) || [],
+    [store?.products, categoria.id]
+  );
+
+  const handleNavigate = useCallback(() => {
+    router.push(`/t/${store?.sitioweb}/category/${categoria.id}`);
+  }, [router, store?.sitioweb, categoria.id]);
+
+  if (categoria.subtienda) {
+    return (
+      <SubCategoryCard
+        categoria={categoria}
+        store={store}
+        productsCount={categoryProducts.length}
+        onNavigate={handleNavigate}
+      />
+    );
+  }
+
+  return (
+    <AnimatedCategorySection
+      categoria={categoria}
+      banner={store?.urlPoster || logoApp}
+      products={categoryProducts}
+    />
+  );
+});
+
+interface SubCategoryCardProps {
+  categoria: Categoria;
+  store: AppState;
+  productsCount: number;
+  onNavigate: () => void;
+}
+
+const SubCategoryCard = React.memo(function SubCategoryCard({
+  categoria,
+  store,
+  productsCount,
+  onNavigate,
+}: SubCategoryCardProps) {
+  const categoryImage = categoria.image || store?.urlPoster || logoApp;
+
+  return (
+    <div className="p-2 mb-2">
+      <div className="rounded-lg">
+        <div className="pb-2">
+          <Link
+            className="text-sm uppercase font-cinzel text-center text-gray-700 tracking-widest line-clamp-1"
+            href={`/t/${store?.sitioweb}/category/${categoria.id}`}
+          >
+            {categoria.name}
+          </Link>
+        </div>
+
+        <Link
+          href={`/t/${store?.sitioweb}/category/${categoria.id}`}
+          className="flex items-center justify-center"
+        >
+          <Image
+            width={250}
+            height={250}
+            placeholder="blur"
+            blurDataURL={categoryImage}
+            alt={categoria.name || "Categoría"}
+            className="aspect-square object-cover rounded-lg"
+            src={categoryImage}
+          />
+        </Link>
+
+        <div className="p-2 flex flex-col justify-evenly">
+          {!store?.edit?.minimalista && categoria.description && (
+            <p className="text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2 whitespace-pre-line">
+              {categoria.description}
+            </p>
+          )}
+
+          <div className="flex items-center justify-between mt-3">
+            <p className="font-medium w-full text-10 text-gray-700">
+              {productsCount} Productos
+            </p>
+            <div className="relative h-9 w-full flex justify-end items-center">
+              <Button
+                size="icon"
+                type="button"
+                className="size-8 flex justify-center items-center rounded-full"
+                onClick={onNavigate}
+                aria-label={`Ver productos de ${categoria.name}`}
+              >
+                <FaArrowRight className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+interface AnimatedCategorySectionProps {
   categoria: Categoria;
   banner: string;
   products: Product[];
-}) {
+}
+
+const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
+  categoria,
+  banner,
+  products,
+}: AnimatedCategorySectionProps) {
   const { store } = useContext(MyContext);
+
+  // Memoizar productos ordenados
+  const sortedProducts = useMemo(
+    () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
+    [products]
+  );
+
+  const gridClass = useMemo(
+    () =>
+      `grid grid-flow-row-dense gap-2 p-2 ${
+        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
+      }`,
+    [store?.edit?.grid]
+  );
 
   return (
     <motion.div className="mb-12">
@@ -149,17 +200,16 @@ function AnimatedCategorySection({
         </Link>
       </motion.div>
 
-      <div
-        className={`grid  grid-flow-row-dense gap-2 p-2 ${
-          store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
-        }`}
-      >
-        {products
-          .sort((a, b) => (a.order || 0) - (b.order || 0))
-          .map((product, i) => (
-            <ProductGrid product={product} key={i} banner={banner} i={i} />
-          ))}
+      <div className={gridClass}>
+        {sortedProducts.map((product, i) => (
+          <ProductGrid
+            product={product}
+            key={product.id || i}
+            banner={banner}
+            i={i}
+          />
+        ))}
       </div>
     </motion.div>
   );
-}
+});

@@ -99,9 +99,11 @@ export function ButtonOfCart({
         disabled={store.stocks && product.Cant >= (product.stock || 0)}
         className="size-8 flex justify-center items-center rounded-full"
         onClick={() => {
-          const el = document.getElementById(product.productId);
-          el?.scrollIntoView({ behavior: "smooth", block: "start" });
-          handleToCart({ ...product, Cant: (product.Cant || 0) + 1 });
+          if (slideOpen && product.Cant > 0) {
+            const el = document.getElementById(product.productId);
+            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            handleToCart({ ...product, Cant: (product.Cant || 0) + 1 });
+          }
           setSlideOpen(true);
         }}
       >

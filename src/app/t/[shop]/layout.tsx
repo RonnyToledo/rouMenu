@@ -80,7 +80,6 @@ export default async function RootLayout({
   params: Promise<{ shop: string }>;
 }) {
   const { shop } = await params;
-  console.log(shop);
   const { data: storeOne, error } = await supabase.rpc(
     "get_store_with_transform",
     { tienda_slug: shop }
