@@ -1,70 +1,208 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useContext } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Minus, Plus, Trash2, ArrowLeft, Save } from "lucide-react";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
+import { userContext } from "@/context/userContext";
+import { toast } from "sonner";
+import { logoApp } from "@/lib/image";
+
+type EventRow = {
+  event_id: number;
+  events_text: string | null;
+  event_desc: string | null;
+  uid_sitio: string | null;
+  uid_venta: string | null;
+  visto: boolean | null;
+  nombre_event: string | null;
+  created_at: string | null;
+  phonenumber: number | null;
+  descripcion: string | null;
+  user_id: string | null;
+  sitio_uuid: string | null;
+  sitio_sitioweb: string | null;
+  sitio_name: string | null;
+};
 
 interface OrderItem {
   id: string;
   name: string;
   quantity: number;
   price: number;
-  image: string;
+  image?: string;
+  nombre?: string;
+  Cant?: number;
+  cant?: number;
+  qty?: number;
+  priceCompra?: number;
+  precio?: number;
+  imagen?: string;
+  title?: string;
 }
 
-interface Order {
-  id: string;
-  catalogName: string;
-  catalogType: string;
-  date: string;
-  status: string;
-  location: string;
+interface ParsedEventData {
+  pedido?: Array<{
+    id?: string;
+    nombre?: string;
+    name?: string;
+    Cant?: number;
+    cant?: number;
+    quantity?: number;
+    qty?: number;
+    price?: number;
+    priceCompra?: number;
+    precio?: number;
+    imagen?: string;
+    title?: string;
+    image?: string;
+  }>;
+  items?: OrderItem[];
+  total?: number;
+  moneda?: string;
+  direccion?: string;
+  lugar?: string;
+  address?: string;
+  phone?: string;
+  phonenumber?: string | number;
+  pago?: string;
+  payment?: string;
 }
 
-// Datos de ejemplo
-const mockOrders: Record<string, Order> = {
-  "2": {
-    id: "2",
-    catalogName: "Catálogo Tecnología",
-    catalogType: "Electrónica",
-    date: "08 Mar 2024",
-    status: "shipped",
-    location: "Barcelona, España",
-  },
-};
+function eventToOrderData(event: EventRow) {
+  const result = {
+    items: [] as OrderItem[],
+    total: 0,
+    currency: undefined as string | undefined,
+    address: undefined as string | undefined,
+    phone: undefined as string | undefined,
+    paymentMethod: undefined as string | undefined,
+  };
 
-const mockOrderItems: Record<string, OrderItem[]> = {
-  "2": [
-    {
-      id: "item-1",
-      name: "Laptop Pro 15",
-      quantity: 1,
-      price: 899.0,
-      image: "/modern-laptop-workspace.png",
-    },
-  ],
-};
+  if (!event.event_desc) return result;
+
+  try {
+    const parsed: ParsedEventData = JSON.parse(event.event_desc);
+
+    result.currency = parsed.moneda;
+    result.address =
+      parsed.direccion ?? parsed.lugar ?? parsed.address ?? undefined;
+    result.phone =
+      String(parsed.phone ?? parsed.phonenumber ?? "").trim() || undefined;
+    result.paymentMethod = parsed.pago ?? parsed.payment ?? undefined;
+
+    const totalValue = Number(parsed.total ?? 0);
+    result.total = !isNaN(totalValue) && totalValue > 0 ? totalValue : 0;
+
+    const itemsArray = parsed.pedido ?? parsed.items ?? [];
+    if (Array.isArray(itemsArray)) {
+      result.items = itemsArray
+        .map((item, index): OrderItem | null => {
+          if (!item || typeof item !== "object") return null;
+
+          const quantity =
+            Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 1) ||
+            1;
+          const price =
+            Number(item.price ?? item.priceCompra ?? item.precio ?? 0) || 0;
+          const name =
+            item.nombre ?? item.title ?? item.name ?? `Producto ${index + 1}`;
+          const image = item.imagen ?? item.image ?? undefined;
+
+          return {
+            id: item.id ?? `item-${index}`,
+            name,
+            quantity,
+            price,
+            image,
+          };
+        })
+        .filter((item): item is OrderItem => item !== null);
+    }
+
+    return result;
+  } catch (error) {
+    console.warn("Error parsing event_desc:", error);
+    return result;
+  }
+}
+
+function itemsToEventDesc(
+  originalEvent: EventRow,
+  updatedItems: OrderItem[]
+): string {
+  try {
+    const parsed: ParsedEventData = JSON.parse(
+      originalEvent.event_desc || "{}"
+    );
+
+    const updatedPedido = updatedItems.map((item) => {
+      const original = (parsed.pedido ?? []).find(
+        (p) => p.id === item.id || p.id === undefined
+      );
+      return {
+        ...original,
+        id: item.id,
+        nombre: item.name,
+        Cant: item.quantity,
+        price: item.price,
+      };
+    });
+
+    const newTotal = updatedItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    return JSON.stringify({
+      ...parsed,
+      pedido: updatedPedido,
+      total: newTotal,
+    });
+  } catch (error) {
+    console.error("Error converting items to event_desc:", error);
+    return originalEvent.event_desc ?? "{}";
+  }
+}
+
+function canEditOrder(event: EventRow): boolean {
+  return event.visto === false;
+}
+
+function getStatusLabel(event: EventRow): string {
+  if (event.visto === true) return "Completado";
+  if (event.visto === false) return "Enviado";
+  return "Procesando";
+}
 
 export default function EditOrderPage() {
   const params = useParams();
   const router = useRouter();
-  const orderId = params.id as string;
+  const { events, setEvents } = useContext(userContext);
+  const orderId = params.id_order as string;
 
-  const [order, setOrder] = useState<Order | null>(null);
+  const event = useMemo(
+    () => events.find((e) => e.event_id === parseInt(orderId)),
+    [events, orderId]
+  );
+  console.log(event);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
+  const orderData = useMemo(() => {
+    return event ? eventToOrderData(event) : null;
+  }, [event]);
+
   useEffect(() => {
-    // Cargar datos del pedido
-    if (mockOrders[orderId]) {
-      setOrder(mockOrders[orderId]);
-      setItems(mockOrderItems[orderId] || []);
+    if (event) {
+      const parsed = eventToOrderData(event);
+      setItems(parsed.items);
     }
-  }, [orderId]);
+  }, [event]);
 
   const updateQuantity = (itemId: string, delta: number) => {
     setItems((prev) =>
@@ -87,45 +225,72 @@ export default function EditOrderPage() {
       .reduce((sum, item) => sum + item.price * item.quantity, 0)
       .toFixed(2);
   };
-
+  console.log(event);
   const handleSave = async () => {
+    if (!event || items.length === 0) return;
+
     setIsSaving(true);
-    // Aquí iría la lógica para guardar los cambios en el backend
-    console.log("[v0] Guardando cambios del pedido:", { orderId, items });
+    try {
+      const updatedEventDesc = itemsToEventDesc(event, items);
 
-    // Simular guardado
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { error: updateError } = await supabase
+        .from("events")
+        .update({
+          event_desc: updatedEventDesc,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("event_id", event.event_id);
 
-    setIsSaving(false);
-    router.push("/");
+      if (updateError) {
+        throw new Error(updateError.message || "Error al guardar cambios");
+      }
+
+      // Actualiza el context
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.event_id === event.event_id
+            ? { ...e, event_desc: updatedEventDesc }
+            : e
+        )
+      );
+
+      toast.success("Pedido actualizado correctamente");
+      router.push("/user");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error desconocido";
+      toast.error(errorMessage);
+      console.error("Error saving order:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  if (!order) {
+  if (!event) {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card className="p-12 text-center">
-            <p className="text-muted-foreground">Pedido no encontrado</p>
+            <p className="text-muted-foreground mb-4">Pedido no encontrado</p>
+            <Button variant="outline" onClick={() => router.push("/user")}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver al perfil
+            </Button>
           </Card>
         </div>
       </div>
     );
   }
 
-  // Verificar que el pedido esté en estado "enviado"
-  if (order.status !== "shipped") {
+  if (!canEditOrder(event)) {
     return (
       <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card className="p-12 text-center">
-            <p className="text-muted-foreground">
-              Este pedido no puede ser editado
+            <p className="text-muted-foreground mb-4">
+              Este pedido no puede ser editado (estado: {getStatusLabel(event)})
             </p>
-            <Button
-              variant="outline"
-              className="mt-4 bg-transparent"
-              onClick={() => router.push("/")}
-            >
+            <Button variant="outline" onClick={() => router.push("/user")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al perfil
             </Button>
@@ -141,14 +306,14 @@ export default function EditOrderPage() {
         <Button
           variant="ghost"
           className="mb-6 gap-2"
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/user")}
         >
           <ArrowLeft className="h-4 w-4" />
           Volver al perfil
         </Button>
 
         <div className="mb-8">
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between mb-4 flex-col sm:flex-row gap-4">
             <div>
               <h1 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">
                 Editar Pedido
@@ -161,27 +326,39 @@ export default function EditOrderPage() {
               variant="secondary"
               className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
             >
-              Enviado
+              {getStatusLabel(event)}
             </Badge>
           </div>
 
           <Card className="p-6 bg-muted/30">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground mb-1">Pedido</p>
-                <p className="font-medium">#{order.id}</p>
+                <p className="font-medium">#{event.event_id}</p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Catálogo</p>
-                <p className="font-medium">{order.catalogName}</p>
+                <p className="font-medium">
+                  {event.sitio_name || event.nombre_event || "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Fecha</p>
-                <p className="font-medium">{order.date}</p>
+                <p className="font-medium">
+                  {event.created_at
+                    ? new Date(event.created_at).toLocaleDateString(undefined, {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-muted-foreground mb-1">Ubicación</p>
-                <p className="font-medium">{order.location}</p>
+                <p className="font-medium">
+                  {orderData?.address || event.descripcion || "N/A"}
+                </p>
               </div>
             </div>
           </Card>
@@ -203,29 +380,34 @@ export default function EditOrderPage() {
                     key={item.id}
                     className="p-6 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-center gap-6">
-                      <Image
-                        fill
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.name}
-                        className="h-24 w-24 rounded-lg object-cover bg-muted"
-                      />
+                    <div className="flex items-center gap-6 flex-col ">
+                      <div className="flex flex-row gap-2">
+                        <div className="relative  ">
+                          <Image
+                            src={item.image || logoApp}
+                            alt={item.name}
+                            width={100}
+                            height={100}
+                            className="rounded-lg object-cover bg-muted size-16"
+                          />
+                        </div>
 
-                      <div className="flex-1">
-                        <h3 className="text-lg font-medium text-foreground mb-2">
-                          {item.name}
-                        </h3>
-                        <p className="text-muted-foreground">
-                          ${item.price.toFixed(2)} por unidad
-                        </p>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-medium text-foreground mb-2">
+                            {item.name}
+                          </h3>
+                          <p className="text-muted-foreground">
+                            ${item.price.toFixed(2)} por unidad
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
                         <div className="flex items-center gap-3">
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-9 w-9 bg-transparent"
+                            className="h-9 w-9"
                             onClick={() => updateQuantity(item.id, -1)}
                             disabled={item.quantity <= 1}
                           >
@@ -239,14 +421,14 @@ export default function EditOrderPage() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-9 w-9 bg-transparent"
+                            className="h-9 w-9"
                             onClick={() => updateQuantity(item.id, 1)}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>
                         </div>
 
-                        <div className="w-28 text-right">
+                        <div className="w-28 text-center">
                           <p className="text-xl font-light tracking-tight">
                             ${(item.price * item.quantity).toFixed(2)}
                           </p>
@@ -273,14 +455,17 @@ export default function EditOrderPage() {
               <span className="text-xl font-medium">Total del pedido</span>
               <span className="text-3xl font-light tracking-tight">
                 ${calculateTotal()}
+                {orderData?.currency && (
+                  <span className="text-sm ml-2">{orderData.currency}</span>
+                )}
               </span>
             </div>
           </Card>
 
-          <div className="flex gap-3 justify-end">
+          <div className="flex gap-3 justify-end flex-col sm:flex-row">
             <Button
               variant="outline"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/user")}
               disabled={isSaving}
             >
               Cancelar

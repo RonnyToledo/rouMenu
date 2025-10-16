@@ -1,25 +1,18 @@
+import React from "react";
 import { Card } from "@/components/ui/card";
-import { ShoppingBag, Package, Star } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 
-export function ProfileStats() {
+interface ProfileStatsInterface {
+  total: number;
+}
+
+export function ProfileStats({ total = 0 }: ProfileStatsInterface) {
   const stats = [
     {
       label: "Total de Compras",
-      value: "24",
+      value: total,
       icon: ShoppingBag,
       description: "En los últimos 6 meses",
-    },
-    {
-      label: "Catálogos Activos",
-      value: "8",
-      icon: Package,
-      description: "Catálogos disponibles",
-    },
-    {
-      label: "Puntos Acumulados",
-      value: "1,250",
-      icon: Star,
-      description: "Programa de fidelidad",
     },
   ];
 
