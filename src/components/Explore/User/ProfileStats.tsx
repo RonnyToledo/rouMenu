@@ -17,7 +17,7 @@ export function ProfileStats({ total = 0 }: ProfileStatsInterface) {
   ];
 
   return (
-    <div className="mb-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mb-12 grid gap-6 ">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (

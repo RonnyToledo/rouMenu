@@ -1,5 +1,5 @@
 // ============================================
-// UTILITIES - purchaseParser.ts
+// UTILITIES - Exportar a utils/purchaseParser.ts
 // ============================================
 
 interface ParsedEventDesc {
@@ -13,6 +13,10 @@ interface ParsedEventDesc {
   raw: unknown;
 }
 
+/**
+ * Parser robusto para event_desc JSON
+ * Soporta múltiples formatos de datos
+ */
 export function parseEventDesc(desc?: string | null): ParsedEventDesc {
   const result: ParsedEventDesc = {
     items: 0,
@@ -31,28 +35,35 @@ export function parseEventDesc(desc?: string | null): ParsedEventDesc {
     const parsed = JSON.parse(desc);
     result.raw = parsed;
 
+    // Extrae teléfono de múltiples formatos
     result.phone =
       String(parsed.phonenumber ?? parsed.phone ?? "").trim() || undefined;
 
+    // Extrae dirección de múltiples campos
     result.address =
       (parsed.direccion ?? parsed.lugar ?? parsed.address ?? "").trim() ||
       undefined;
 
+    // Extrae método de pago
     result.paymentMethod =
       (parsed.pago ?? parsed.payment ?? "").trim() || undefined;
 
+    // Extrae código de descuento
     result.discountCode =
       typeof parsed.code === "string"
         ? parsed.code
         : (parsed.code?.name ?? null);
 
+    // Extrae moneda
     result.currency = parsed.moneda;
 
+    // Procesa total explícito
     const explicitTotal = Number(parsed.total);
     if (!isNaN(explicitTotal) && explicitTotal > 0) {
       result.total = explicitTotal;
     }
 
+    // Procesa array de pedidos
     const itemsArray = parsed.pedido ?? parsed.items ?? [];
     if (Array.isArray(itemsArray) && itemsArray.length > 0) {
       let totalItems = 0;
@@ -72,6 +83,7 @@ export function parseEventDesc(desc?: string | null): ParsedEventDesc {
       }
 
       result.items = totalItems;
+      // Solo usa subtotal si no hay total explícito
       if (result.total === 0 && subtotal > 0) {
         result.total = subtotal;
       }
@@ -84,6 +96,9 @@ export function parseEventDesc(desc?: string | null): ParsedEventDesc {
   }
 }
 
+/**
+ * Formatea valores monetarios con fallback inteligente
+ */
 export function formatCurrency(value: number, currency?: string): string {
   if (typeof value !== "number" || isNaN(value) || value < 0) {
     return "-";

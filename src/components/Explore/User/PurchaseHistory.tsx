@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Eye, Pencil } from "lucide-react";
+import { Calendar, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseEventDesc, formatCurrency } from "@/utils/purchaseParser";
 
@@ -203,9 +203,9 @@ function PurchaseCard({ purchase, onView, onEdit }: PurchaseCardProps) {
 
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
-      <div className="flex items-start justify-between gap-6 flex-col sm:flex-row">
+      <div className="flex items-start justify-between gap-6 flex-col ">
         <div className="flex-1 w-full">
-          <div className="mb-3 flex items-start justify-between gap-2 flex-col sm:flex-row">
+          <div className="mb-3 flex items-start justify-between gap-2 flex-col">
             <div>
               <h3 className="text-xl font-medium text-foreground mb-1">
                 {purchase.catalogName}
@@ -263,33 +263,43 @@ function PurchaseCard({ purchase, onView, onEdit }: PurchaseCardProps) {
           )}
         </div>
 
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-col items-center gap-3 w-full">
           <p className="text-2xl font-light tracking-tight text-foreground">
             {purchase.total}
           </p>
-          <div className="flex gap-2">
-            {purchase.status === "shipped" && (
+          <div className="flex gap-2  w-full flex-col">
+            {purchase.status === "shipped" ? (
+              <div className="gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 w-full"
+                  onClick={onEdit}
+                >
+                  <Pencil className="h-4 w-4" />
+                  Editar
+                </Button>
+                <Button
+                  variant={"destructive"}
+                  size="sm"
+                  className="gap-2 w-full"
+                  onClick={onView}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Eliminar
+                </Button>
+              </div>
+            ) : (
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2"
-                disabled
-                onClick={onEdit}
+                className="gap-2 w-full"
+                onClick={onView}
               >
-                <Pencil className="h-4 w-4" />
-                Editar
+                <Eye className="h-4 w-4" />
+                Ver
               </Button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="gap-2"
-              onClick={onView}
-            >
-              <Eye className="h-4 w-4" />
-              Ver
-            </Button>
           </div>
         </div>
       </div>

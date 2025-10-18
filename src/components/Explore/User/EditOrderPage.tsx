@@ -184,12 +184,11 @@ export default function EditOrderPage() {
   const router = useRouter();
   const { events, setEvents } = useContext(userContext);
   const orderId = params.id_order as string;
-
   const event = useMemo(
     () => events.find((e) => e.event_id === parseInt(orderId)),
     [events, orderId]
   );
-  console.log(event);
+
   const [items, setItems] = useState<OrderItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -225,7 +224,6 @@ export default function EditOrderPage() {
       .reduce((sum, item) => sum + item.price * item.quantity, 0)
       .toFixed(2);
   };
-  console.log(event);
   const handleSave = async () => {
     if (!event || items.length === 0) return;
 
@@ -233,14 +231,23 @@ export default function EditOrderPage() {
     try {
       const updatedEventDesc = itemsToEventDesc(event, items);
 
-      const { error: updateError } = await supabase
-        .from("events")
-        .update({
-          event_desc: updatedEventDesc,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("event_id", event.event_id);
+      const paramsRpc = {
+        p_uid: event.sitio_uuid,
+        p_events: event.events_text,
+        p_desc: JSON.parse(updatedEventDesc),
+        p_uid_venta: event.uid_venta,
+        p_nombre: event.nombre_event,
+        p_phonenumber: Number(event.phonenumber) || 0,
+        p_descripcion: event.descripcion || "",
+        p_created_at: event.created_at || new Date().toISOString(),
+      };
+      console.log(paramsRpc);
+      const { data, error: updateError } = await supabase.rpc(
+        "update_event_adjust_stock",
+        paramsRpc
+      );
 
+      console.log(data);
       if (updateError) {
         throw new Error(updateError.message || "Error al guardar cambios");
       }
@@ -272,24 +279,6 @@ export default function EditOrderPage() {
         <div className="max-w-4xl mx-auto">
           <Card className="p-12 text-center">
             <p className="text-muted-foreground mb-4">Pedido no encontrado</p>
-            <Button variant="outline" onClick={() => router.push("/user")}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver al perfil
-            </Button>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (!canEditOrder(event)) {
-    return (
-      <div className="min-h-screen bg-background p-8">
-        <div className="max-w-4xl mx-auto">
-          <Card className="p-12 text-center">
-            <p className="text-muted-foreground mb-4">
-              Este pedido no puede ser editado (estado: {getStatusLabel(event)})
-            </p>
             <Button variant="outline" onClick={() => router.push("/user")}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Volver al perfil
@@ -403,30 +392,32 @@ export default function EditOrderPage() {
                       </div>
 
                       <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
-                        <div className="flex items-center gap-3">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-9 w-9"
-                            onClick={() => updateQuantity(item.id, -1)}
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </Button>
-                          <div className="w-16 text-center">
-                            <span className="text-lg font-medium">
-                              {item.quantity}
-                            </span>
+                        {canEditOrder(event) && (
+                          <div className="flex items-center gap-3">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-9 w-9"
+                              onClick={() => updateQuantity(item.id, -1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <div className="w-16 text-center">
+                              <span className="text-lg font-medium">
+                                {item.quantity}
+                              </span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className="h-9 w-9"
+                              onClick={() => updateQuantity(item.id, 1)}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="h-9 w-9"
-                            onClick={() => updateQuantity(item.id, 1)}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        )}
 
                         <div className="w-28 text-center">
                           <p className="text-xl font-light tracking-tight">
@@ -434,14 +425,16 @@ export default function EditOrderPage() {
                           </p>
                         </div>
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {canEditOrder(event) && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => removeItem(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </Card>
@@ -462,23 +455,25 @@ export default function EditOrderPage() {
             </div>
           </Card>
 
-          <div className="flex gap-3 justify-end flex-col sm:flex-row">
-            <Button
-              variant="outline"
-              onClick={() => router.push("/user")}
-              disabled={isSaving}
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={items.length === 0 || isSaving}
-              className="gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? "Guardando..." : "Guardar Cambios"}
-            </Button>
-          </div>
+          {canEditOrder(event) && (
+            <div className="flex gap-3 justify-end flex-col sm:flex-row">
+              <Button
+                variant="outline"
+                onClick={() => router.push("/user")}
+                disabled={isSaving}
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={items.length === 0 || isSaving}
+                className="gap-2"
+              >
+                <Save className="h-4 w-4" />
+                {isSaving ? "Guardando..." : "Guardar Cambios"}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>

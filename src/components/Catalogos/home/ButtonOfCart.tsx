@@ -20,6 +20,7 @@ export function ButtonOfCart({
 
   const handleToCart = useCallback(
     (productToCart: Product) => {
+      console.log(productToCart);
       dispatchStore({
         type: "AddCart",
         payload: JSON.stringify(productToCart),
@@ -99,7 +100,7 @@ export function ButtonOfCart({
         disabled={store.stocks && product.Cant >= (product.stock || 0)}
         className="size-8 flex justify-center items-center rounded-full"
         onClick={() => {
-          if (slideOpen && product.Cant > 0) {
+          if (slideOpen) {
             const el = document.getElementById(product.productId);
             el?.scrollIntoView({ behavior: "smooth", block: "start" });
             handleToCart({ ...product, Cant: (product.Cant || 0) + 1 });
