@@ -125,7 +125,7 @@ export function PurchaseHistory({
   onFilterChange,
 }: PurchaseHistoryProps) {
   const router = useRouter();
-
+  console.log("events", events);
   const { purchases, filteredPurchases } = useMemo(() => {
     const allPurchases = (events ?? []).map(eventToPurchase);
 

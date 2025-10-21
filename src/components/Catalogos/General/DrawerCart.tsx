@@ -295,21 +295,25 @@ function ListCard({
           onClick={() => RedirectLink(productId, caja || "")}
           className="h-10 p-0 justify-between  animate-in slide-in-from-bottom-2 duration-300"
         >
-          <Image
-            src={image}
-            alt={title}
-            className="size-10 object-cover rounded"
-            width={150}
-            height={150}
-          />
+          <div className="relative">
+            <Image
+              src={image}
+              alt={title}
+              className="size-10 object-cover rounded"
+              width={150}
+              height={150}
+            />
+            <Badge className="absolute -bottom-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+              {cantidad}
+            </Badge>
+          </div>
           <div className="flex flex-col items-start justify-center">
             <p className="text-sm font-medium text-gray-900 truncate text-center">
               {title}
             </p>
             <p className="text-xs text-gray-500 text-center">
               ${price}
-              {" × "}
-              {cantidad} {embalaje > 0 ? ` + ${embalaje} embalaje` : ""}
+              {embalaje > 0 ? ` + ${embalaje} embalaje` : ""}
               {} {" - "}
               {store.moneda.find((m) => m.id == default_moneda)?.nombre || ""}
             </p>

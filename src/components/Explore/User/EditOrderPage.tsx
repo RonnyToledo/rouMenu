@@ -5,12 +5,20 @@ import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Trash2, ArrowLeft, Save } from "lucide-react";
+import {
+  Minus,
+  Plus,
+  Trash2,
+  ArrowLeft,
+  Save,
+  AlertCircle,
+} from "lucide-react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { userContext } from "@/context/userContext";
 import { toast } from "sonner";
 import { logoApp } from "@/lib/image";
+import { AgregadosInterface } from "@/context/InitialStatus";
 
 type EventRow = {
   event_id: number;
@@ -27,50 +35,44 @@ type EventRow = {
   sitio_uuid: string | null;
   sitio_sitioweb: string | null;
   sitio_name: string | null;
+  sitio_stocks?: boolean;
 };
 
 interface OrderItem {
   id: string;
   name: string;
-  quantity: number;
-  price: number;
-  image?: string;
   nombre?: string;
-  Cant?: number;
-  cant?: number;
-  qty?: number;
-  priceCompra?: number;
-  precio?: number;
-  imagen?: string;
   title?: string;
+  quantity: number;
+  cant?: number;
+  Cant?: number;
+  qty?: number;
+  price: number;
+  precio?: number;
+  image?: string;
+  imagen?: string;
+  productId?: string;
+  agregados?: AgregadosInterface[];
+}
+
+interface ProductStock {
+  [productId: string]: number;
 }
 
 interface ParsedEventData {
-  pedido?: Array<{
-    id?: string;
-    nombre?: string;
-    name?: string;
-    Cant?: number;
-    cant?: number;
-    quantity?: number;
-    qty?: number;
-    price?: number;
-    priceCompra?: number;
-    precio?: number;
-    imagen?: string;
-    title?: string;
-    image?: string;
-  }>;
   items?: OrderItem[];
+  pedido?: OrderItem[];
   total?: number;
+  currency?: string;
   moneda?: string;
+  address?: string;
   direccion?: string;
   lugar?: string;
-  address?: string;
-  phone?: string;
-  phonenumber?: string | number;
-  pago?: string;
+  paymentMethod?: string;
   payment?: string;
+  pago?: string;
+  phone?: string;
+  phonenumber?: string;
 }
 
 function eventToOrderData(event: EventRow) {
@@ -107,18 +109,20 @@ function eventToOrderData(event: EventRow) {
           const quantity =
             Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 1) ||
             1;
-          const price =
-            Number(item.price ?? item.priceCompra ?? item.precio ?? 0) || 0;
+          const price = Number(item.price ?? item.precio ?? 0) || 0;
           const name =
             item.nombre ?? item.title ?? item.name ?? `Producto ${index + 1}`;
           const image = item.imagen ?? item.image ?? undefined;
-
+          const productId = item.productId ?? item.id;
+          const agregados = item.agregados;
           return {
-            id: item.id ?? `item-${index}`,
+            id: productId ?? `item-${index}`,
             name,
             quantity,
             price,
             image,
+            productId,
+            agregados,
           };
         })
         .filter((item): item is OrderItem => item !== null);
@@ -128,44 +132,6 @@ function eventToOrderData(event: EventRow) {
   } catch (error) {
     console.warn("Error parsing event_desc:", error);
     return result;
-  }
-}
-
-function itemsToEventDesc(
-  originalEvent: EventRow,
-  updatedItems: OrderItem[]
-): string {
-  try {
-    const parsed: ParsedEventData = JSON.parse(
-      originalEvent.event_desc || "{}"
-    );
-
-    const updatedPedido = updatedItems.map((item) => {
-      const original = (parsed.pedido ?? []).find(
-        (p) => p.id === item.id || p.id === undefined
-      );
-      return {
-        ...original,
-        id: item.id,
-        nombre: item.name,
-        Cant: item.quantity,
-        price: item.price,
-      };
-    });
-
-    const newTotal = updatedItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
-
-    return JSON.stringify({
-      ...parsed,
-      pedido: updatedPedido,
-      total: newTotal,
-    });
-  } catch (error) {
-    console.error("Error converting items to event_desc:", error);
-    return originalEvent.event_desc ?? "{}";
   }
 }
 
@@ -182,23 +148,109 @@ function getStatusLabel(event: EventRow): string {
 export default function EditOrderPage() {
   const params = useParams();
   const router = useRouter();
-  const { events, setEvents } = useContext(userContext);
+  const { events } = useContext(userContext);
   const orderId = params.id_order as string;
   const event = useMemo(
     () => events.find((e) => e.event_id === parseInt(orderId)),
     [events, orderId]
   );
-
   const [items, setItems] = useState<OrderItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [productStocks, setProductStocks] = useState<ProductStock>({});
+  const [storeHasStockControl, setStoreHasStockControl] = useState(false);
 
   const orderData = useMemo(() => {
     return event ? eventToOrderData(event) : null;
   }, [event]);
 
+  // Cargar stock actual de productos
+  useEffect(() => {
+    if (!event) return;
+
+    const loadStockData = async () => {
+      setIsSaving(true);
+      try {
+        // 1. Verificar si la tienda controla stock
+        const { data: siteData, error: siteError } = await supabase
+          .from("Sitios")
+          .select("stocks")
+          .eq("UUID", event.sitio_uuid)
+          .single();
+
+        if (siteError) {
+          console.error("Error loading store config:", siteError);
+          setStoreHasStockControl(false);
+          return;
+        }
+
+        const hasStockControl = siteData?.stocks ?? false;
+        setStoreHasStockControl(hasStockControl);
+
+        if (!hasStockControl) {
+          // Si no controla stock, no hay restricciones
+          return;
+        }
+
+        // 2. Obtener stock actual de cada producto
+        const parsed = eventToOrderData(event);
+        const productIds = parsed.items.map(
+          (item) => item.productId || item.id
+        );
+
+        if (productIds.length === 0) return;
+
+        const stockMap: ProductStock = {};
+        const numericIds = productIds.filter((id) => /^\d+$/.test(String(id)));
+        const stringIds = productIds.filter((id) => !/^\d+$/.test(String(id)));
+
+        // Consultar por ID numérico
+        if (numericIds.length > 0) {
+          const { data: productsData } = await supabase
+            .from("Products")
+            .select("id, productId, stock")
+            .in("id", numericIds.map(Number));
+
+          if (productsData) {
+            productsData.forEach((p) => {
+              stockMap[p.id] = p.stock || 0;
+              if (p.productId) {
+                stockMap[p.productId] = p.stock || 0;
+              }
+            });
+          }
+        }
+        // Consultar por productId string
+        if (stringIds.length > 0) {
+          const { data: productsData } = await supabase
+            .from("Products")
+            .select("id, productId, stock")
+            .in("productId", stringIds);
+
+          if (productsData) {
+            productsData.forEach((p) => {
+              stockMap[p.id] = p.stock || 0;
+              if (p.productId) {
+                stockMap[p.productId] = p.stock || 0;
+              }
+            });
+          }
+        }
+
+        setProductStocks(stockMap);
+      } catch (err) {
+        console.error("Error loading stock data:", err);
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    loadStockData();
+  }, [event]);
+
   useEffect(() => {
     if (event) {
       const parsed = eventToOrderData(event);
+
       setItems(parsed.items);
     }
   }, [event]);
@@ -207,6 +259,19 @@ export default function EditOrderPage() {
     setItems((prev) =>
       prev.map((item) => {
         if (item.id === itemId) {
+          // Si hay control de stock, verificar límite
+          if (storeHasStockControl) {
+            const availableStock = productStocks[item.id] ?? 0;
+            const newQuantity = (item.quantity || 0) + delta;
+
+            if (newQuantity > availableStock) {
+              toast.error(
+                `Stock disponible: ${availableStock} unidades. No puedes exceder este límite.`
+              );
+              return item;
+            }
+          }
+
           const newQuantity = Math.max(1, item.quantity + delta);
           return { ...item, quantity: newQuantity };
         }
@@ -224,12 +289,46 @@ export default function EditOrderPage() {
       .reduce((sum, item) => sum + item.price * item.quantity, 0)
       .toFixed(2);
   };
+
   const handleSave = async () => {
     if (!event || items.length === 0) return;
 
+    // Validación final de stock antes de guardar
+    if (storeHasStockControl) {
+      for (const item of items) {
+        const availableStock = productStocks[item.id] ?? 0;
+        if (item.quantity > availableStock) {
+          toast.error(
+            `Stock insuficiente para "${item.name}". Disponible: ${availableStock}, solicitado: ${item.quantity}`
+          );
+          return;
+        }
+      }
+    }
+
     setIsSaving(true);
     try {
-      const updatedEventDesc = itemsToEventDesc(event, items);
+      // Convertir items a formato event_desc
+      const parsed: ParsedEventData = JSON.parse(event.event_desc || "{}");
+      const updatedPedido = items.map((item) => ({
+        ...(parsed.items?.[0] ?? {}),
+        id: item.productId || item.id,
+        productId: item.productId || item.id,
+        nombre: item.name,
+        Cant: item.quantity,
+        price: item.price,
+      }));
+
+      const newTotal = items.reduce(
+        (sum, item) => sum + item.price * item.quantity,
+        0
+      );
+
+      const updatedEventDesc = JSON.stringify({
+        ...parsed,
+        pedido: updatedPedido,
+        total: newTotal,
+      });
 
       const paramsRpc = {
         p_uid: event.sitio_uuid,
@@ -241,25 +340,15 @@ export default function EditOrderPage() {
         p_descripcion: event.descripcion || "",
         p_created_at: event.created_at || new Date().toISOString(),
       };
-      console.log(paramsRpc);
-      const { data, error: updateError } = await supabase.rpc(
-        "update_event_adjust_stock",
+
+      const { error: updateError } = await supabase.rpc(
+        "update_event_adjust_stock_v3",
         paramsRpc
       );
 
-      console.log(data);
       if (updateError) {
         throw new Error(updateError.message || "Error al guardar cambios");
       }
-
-      // Actualiza el context
-      setEvents((prev) =>
-        prev.map((e) =>
-          e.event_id === event.event_id
-            ? { ...e, event_desc: updatedEventDesc }
-            : e
-        )
-      );
 
       toast.success("Pedido actualizado correctamente");
       router.push("/user");
@@ -275,7 +364,7 @@ export default function EditOrderPage() {
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-background p-8">
+      <div className="min-h-screen bg-background p-8 py-2">
         <div className="max-w-4xl mx-auto">
           <Card className="p-12 text-center">
             <p className="text-muted-foreground mb-4">Pedido no encontrado</p>
@@ -290,7 +379,7 @@ export default function EditOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background p-8 py-2">
       <div className="max-w-4xl mx-auto">
         <Button
           variant="ghost"
@@ -351,6 +440,18 @@ export default function EditOrderPage() {
               </div>
             </div>
           </Card>
+
+          {storeHasStockControl && (
+            <Card className="p-4 mt-4 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-amber-800 dark:text-amber-200">
+                  Esta tienda controla stock. No puedes aumentar cantidades más
+                  allá del disponible.
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -364,81 +465,57 @@ export default function EditOrderPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {items.map((item) => (
-                  <Card
-                    key={item.id}
-                    className="p-6 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center gap-6 flex-col ">
-                      <div className="flex flex-row gap-2">
-                        <div className="relative  ">
-                          <Image
-                            src={item.image || logoApp}
-                            alt={item.name}
-                            width={100}
-                            height={100}
-                            className="rounded-lg object-cover bg-muted size-16"
+                {items.map((item) => {
+                  const availableStock = productStocks[item.id] || 0;
+                  const isOutOfStock =
+                    storeHasStockControl &&
+                    availableStock !== null &&
+                    availableStock <= 0;
+                  const canIncrease =
+                    !storeHasStockControl ||
+                    availableStock === null ||
+                    item.quantity < availableStock;
+                  console.log(item);
+
+                  return (
+                    <div key={item.id}>
+                      {(item?.agregados || []).length > 0 &&
+                        (item?.agregados || []).map((agg) => (
+                          <CardProducts
+                            key={agg.id}
+                            id={agg.id}
+                            image={item.image || logoApp}
+                            name={`${item.name} + ${agg.name}`}
+                            price={agg.price}
+                            quantity={item.cant || 0}
+                            updateQuantity={updateQuantity}
+                            removeItem={removeItem}
+                            isOutOfStock={isOutOfStock}
+                            storeHasStockControl={storeHasStockControl}
+                            availableStock={availableStock}
+                            canIncrease={canIncrease}
+                            event={event}
                           />
-                        </div>
-
-                        <div className="flex-1">
-                          <h3 className="text-lg font-medium text-foreground mb-2">
-                            {item.name}
-                          </h3>
-                          <p className="text-muted-foreground">
-                            ${item.price.toFixed(2)} por unidad
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
-                        {canEditOrder(event) && (
-                          <div className="flex items-center gap-3">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-9 w-9"
-                              onClick={() => updateQuantity(item.id, -1)}
-                              disabled={item.quantity <= 1}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <div className="w-16 text-center">
-                              <span className="text-lg font-medium">
-                                {item.quantity}
-                              </span>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-9 w-9"
-                              onClick={() => updateQuantity(item.id, 1)}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-
-                        <div className="w-28 text-center">
-                          <p className="text-xl font-light tracking-tight">
-                            ${(item.price * item.quantity).toFixed(2)}
-                          </p>
-                        </div>
-
-                        {canEditOrder(event) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => removeItem(item.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                        ))}
+                      {item.quantity > 0 && (
+                        <CardProducts
+                          id={item.id}
+                          image={item.image || logoApp}
+                          name={item.name}
+                          price={item.price}
+                          quantity={item.quantity}
+                          updateQuantity={updateQuantity}
+                          removeItem={removeItem}
+                          isOutOfStock={isOutOfStock}
+                          storeHasStockControl={storeHasStockControl}
+                          availableStock={availableStock}
+                          canIncrease={canIncrease}
+                          event={event}
+                        />
+                      )}
                     </div>
-                  </Card>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -477,5 +554,122 @@ export default function EditOrderPage() {
         </div>
       </div>
     </div>
+  );
+}
+interface CardProductsProps {
+  id: string;
+  image: string;
+  name: string;
+  price: number;
+  quantity: number;
+  updateQuantity: (itemId: string, delta: number) => void;
+  removeItem: (itemId: string) => void;
+  isOutOfStock: boolean;
+  storeHasStockControl: boolean;
+  availableStock: number;
+  event: EventRow;
+  canIncrease: boolean;
+}
+function CardProducts({
+  id,
+  image,
+  name,
+  price,
+  quantity,
+  updateQuantity,
+  removeItem,
+  isOutOfStock,
+  storeHasStockControl,
+  availableStock,
+  event,
+  canIncrease,
+}: CardProductsProps) {
+  return (
+    <Card
+      key={id}
+      className={`p-6 hover:shadow-md transition-shadow ${
+        isOutOfStock ? "opacity-60" : ""
+      }`}
+    >
+      <div className="flex items-center gap-6 flex-col">
+        <div className="flex flex-row gap-2 w-full">
+          <div className="relative">
+            <Image
+              src={image || logoApp}
+              alt={name}
+              width={100}
+              height={100}
+              className="rounded-lg object-cover bg-muted size-16"
+            />
+          </div>
+
+          <div className="flex-1">
+            <h3 className="text-lg font-medium text-foreground mb-2">{name}</h3>
+            <p className="text-muted-foreground">
+              ${price.toFixed(2)} por unidad
+            </p>
+            {storeHasStockControl && availableStock !== null && (
+              <p
+                className={`text-sm mt-1 ${
+                  isOutOfStock
+                    ? "text-red-600 dark:text-red-400 font-medium"
+                    : "text-green-600 dark:text-green-400"
+                }`}
+              >
+                {isOutOfStock
+                  ? "Sin stock"
+                  : `Stock disponible: ${availableStock}`}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
+          {canEditOrder(event) && !isOutOfStock && (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => updateQuantity(id, -1)}
+                disabled={quantity <= 1}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <div className="w-16 text-center">
+                <span className="text-lg font-medium">{quantity}</span>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9"
+                onClick={() => updateQuantity(id, 1)}
+                disabled={!canIncrease}
+                title={!canIncrease ? `Stock máximo: ${availableStock}` : ""}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          <div className="w-28 text-center">
+            <p className="text-xl font-light tracking-tight">
+              ${(price * quantity).toFixed(2)}
+            </p>
+          </div>
+
+          {canEditOrder(event) && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => removeItem(id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </Card>
   );
 }

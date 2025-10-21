@@ -2,6 +2,8 @@
 // UTILITIES - Exportar a utils/purchaseParser.ts
 // ============================================
 
+import { AgregadosInterface } from "@/context/InitialStatus";
+
 interface ParsedEventDesc {
   items: number;
   total: number;
@@ -71,15 +73,21 @@ export function parseEventDesc(desc?: string | null): ParsedEventDesc {
 
       for (const item of itemsArray) {
         if (!item || typeof item !== "object") continue;
-
+        console.log(item);
+        const aggQty = item.agregados.reduce(
+          (sum: number, agg: AgregadosInterface) => {
+            const aggQty = Number(agg.cant || 0) || 0;
+            return sum + aggQty;
+          },
+          0
+        );
         const qty =
           Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 0) || 0;
         const price =
           Number(item.price ?? item.priceCompra ?? item.precio ?? 0) || 0;
-        const effectiveQty = qty || (Object.keys(item).length > 0 ? 1 : 0);
 
-        totalItems += effectiveQty;
-        subtotal += price * effectiveQty;
+        totalItems += qty + aggQty;
+        subtotal += price * qty;
       }
 
       result.items = totalItems;
