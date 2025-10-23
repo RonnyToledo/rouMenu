@@ -20,7 +20,6 @@ export function ButtonOfCart({
 
   const handleToCart = useCallback(
     (productToCart: Product) => {
-      console.log(productToCart);
       dispatchStore({
         type: "AddCart",
         payload: JSON.stringify(productToCart),

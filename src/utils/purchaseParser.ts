@@ -73,7 +73,6 @@ export function parseEventDesc(desc?: string | null): ParsedEventDesc {
 
       for (const item of itemsArray) {
         if (!item || typeof item !== "object") continue;
-        console.log(item);
         const aggQty = item.agregados.reduce(
           (sum: number, agg: AgregadosInterface) => {
             const aggQty = Number(agg.cant || 0) || 0;

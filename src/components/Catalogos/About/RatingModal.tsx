@@ -1,11 +1,12 @@
 "use client";
 
-import React, { FC, useState, useContext, useEffect } from "react";
+import React, { FC, useState } from "react";
 import { Star } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -13,23 +14,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { MyContext } from "@/context/MyContext";
-import axios from "axios";
-import { toast } from "sonner";
 import { logoUser } from "@/lib/image";
 import { IoIosSend } from "react-icons/io";
 import { Spinner } from "@/components/ui/spinner";
 
 interface RatingModalProps {
   isOpen: boolean;
-  onClose: (open: boolean) => void;
+  rating: RatingInterface;
   userName: string;
   user?: string;
-  starsSelected: number;
   imageUser?: string;
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: (open: boolean) => void;
+  setRating: React.Dispatch<React.SetStateAction<RatingInterface>>;
   sendToWhatsapp?: () => void;
-  uuid: string;
+  handleSubmit: () => Promise<void>;
 }
 export interface RatingInterface {
   nombre: string;
@@ -45,74 +43,16 @@ export const initialState = {
 export const Rating: FC<RatingModalProps> = ({
   isOpen,
   onClose,
-  starsSelected,
   userName,
-  setIsModalOpen,
   imageUser = logoUser,
   user,
-  uuid,
   sendToWhatsapp,
+  handleSubmit,
+  rating,
+  setRating,
 }) => {
-  const { store, dispatchStore } = useContext(MyContext);
   const [loading, setLoading] = useState(false);
-  const [rating, setRating] = useState<RatingInterface>({
-    ...initialState,
-    nombre: user || initialState.nombre,
-  });
-  useEffect(() => {
-    if (user) setRating((prev) => ({ ...prev, nombre: user }));
-  }, [user]);
 
-  useEffect(() => {
-    setRating((prev) => ({ ...prev, selectedRating: starsSelected }));
-  }, [starsSelected]);
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      if (!uuid) {
-        throw new Error("No existe el usuario");
-      }
-      if (!rating.nombre) {
-        throw new Error("No existe el campo de nombre");
-      }
-      const res = await axios.post(
-        `/api/tienda/${store}/coment`,
-        {
-          comentario: {
-            cmt: rating.description,
-            star: rating.selectedRating,
-            name: rating.nombre,
-          },
-          uid: store.UUID,
-          uuid,
-        },
-        { headers: { "Content-Type": "application/json" } } // Cambia a application/json
-      );
-
-      if (res.status === 200 || res.status === 201) {
-        window.localStorage.setItem(`${store.sitioweb}-userRating`, "ok");
-        toast.success("Tarea Ejecutada", {
-          description: "Comentario realizado",
-        });
-        dispatchStore({
-          type: "AddComent",
-          payload: { star: res.data.star },
-        });
-        setIsModalOpen(false);
-        if (sendToWhatsapp) {
-          sendToWhatsapp();
-        }
-      }
-    } catch (error) {
-      console.error("Error al enviar el comentario:", error);
-      toast("Error", {
-        description: "No se pudo enviar el comentario.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -130,17 +70,10 @@ export const Rating: FC<RatingModalProps> = ({
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              className="text-blue-400"
-              onClick={handleSubmit}
-              disabled={loading}
-            >
-              {loading ? <Spinner /> : <IoIosSend />}
-            </Button>
+            <div></div>
           </div>
         </DialogHeader>
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Input
             placeholder="Nombre"
             className="bg-transparent border-gray-300 text-sm"
@@ -151,7 +84,7 @@ export const Rating: FC<RatingModalProps> = ({
             }
           />
 
-          <div className="flex gap-1 my-4 justify-center items-center">
+          <div className="flex gap-1 my-2 justify-center items-center">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -183,6 +116,34 @@ export const Rating: FC<RatingModalProps> = ({
             {rating.description.length}/500
           </div>
         </div>
+        <DialogFooter className="flex flex-row items-center justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-blue-400"
+            onClick={async () => {
+              try {
+                setLoading(true);
+                await handleSubmit();
+                if (sendToWhatsapp) {
+                  sendToWhatsapp();
+                }
+                onClose(false);
+              } catch (error) {
+                console.error("Error submitting rating:", error);
+              } finally {
+                setLoading(false);
+              }
+            }}
+            disabled={loading}
+          >
+            {loading ? (
+              <Spinner className="size-8 animate-spin" />
+            ) : (
+              <IoIosSend className="size-8" />
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

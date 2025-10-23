@@ -27,7 +27,6 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ShareButton from "@/components/myUI/buttonShare";
 import ClipboardProduct from "@/components/myUI/clipboardProduct";
 import RelativeTime from "@/components/GeneralComponents/DateTime";
@@ -227,7 +226,10 @@ export default function Product({ id }: { id: string }) {
               <div
                 className={`flex justify-between items-center w-full gap-2 animate-in ${swipeComponents.corto} duration-500 delay-300`}
               >
-                <div className="flex gap-2">
+                <Link
+                  href={`/t/${store.sitioweb}/producto/${product.productId}/coment`}
+                  className="flex gap-2"
+                >
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
@@ -244,7 +246,7 @@ export default function Product({ id }: { id: string }) {
                     {product?.coment?.promedio || 0} ({product?.coment.total}{" "}
                     reseñas)
                   </span>
-                </div>
+                </Link>
 
                 <div className="flex ">
                   <ClipboardProduct
@@ -570,41 +572,22 @@ export default function Product({ id }: { id: string }) {
           {product?.venta ? (
             <>
               <Separator />
-              <Tabs
-                defaultValue={product?.descripcion ? "description" : "rating"}
-                className="min-h-96  text-gray-800"
-              >
-                <TabsList>
-                  <TabsTrigger
-                    value="description"
-                    disabled={!product?.descripcion}
-                  >
-                    Detalles
-                  </TabsTrigger>
 
-                  <TabsTrigger value="rating">Rating</TabsTrigger>
-                </TabsList>
-                {product?.descripcion && (
-                  <TabsContent value="description">
-                    {/* Descripción */}
-                    <div
-                      className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
-                    >
-                      Posteado:{" "}
-                      <RelativeTime datetime={product?.creado || new Date()} />
-                      <ExpandableText text={product?.descripcion || "..."} />
-                    </div>
-                  </TabsContent>
-                )}
-                <TabsContent value="rating">
-                  {/* Estado de stock */}
+              {product?.descripcion && (
+                <div
+                  className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
+                >
+                  Posteado:{" "}
+                  <RelativeTime datetime={product?.creado || new Date()} />
+                  <ExpandableText text={product?.descripcion || "..."} />
+                </div>
+              )}
+              <Separator />
 
-                  <RatingSection
-                    specific={product?.productId || id}
-                    sitioweb={store.sitioweb || ""}
-                  />
-                </TabsContent>
-              </Tabs>
+              <RatingSection
+                specific={product?.productId || id}
+                sitioweb={store.sitioweb || ""}
+              />
             </>
           ) : (
             <p className="text-base text-gray-700">{product?.descripcion}</p>

@@ -69,7 +69,6 @@ export default function UserContextProvider({
         "get_events_with_site",
         { p_user_id: userId }
       );
-      console.log(data);
       if (rpcError) {
         throw new Error(rpcError.message || "Error al cargar eventos");
       }

@@ -59,7 +59,10 @@ export default function HeroNew({}) {
 
       <div className="space-y-3">
         {/* Rating */}
-        <div className="flex items-center gap-2 text-sm text-gray-600">
+        <Link
+          href={`/t/${store.sitioweb}/about/ratings`}
+          className="flex items-center gap-2 text-sm text-gray-600"
+        >
           <Star className="w-4 h-4 fill-current text-gray-700" />
           <span className="font-medium text-gray-900">
             {store?.comentTienda.promedio.toFixed(1)}
@@ -67,7 +70,7 @@ export default function HeroNew({}) {
           <span>({store?.comentTienda.total} reseñas)</span>
           <span className="text-gray-300">•</span>
           <span>$ {store.moneda.find((m) => m.defecto)?.nombre || ""}</span>
-        </div>
+        </Link>
         {/* Location */}
         <Link
           className="inline-flex gap-2 items-center bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-2 px-4 rounded-full border border-[var(--border-gold)]"

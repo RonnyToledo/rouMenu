@@ -12,13 +12,13 @@ import Resumen from "./Resumen";
 import CodeDiscount from "./CodeDiscount";
 import CartItems from "./CartItems";
 import { v4 as uuidv4 } from "uuid";
-import { Rating } from "../About/RatingModal";
 import { smartRound } from "@/functions/precios";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
 import { useAuth } from "@/context/AuthContext";
 import { redondearAMultiploDe5 } from "@/reducer/reducerGeneral";
+import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
 
 export interface CompraInterface {
   pago: string;
@@ -420,21 +420,12 @@ export default function CarritoPage() {
             />
           </>
         )}
-        <Rating
-          uuid={user?.id || ""}
-          user={user?.user_metadata.full_name || "user"}
-          imageUser={
-            user?.user_metadata.avatar_url || user?.user_metadata.avatar_url
-          }
-          isOpen={showRatingModal}
+        <PreviewRatingGeneral
+          reviewOpen={showRatingModal}
           onClose={() => {
             setShowRatingModal(false);
             sendToWhatsapp();
           }}
-          sendToWhatsapp={sendToWhatsapp}
-          starsSelected={0}
-          userName="User"
-          setIsModalOpen={setShowRatingModal}
         />
       </div>
       <style jsx>{`

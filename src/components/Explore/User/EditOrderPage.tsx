@@ -107,8 +107,8 @@ function eventToOrderData(event: EventRow) {
           if (!item || typeof item !== "object") return null;
 
           const quantity =
-            Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 1) ||
-            1;
+            Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 0) ||
+            0;
           const price = Number(item.price ?? item.precio ?? 0) || 0;
           const name =
             item.nombre ?? item.title ?? item.name ?? `Producto ${index + 1}`;
@@ -286,7 +286,16 @@ export default function EditOrderPage() {
 
   const calculateTotal = () => {
     return items
-      .reduce((sum, item) => sum + item.price * item.quantity, 0)
+      .reduce(
+        (sum, item) =>
+          sum +
+          item.price * item.quantity +
+          (item.agregados?.reduce(
+            (sum, agg) => sum + agg.price * agg.cant,
+            0
+          ) || 0),
+        0
+      )
       .toFixed(2);
   };
 
@@ -475,7 +484,6 @@ export default function EditOrderPage() {
                     !storeHasStockControl ||
                     availableStock === null ||
                     item.quantity < availableStock;
-                  console.log(item);
 
                   return (
                     <div key={item.id}>
@@ -487,7 +495,7 @@ export default function EditOrderPage() {
                             image={item.image || logoApp}
                             name={`${item.name} + ${agg.name}`}
                             price={agg.price}
-                            quantity={item.cant || 0}
+                            quantity={agg.cant || 0}
                             updateQuantity={updateQuantity}
                             removeItem={removeItem}
                             isOutOfStock={isOutOfStock}

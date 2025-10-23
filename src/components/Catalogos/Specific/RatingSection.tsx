@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Star } from "lucide-react";
-import { StarDistribution } from "@/context/InitialStatus";
+import { Product, StarDistribution } from "@/context/InitialStatus";
 import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { RatingModalProduct } from "./RatingModalProduct";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
+import { Separator } from "@/components/ui/separator";
+import axios from "axios";
+import { toast } from "sonner";
+import { initialState, Rating, RatingInterface } from "../About/RatingModal";
 
 export default function RatingSection({
   specific,
@@ -18,15 +21,27 @@ export default function RatingSection({
   sitioweb: string;
 }) {
   const pathname = usePathname();
-  const { store } = useContext(MyContext);
+  const { store, dispatchStore } = useContext(MyContext);
+  const [product, setproduct] = useState<Product>();
   const { user, loading } = useAuth();
-  const [selectedRating, setSelectedRating] = useState(0);
-
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
+  const [rating, setRating] = useState<RatingInterface>(initialState);
+
+  useEffect(() => {
+    if (user?.user_metadata.full_name) {
+      setRating((prev) => ({
+        ...prev,
+        nombre: user?.user_metadata.full_name || "",
+      }));
+    }
+  }, [user?.user_metadata.full_name]);
 
   const handleStarClick = (rating: number) => {
-    setSelectedRating(rating);
+    setRating((prev) => ({
+      ...prev,
+      selectedRating: rating,
+    }));
 
     if (user && loading === false) {
       setReviewOpen(true);
@@ -37,21 +52,57 @@ export default function RatingSection({
     setIsLoginOpen(true);
   };
 
+  useEffect(() => {
+    setproduct(store.products.find((obj) => obj.productId == specific));
+  }, [store.products, specific]);
+
+  const handleSubmit = async () => {
+    if (!user?.id) return;
+    try {
+      const res = await axios.post(
+        `/api/tienda/${store}/product/${product?.productId || ""}/coment`,
+        {
+          comentario: {
+            cmt: rating.description,
+            star: rating.selectedRating,
+          },
+          uuid: user?.id,
+        },
+        { headers: { "Content-Type": "application/json" } } // Cambia a application/json
+      );
+
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Tarea Ejecutada", {
+          description: "Comentario realizado",
+        });
+        dispatchStore({
+          type: "AddComentProduct",
+          payload: { data: res?.data?.value, specific: specific },
+        });
+        setReviewOpen(false);
+      }
+    } catch (error) {
+      console.error("Error al enviar el comentario:", error);
+      toast("Error", {
+        description: "No se pudo enviar el comentario.",
+      });
+    }
+  };
   return (
     <>
       {store.products
         .filter((env) => env.productId === specific)
         .map((obj, ind) => (
-          <div key={ind} className="max-w-xl mx-auto px-6 py-2 ">
+          <div key={ind} className="max-w-xl mx-auto p-2 ">
             <p className="text-gray-500 mb-2 text-sm">
               {obj.coment?.total == 0
                 ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
-                : "Las calificaciones y opiniones provienen de personas que usan el mismo tipo de dispositivo que tú."}
+                : "Las calificaciones y opiniones provienen de personas que comparten sus expariencias con otros usuarios."}
             </p>
 
             <div className="grid grid-cols-2 items-center gap-2 mb-2">
               <div className="flex flex-col items-center">
-                <div className="text-6xl font-light">
+                <div className="text-6xl font-light text-gray-700">
                   {(obj?.coment?.promedio).toFixed(1)}
                 </div>
                 <div className="flex gap-1 my-2">
@@ -77,31 +128,30 @@ export default function RatingSection({
               <Button asChild variant="ghost">
                 <Link
                   href={`/t/${store.sitioweb}/producto/${obj.productId}/coment`}
-                  className="w-full flex justify-between"
+                  className="w-full flex justify-between text-lg text-gray-700"
                 >
-                  <h2 className="text-lg ">Todos los comentarios</h2>
-                  <div className="text-lg">→</div>
+                  <h2>Todos los comentarios →</h2>
                 </Link>
               </Button>
             </div>
-
-            <div className="border-t border-gray-800 pt-2">
-              <h3 className="text-lg mb-1 text-center">
+            <Separator />
+            <div className="pt-2">
+              <h3 className="text-lg mb-1 text-center text-gray-700 font-medium">
                 Califica este producto
               </h3>
               <p className="text-gray-400 mb-4 text-base text-center">
                 Comparte tu opinión con otros usuarios
               </p>
               <div className="flex gap-2 justify-center">
-                {[1, 2, 3, 4, 5].map((rating) => (
+                {[1, 2, 3, 4, 5].map((starValue) => (
                   <button
-                    key={rating}
-                    onClick={() => handleStarClick(rating)}
+                    key={starValue}
+                    onClick={() => handleStarClick(starValue)}
                     className="hover:scale-110 transition-transform"
                   >
                     <Star
-                      className={`w-8 h-8 ${
-                        rating <= selectedRating
+                      className={`size-7 ${
+                        starValue <= rating.selectedRating
                           ? "fill-gray-600 text-gray-600"
                           : "text-gray-400"
                       }`}
@@ -118,18 +168,17 @@ export default function RatingSection({
               }}
               redirectTo={pathname} // Ruta dinámica
             />
-            <RatingModalProduct
+            <Rating
+              rating={rating}
+              setRating={setRating}
               isOpen={reviewOpen}
               onClose={() => setReviewOpen(false)}
-              id={specific}
               userName="Usuario"
-              setIsModalOpen={setReviewOpen}
-              starsSelected={selectedRating}
               user={user?.user_metadata.full_name}
+              handleSubmit={handleSubmit}
               imageUser={
                 user?.user_metadata.avatar_url || user?.user_metadata.avatar_url
               }
-              uuid={user?.id || ""}
             />
           </div>
         ))}
@@ -161,7 +210,7 @@ function StarSpecifications({ datos }: { datos: StarDistribution }) {
         const porcentaje = totalVotos > 0 ? (votos * 100) / totalVotos : 0;
         return (
           <div key={item} className="flex items-center gap-1">
-            <span className="w-3">{item}</span>
+            <span className="w-3 text-gray-700">{item}</span>
             <div className="flex-1 h-2 bg-gray-400 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-400"

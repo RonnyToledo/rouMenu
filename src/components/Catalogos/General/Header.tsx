@@ -41,7 +41,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { LiaSignInAltSolid } from "react-icons/lia";
 import { Separator } from "@/components/ui/separator";
 import { logoUser } from "@/lib/image";
-import { Rating } from "../About/RatingModal";
+import PreviewRatingGeneral from "./PreviewRatingGeneral";
 
 type SheetView = "home" | "categories" | "coins";
 
@@ -74,7 +74,6 @@ export default function Header() {
   // Memoized handlers
   const closeSheet = useCallback(() => setOpen(false), []);
   const closeLogin = useCallback(() => setIsLoginOpen(false), []);
-  const closeReview = useCallback(() => setReviewOpen(false), []);
 
   const handleReviewAction = useCallback(() => {
     if (context?.user && !context.loading) {
@@ -171,10 +170,6 @@ export default function Header() {
     [store.sitioweb, router, closeSheet, handleReviewAction]
   );
 
-  const userAvatar = context?.user?.user_metadata.avatar_url || logoUser;
-  const userName = context?.user?.user_metadata.full_name || "user";
-  const userId = context?.user?.id || "";
-
   return (
     <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between">
       <LoginPopover
@@ -183,15 +178,9 @@ export default function Header() {
         redirectTo={pathname}
       />
 
-      <Rating
-        isOpen={reviewOpen}
-        onClose={closeReview}
-        starsSelected={5}
-        userName="Usuario"
-        user={userName}
-        imageUser={userAvatar}
-        uuid={userId}
-        setIsModalOpen={setReviewOpen}
+      <PreviewRatingGeneral
+        reviewOpen={reviewOpen}
+        onClose={() => setReviewOpen(false)}
       />
 
       <div className="flex items-center">

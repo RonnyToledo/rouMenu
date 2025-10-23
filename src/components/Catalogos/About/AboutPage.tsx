@@ -2,7 +2,7 @@
 import { MyContext } from "@/context/MyContext";
 import Image from "next/image";
 import React, { useContext, useEffect, useState } from "react";
-import { logoAdmin, logoUser } from "@/lib/image";
+import { logoAdmin } from "@/lib/image";
 import { Map, Marker } from "pigeon-maps";
 import { FaLocationDot } from "react-icons/fa6";
 import { GrSchedule } from "react-icons/gr";
@@ -20,7 +20,6 @@ import { isOpen, IsOpenStoreInteface } from "@/functions/time";
 import OpenClose from "../General/OpenClose";
 import { ScheduleInterface } from "@/context/InitialStatus";
 import { Separator } from "@/components/ui/separator";
-import { Rating } from "./RatingModal";
 import AboutMePage from "./NewDesing";
 import {
   Carousel,
@@ -32,19 +31,20 @@ import Autoplay from "embla-carousel-autoplay";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import { AuthContext } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
+import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
 
 export default function AboutPage() {
   const { store } = useContext(MyContext);
   const context = useContext(AuthContext);
   const pathname = usePathname();
-  const [selectedRating, setSelectedRating] = useState<number>(0);
   const [isOpenStore, setIsOpenStore] = useState<IsOpenStoreInteface>();
+  const [ratingSelect, setRatingSelect] = useState<number>(0);
   // nuevo: control del popover de login y del modal de reseña
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
 
   const handleStarClick = (rating: number) => {
-    setSelectedRating(rating);
+    setRatingSelect(rating);
 
     if (context?.user && context?.loading === false) {
       setReviewOpen(true);
@@ -212,15 +212,15 @@ export default function AboutPage() {
               <CardContent>
                 <div className="pt-6">
                   <div className="flex gap-2 items-center justify-center">
-                    {[1, 2, 3, 4, 5].map((rating) => (
+                    {[1, 2, 3, 4, 5].map((starValue) => (
                       <button
-                        key={rating}
-                        onClick={() => handleStarClick(rating)}
+                        key={starValue}
+                        onClick={() => handleStarClick(starValue)}
                         className="hover:scale-110 transition-transform "
                       >
                         <Star
                           className={`w-8 h-8 ${
-                            rating <= selectedRating
+                            starValue <= ratingSelect
                               ? "fill-gray-600 text-gray-600"
                               : "text-gray-400"
                           }`}
@@ -237,21 +237,11 @@ export default function AboutPage() {
                   }}
                   redirectTo={pathname} // Ruta dinámica
                 />
-
                 {/* Modal de reseña: ajusta props/import si tu componente es distinto */}
-                <Rating
-                  isOpen={reviewOpen}
+                <PreviewRatingGeneral
+                  reviewOpen={reviewOpen}
                   onClose={() => setReviewOpen(false)}
-                  starsSelected={5}
-                  userName={"Usuario"}
-                  user={context?.user?.user_metadata.full_name || "user"}
-                  imageUser={
-                    context?.user?.user_metadata.avatar_url ||
-                    context?.user?.user_metadata.avatar_url ||
-                    logoUser
-                  }
-                  uuid={context?.user?.id || ""}
-                  setIsModalOpen={setReviewOpen}
+                  ratingSelect={ratingSelect}
                 />
               </CardContent>
             </Card>
