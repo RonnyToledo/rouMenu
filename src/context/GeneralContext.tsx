@@ -161,7 +161,7 @@ export default function GeneralProvider({
     if (typeof window === "undefined") return;
 
     // Si ya hay usuario, aseguramos que el popover esté cerrado y marcamos como mostrado
-    if (user && !loading) {
+    if (!!user || !loading) {
       setIsLoginOpen(false);
 
       return;

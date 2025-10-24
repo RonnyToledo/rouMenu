@@ -248,7 +248,7 @@ export default function CarritoPage() {
             descripcion: compra.descripcion,
             date: getLocalISOString(),
             desc: compra,
-            uid: newUID,
+            uid: store.compraUUID ?? newUID,
             nombre: compra.people,
             phonenumber: compra.phonenumber,
             user_id: user?.id || "",
@@ -260,6 +260,7 @@ export default function CarritoPage() {
           );
           if (saved !== null) {
             await sendToWhatsapp();
+            if (store.compraUUID) router.push("/user");
           } else {
             setShowRatingModal(true);
           }
@@ -287,7 +288,7 @@ export default function CarritoPage() {
   const sendToWhatsapp = async () => {
     // Abrir WhatsApp
 
-    let mensaje = `Hola, Quiero realizar este pedido:\n- Metodo de envio: ${
+    let mensaje = `Hola, Quiero modificar este pedido:\n- Metodo de envio: ${
       compra.lugar
     }\n`;
     mensaje += `- ID de Venta: ${newUID}\n`;

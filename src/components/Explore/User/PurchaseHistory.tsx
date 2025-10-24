@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseEventDesc, formatCurrency } from "@/utils/purchaseParser";
+import { persistCartIDB } from "@/reducer/reducerGeneral";
 
 type EventRow = {
   event_id: number;
@@ -140,7 +141,18 @@ export function PurchaseHistory({
   const handleFilterClick = (filter: (typeof FILTERS)[number]) => {
     onFilterChange?.(filter);
   };
+  console.log(events);
 
+  const EditarComprar = (idCompra: string) => {
+    const e = events.find((e) => e.event_id === Number(idCompra));
+    if (!e) return;
+    persistCartIDB(
+      e.sitio_sitioweb || "",
+      JSON.parse(e.event_desc || "{}").pedido,
+      e.uid_venta || ""
+    );
+    router.push(`/t/${e.sitio_sitioweb}`);
+  };
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
@@ -177,7 +189,8 @@ export function PurchaseHistory({
               key={purchase.id}
               purchase={purchase}
               onView={() => router.push(`/user/order/${purchase.id}`)}
-              onEdit={() => router.push(`/user/order/${purchase.id}`)}
+              onEdit={() => EditarComprar(purchase.id)}
+              onDelete={() => console.log("Delete", purchase.id)}
             />
           ))
         ) : (
@@ -196,9 +209,15 @@ interface PurchaseCardProps {
   purchase: Purchase;
   onView: () => void;
   onEdit: () => void;
+  onDelete: () => void;
 }
 
-function PurchaseCard({ purchase, onView, onEdit }: PurchaseCardProps) {
+function PurchaseCard({
+  purchase,
+  onView,
+  onEdit,
+  onDelete,
+}: PurchaseCardProps) {
   const status = STATUS_CONFIG[purchase.status];
 
   return (
@@ -268,8 +287,17 @@ function PurchaseCard({ purchase, onView, onEdit }: PurchaseCardProps) {
             {purchase.total}
           </p>
           <div className="flex gap-2  w-full flex-col">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 w-full"
+              onClick={onView}
+            >
+              <Eye className="h-4 w-4" />
+              Ver
+            </Button>
             {purchase.status === "shipped" ? (
-              <div className="gap-2">
+              <>
                 <Button
                   variant="outline"
                   size="sm"
@@ -283,23 +311,13 @@ function PurchaseCard({ purchase, onView, onEdit }: PurchaseCardProps) {
                   variant={"destructive"}
                   size="sm"
                   className="gap-2 w-full"
-                  onClick={onView}
+                  onClick={onDelete}
                 >
                   <Trash2 className="h-4 w-4" />
                   Eliminar
                 </Button>
-              </div>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 w-full"
-                onClick={onView}
-              >
-                <Eye className="h-4 w-4" />
-                Ver
-              </Button>
-            )}
+              </>
+            ) : null}
           </div>
         </div>
       </div>

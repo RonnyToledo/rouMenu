@@ -14,9 +14,11 @@ export type SavedProduct = {
   agregados?: SavedAgregado[];
 };
 
+// Ahora permitimos opcionalmente guardar una "purchaseUuid" junto a la entrada
 export type IDBCartEntry = {
   key: string; // ej: cart_mitienda
   value: SavedProduct[]; // guardamos el array normalizado
+  purchaseUuid?: string; // clave UUID de la compra (opcional)
 };
 
 const DB_NAME = "roudev_cart_db";
@@ -76,10 +78,14 @@ function normalizeSavedProduct(p: SavedProduct): SavedProduct {
 /**
  * Guarda un array de SavedProduct bajo la key `cart_<shopKey>`,
  * normalizando las cantidades de agregados.
+ *
+ * Ahora acepta un parámetro opcional `purchaseUuid` que, si se proporciona,
+ * se guardará en la entrada junto con los productos.
  */
 export async function saveCartToIDB(
   shopKey: string,
-  cartData: SavedProduct[]
+  cartData: SavedProduct[],
+  purchaseUuid?: string
 ): Promise<void> {
   try {
     const db = await openDB();
@@ -91,7 +97,12 @@ export async function saveCartToIDB(
       normalizeSavedProduct(p)
     );
 
-    const entry: IDBCartEntry = { key: `cart_${shopKey}`, value: normalized };
+    const entry: IDBCartEntry = {
+      key: `cart_${shopKey}`,
+      value: normalized,
+      ...(purchaseUuid ? { purchaseUuid } : {}),
+    };
+
     store.put(entry);
     await txComplete(tx);
     db.close();
@@ -102,12 +113,14 @@ export async function saveCartToIDB(
 }
 
 /**
- * Devuelve el array SavedProduct guardado o null si no existe.
+ * Devuelve la entrada guardada o null si no existe.
  * Al cargar también normalizamos para garantizar que agregados tengan 'cant' numérico.
+ *
+ * RETURN: { products: SavedProduct[], purchaseUuid?: string } | null
  */
 export async function loadCartFromIDB(
   shopKey: string
-): Promise<SavedProduct[] | null> {
+): Promise<{ products: SavedProduct[]; purchaseUuid?: string } | null> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, "readonly");
@@ -120,11 +133,22 @@ export async function loadCartFromIDB(
     if (!value?.value) return null;
     // Normalizamos al devolver
     const normalized = value.value.map((p) => normalizeSavedProduct(p));
-    return normalized;
+    return { products: normalized, purchaseUuid: value.purchaseUuid };
   } catch (err) {
     console.error("loadCartFromIDB error:", err);
     return null;
   }
+}
+
+/**
+ * Función de compatibilidad que devuelve solo el array de productos (como antes).
+ * Útil si tienes código existente que espera SavedProduct[] | null.
+ */
+export async function loadCartProductsFromIDB(
+  shopKey: string
+): Promise<SavedProduct[] | null> {
+  const entry = await loadCartFromIDB(shopKey);
+  return entry?.products ?? null;
 }
 
 export async function clearCartFromIDB(shopKey: string): Promise<void> {

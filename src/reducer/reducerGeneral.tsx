@@ -22,6 +22,7 @@ export type AppAction =
   | { type: "Top"; payload: string }
   | { type: "animateCart"; payload: boolean }
   | { type: "balanceMode"; payload: boolean }
+  | { type: "SetPurchaseUuid"; payload: string }
   | { type: "AddComent"; payload: { star: number } }
   | {
       type: "AddComentProduct";
@@ -73,7 +74,11 @@ function mergeCartDataWithProducts(
 }
 
 // Función helper para guardar en IndexedDB con clave dinámica (fire-and-forget)
-function persistCartIDB(shopName: string, products: Product[]) {
+export function persistCartIDB(
+  shopName: string,
+  products: Product[],
+  purchaseUuid?: string
+) {
   try {
     const cartKey = `cart_${shopName}`;
     // Filtrar productos a guardar (mismo criterio que tenías)
@@ -126,7 +131,8 @@ function persistCartIDB(shopName: string, products: Product[]) {
       // no await aquí: el reducer no debe ser async. Fire-and-forget.
       saveCartToIDB(
         cartKey.replace(/^cart_/, "" /* pasamos solo shopName */),
-        productsToSave
+        productsToSave,
+        purchaseUuid
       ).catch((err) => console.error("Error persisting cart to IDB:", err));
     } else {
       // eliminar la clave si no hay productos
@@ -193,6 +199,12 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
             [key]: value,
           },
         },
+      };
+    }
+    case "SetPurchaseUuid": {
+      return {
+        ...state,
+        compraUUID: action.payload,
       };
     }
 

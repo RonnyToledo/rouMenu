@@ -111,7 +111,7 @@ export default function Resumen({
           {!downloading ? (
             <>
               <MdOutlineShoppingCart className="h-8 w-8 text-white" />
-              Proceder al Checkout
+              {store.compraUUID ? "Modificar compra" : "Proceder al Checkout"}
             </>
           ) : (
             <>

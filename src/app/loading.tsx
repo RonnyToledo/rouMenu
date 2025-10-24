@@ -33,7 +33,7 @@ export default function CatalogLoading() {
     <MultiStepLoader
       loadingStates={loadingStates}
       loading={true}
-      duration={500}
+      duration={2000}
     />
   );
 }

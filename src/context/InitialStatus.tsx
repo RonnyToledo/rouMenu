@@ -154,6 +154,7 @@ export interface AppState {
   id: number;
   insta: string;
   local: boolean;
+  compraUUID?: string;
   login: boolean;
   marketing: boolean;
   moneda: Current[];

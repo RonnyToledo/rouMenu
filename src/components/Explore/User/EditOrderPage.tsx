@@ -5,18 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Minus,
-  Plus,
-  Trash2,
-  ArrowLeft,
-  Save,
-  AlertCircle,
-} from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { userContext } from "@/context/userContext";
-import { toast } from "sonner";
 import { logoApp } from "@/lib/image";
 import { AgregadosInterface } from "@/context/InitialStatus";
 
@@ -38,21 +30,31 @@ type EventRow = {
   sitio_stocks?: boolean;
 };
 
+interface Agregado {
+  id: string;
+  name: string;
+  cant: number;
+  price: number;
+}
+
 interface OrderItem {
   id: string;
   name: string;
-  nombre?: string;
   title?: string;
+  nombre?: string;
   quantity: number;
-  cant?: number;
   Cant?: number;
+  cant?: number;
   qty?: number;
   price: number;
+  packing: number;
+  embalaje?: number;
   precio?: number;
   image?: string;
   imagen?: string;
   productId?: string;
-  agregados?: AgregadosInterface[];
+  agregados?: Agregado[];
+  stock?: number;
 }
 
 interface ProductStock {
@@ -60,19 +62,21 @@ interface ProductStock {
 }
 
 interface ParsedEventData {
-  items?: OrderItem[];
+  code: {
+    discount?: number | string;
+    name: string;
+  };
   pedido?: OrderItem[];
+  items?: OrderItem[];
   total?: number;
-  currency?: string;
   moneda?: string;
-  address?: string;
   direccion?: string;
   lugar?: string;
-  paymentMethod?: string;
-  payment?: string;
-  pago?: string;
+  address?: string;
   phone?: string;
   phonenumber?: string;
+  pago?: string;
+  payment?: string;
 }
 
 function eventToOrderData(event: EventRow) {
@@ -83,13 +87,14 @@ function eventToOrderData(event: EventRow) {
     address: undefined as string | undefined,
     phone: undefined as string | undefined,
     paymentMethod: undefined as string | undefined,
+    discount: undefined as number | string | undefined,
   };
 
   if (!event.event_desc) return result;
 
   try {
     const parsed: ParsedEventData = JSON.parse(event.event_desc);
-
+    result.discount = parsed.code.discount;
     result.currency = parsed.moneda;
     result.address =
       parsed.direccion ?? parsed.lugar ?? parsed.address ?? undefined;
@@ -105,7 +110,6 @@ function eventToOrderData(event: EventRow) {
       result.items = itemsArray
         .map((item, index): OrderItem | null => {
           if (!item || typeof item !== "object") return null;
-
           const quantity =
             Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 0) ||
             0;
@@ -114,7 +118,18 @@ function eventToOrderData(event: EventRow) {
             item.nombre ?? item.title ?? item.name ?? `Producto ${index + 1}`;
           const image = item.imagen ?? item.image ?? undefined;
           const productId = item.productId ?? item.id;
-          const agregados = item.agregados;
+          const stock = item.stock ?? 0;
+          const packing = item.embalaje ?? 0;
+
+          const agregados = Array.isArray(item.agregados)
+            ? item.agregados.map((agg: AgregadosInterface) => ({
+                id: agg.id,
+                name: agg.name,
+                cant: Number(agg.cant ?? 0) || 0,
+                price: Number(agg.price ?? 0) || 0,
+              }))
+            : [];
+
           return {
             id: productId ?? `item-${index}`,
             name,
@@ -123,6 +138,8 @@ function eventToOrderData(event: EventRow) {
             image,
             productId,
             agregados,
+            stock,
+            packing,
           };
         })
         .filter((item): item is OrderItem => item !== null);
@@ -133,10 +150,6 @@ function eventToOrderData(event: EventRow) {
     console.warn("Error parsing event_desc:", error);
     return result;
   }
-}
-
-function canEditOrder(event: EventRow): boolean {
-  return event.visto === false;
 }
 
 function getStatusLabel(event: EventRow): string {
@@ -154,23 +167,34 @@ export default function EditOrderPage() {
     () => events.find((e) => e.event_id === parseInt(orderId)),
     [events, orderId]
   );
+
   const [items, setItems] = useState<OrderItem[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
   const [productStocks, setProductStocks] = useState<ProductStock>({});
   const [storeHasStockControl, setStoreHasStockControl] = useState(false);
+  const [loadingStocks, setLoadingStocks] = useState(false);
+
+  // Calcular stock disponible considerando cantidades ya pedidas
+  const getAvailableStock = (
+    productId: string,
+    currentQuantityInOrder: number = 0
+  ) => {
+    const stockInDB = Number(productStocks[productId] ?? 0);
+    const currentQty = Number(currentQuantityInOrder ?? 0);
+    const available = stockInDB + currentQty;
+    return Math.max(0, available);
+  };
 
   const orderData = useMemo(() => {
     return event ? eventToOrderData(event) : null;
   }, [event]);
 
-  // Cargar stock actual de productos
+  // Cargar stock actual de productos y agregados
   useEffect(() => {
     if (!event) return;
 
     const loadStockData = async () => {
-      setIsSaving(true);
+      setLoadingStocks(true);
       try {
-        // 1. Verificar si la tienda controla stock
         const { data: siteData, error: siteError } = await supabase
           .from("Sitios")
           .select("stocks")
@@ -187,52 +211,99 @@ export default function EditOrderPage() {
         setStoreHasStockControl(hasStockControl);
 
         if (!hasStockControl) {
-          // Si no controla stock, no hay restricciones
           return;
         }
 
-        // 2. Obtener stock actual de cada producto
         const parsed = eventToOrderData(event);
-        const productIds = parsed.items.map(
-          (item) => item.productId || item.id
-        );
+        const allProductIds = new Set<string>();
 
-        if (productIds.length === 0) return;
+        parsed.items.forEach((item) => {
+          if (item.productId || item.id) {
+            allProductIds.add(item.productId || item.id);
+          }
+        });
+
+        const agregadosIds = new Set<string>();
+        parsed.items.forEach((item) => {
+          item.agregados?.forEach((agg) => {
+            if (agg.id) {
+              agregadosIds.add(agg.id);
+            }
+          });
+        });
 
         const stockMap: ProductStock = {};
-        const numericIds = productIds.filter((id) => /^\d+$/.test(String(id)));
-        const stringIds = productIds.filter((id) => !/^\d+$/.test(String(id)));
 
-        // Consultar por ID numérico
-        if (numericIds.length > 0) {
-          const { data: productsData } = await supabase
-            .from("Products")
-            .select("id, productId, stock")
-            .in("id", numericIds.map(Number));
+        const productIds = Array.from(allProductIds);
+        if (productIds.length > 0) {
+          const numericIds = productIds.filter((id) =>
+            /^\d+$/.test(String(id))
+          );
+          const stringIds = productIds.filter(
+            (id) => !/^\d+$/.test(String(id))
+          );
 
-          if (productsData) {
-            productsData.forEach((p) => {
-              stockMap[p.id] = p.stock || 0;
-              if (p.productId) {
-                stockMap[p.productId] = p.stock || 0;
-              }
-            });
+          if (numericIds.length > 0) {
+            const { data: productsData } = await supabase
+              .from("Products")
+              .select("id, productId, stock")
+              .in("id", numericIds.map(Number));
+
+            if (productsData) {
+              productsData.forEach((p) => {
+                stockMap[String(p.id)] = p.stock || 0;
+                if (p.productId) {
+                  stockMap[String(p.productId)] = p.stock || 0;
+                }
+              });
+            }
+          }
+
+          if (stringIds.length > 0) {
+            const { data: productsData } = await supabase
+              .from("Products")
+              .select("id, productId, stock")
+              .in("productId", stringIds);
+
+            if (productsData) {
+              productsData.forEach((p) => {
+                stockMap[String(p.id)] = p.stock || 0;
+                if (p.productId) {
+                  stockMap[String(p.productId)] = p.stock || 0;
+                }
+              });
+            }
           }
         }
-        // Consultar por productId string
-        if (stringIds.length > 0) {
-          const { data: productsData } = await supabase
-            .from("Products")
-            .select("id, productId, stock")
-            .in("productId", stringIds);
 
-          if (productsData) {
-            productsData.forEach((p) => {
-              stockMap[p.id] = p.stock || 0;
-              if (p.productId) {
-                stockMap[p.productId] = p.stock || 0;
+        if (agregadosIds.size > 0) {
+          const { data: agregadosData } = await supabase
+            .from("agregados")
+            .select("id, id_product")
+            .in("id", Array.from(agregadosIds));
+
+          if (agregadosData && agregadosData.length > 0) {
+            const agregadosProductIds = agregadosData
+              .map((agg) => agg.id_product)
+              .filter(Boolean);
+
+            if (agregadosProductIds.length > 0) {
+              const { data: productsFromAgregados } = await supabase
+                .from("Products")
+                .select("id, productId, stock")
+                .in("productId", agregadosProductIds);
+
+              if (productsFromAgregados) {
+                agregadosData.forEach((agg) => {
+                  const product = productsFromAgregados.find(
+                    (p) => p.productId === agg.id_product
+                  );
+                  if (product) {
+                    stockMap[String(agg.id)] = product.stock || 0;
+                  }
+                });
               }
-            });
+            }
           }
         }
 
@@ -240,7 +311,7 @@ export default function EditOrderPage() {
       } catch (err) {
         console.error("Error loading stock data:", err);
       } finally {
-        setIsSaving(false);
+        setLoadingStocks(false);
       }
     };
 
@@ -250,130 +321,26 @@ export default function EditOrderPage() {
   useEffect(() => {
     if (event) {
       const parsed = eventToOrderData(event);
-
       setItems(parsed.items);
     }
   }, [event]);
 
-  const updateQuantity = (itemId: string, delta: number) => {
-    setItems((prev) =>
-      prev.map((item) => {
-        if (item.id === itemId) {
-          // Si hay control de stock, verificar límite
-          if (storeHasStockControl) {
-            const availableStock = productStocks[item.id] ?? 0;
-            const newQuantity = (item.quantity || 0) + delta;
-
-            if (newQuantity > availableStock) {
-              toast.error(
-                `Stock disponible: ${availableStock} unidades. No puedes exceder este límite.`
-              );
-              return item;
-            }
-          }
-
-          const newQuantity = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
-    );
-  };
-
-  const removeItem = (itemId: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== itemId));
-  };
-
   const calculateTotal = () => {
     return items
-      .reduce(
-        (sum, item) =>
-          sum +
-          item.price * item.quantity +
-          (item.agregados?.reduce(
-            (sum, agg) => sum + agg.price * agg.cant,
-            0
-          ) || 0),
-        0
-      )
+      .reduce((sum, item) => {
+        const itemTotal = (item.price + item.packing) * item.quantity;
+        const agregadosTotal = (item.agregados || []).reduce(
+          (aggSum, agg) => aggSum + (agg.price + item.packing) * agg.cant,
+          0
+        );
+        return sum + itemTotal + agregadosTotal;
+      }, 0)
       .toFixed(2);
-  };
-
-  const handleSave = async () => {
-    if (!event || items.length === 0) return;
-
-    // Validación final de stock antes de guardar
-    if (storeHasStockControl) {
-      for (const item of items) {
-        const availableStock = productStocks[item.id] ?? 0;
-        if (item.quantity > availableStock) {
-          toast.error(
-            `Stock insuficiente para "${item.name}". Disponible: ${availableStock}, solicitado: ${item.quantity}`
-          );
-          return;
-        }
-      }
-    }
-
-    setIsSaving(true);
-    try {
-      // Convertir items a formato event_desc
-      const parsed: ParsedEventData = JSON.parse(event.event_desc || "{}");
-      const updatedPedido = items.map((item) => ({
-        ...(parsed.items?.[0] ?? {}),
-        id: item.productId || item.id,
-        productId: item.productId || item.id,
-        nombre: item.name,
-        Cant: item.quantity,
-        price: item.price,
-      }));
-
-      const newTotal = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-
-      const updatedEventDesc = JSON.stringify({
-        ...parsed,
-        pedido: updatedPedido,
-        total: newTotal,
-      });
-
-      const paramsRpc = {
-        p_uid: event.sitio_uuid,
-        p_events: event.events_text,
-        p_desc: JSON.parse(updatedEventDesc),
-        p_uid_venta: event.uid_venta,
-        p_nombre: event.nombre_event,
-        p_phonenumber: Number(event.phonenumber) || 0,
-        p_descripcion: event.descripcion || "",
-        p_created_at: event.created_at || new Date().toISOString(),
-      };
-
-      const { error: updateError } = await supabase.rpc(
-        "update_event_adjust_stock_v3",
-        paramsRpc
-      );
-
-      if (updateError) {
-        throw new Error(updateError.message || "Error al guardar cambios");
-      }
-
-      toast.success("Pedido actualizado correctamente");
-      router.push("/user");
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Error desconocido";
-      toast.error(errorMessage);
-      console.error("Error saving order:", err);
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-background p-8 py-2">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-4xl mx-auto">
           <Card className="p-12 text-center">
             <p className="text-muted-foreground mb-4">Pedido no encontrado</p>
@@ -386,9 +353,8 @@ export default function EditOrderPage() {
       </div>
     );
   }
-
   return (
-    <div className="min-h-screen bg-background p-8 py-2">
+    <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto">
         <Button
           variant="ghost"
@@ -403,10 +369,10 @@ export default function EditOrderPage() {
           <div className="flex items-start justify-between mb-4 flex-col sm:flex-row gap-4">
             <div>
               <h1 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">
-                Editar Pedido
+                Vista del Pedido
               </h1>
               <p className="text-muted-foreground">
-                Modifica las cantidades o elimina productos de tu pedido
+                Visualiza los detalles del pedido (modo solo lectura).
               </p>
             </div>
             <Badge
@@ -455,8 +421,8 @@ export default function EditOrderPage() {
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                 <div className="text-sm text-amber-800 dark:text-amber-200">
-                  Esta tienda controla stock. No puedes aumentar cantidades más
-                  allá del disponible.
+                  Esta tienda controla stock. Los valores mostrados reflejan la
+                  disponibilidad actual.
                 </div>
               </div>
             </Card>
@@ -475,52 +441,178 @@ export default function EditOrderPage() {
             ) : (
               <div className="space-y-4">
                 {items.map((item) => {
-                  const availableStock = productStocks[item.id] || 0;
+                  const availableStock = getAvailableStock(
+                    item.id,
+                    item.quantity
+                  );
                   const isOutOfStock =
-                    storeHasStockControl &&
-                    availableStock !== null &&
-                    availableStock <= 0;
-                  const canIncrease =
-                    !storeHasStockControl ||
-                    availableStock === null ||
-                    item.quantity < availableStock;
+                    storeHasStockControl && availableStock <= 0;
 
                   return (
-                    <div key={item.id}>
-                      {(item?.agregados || []).length > 0 &&
-                        (item?.agregados || []).map((agg) => (
-                          <CardProducts
-                            key={agg.id}
-                            id={agg.id}
-                            image={item.image || logoApp}
-                            name={`${item.name} + ${agg.name}`}
-                            price={agg.price}
-                            quantity={agg.cant || 0}
-                            updateQuantity={updateQuantity}
-                            removeItem={removeItem}
-                            isOutOfStock={isOutOfStock}
-                            storeHasStockControl={storeHasStockControl}
-                            availableStock={availableStock}
-                            canIncrease={canIncrease}
-                            event={event}
-                          />
-                        ))}
+                    <div key={item.id} className="space-y-2">
+                      {/* Producto principal (solo lectura) */}
                       {item.quantity > 0 && (
-                        <CardProducts
-                          id={item.id}
-                          image={item.image || logoApp}
-                          name={item.name}
-                          price={item.price}
-                          quantity={item.quantity}
-                          updateQuantity={updateQuantity}
-                          removeItem={removeItem}
-                          isOutOfStock={isOutOfStock}
-                          storeHasStockControl={storeHasStockControl}
-                          availableStock={availableStock}
-                          canIncrease={canIncrease}
-                          event={event}
-                        />
+                        <Card
+                          className={`p-6 hover:shadow-md transition-shadow ${
+                            isOutOfStock ? "opacity-60" : ""
+                          } ${loadingStocks ? "backdrop-grayscale-25" : ""}`}
+                        >
+                          <div className="flex items-center gap-6 flex-col">
+                            <div className="flex flex-row gap-2 w-full">
+                              <div className="relative">
+                                <Image
+                                  src={item.image || logoApp}
+                                  alt={item.name}
+                                  width={100}
+                                  height={100}
+                                  className="rounded-lg object-cover bg-muted size-16"
+                                />
+                              </div>
+
+                              <div className="flex-1">
+                                <h3 className="text-lg font-medium text-foreground mb-2">
+                                  {item.name}
+                                </h3>
+                                <p className="text-muted-foreground">
+                                  ${item.price.toFixed(2)} por unidad
+                                </p>
+                                {storeHasStockControl && (
+                                  <p
+                                    className={`text-sm mt-1 ${
+                                      isOutOfStock
+                                        ? "text-red-600 dark:text-red-400 font-medium"
+                                        : "text-green-600 dark:text-green-400"
+                                    }`}
+                                  >
+                                    {isOutOfStock
+                                      ? "Sin stock"
+                                      : `Stock disponible: ${availableStock}`}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
+                              <div className="flex justify-around">
+                                <div className="w-16 text-center">
+                                  <span className="text-lg font-medium">
+                                    {item.quantity}
+                                  </span>
+                                  <div className="text-xs text-muted-foreground">
+                                    unidades
+                                  </div>
+                                </div>
+                                {item.packing ? (
+                                  <div className="w-16 text-center">
+                                    <span className="text-lg font-medium">
+                                      {item.packing}
+                                    </span>
+                                    <div className="text-xs text-muted-foreground">
+                                      embalaje
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
+                              <div className="w-28 text-center">
+                                <p className="text-xl font-light tracking-tight">
+                                  $
+                                  {(
+                                    (item.price + item.packing) *
+                                    item.quantity
+                                  ).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
                       )}
+
+                      {/* Agregados (solo lectura) */}
+                      {(item.agregados || []).map((agg) => {
+                        if (agg.cant === 0) return null;
+
+                        const aggStock = getAvailableStock(agg.id, agg.cant);
+                        const aggOutOfStock =
+                          storeHasStockControl && aggStock <= 0;
+
+                        return (
+                          <Card
+                            key={agg.id}
+                            className={`p-6  border-l-4 border-l-blue-200 dark:border-l-blue-800 hover:shadow-md transition-shadow ${
+                              aggOutOfStock ? "opacity-60" : ""
+                            }`}
+                          >
+                            <div className="flex items-center gap-6 flex-col">
+                              <div className="flex flex-row gap-2 w-full">
+                                <div className="relative">
+                                  <Image
+                                    src={item.image || logoApp}
+                                    alt={agg.name}
+                                    width={100}
+                                    height={100}
+                                    className="rounded-lg object-cover bg-muted size-16"
+                                  />
+                                </div>
+
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-medium text-foreground mb-2">
+                                    {item.name} + {agg.name}
+                                  </h3>
+                                  <p className="text-muted-foreground">
+                                    ${agg.price.toFixed(2)} por unidad
+                                  </p>
+                                  {storeHasStockControl && (
+                                    <p
+                                      className={`text-sm mt-1 ${
+                                        aggOutOfStock
+                                          ? "text-red-600 dark:text-red-400 font-medium"
+                                          : "text-green-600 dark:text-green-400"
+                                      }`}
+                                    >
+                                      {aggOutOfStock
+                                        ? "Sin stock"
+                                        : `Stock disponible: ${aggStock}`}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
+                                <div className="flex justify-around">
+                                  <div className="w-16 text-center">
+                                    <span className="text-lg font-medium">
+                                      {agg.cant}
+                                    </span>
+                                    <div className="text-xs text-muted-foreground">
+                                      unidades
+                                    </div>
+                                  </div>
+                                  {item.packing ? (
+                                    <div className="w-16 text-center">
+                                      <span className="text-lg font-medium">
+                                        {item.packing}
+                                      </span>
+                                      <div className="text-xs text-muted-foreground">
+                                        embalaje
+                                      </div>
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                <div className="w-28 text-center">
+                                  <p className="text-xl font-light tracking-tight">
+                                    $
+                                    {(
+                                      (agg.price + item.packing) *
+                                      agg.cant
+                                    ).toFixed(2)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        );
+                      })}
                     </div>
                   );
                 })}
@@ -529,7 +621,7 @@ export default function EditOrderPage() {
           </div>
 
           <Card className="p-6 bg-muted/30">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-center justify-between space-y-2">
               <span className="text-xl font-medium">Total del pedido</span>
               <span className="text-3xl font-light tracking-tight">
                 ${calculateTotal()}
@@ -537,147 +629,13 @@ export default function EditOrderPage() {
                   <span className="text-sm ml-2">{orderData.currency}</span>
                 )}
               </span>
+              <span className="text-base font-light tracking-tight">
+                {orderData?.discount ? `Descuento: $${orderData.discount}` : ""}
+              </span>
             </div>
           </Card>
-
-          {canEditOrder(event) && (
-            <div className="flex gap-3 justify-end flex-col sm:flex-row">
-              <Button
-                variant="outline"
-                onClick={() => router.push("/user")}
-                disabled={isSaving}
-              >
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={items.length === 0 || isSaving}
-                className="gap-2"
-              >
-                <Save className="h-4 w-4" />
-                {isSaving ? "Guardando..." : "Guardar Cambios"}
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </div>
-  );
-}
-interface CardProductsProps {
-  id: string;
-  image: string;
-  name: string;
-  price: number;
-  quantity: number;
-  updateQuantity: (itemId: string, delta: number) => void;
-  removeItem: (itemId: string) => void;
-  isOutOfStock: boolean;
-  storeHasStockControl: boolean;
-  availableStock: number;
-  event: EventRow;
-  canIncrease: boolean;
-}
-function CardProducts({
-  id,
-  image,
-  name,
-  price,
-  quantity,
-  updateQuantity,
-  removeItem,
-  isOutOfStock,
-  storeHasStockControl,
-  availableStock,
-  event,
-  canIncrease,
-}: CardProductsProps) {
-  return (
-    <Card
-      key={id}
-      className={`p-6 hover:shadow-md transition-shadow ${
-        isOutOfStock ? "opacity-60" : ""
-      }`}
-    >
-      <div className="flex items-center gap-6 flex-col">
-        <div className="flex flex-row gap-2 w-full">
-          <div className="relative">
-            <Image
-              src={image || logoApp}
-              alt={name}
-              width={100}
-              height={100}
-              className="rounded-lg object-cover bg-muted size-16"
-            />
-          </div>
-
-          <div className="flex-1">
-            <h3 className="text-lg font-medium text-foreground mb-2">{name}</h3>
-            <p className="text-muted-foreground">
-              ${price.toFixed(2)} por unidad
-            </p>
-            {storeHasStockControl && availableStock !== null && (
-              <p
-                className={`text-sm mt-1 ${
-                  isOutOfStock
-                    ? "text-red-600 dark:text-red-400 font-medium"
-                    : "text-green-600 dark:text-green-400"
-                }`}
-              >
-                {isOutOfStock
-                  ? "Sin stock"
-                  : `Stock disponible: ${availableStock}`}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-col sm:flex-row w-full sm:w-auto">
-          {canEditOrder(event) && !isOutOfStock && (
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => updateQuantity(id, -1)}
-                disabled={quantity <= 1}
-              >
-                <Minus className="h-4 w-4" />
-              </Button>
-              <div className="w-16 text-center">
-                <span className="text-lg font-medium">{quantity}</span>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9"
-                onClick={() => updateQuantity(id, 1)}
-                disabled={!canIncrease}
-                title={!canIncrease ? `Stock máximo: ${availableStock}` : ""}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-
-          <div className="w-28 text-center">
-            <p className="text-xl font-light tracking-tight">
-              ${(price * quantity).toFixed(2)}
-            </p>
-          </div>
-
-          {canEditOrder(event) && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => removeItem(id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-    </Card>
   );
 }
