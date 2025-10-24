@@ -83,7 +83,6 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
             payload: products as Product[],
           });
         }
-        console.log(purchaseUuid);
         // opcional: guardar purchaseUuid en el estado si quieres
         if (purchaseUuid) {
           dispatchStore({ type: "SetPurchaseUuid", payload: purchaseUuid });
@@ -93,7 +92,7 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
       }
     })();
   }, [store.sitioweb]);
-  console.log(store);
+
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
   return (
     <MyContext.Provider value={contextValue}>

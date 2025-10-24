@@ -141,7 +141,6 @@ export function PurchaseHistory({
   const handleFilterClick = (filter: (typeof FILTERS)[number]) => {
     onFilterChange?.(filter);
   };
-  console.log(events);
 
   const EditarComprar = (idCompra: string) => {
     const e = events.find((e) => e.event_id === Number(idCompra));

@@ -90,9 +90,9 @@ export default async function RootLayout({
   } else {
     console.info("Store listo");
   }
-  let store = trasnformData(storeOne);
+  let store = transformData(storeOne);
   if (typeof storeOne.edit == "string") {
-    store = trasnformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
+    store = transformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
   }
   if (!store.sitioweb) notFound();
 
@@ -108,17 +108,25 @@ export default async function RootLayout({
     </div>
   );
 }
-function trasnformData(store: AppState): AppState {
+// Memoizar si es posible o hacerlo más eficiente
+function transformData(store: AppState): AppState {
+  if (!store) return {} as AppState;
+
+  // Evitar JSON.parse si ya viene parseado
+  const edit =
+    typeof store.edit === "string" ? JSON.parse(store.edit) : store.edit;
+
   return {
     ...store,
-
-    products: (store.products || []).map((obj) => ({
-      ...obj,
-      Cant: 0,
-      comparar: false,
-    })),
+    edit,
+    products:
+      store.products?.map((obj) => ({
+        ...obj,
+        Cant: 0,
+        comparar: false,
+      })) ?? [],
     envios:
-      (store.envios || [])?.map((env) => ({
+      store.envios?.map((env) => ({
         ...env,
         precio: Number(env.precio),
       })) ?? [],

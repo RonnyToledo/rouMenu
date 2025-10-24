@@ -157,22 +157,18 @@ export default function GeneralProvider({
   }, [pathname]);
   // Abrir el popover la primera vez que el usuario entra si no hay user
   useEffect(() => {
-    // solo en cliente
+    // Solo en cliente
     if (typeof window === "undefined") return;
 
-    // Si ya hay usuario, aseguramos que el popover esté cerrado y marcamos como mostrado
-    if (!!user || !loading) {
+    // CRÍTICO: No hacer nada mientras está cargando
+    if (loading) return;
+
+    // Una vez que terminó de cargar, decidir qué hacer
+    if (user) {
+      // Si hay usuario, cerrar el popover
       setIsLoginOpen(false);
-
-      return;
-    }
-
-    // Si no hay usuario, solo abrir si no se ha mostrado antes
-    try {
-      setIsLoginOpen(true);
-    } catch (e) {
-      // Si localStorage falla, aún abrimos para no bloquear la UX
-      console.error("Error accediendo a localStorage", e);
+    } else {
+      // Si NO hay usuario, abrir el popover
       setIsLoginOpen(true);
     }
   }, [loading, user]);
