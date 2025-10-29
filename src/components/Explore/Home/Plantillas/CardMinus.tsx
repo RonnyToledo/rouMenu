@@ -4,6 +4,7 @@ import { MyGeneralContext } from "@/context/GeneralContext";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import Link from "next/link";
 
 export default function CardMinus({ value = 1 }: { value?: number }) {
   const { generalData } = useContext(MyGeneralContext);
@@ -35,7 +36,8 @@ export default function CardMinus({ value = 1 }: { value?: number }) {
         <ScrollArea className="w-full h-fit  rounded-md  whitespace-nowrap">
           <div className="flex h-full w-max space-x-4">
             {generalData.top_provinces[value]?.top_sites.map((site, index) => (
-              <div
+              <Link
+                href={`/t/${site.sitioweb}`}
                 key={index}
                 className="flex  flex-1 flex-col gap-1 rounded-lg "
               >
@@ -49,7 +51,7 @@ export default function CardMinus({ value = 1 }: { value?: number }) {
                 <p className="text-[#0d141c] text-base font-medium leading-normal">
                   {site.name}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
 

@@ -162,8 +162,11 @@ function verifyAndSavedAfiliate(
 }
 function getAfiliate(shopName: string): string {
   try {
+    if (typeof globalThis === "undefined" || !("localStorage" in globalThis))
+      return "";
     const cartKey = `afiliate_${shopName}`;
-    return window.localStorage.getItem(cartKey) || "";
+    const g = globalThis as unknown as { localStorage?: Storage };
+    return g.localStorage?.getItem(cartKey) ?? "";
   } catch (error) {
     console.error("Error loading from localStorage:", error);
     return "";

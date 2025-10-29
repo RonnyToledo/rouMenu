@@ -28,7 +28,7 @@ import {
 } from "@/context/InitialStatus";
 import { cn } from "@/lib/utils";
 import "@github/relative-time-element";
-import { CiMenuFries } from "react-icons/ci";
+import { TbMenuDeep } from "react-icons/tb";
 import { MdCategory, MdCurrencyExchange, MdRateReview } from "react-icons/md";
 import { IoStorefrontOutline, IoSearch } from "react-icons/io5";
 import { isOpen, IsOpenStoreInteface } from "@/functions/time";
@@ -42,7 +42,8 @@ import { LiaSignInAltSolid } from "react-icons/lia";
 import { Separator } from "@/components/ui/separator";
 import { logoUser } from "@/lib/image";
 import PreviewRatingGeneral from "./PreviewRatingGeneral";
-
+import { ExtraerCategorias } from "@/functions/extraerCategoriass";
+import { BsFileEarmarkPostFill } from "react-icons/bs";
 type SheetView = "home" | "categories" | "coins";
 
 export default function Header() {
@@ -166,6 +167,14 @@ export default function Header() {
           closeSheet();
         },
       },
+      {
+        name: "Blog",
+        icon: <BsFileEarmarkPostFill />,
+        action: () => {
+          router.push(`/t/${store.sitioweb}/blog`);
+          closeSheet();
+        },
+      },
     ],
     [store.sitioweb, router, closeSheet, handleReviewAction]
   );
@@ -223,9 +232,9 @@ export default function Header() {
         )}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <button aria-label="Abrir menú">
-              <CiMenuFries className="text-[var(--text-gold)] cursor-pointer" />
-            </button>
+            <Button aria-label="Abrir menú" variant={"ghost"}>
+              <TbMenuDeep className="text-[var(--text-gold)] cursor-pointer" />
+            </Button>
           </SheetTrigger>
 
           <SheetContent className="overflow-hidden">
@@ -245,7 +254,10 @@ export default function Header() {
             {showState === "categories" && (
               <CategoriesView
                 store={store}
-                onBack={() => setShowState("home")}
+                onBack={() => {
+                  setShowState("home");
+                  setOpen(false);
+                }}
                 onClose={closeSheet}
               />
             )}
@@ -253,7 +265,10 @@ export default function Header() {
             {showState === "coins" && (
               <CoinsView
                 coins={store?.moneda || []}
-                onBack={() => setShowState("home")}
+                onBack={() => {
+                  setShowState("home");
+                  setOpen(false);
+                }}
                 onSelectCoin={handleCoinChange}
               />
             )}
@@ -302,6 +317,49 @@ interface CategoriesViewProps {
 
 function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const handleCategoryClick = useCallback(
+    (category: Categoria) => {
+      if (category.subtienda) {
+        // Navegar a página de categoría
+        router.push(`/t/${store?.sitioweb}/category/${category.id}`);
+        onClose();
+      } else {
+        // Scroll suave al elemento con el ID
+        const targetUrl = `/t/${store?.sitioweb}`;
+        const targetId = category.id;
+
+        // Si ya estamos en la página principal
+        if (pathname === targetUrl) {
+          scrollToElement(targetId);
+          onClose();
+        } else {
+          // Navegar primero y luego hacer scroll
+          router.push(targetUrl);
+          onClose();
+
+          // Esperar a que la navegación se complete
+          setTimeout(() => {
+            scrollToElement(targetId);
+          }, 100);
+        }
+      }
+    },
+    [store?.sitioweb, pathname, router, onClose]
+  );
+
+  const scrollToElement = (elementId: string) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+    }
+  };
+
   return (
     <div className="p-2 w-full">
       <ListSheet
@@ -319,25 +377,20 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
             onClose();
           }}
         />
-        {store?.categorias?.map((category: Categoria) => (
-          <ListSheet
-            key={category.id}
-            name={category.name || ""}
-            icon2={<ChevronRight />}
-            action={() => {
-              const url = category.subtienda
-                ? `/t/${store?.sitioweb}/category/${category.id}`
-                : `/t/${store?.sitioweb}#${category.id}`;
-              router.push(url);
-              onClose();
-            }}
-          />
-        ))}
+        {ExtraerCategorias(store?.categorias, store.products).map(
+          (category: Categoria) => (
+            <ListSheet
+              key={category.id}
+              name={category.name || ""}
+              icon2={<ChevronRight />}
+              action={() => handleCategoryClick(category)}
+            />
+          )
+        )}
       </ScrollArea>
     </div>
   );
 }
-
 interface CoinsViewProps {
   coins: Current[];
   onBack: () => void;

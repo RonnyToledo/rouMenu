@@ -70,6 +70,7 @@ type TopSites = {
   name?: string;
   image?: string;
   visitas?: string;
+  sitioweb: string;
 };
 export type Top_provinces = {
   provincia?: string;

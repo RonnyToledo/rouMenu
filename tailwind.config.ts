@@ -1,3 +1,5 @@
+import typography from "@tailwindcss/typography";
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -8,7 +10,7 @@ module.exports = {
     "./src/**/*.{js,jsx}",
   ],
   prefix: "",
-
+  plugins: [typography],
   theme: {
     container: {
       center: "true",

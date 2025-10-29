@@ -171,4 +171,58 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Estilos mejorados para títulos y contenido del blog */
+  .prose h2 {
+    @apply text-3xl font-bold text-foreground mt-12 mb-3 leading-tight;
+  }
+
+  .prose h3 {
+    @apply text-2xl font-semibold text-foreground mt-10 mb-2 leading-snug;
+  }
+
+  .prose h4 {
+    @apply text-xl font-semibold text-foreground mt-3 mb-1;
+  }
+
+  .prose p {
+    @apply text-lg text-foreground/90 leading-relaxed mb-2;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply my-3 space-y-1;
+  }
+
+  .prose li {
+    @apply text-lg text-foreground/90 leading-relaxed;
+  }
+
+  .prose strong {
+    @apply font-semibold text-foreground;
+  }
+
+  .prose em {
+    @apply italic text-foreground/80;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-primary pl-6 py-4 my-3 bg-muted/30 rounded-r-lg;
+  }
+
+  .prose blockquote p {
+    @apply text-lg italic text-foreground/80 mb-0;
+  }
+
+  .prose hr {
+    @apply my-3 border-border;
+  }
+
+  .prose code {
+    @apply bg-muted px-2 py-1 rounded text-sm font-mono text-foreground;
+  }
+
+  .prose a {
+    @apply text-primary underline underline-offset-4 hover:text-primary/80 transition-colors;
+  }
 }
