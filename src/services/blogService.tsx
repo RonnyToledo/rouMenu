@@ -67,7 +67,7 @@ export class BlogService {
     const { data, error } = await supabase
       .from("blogs")
       .select(BASE_BLOG_QUERY)
-      .eq("Sitios.sitioweb", siteId)
+      .eq("ui_store", siteId)
       .order("created_at", { ascending: false });
 
     if (error) {

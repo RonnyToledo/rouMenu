@@ -21,5 +21,5 @@ export default async function Page() {
     );
   }
 
-  return <BlogPage posts={posts} />;
+  return <BlogPage posts={posts} global={true} />;
 }

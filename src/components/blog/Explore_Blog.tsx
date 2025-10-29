@@ -17,9 +17,10 @@ import { usePathname } from "next/navigation";
 
 interface BlogPageProps {
   posts: Post[];
+  global?: boolean;
 }
 
-export default function BlogPage({ posts }: BlogPageProps) {
+export default function BlogPage({ posts, global = false }: BlogPageProps) {
   // Validación temprana
   const pathname = usePathname();
   if (!posts || posts.length === 0) {
@@ -44,18 +45,21 @@ export default function BlogPage({ posts }: BlogPageProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="border-b bg-muted/30">
-        <div className="container mx-auto p-4">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance mb-6">
-              Blog de {siteName}
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              Explora tutoriales, guías y las últimas tendencias {topicPhrase}.
-            </p>
+      {!global ? (
+        <section className="border-b bg-muted/30">
+          <div className="container mx-auto p-4">
+            <div className="max-w-3xl">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance mb-6">
+                Blog de {siteName}
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                Explora tutoriales, guías y las últimas tendencias {topicPhrase}
+                .
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Posts Grid */}
       <section className="container mx-auto p-4 md:py-16">

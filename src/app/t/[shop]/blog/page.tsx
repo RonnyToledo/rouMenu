@@ -2,6 +2,7 @@ import React from "react";
 import BlogPage from "@/components/blog/Explore_Blog";
 import { BlogService } from "@/services/blogService";
 import { Metadata } from "next";
+import { supabase } from "@/lib/supabase";
 
 export const metadata: Metadata = {
   title: "Blog | Artículos y Tutoriales",
@@ -15,8 +16,20 @@ interface PageProps {
 
 export default async function Pagea({ params }: PageProps) {
   const { shop } = await params;
-  const { posts, error } = await BlogService.getPostsBySite(shop);
-
+  const { data: uuid, error: err } = await supabase
+    .from("Sitios")
+    .select("UUID")
+    .eq("sitioweb", shop)
+    .single();
+  if (err || !uuid) {
+    return (
+      <div className="container mx-auto p-4">
+        <p className="text-red-500">Tienda no encontrada</p>
+      </div>
+    );
+  }
+  const { posts, error } = await BlogService.getPostsBySite(uuid.UUID);
+  console.log(posts);
   if (error) {
     // Podrías retornar un componente de error personalizado
     return (
@@ -26,5 +39,5 @@ export default async function Pagea({ params }: PageProps) {
     );
   }
 
-  return <BlogPage posts={posts} />;
+  return <BlogPage posts={posts || []} />;
 }
