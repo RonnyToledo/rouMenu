@@ -90,7 +90,7 @@ export default function CommentsPage() {
         }
 
         const { data, count, error } = await query;
-
+        console.log("Datos de comentarios obtenidos:", data);
         if (error) throw error;
         if (data) {
           setReviews(ReordenateData(data, store));
@@ -143,7 +143,7 @@ export default function CommentsPage() {
                 <Star className="size-5 fill-yellow-500 text-yellow-500" />
                 <p className="text-2xl font-bold">
                   {reviews.reduce((sum, rev) => rev.star + sum, 0) /
-                    reviews.length}
+                    reviews.length || 0}
                 </p>
                 <p className="text-xs text-muted-foreground text-center">
                   Promedio

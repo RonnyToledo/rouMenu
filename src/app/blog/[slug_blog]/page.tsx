@@ -3,6 +3,7 @@ import PostPage from "@/components/blog/PostPage";
 import { BlogService } from "@/services/blogService";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { buildPostMetadata } from "@/lib/postMeta";
 
 interface PageProps {
   params: Promise<{ slug_blog: string }>;
@@ -18,28 +19,12 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
+}: {
+  params: Promise<{ slug_blog: string }>;
+}): Promise<Metadata> {
   const { slug_blog } = await params;
-  const { post, error } = await BlogService.getPostBySlug(slug_blog);
-
-  if (error || !post) {
-    return {
-      title: "Post no encontrado",
-    };
-  }
-
-  return {
-    title: `${post.title} | Blog`,
-    description: post.abstract,
-    openGraph: {
-      title: post.title,
-      description: post.abstract,
-      images: post.image ? [post.image] : [],
-      type: "article",
-      publishedTime: post.created_at,
-      authors: [post.Sitios.name],
-    },
-  };
+  // Si quieres pasar opciones: buildPostMetadata(params.slug_blog, { siteName: "rouMenu", canonicalBase: "https://roumenu.vercel.app" });
+  return await buildPostMetadata(slug_blog);
 }
 
 export default async function Page({ params }: PageProps) {

@@ -17,12 +17,12 @@ export function ReordenateData(data: Review[], store: AppState) {
       ...rep,
       reply: true,
       user: {
-        ...obj.user,
-        image: obj.user_id === store.Editor ? store?.urlPoster : obj.user.image,
+        ...rep.user,
+        image: rep.user_id === store.Editor ? store?.urlPoster : rep.user.image,
         name:
-          obj.user_id === store.Editor
+          rep.user_id === store.Editor
             ? store?.name || "Anonymous"
-            : obj.user.name,
+            : rep.user.name,
       },
     })),
   }));

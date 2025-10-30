@@ -17,7 +17,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
 import {
@@ -180,7 +179,7 @@ export default function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white h-12 p-4 flex items-center justify-between shadow-md">
       <LoginPopover
         isOpen={isLoginOpen}
         onClose={closeLogin}
@@ -238,40 +237,47 @@ export default function Header() {
           </SheetTrigger>
 
           <SheetContent className="overflow-hidden">
-            <SheetHeader>
-              <SheetTitle className="text-[var(--text-gold)] line-clamp-1">
+            <SheetHeader className="px-6 pt-8 pb-2 space-y-1">
+              <SheetTitle className="text-2xl font-semibold tracking-tight">
                 {store?.name || "Rou-Menu"}
               </SheetTitle>
-              <SheetDescription className="line-clamp-2">
+              <SheetDescription className="text-sm leading-relaxed text-muted-foreground line-clamp-2">
                 {store?.parrrafo || "Rou-Menu"}
               </SheetDescription>
             </SheetHeader>
+            <Separator />
+            <div className="flex-1 overflow-y-auto px-3 py-1">
+              {showState === "home" && <HomeView items={homeItems} />}
 
-            {showState === "home" && (
-              <HomeView items={homeItems} profile={profile} />
-            )}
+              {showState === "categories" && (
+                <CategoriesView
+                  store={store}
+                  onBack={() => {
+                    setShowState("home");
+                  }}
+                  onClose={closeSheet}
+                />
+              )}
 
-            {showState === "categories" && (
-              <CategoriesView
-                store={store}
-                onBack={() => {
-                  setShowState("home");
-                  setOpen(false);
-                }}
-                onClose={closeSheet}
+              {showState === "coins" && (
+                <CoinsView
+                  coins={store?.moneda || []}
+                  onBack={() => {
+                    setShowState("home");
+                  }}
+                  onSelectCoin={handleCoinChange}
+                />
+              )}
+            </div>
+            <div className="space-y-2 p-2">
+              <Separator />
+              <ListSheet
+                name={profile.name}
+                icon={profile.icon}
+                icon2={<ChevronRight />}
+                action={profile.action}
               />
-            )}
-
-            {showState === "coins" && (
-              <CoinsView
-                coins={store?.moneda || []}
-                onBack={() => {
-                  setShowState("home");
-                  setOpen(false);
-                }}
-                onSelectCoin={handleCoinChange}
-              />
-            )}
+            </div>
           </SheetContent>
         </Sheet>
       </div>
@@ -282,30 +288,21 @@ export default function Header() {
 // Subcomponents
 interface HomeViewProps {
   items: Array<{ name: string; icon: React.ReactNode; action: () => void }>;
-  profile: { name: string; icon: React.ReactNode; action: () => void };
 }
 
-function HomeView({ items, profile }: HomeViewProps) {
+function HomeView({ items }: HomeViewProps) {
   return (
-    <div className="p-2 w-full h-full flex flex-col justify-between">
-      <div>
-        {items.map((item) => (
-          <ListSheet
-            key={item.name}
-            name={item.name}
-            icon={item.icon}
-            icon2={<ChevronRight />}
-            action={item.action}
-          />
-        ))}
-      </div>
-      <ListSheet
-        name={profile.name}
-        icon={profile.icon}
-        icon2={<ChevronRight />}
-        action={profile.action}
-      />
-    </div>
+    <>
+      {items.map((item) => (
+        <ListSheet
+          key={item.name}
+          name={item.name}
+          icon={item.icon}
+          icon2={<ChevronRight />}
+          action={item.action}
+        />
+      ))}
+    </>
   );
 }
 
@@ -361,33 +358,35 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
   };
 
   return (
-    <div className="p-2 w-full">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden  px-3 py-1">
       <ListSheet
         name="Atrás"
         icon2={<ChevronLeft />}
         action={onBack}
-        className="shadow-md"
+        className="shadow-"
       />
-      <ScrollArea className="h-[70vh] rounded-md border">
-        <ListSheet
-          name="Todas"
-          icon2={<ChevronLeft />}
-          action={() => {
-            router.push(`/t/${store?.sitioweb}/category`);
-            onClose();
-          }}
-        />
-        {ExtraerCategorias(store?.categorias, store.products).map(
-          (category: Categoria) => (
-            <ListSheet
-              key={category.id}
-              name={category.name || ""}
-              icon2={<ChevronRight />}
-              action={() => handleCategoryClick(category)}
-            />
-          )
-        )}
-      </ScrollArea>
+      <Separator />
+
+      <ListSheet
+        name="Todas"
+        icon2={<ChevronLeft />}
+        action={() => {
+          router.push(`/t/${store?.sitioweb}/category`);
+          onClose();
+        }}
+      />
+      <Separator />
+
+      {ExtraerCategorias(store?.categorias, store.products).map(
+        (category: Categoria) => (
+          <ListSheet
+            key={category.id}
+            name={category.name || ""}
+            icon2={<ChevronRight />}
+            action={() => handleCategoryClick(category)}
+          />
+        )
+      )}
     </div>
   );
 }
@@ -399,23 +398,18 @@ interface CoinsViewProps {
 
 function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
   return (
-    <div className="p-2 w-full">
-      <ListSheet
-        name="Atrás"
-        icon2={<ChevronLeft />}
-        action={onBack}
-        className="shadow-md"
-      />
-      <ScrollArea className="h-[70vh] rounded-md border">
-        {coins.map((coin) => (
-          <ListSheet
-            key={coin.id}
-            name={coin.nombre || ""}
-            icon2={<MdCurrencyExchange />}
-            action={() => onSelectCoin(coin.id)}
-          />
-        ))}
-      </ScrollArea>
+    <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
+      <ListSheet name="Atrás" icon2={<ChevronLeft />} action={onBack} />
+      <Separator />
+
+      {coins.map((coin) => (
+        <ListSheet
+          key={coin.id}
+          name={coin.nombre || ""}
+          icon2={<MdCurrencyExchange />}
+          action={() => onSelectCoin(coin.id)}
+        />
+      ))}
     </div>
   );
 }
@@ -443,12 +437,12 @@ const ListSheet = React.memo(function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex justify-between items-center h-10 text-base",
+          "flex items-center gap-1 p-1 rounded-lg text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors group",
           className
         )}
       >
-        <div className="flex items-center gap-2 truncate line-clamp-1 justify-between">
-          {icon}
+        {icon}
+        <div className="flex items-center gap-2 truncate justify-between">
           {name}
         </div>
         {icon2}

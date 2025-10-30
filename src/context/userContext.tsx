@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import PageLoading from "@/components/GeneralComponents/loading";
 import { AuthContext } from "./AuthContext";
 import { supabase } from "@/lib/supabase";
+import SeoClient from "@/lib/SeoClient";
+import { logoUser } from "@/lib/image";
 
 export type EventRow = {
   event_id: number;
@@ -50,6 +52,19 @@ export default function UserContextProvider({
   const [error, setError] = useState<string | null>(null);
   const [events, setEvents] = useState<EventRow[]>([]);
 
+  //SEO
+  const title = `${user?.user_metadata.full_name || "Usuario"} — Catálogo | rouMenu`;
+  const description = `Pagina de usuario para ${user?.user_metadata.full_name || "Usuario"}.`;
+  const image =
+    user?.user_metadata.avatar || user?.user_metadata.picture || logoUser;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: user?.user_metadata.full_name || "Usuario",
+    url: `https://roumenu.vercel.app/user`,
+    logo: user?.user_metadata.avatar || user?.user_metadata.picture || logoUser,
+  };
   // Muestra toast de error cuando cambia
   useEffect(() => {
     if (error) {
@@ -123,6 +138,13 @@ export default function UserContextProvider({
 
   return (
     <userContext.Provider value={value}>
+      <SeoClient
+        title={title}
+        description={description}
+        image={image}
+        canonical={`https://roumenu.vercel.app/user`}
+        jsonLd={jsonLd}
+      />
       {loading ? (
         <PageLoading title="Usuario" subtitle="Cargando datos" />
       ) : (
