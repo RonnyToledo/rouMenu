@@ -126,6 +126,7 @@ export default function MenuBar({
               : "none",
           willChange: isMounted && isMenuOpen ? "transform" : "auto",
           overflow: isMounted && isMenuOpen ? "hidden" : "visible",
+          pointerEvents: isMounted && isMenuOpen ? "none" : "auto",
         }}
       >
         <div
