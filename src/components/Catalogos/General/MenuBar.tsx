@@ -22,7 +22,7 @@ export default function MenuBar({
 
   // Memoizar las rutas para evitar cálculos innecesarios
   const routes = useMemo(
-    () => getReversedUniqueRoutes(record, pathname),
+    () => getReversedUniqueRoutes(record, pathname).slice(0, 2),
     [record, pathname]
   );
 
@@ -126,7 +126,6 @@ export default function MenuBar({
               : "none",
           willChange: isMounted && isMenuOpen ? "transform" : "auto",
           overflow: isMounted && isMenuOpen ? "hidden" : "visible",
-          pointerEvents: isMounted && isMenuOpen ? "none" : "auto",
         }}
       >
         <div
@@ -134,7 +133,17 @@ export default function MenuBar({
             isMounted && isMenuOpen ? "overflow-y-hidden" : "overflow-y-scroll"
           }`}
         >
-          {children}
+          <button
+            className="absolute w-full h-full z-[31]"
+            onClick={() => setIsMenuOpen(false)}
+          ></button>
+          <div
+            style={{
+              pointerEvents: isMounted && isMenuOpen ? "none" : "auto",
+            }}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>
