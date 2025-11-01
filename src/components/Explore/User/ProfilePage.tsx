@@ -6,7 +6,7 @@
 
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 import { LiaSignOutAltSolid } from "react-icons/lia";
 import { ProfileHeader } from "./ProfileHeader";
@@ -19,7 +19,7 @@ type FilterType = "all" | "completed" | "shipped";
 export default function ProfilePage() {
   const { events } = useContext(userContext);
   const router = useRouter();
-  const { user, loading, signOut } = useContext(AuthContext);
+  const { user, loading, signOut } = useAuth();
 
   const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
 
@@ -56,8 +56,8 @@ export default function ProfilePage() {
 
       <div className="sticky bottom-0 p-4 bg-background border-t">
         <Button
-          className="w-full"
-          variant="destructive"
+          className="w-full border-red-800 text-red-800"
+          variant="outline"
           onClick={handleSignOut}
         >
           Cerrar Sesión

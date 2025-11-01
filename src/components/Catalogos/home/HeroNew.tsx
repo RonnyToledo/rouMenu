@@ -7,7 +7,7 @@ import { MyContext } from "@/context/MyContext";
 import { logoApp } from "@/lib/image";
 import { MdDeliveryDining } from "react-icons/md";
 import { FaShop } from "react-icons/fa6";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { useParams, useSearchParams } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 

@@ -1,11 +1,11 @@
 "use client";
-import React, { useContext } from "react";
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthContext } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { logoUser } from "@/lib/image";
 
 export function ProfileHeader() {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   return (
     <div className="mb-12">
       <div className="flex  items-start justify-center">

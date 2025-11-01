@@ -4,6 +4,7 @@ import React, {
   createContext,
   useReducer,
   ReactNode,
+  useState,
   Dispatch,
   useMemo,
   useEffect,
@@ -27,6 +28,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import Header from "@/components/Catalogos/General/Header";
+import MenuBar from "@/components/Catalogos/General/MenuBar";
 
 interface ContextType {
   store: AppState;
@@ -49,7 +52,7 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const afiliate = searchParams.get("afiliate");
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   let afiliateNew = afiliate;
   //Verificar, salvar o buscar afiliado
 
@@ -96,45 +99,48 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
   return (
     <MyContext.Provider value={contextValue}>
-      <SitioRealtime uuid={store.UUID || ""} />
-      {children}
-      {store.compraUUID ? (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              size="icon"
-              className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
-            >
-              <Pencil />
-              <span className="sr-only">Edicion</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta seguro que desea salir de la edicion de compras?. Los
-                cambios efectuados se perderan.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  dispatchStore({
-                    type: "SetPurchaseUuid",
-                    payload: "",
-                  });
-                  dispatchStore({ type: "Clean" });
-                  router.push("/user");
-                }}
+      <MenuBar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}>
+        <Header onOpen={() => setIsMenuOpen(true)} />
+        <SitioRealtime uuid={store.UUID || ""} />
+        {children}
+        {store.compraUUID ? (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="icon"
+                className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
               >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      ) : null}
+                <Pencil />
+                <span className="sr-only">Edicion</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta seguro que desea salir de la edicion de compras?. Los
+                  cambios efectuados se perderan.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    dispatchStore({
+                      type: "SetPurchaseUuid",
+                      payload: "",
+                    });
+                    dispatchStore({ type: "Clean" });
+                    router.push("/user");
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : null}
+      </MenuBar>
     </MyContext.Provider>
   );
 }

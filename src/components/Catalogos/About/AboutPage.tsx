@@ -29,13 +29,13 @@ import {
 import { format } from "@formkit/tempo";
 import Autoplay from "embla-carousel-autoplay";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
-import { AuthContext } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
+import { useAuth } from "@/context/AppContext";
 
 export default function AboutPage() {
   const { store } = useContext(MyContext);
-  const context = useContext(AuthContext);
+  const { user, loading } = useAuth();
   const pathname = usePathname();
   const [isOpenStore, setIsOpenStore] = useState<IsOpenStoreInteface>();
   const [ratingSelect, setRatingSelect] = useState<number>(0);
@@ -46,7 +46,7 @@ export default function AboutPage() {
   const handleStarClick = (rating: number) => {
     setRatingSelect(rating);
 
-    if (context?.user && context?.loading === false) {
+    if (user && loading === false) {
       setReviewOpen(true);
       return;
     }

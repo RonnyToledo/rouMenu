@@ -7,14 +7,11 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import Head from "next/head";
 import Header from "@/components/Explore/Home/Header";
 import { supabase } from "@/lib/supabase";
-import GeneralProvider, { AppState } from "@/context/GeneralContext";
 import { logoApp } from "@/lib/image";
-import { HistoryProvider } from "@/context/HistoryContext";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
-import { AuthProvider } from "@/context/AuthContext";
 import { buildSiteMetadata } from "@/lib/siteMeta";
-
+import { AppProvider, AppState } from "@/context/AppContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -78,20 +75,16 @@ export default async function RootLayout({
         `}
       </Script>
       <body className={inter.className}>
-        <AuthProvider>
+        <AppProvider storeSSD={newData}>
           <div className=" flex justify-center bg-gray-200">
-            <HistoryProvider>
-              <div className=" max-w-md w-full bg-white">
-                <GeneralProvider storeSSD={newData}>
-                  <Header>
-                    {children}
-                    <Toaster richColors position="top-center" />
-                  </Header>
-                </GeneralProvider>
-              </div>
-            </HistoryProvider>
+            <div className=" max-w-md w-full bg-white">
+              <Header>
+                {children}
+                <Toaster richColors position="top-center" />
+              </Header>
+            </div>
           </div>
-        </AuthProvider>
+        </AppProvider>
         <GoogleAnalytics gaId={GA_ID || ""} />
         <Analytics />
       </body>

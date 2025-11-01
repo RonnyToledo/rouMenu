@@ -1,6 +1,6 @@
 "use client";
-import React, { useContext } from "react";
-import { MyGeneralContext } from "@/context/GeneralContext";
+import React from "react";
+import { useApp } from "@/context/AppContext";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { LuMessageCircle } from "react-icons/lu";
@@ -8,7 +8,7 @@ import { FaRegEye } from "react-icons/fa";
 import RelativeTime from "@/components/GeneralComponents/DateTime";
 import Link from "next/link";
 export default function PostCard({ filterIndex }: { filterIndex: number }) {
-  const { generalData } = useContext(MyGeneralContext);
+  const { generalData } = useApp();
 
   return generalData.top_posts
     .filter((obj, index) => index === filterIndex)

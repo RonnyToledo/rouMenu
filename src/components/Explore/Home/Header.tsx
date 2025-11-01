@@ -1,5 +1,5 @@
 "use client";
-import React, { ReactNode, useContext, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import type { IconType } from "react-icons/lib";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +17,7 @@ import { logoApp } from "@/lib/image";
 import { usePathname, useRouter } from "next/navigation";
 import { ExplorationFooter } from "./Footer";
 import { Input } from "@/components/ui/input";
-import { MyGeneralContext } from "@/context/GeneralContext";
+import { useApp } from "@/context/AppContext";
 import { FaHome, FaInfo } from "react-icons/fa";
 import { RiCustomerServiceFill } from "react-icons/ri";
 import { MdContactPage } from "react-icons/md";
@@ -50,7 +50,7 @@ const cardsinfo = [
 ];
 
 export default function Header({ children }: { children: ReactNode }) {
-  const { generalData } = useContext(MyGeneralContext);
+  const { generalData } = useApp();
   const pathname = usePathname();
   const router = useRouter();
   const [search, setSearch] = useState("");

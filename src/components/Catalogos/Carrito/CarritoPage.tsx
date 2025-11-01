@@ -16,7 +16,7 @@ import { smartRound } from "@/functions/precios";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CartClean from "./CartClean";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { redondearAMultiploDe5 } from "@/reducer/reducerGeneral";
 import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
 

@@ -6,7 +6,7 @@ import { Product, StarDistribution } from "@/context/InitialStatus";
 import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { usePathname } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import { Separator } from "@/components/ui/separator";

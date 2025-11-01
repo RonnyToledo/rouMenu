@@ -1,12 +1,12 @@
 "use client";
-import React, { useContext } from "react";
-import { MyGeneralContext } from "@/context/GeneralContext";
+import React from "react";
+import { useApp } from "@/context/AppContext";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import Link from "next/link";
 
 export default function MostLike() {
-  const { generalData } = useContext(MyGeneralContext);
+  const { generalData } = useApp();
 
   return (
     <div className=" shadow-lg">

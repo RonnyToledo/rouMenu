@@ -3,7 +3,7 @@ import React, { useState, useContext, useCallback, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { initialState, Rating, RatingInterface } from "../About/RatingModal";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { logoUser } from "@/lib/image";
 import { MyContext } from "@/context/MyContext";
 

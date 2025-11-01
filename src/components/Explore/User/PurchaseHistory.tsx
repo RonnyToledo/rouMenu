@@ -307,9 +307,9 @@ function PurchaseCard({
                   Editar
                 </Button>
                 <Button
-                  variant={"destructive"}
+                  variant={"outline"}
                   size="sm"
-                  className="gap-2 w-full"
+                  className="gap-2 w-full border-red-800 text-red-800"
                   onClick={onDelete}
                 >
                   <Trash2 className="h-4 w-4" />

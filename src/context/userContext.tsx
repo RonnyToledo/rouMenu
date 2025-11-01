@@ -3,7 +3,7 @@
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 import { toast } from "sonner";
 import PageLoading from "@/components/GeneralComponents/loading";
-import { AuthContext } from "./AuthContext";
+import { useAuth } from "./AppContext";
 import { supabase } from "@/lib/supabase";
 import SeoClient from "@/lib/SeoClient";
 import { logoUser } from "@/lib/image";
@@ -47,7 +47,7 @@ export default function UserContextProvider({
 }: {
   children: ReactNode;
 }) {
-  const { user } = React.useContext(AuthContext);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [events, setEvents] = useState<EventRow[]>([]);

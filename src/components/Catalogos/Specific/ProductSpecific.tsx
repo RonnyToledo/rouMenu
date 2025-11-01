@@ -159,7 +159,7 @@ export default function Product({ id }: { id: string }) {
     },
   ];
   return (
-    <main className="flex items-start min-h-[100svh]">
+    <main className="flex items-start min-h-dvh">
       <div className="grid grid-cols-1  gap-2 items-start p-4">
         <BreadCrumpParent list={links} />
         <AnimatePresence>

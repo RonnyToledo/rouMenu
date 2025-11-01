@@ -1,15 +1,15 @@
 "use client";
-import React, { useContext } from "react";
+import React from "react";
 import CardMinus from "@/components/Explore/Home/Plantillas/CardMinus";
 import MostLike from "@/components/Explore/Home/Plantillas/MostLike";
 import Popular from "@/components/Explore/Home/Plantillas/Popular";
 import PostCard from "@/components/Explore/Home/Plantillas/PostCard";
-import { MyGeneralContext } from "@/context/GeneralContext";
+import { useApp } from "@/context/AppContext";
 import ArcGalleryHero from "./HeroPage";
 import OptionsSelector from "./Plantillas/CardProduct";
 
 export default function HomePage() {
-  const { generalData } = useContext(MyGeneralContext);
+  const { generalData } = useApp();
   const products = generalData?.products || [];
   const images = generalData?.images || [];
 

@@ -1,13 +1,13 @@
 "use client";
-import React, { useContext } from "react";
-import { MyGeneralContext } from "@/context/GeneralContext";
+import React from "react";
+import { useApp } from "@/context/AppContext";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import Link from "next/link";
 
 export default function CardMinus({ value = 1 }: { value?: number }) {
-  const { generalData } = useContext(MyGeneralContext);
+  const { generalData } = useApp();
   const data = generalData.top_provinces[value];
   if (!data) return null;
 

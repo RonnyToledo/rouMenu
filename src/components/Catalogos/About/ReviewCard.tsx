@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/context/AppContext";
 import { ReordenateData } from "@/functions/ReordenateDataReviews";
 import { MyContext } from "@/context/MyContext";
 

@@ -2,14 +2,14 @@
 
 import { logoApp } from "@/lib/image";
 import type React from "react";
-import { useState, useContext } from "react";
-import { MyGeneralContext } from "@/context/GeneralContext";
+import { useState } from "react";
+import { useApp } from "@/context/AppContext";
 import Link from "next/link";
 import Image from "next/image";
 import style from "./styles.module.css";
 import { cn } from "@/lib/utils";
 const OptionsSelector: React.FC = () => {
-  const { generalData } = useContext(MyGeneralContext);
+  const { generalData } = useApp();
   const [activeOption, setActiveOption] = useState<number>(0);
 
   const handleOptionClick = (optionId: number) => {
