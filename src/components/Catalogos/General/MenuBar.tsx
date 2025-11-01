@@ -95,7 +95,7 @@ export default function MenuBar({
               width="100%"
               height="100%"
               className="border-0 pointer-events-none"
-              sandbox="allow-scripts"
+              sandbox="allow-same-origin"
               loading="lazy"
               tabIndex={-1}
             />
