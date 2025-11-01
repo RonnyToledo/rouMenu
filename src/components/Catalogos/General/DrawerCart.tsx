@@ -274,7 +274,7 @@ interface ListCardInterface {
   cantidad: number;
   handleToCart: () => void;
 }
-function ListCard({
+export function ListCard({
   RedirectLink,
   productId,
   caja,

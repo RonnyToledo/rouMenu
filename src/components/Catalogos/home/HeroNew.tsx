@@ -4,12 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
-import { logoApp } from "@/lib/image";
 import { MdDeliveryDining } from "react-icons/md";
 import { FaShop } from "react-icons/fa6";
 import { useAuth } from "@/context/AppContext";
 import { useParams, useSearchParams } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
+import { logoApp } from "@/lib/image";
 
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
@@ -52,7 +52,7 @@ export default function HeroNew({}) {
             alt={store?.name || "Store"}
             width={400}
             height={500}
-            className="w-full aspect-square object-cover"
+            className="w-full aspect-square md:aspect-video lg:aspect-[30/10] object-cover"
           />
         </div>
       </div>

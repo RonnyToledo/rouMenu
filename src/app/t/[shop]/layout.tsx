@@ -49,7 +49,9 @@ export default async function RootLayout({
     <div>
       <MyProvider storeSSD={store}>
         <div className="min-h-[80vh]">{children}</div>
-        <DrawerCart />
+        <aside className="flex md:hidden">
+          <DrawerCart />
+        </aside>
         <CatalogFooter />
       </MyProvider>
     </div>

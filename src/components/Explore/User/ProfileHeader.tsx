@@ -1,36 +1,34 @@
 "use client";
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AppContext";
 import { logoUser } from "@/lib/image";
+import Image from "next/image";
 
 export function ProfileHeader() {
   const { user } = useAuth();
   return (
     <div className="mb-12">
-      <div className="flex  items-start justify-center">
-        <div className="flex flex-col items-center gap-6">
-          <Avatar className="h-24 w-24 border-2 border-border">
-            <AvatarImage
+      <div className="">
+        {/* Profile Section */}
+        <div className="text-center mb-8">
+          <div className="relative w-32 h-32 mx-auto mb-6">
+            <Image
               src={
                 user?.user_metadata.avatar ||
                 user?.user_metadata.picture ||
                 logoUser
               }
-              alt="Usuario"
+              alt="Profile"
+              width={128}
+              height={128}
+              className="rounded-full object-cover border-4 border-slate-700"
             />
-            <AvatarFallback className="text-2xl font-medium bg-secondary text-secondary-foreground">
-              {user?.user_metadata.full_name.charAt(0) ||
-                (user?.email || "").charAt(0) ||
-                "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-4xl font-serif font-light tracking-tight text-foreground mb-2">
-              {user?.user_metadata.full_name || user?.email || "Usuario"}
-            </h1>
-            <p className="text-muted-foreground text-lg">{user?.email}</p>
           </div>
+
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            {user?.user_metadata.full_name || user?.email || "Usuario"}
+          </h1>
+          <p className="text-slate-700">{user?.email}</p>
         </div>
       </div>
     </div>

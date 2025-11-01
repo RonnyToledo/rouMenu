@@ -53,18 +53,21 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const router = useRouter();
   const afiliate = searchParams.get("afiliate");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  let afiliateNew = afiliate;
+  const [afiliateNew, setafiliateNew] = useState("false");
   //Verificar, salvar o buscar afiliado
-
-  if (afiliate) {
-    afiliateNew = verifyAndSavedAfiliate(
-      storeSSD.sitioweb || "",
-      storeSSD.codeDiscount,
-      afiliate
-    );
-  } else {
-    afiliateNew = getAfiliate(storeSSD.sitioweb || "");
-  }
+  useEffect(() => {
+    if (afiliate) {
+      setafiliateNew(
+        verifyAndSavedAfiliate(
+          storeSSD.sitioweb || "",
+          storeSSD.codeDiscount,
+          afiliate
+        )
+      );
+    } else {
+      setafiliateNew(getAfiliate(storeSSD.sitioweb || ""));
+    }
+  }, [afiliate, storeSSD.codeDiscount, storeSSD.sitioweb]);
 
   // Nota: ya NO cargamos el carrito desde localStorage aquí.
   // Inicializamos el reducer con los productos del servidor (storeSSD)

@@ -6,7 +6,7 @@ export function ExplorationFooter() {
   const now = new Date();
   return (
     <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-12 ">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">
             Créate un catálogo digital en minutos.
@@ -22,8 +22,8 @@ export function ExplorationFooter() {
             </Link>
           </Button>
         </div>
-        <Separator className="my-4" />
-        <div className="grid grid-cols-1  gap-8 mb-8">
+        <Separator className="my-4 " />
+        <div className="grid grid-cols-1  gap-8 mb-8  md:hidden">
           <div className="space-y-6">
             <div>
               <h3 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2 uppercase">

@@ -22,7 +22,7 @@ import { FaHome, FaInfo } from "react-icons/fa";
 import { RiCustomerServiceFill } from "react-icons/ri";
 import { MdContactPage } from "react-icons/md";
 
-const cardsinfo = [
+export const cardsinfo = [
   {
     path: "/",
     name: "Inicio",
@@ -62,7 +62,7 @@ export default function Header({ children }: { children: ReactNode }) {
   }, [search, pathname, router]);
 
   return (
-    <div className="">
+    <div id="header-home">
       {/* LoginPopover: se abrirá si no hay user y no se mostró antes */}
 
       {!pathname.includes("/t/") && (
@@ -105,7 +105,7 @@ export default function Header({ children }: { children: ReactNode }) {
             pathname.includes("/info") ? (
               <Drawer>
                 <DrawerTrigger asChild>
-                  <Button variant="ghost" className="p-0 m-0">
+                  <Button variant="ghost" className="p-0 m-0 md:hidden">
                     <HiMiniBars3BottomRight className="size-6 text-gray-700 " />
                   </Button>
                 </DrawerTrigger>
@@ -155,7 +155,7 @@ interface CardDrawerInterface {
   path: string;
   icon: IconType;
 }
-function CardDrawerActive({ card }: { card: CardDrawerInterface }) {
+export function CardDrawerActive({ card }: { card: CardDrawerInterface }) {
   return (
     <Link
       href={card.path}
@@ -167,7 +167,7 @@ function CardDrawerActive({ card }: { card: CardDrawerInterface }) {
     </Link>
   );
 }
-function CardDrawer({ card }: { card: CardDrawerInterface }) {
+export function CardDrawer({ card }: { card: CardDrawerInterface }) {
   return (
     <Link
       href={card.path}

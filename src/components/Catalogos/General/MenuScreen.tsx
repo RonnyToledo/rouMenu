@@ -160,7 +160,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
   return (
     <div
-      className="absolute inset-0 bg-gradient-to-r from-gray-500 to-gray-800 transition-opacity duration-500"
+      className="absolute inset-0 bg-gradient-to-r from-gray-600 to-gray-900 transition-opacity duration-500"
       style={{
         opacity: isMenuOpen ? 1 : 0,
         pointerEvents: isMenuOpen ? "auto" : "none",

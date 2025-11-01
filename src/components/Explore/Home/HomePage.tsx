@@ -7,12 +7,14 @@ import PostCard from "@/components/Explore/Home/Plantillas/PostCard";
 import { useApp } from "@/context/AppContext";
 import ArcGalleryHero from "./HeroPage";
 import OptionsSelector from "./Plantillas/CardProduct";
+import { cardsinfo } from "./Header";
+
+import Link from "next/link";
 
 export default function HomePage() {
   const { generalData } = useApp();
   const products = generalData?.products || [];
   const images = generalData?.images || [];
-
   // Últimos 10 posts (o menos si hay menos)
   const latest = products.slice(0, 10);
   const remaining = products.slice(10); // los que vamos a intercalar uno a uno
@@ -93,9 +95,68 @@ export default function HomePage() {
         <ArcGalleryHero images={images} />
       </main>
 
-      <main id="main-general" className="grid gap-6">
+      <main id="main-general" className="grid gap-6 md:grid-cols-4">
         {/* Renderizamos la lista intercalada */}
-        <div className="grid grid-cols-1 gap-6 space-y-4">{interleaved}</div>
+        <div className="hidden grid-cols-1  gap-8 mb-8  md:grid md:sticky top-20 p-2 h-fit">
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2 uppercase">
+                RouMenu
+              </h3>
+              <div className="space-y-3 text-gray-600">
+                <div>
+                  <Link href="/">
+                    Herramienta para la creacion y diseño de catalogos onlines
+                    para venta de productos y servicios
+                  </Link>
+                </div>
+                <div>
+                  <Link href={"https://rouadmin.vercel.app/createAccount"}>
+                    Registra tu negocio ahora en nuestro catálogo
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3">
+                Guía para potenciar tu negocio
+              </h4>
+              <div className="space-y-2">
+                <div className=" text-gray-600 text-sm">
+                  <Link href={"/services"}>
+                    Preguntas frecuentes nuestro servicio?
+                  </Link>
+                </div>
+                <div className=" text-gray-600 text-sm">
+                  <Link href={"/info"}>Guia para usar nuestra plataforma?</Link>
+                </div>
+                <div className=" text-gray-600 text-sm">
+                  <Link href={"/contact"}>Contactanos</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-6 space-y-4 md:col-span-2">
+          {interleaved}
+        </div>
+        <div className="hidden md:grid h-fit sticky top-20">
+          {cardsinfo
+            .filter((obj) => obj.path !== "/info")
+            .map((card, index) => (
+              <Link
+                key={`Active_${index}`}
+                href={card.path}
+                className="bg-accent text-accent-foreground p-4 rounded-xl shadow-sm h-fit"
+              >
+                <card.icon className="w-6 h-6 mb-2" />
+                <h3 className="font-semibold text-sm">{card.name}</h3>
+                <p className="text-xs opacity-90 mt-1">{card.descripcion}</p>
+              </Link>
+            ))}
+        </div>
       </main>
     </div>
   );

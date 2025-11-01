@@ -76,14 +76,10 @@ export default async function RootLayout({
       </Script>
       <body className={inter.className}>
         <AppProvider storeSSD={newData}>
-          <div className=" flex justify-center bg-gray-200">
-            <div className=" max-w-md w-full bg-white">
-              <Header>
-                {children}
-                <Toaster richColors position="top-center" />
-              </Header>
-            </div>
-          </div>
+          <Header>
+            {children}
+            <Toaster richColors position="top-center" />
+          </Header>
         </AppProvider>
         <GoogleAnalytics gaId={GA_ID || ""} />
         <Analytics />

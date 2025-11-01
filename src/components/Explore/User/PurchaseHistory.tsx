@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useContext, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Calendar, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseEventDesc, formatCurrency } from "@/utils/purchaseParser";
 import { persistCartIDB } from "@/reducer/reducerGeneral";
+import { userContext } from "@/context/userContext";
 
 type EventRow = {
   event_id: number;
@@ -27,6 +28,7 @@ type EventRow = {
 };
 
 type PurchaseStatus = "completed" | "shipped";
+type FilterType = "all" | "completed" | "shipped";
 
 interface Purchase {
   id: string;
@@ -114,18 +116,10 @@ function eventToPurchase(event: EventRow): Purchase {
   };
 }
 
-interface PurchaseHistoryProps {
-  events: EventRow[];
-  selectedFilter?: PurchaseStatus | "all";
-  onFilterChange?: (filter: PurchaseStatus | "all") => void;
-}
-
-export function PurchaseHistory({
-  events,
-  selectedFilter = "all",
-  onFilterChange,
-}: PurchaseHistoryProps) {
+export function PurchaseHistory() {
   const router = useRouter();
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>("all");
+  const { events } = useContext(userContext);
 
   const { purchases, filteredPurchases } = useMemo(() => {
     const allPurchases = (events ?? []).map(eventToPurchase);
@@ -139,7 +133,7 @@ export function PurchaseHistory({
   }, [events, selectedFilter]);
 
   const handleFilterClick = (filter: (typeof FILTERS)[number]) => {
-    onFilterChange?.(filter);
+    setSelectedFilter?.(filter);
   };
 
   const EditarComprar = (idCompra: string) => {
@@ -154,51 +148,52 @@ export function PurchaseHistory({
   };
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-serif font-light tracking-tight text-foreground mb-2">
-            Historial de Compras
-          </h2>
-          <p className="text-muted-foreground">
-            Revisa todas tus compras ({purchases.length} total)
-          </p>
-        </div>
-      </div>
-
-      <div className="mb-6 flex gap-2 flex-wrap">
-        {FILTERS.map((filter) => (
-          <Button
-            key={filter}
-            variant={selectedFilter === filter ? "default" : "outline"}
-            size="sm"
-            onClick={() => handleFilterClick(filter)}
-            className="capitalize"
-          >
-            {filter === "all"
-              ? "Todos"
-              : (STATUS_CONFIG[filter as PurchaseStatus]?.label ?? filter)}
-          </Button>
-        ))}
-      </div>
-
-      <div className="space-y-4">
-        {filteredPurchases.length > 0 ? (
-          filteredPurchases.map((purchase) => (
-            <PurchaseCard
-              key={purchase.id}
-              purchase={purchase}
-              onView={() => router.push(`/user/order/${purchase.id}`)}
-              onEdit={() => EditarComprar(purchase.id)}
-              onDelete={() => console.log("Delete", purchase.id)}
-            />
-          ))
-        ) : (
-          <Card className="p-12 text-center">
-            <p className="text-muted-foreground">
-              No se encontraron compras con este filtro
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-serif font-light tracking-tight text-slate-800 mb-2 ">
+              Historial de Compras
+            </h2>
+            <p className="text-slate-700">
+              Revisa todas tus compras ({purchases.length} total)
             </p>
-          </Card>
-        )}
+          </div>
+        </div>
+        <div className="mb-6 flex gap-2 flex-wrap">
+          {FILTERS.map((filter) => (
+            <Button
+              key={filter}
+              variant={selectedFilter === filter ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleFilterClick(filter)}
+              className="bg-transparent border-slate-800 text-slate-700 hover:bg-slate-900/70 hover:text-slate-300 rounded-full px-6 h-10"
+            >
+              {filter === "all"
+                ? "Todos"
+                : (STATUS_CONFIG[filter as PurchaseStatus]?.label ?? filter)}
+            </Button>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          {filteredPurchases.length > 0 ? (
+            filteredPurchases.map((purchase) => (
+              <PurchaseCard
+                key={purchase.id}
+                purchase={purchase}
+                onView={() => router.push(`/user/order/${purchase.id}`)}
+                onEdit={() => EditarComprar(purchase.id)}
+                onDelete={() => console.log("Delete", purchase.id)}
+              />
+            ))
+          ) : (
+            <Card className="p-12 text-center">
+              <p className="text-muted-foreground">
+                No se encontraron compras con este filtro
+              </p>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -220,18 +215,19 @@ function PurchaseCard({
   const status = STATUS_CONFIG[purchase.status];
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow">
+    <div
+      key={purchase.id}
+      className="bg-slate-200/50 backdrop-blur-sm border border-slate-300 rounded-2xl p-6"
+    >
       <div className="flex items-start justify-between gap-6 flex-col ">
         <div className="flex-1 w-full">
           <div className="mb-3 flex items-start justify-between gap-2 flex-col">
             <div>
-              <h3 className="text-xl font-medium text-foreground mb-1">
+              <h3 className="text-xl font-medium text-slate-800 mb-1">
                 {purchase.catalogName}
               </h3>
               {purchase.catalogType && (
-                <p className="text-sm text-muted-foreground">
-                  {purchase.catalogType}
-                </p>
+                <p className="text-sm text-slate-700">{purchase.catalogType}</p>
               )}
             </div>
             <Badge variant="secondary" className={status.className}>
@@ -282,14 +278,17 @@ function PurchaseCard({
         </div>
 
         <div className="flex flex-col items-center gap-3 w-full">
-          <p className="text-2xl font-light tracking-tight text-foreground">
-            {purchase.total}
-          </p>
+          <div className="text-center py-4 mb-4 border-t border-b border-slate-400 w-full">
+            <p className="text-3xl font-bold text-slate-700">
+              {" "}
+              {purchase.total}
+            </p>
+          </div>
           <div className="flex gap-2  w-full flex-col">
             <Button
               variant="outline"
               size="sm"
-              className="gap-2 w-full"
+              className="w-full bg-slate-700 hover:bg-slate-300 text-white border-0 h-11 rounded-xl"
               onClick={onView}
             >
               <Eye className="h-4 w-4" />
@@ -300,7 +299,7 @@ function PurchaseCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2 w-full"
+                  className="w-full bg-slate-700 hover:bg-slate-300 text-white border-0 h-11 rounded-xl"
                   onClick={onEdit}
                 >
                   <Pencil className="h-4 w-4" />
@@ -309,7 +308,7 @@ function PurchaseCard({
                 <Button
                   variant={"outline"}
                   size="sm"
-                  className="gap-2 w-full border-red-800 text-red-800"
+                  className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500 h-11 rounded-xl bg-transparent"
                   onClick={onDelete}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -320,6 +319,6 @@ function PurchaseCard({
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
