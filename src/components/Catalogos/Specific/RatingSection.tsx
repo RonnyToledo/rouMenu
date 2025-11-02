@@ -94,7 +94,7 @@ export default function RatingSection({
         .filter((env) => env.productId === specific)
         .map((obj, ind) => (
           <div key={ind} className="max-w-xl mx-auto p-2 ">
-            <p className="text-gray-500 mb-2 text-sm">
+            <p className="text-slate-500 mb-2 text-sm">
               {obj.coment?.total == 0
                 ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
                 : "Las calificaciones y opiniones provienen de personas que comparten sus expariencias con otros usuarios."}
@@ -102,7 +102,7 @@ export default function RatingSection({
 
             <div className="grid grid-cols-2 items-center gap-2 mb-2">
               <div className="flex flex-col items-center">
-                <div className="text-6xl font-light text-gray-700">
+                <div className="text-6xl font-light text-slate-700">
                   {(obj?.coment?.promedio).toFixed(1)}
                 </div>
                 <div className="flex gap-1 my-2">
@@ -117,7 +117,7 @@ export default function RatingSection({
                     />
                   ))}
                 </div>
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-slate-600">
                   {obj.coment?.total.toLocaleString()} reseñas
                 </div>
               </div>
@@ -128,7 +128,7 @@ export default function RatingSection({
               <Button asChild variant="ghost">
                 <Link
                   href={`/t/${store.sitioweb}/producto/${obj.productId}/coment`}
-                  className="w-full flex justify-between text-lg text-gray-700"
+                  className="w-full flex justify-between text-lg text-slate-700"
                 >
                   <h2>Todos los comentarios →</h2>
                 </Link>
@@ -136,10 +136,10 @@ export default function RatingSection({
             </div>
             <Separator />
             <div className="pt-2">
-              <h3 className="text-lg mb-1 text-center text-gray-700 font-medium">
+              <h3 className="text-lg mb-1 text-center text-slate-700 font-medium">
                 Califica este producto
               </h3>
-              <p className="text-gray-400 mb-4 text-base text-center">
+              <p className="text-slate-400 mb-4 text-base text-center">
                 Comparte tu opinión con otros usuarios
               </p>
               <div className="flex gap-2 justify-center">
@@ -152,8 +152,8 @@ export default function RatingSection({
                     <Star
                       className={`size-7 ${
                         starValue <= rating.selectedRating
-                          ? "fill-gray-600 text-gray-600"
-                          : "text-gray-400"
+                          ? "fill-slate-600 text-slate-600"
+                          : "text-slate-400"
                       }`}
                     />
                   </button>
@@ -210,8 +210,8 @@ function StarSpecifications({ datos }: { datos: StarDistribution }) {
         const porcentaje = totalVotos > 0 ? (votos * 100) / totalVotos : 0;
         return (
           <div key={item} className="flex items-center gap-1">
-            <span className="w-3 text-gray-700">{item}</span>
-            <div className="flex-1 h-2 bg-gray-400 rounded-full overflow-hidden">
+            <span className="w-3 text-slate-700">{item}</span>
+            <div className="flex-1 h-2 bg-slate-400 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-400"
                 style={{

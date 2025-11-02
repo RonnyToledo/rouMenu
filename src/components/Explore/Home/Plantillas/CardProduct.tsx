@@ -25,7 +25,7 @@ const OptionsSelector: React.FC = () => {
       <div
         className={cn(style.optionsContainer, "my-2 p-2 space-y-2 shadow-lg")}
       >
-        <div className="w-full text-start text-gray-800 font-bold text-lg">
+        <div className="w-full text-start text-slate-800 font-bold text-lg">
           Catalogos destacados
         </div>
         <div className={style.optionsWrapper}>

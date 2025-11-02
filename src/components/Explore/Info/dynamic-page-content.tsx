@@ -336,14 +336,14 @@ function ButtonPrevNext({
         className={`flex ${align ? "flex-row-reverse" : "flex-row"} items-center`}
       >
         <div>
-          <h4 className="text-sm text-gray-600">{title}</h4>
-          <h2 className="text-lg text-gray-900">{prevNextState?.title}</h2>
+          <h4 className="text-sm text-slate-600">{title}</h4>
+          <h2 className="text-lg text-slate-900">{prevNextState?.title}</h2>
         </div>
 
         {align ? (
-          <ChevronLeft className="size-8 text-gray-700" />
+          <ChevronLeft className="size-8 text-slate-700" />
         ) : (
-          <ChevronRight className="size-8 text-gray-700" />
+          <ChevronRight className="size-8 text-slate-700" />
         )}
       </div>
     </Button>

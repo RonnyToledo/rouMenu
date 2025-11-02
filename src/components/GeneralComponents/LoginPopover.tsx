@@ -53,7 +53,7 @@ export default function LoginPopover({
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative animate-fadeIn">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
           disabled={loading}
         >
           <svg
@@ -95,20 +95,20 @@ export default function LoginPopover({
           </div>
         )}
 
-        <h2 className="text-2xl font-bold mb-2 text-gray-800">
+        <h2 className="text-2xl font-bold mb-2 text-slate-800">
           Iniciar Sesión
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-slate-600 mb-6">
           Inicia sesión para continuar con tu compra
         </p>
 
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 rounded-lg px-6 py-3 text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-300 rounded-lg px-6 py-3 text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
-            <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ export default function LoginPopover({
           )}
         </button>
 
-        <p className="mt-4 text-sm text-gray-500 text-center">
+        <p className="mt-4 text-sm text-slate-500 text-center">
           Al continuar, aceptas nuestros términos y condiciones
         </p>
       </div>

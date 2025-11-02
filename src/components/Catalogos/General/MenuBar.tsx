@@ -46,8 +46,8 @@ export default function MenuBar({
   }, [isMenuOpen, isMounted]);
 
   const stylesFromScreens = [
-    `translateX(240px) scale(0.90)`,
-    `translateX(200px) scale(0.85)`,
+    `translate-x-[240px] sm:translate-x-[300px] md:translate-x-[400px] lg:translate-x-[600px] scale-85`,
+    `translate-x-[190px] sm:translate-x-[250px] md:translate-x-[250px] lg:translate-x-[400px] scale-75`,
   ];
 
   // Handler para navegación
@@ -72,11 +72,10 @@ export default function MenuBar({
           <button
             key={`${rec.path}-${index}`}
             onClick={() => handleNavigate(rec.path)}
-            className="fixed inset-0 bg-white transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 group"
+            className={`fixed inset-0 bg-white transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 group ${
+              isMenuOpen ? stylesFromScreens[index] : "translate-x-0"
+            }`}
             style={{
-              transform: isMenuOpen
-                ? stylesFromScreens[index]
-                : "translateX(0) scale(1)",
               opacity: isMenuOpen ? 1 : 0,
               zIndex: 29 - index,
               borderRadius: isMenuOpen ? "1.5rem" : "0",
@@ -111,13 +110,14 @@ export default function MenuBar({
 
       {/* Pantalla principal - renderizado consistente */}
       <div
-        className="fixed inset-0 bg-white min-h-dvh transition-all duration-500 ease-out"
+        className={`fixed inset-0 bg-white min-h-dvh transition-all duration-500 ease-out ${
+          isMounted && isMenuOpen
+            ? "translate-x-[300px] sm:translate-x-[400px] md:translate-x-[600px] lg:translate-x-[900px]"
+            : "translate-x-0"
+        }`}
         style={{
           zIndex: 30,
-          transform:
-            isMounted && isMenuOpen
-              ? "translateX(300px) scale(0.95)"
-              : "translateX(0) scale(1)",
+          transform: isMounted && isMenuOpen ? "scale(0.95)" : "scale(1)",
           transformOrigin: "left",
           borderRadius: isMounted && isMenuOpen ? "1.5rem" : "0",
           boxShadow:
@@ -133,10 +133,12 @@ export default function MenuBar({
             isMounted && isMenuOpen ? "overflow-y-hidden" : "overflow-y-scroll"
           }`}
         >
-          <button
-            className="absolute w-full h-full z-[31]"
-            onClick={() => setIsMenuOpen(false)}
-          ></button>
+          {isMounted && isMenuOpen ? (
+            <button
+              className="absolute w-full h-full z-[31]"
+              onClick={() => setIsMenuOpen(false)}
+            ></button>
+          ) : null}
           <div
             style={{
               pointerEvents: isMounted && isMenuOpen ? "none" : "auto",

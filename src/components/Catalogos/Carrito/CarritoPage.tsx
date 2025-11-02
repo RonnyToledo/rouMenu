@@ -356,21 +356,21 @@ export default function CarritoPage() {
           <Button
             className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 ${
               currentStep >= 1
-                ? "bg-gray-800 text-white shadow-sm"
-                : "bg-transparent text-gray-400"
+                ? "bg-slate-800 text-white shadow-sm"
+                : "bg-transparent text-slate-400"
             }`}
             onClick={() => setCurrentStep(1)}
           >
             1
           </Button>
           <div
-            className={`w-20 h-0.5 mx-3 transition-colors duration-300 ${currentStep >= 2 ? "bg-gray-800" : "bg-gray-200"}`}
+            className={`w-20 h-0.5 mx-3 transition-colors duration-300 ${currentStep >= 2 ? "bg-slate-800" : "bg-slate-200"}`}
           ></div>
           <Button
             className={`flex items-center justify-center w-10 h-10 rounded-full text-sm font-medium transition-all duration-300 ${
               currentStep >= 2
-                ? "bg-gray-800 text-white shadow-sm"
-                : "bg-transparent text-gray-400"
+                ? "bg-slate-800 text-white shadow-sm"
+                : "bg-transparent text-slate-400"
             }`}
             onClick={() => setCurrentStep(2)}
           >

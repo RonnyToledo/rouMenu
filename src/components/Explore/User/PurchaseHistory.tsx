@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { parseEventDesc, formatCurrency } from "@/utils/purchaseParser";
 import { persistCartIDB } from "@/reducer/reducerGeneral";
 import { userContext } from "@/context/userContext";
+import { Link as LinkRef } from "lucide-react";
+import Link from "next/link";
 
 type EventRow = {
   event_id: number;
@@ -217,19 +219,23 @@ function PurchaseCard({
   return (
     <div
       key={purchase.id}
-      className="bg-slate-200/50 backdrop-blur-sm border border-slate-300 rounded-2xl p-6"
+      className="bg-slate-200/50 backdrop-blur-sm border border-slate-500 rounded-2xl p-6"
     >
       <div className="flex items-start justify-between gap-6 flex-col ">
         <div className="flex-1 w-full">
-          <div className="mb-3 flex items-start justify-between gap-2 flex-col">
-            <div>
-              <h3 className="text-xl font-medium text-slate-800 mb-1">
-                {purchase.catalogName}
-              </h3>
-              {purchase.catalogType && (
+          <h3 className="text-xl font-medium text-slate-800 mb-1">
+            {purchase.catalogName}
+          </h3>
+          <div className="mb-3 flex items-start justify-between gap-2 ">
+            {purchase.catalogType && (
+              <Link
+                href={`/t/${purchase.catalogType}`}
+                className="text-sm text-slate-700 flex items-center justify-start gap-2 "
+              >
                 <p className="text-sm text-slate-700">{purchase.catalogType}</p>
-              )}
-            </div>
+                <LinkRef className="size-4" />
+              </Link>
+            )}
             <Badge variant="secondary" className={status.className}>
               {status.label}
             </Badge>

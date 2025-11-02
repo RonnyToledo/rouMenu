@@ -17,14 +17,14 @@ export default function CatalogNotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => router.back()}
-              className="hover:bg-gray-100 transition-colors duration-200"
+              className="hover:bg-slate-100 transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Volver
@@ -58,10 +58,10 @@ export default function CatalogNotFound() {
 
           {/* Title and Description */}
           <div className="animate-in slide-in-from-bottom-4 duration-700 delay-300">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-4xl font-bold text-slate-900 mb-4">
               Catálogo no encontrado
             </h1>
-            <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-slate-600 mb-6 max-w-2xl mx-auto leading-relaxed">
               El catálogo que buscas no existe o ha sido movido a otra
               ubicación.
             </p>
@@ -83,7 +83,7 @@ export default function CatalogNotFound() {
             <Button
               variant="outline"
               onClick={() => router.refresh()}
-              className="px-8 py-3 h-auto text-base font-medium border-2 hover:bg-gray-50 transition-all duration-300 hover:scale-105 bg-transparent"
+              className="px-8 py-3 h-auto text-base font-medium border-2 hover:bg-slate-50 transition-all duration-300 hover:scale-105 bg-transparent"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Recargar página

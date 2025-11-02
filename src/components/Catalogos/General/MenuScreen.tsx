@@ -160,7 +160,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
   return (
     <div
-      className="absolute inset-0 bg-gradient-to-r from-gray-600 to-gray-900 transition-opacity duration-500"
+      className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-900 transition-opacity duration-500"
       style={{
         opacity: isMenuOpen ? 1 : 0,
         pointerEvents: isMenuOpen ? "auto" : "none",
@@ -391,7 +391,7 @@ const ListSheet = React.memo(function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-100",
+          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-100",
           className
         )}
       >

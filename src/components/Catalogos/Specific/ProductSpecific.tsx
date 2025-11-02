@@ -218,7 +218,7 @@ export default function Product({ id }: { id: string }) {
           {/* Título y precio */}
           <div className="flex flex-col items-start justify-between space-y-1">
             <h1
-              className={`line-clamp-1 text-3xl font-bold text-gray-900 animate-in ${swipeComponents.corto} duration-500 delay-200`}
+              className={`line-clamp-1 text-3xl font-bold text-slate-900 animate-in ${swipeComponents.corto} duration-500 delay-200`}
             >
               {product?.title}
             </h1>
@@ -237,12 +237,12 @@ export default function Product({ id }: { id: string }) {
                         className={`w-4 h-4 ${
                           i < Math.floor(product?.coment?.promedio || 0)
                             ? "text-yellow-400 fill-current"
-                            : "text-gray-500"
+                            : "text-slate-500"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-slate-600">
                     {product?.coment?.promedio || 0} ({product?.coment.total}{" "}
                     reseñas)
                   </span>
@@ -271,15 +271,15 @@ export default function Product({ id }: { id: string }) {
             <>
               <div className="flex items-center justify-between">
                 <div
-                  className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-gray-900`}
+                  className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-slate-900`}
                 >
-                  <p className="leading-relaxed text-gray-900">
+                  <p className="leading-relaxed text-slate-900">
                     ${smartRound(product?.price || 0)}{" "}
                     {store.moneda.find((m) => m.id == product.default_moneda)
                       ?.nombre || ""}
                   </p>
                   {(product?.oldPrice || 0) > (product?.price || 0) && (
-                    <p className=" text-gray-500 line-through">
+                    <p className=" text-slate-500 line-through">
                       ${product?.oldPrice}
                     </p>
                   )}
@@ -358,12 +358,12 @@ export default function Product({ id }: { id: string }) {
           {(product?.embalaje || 0) > 0 && (
             <div className="mb-4 space-y-1">
               <h3 className="font-medium">Embalaje</h3>
-              <Card className="p-3 border-gray-200">
+              <Card className="p-3 border-slate-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div>
                       <div className="font-medium">Costo</div>
-                      <div className="text-sm text-gray-800">
+                      <div className="text-sm text-slate-800">
                         {smartRound(product?.embalaje || 0).toFixed(2)}{" "}
                         {store.moneda.find(
                           (m) => m.id == product?.default_moneda
@@ -371,7 +371,7 @@ export default function Product({ id }: { id: string }) {
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-500 rounded-full ">
+                  <div className="bg-slate-500 rounded-full ">
                     <Check className="m-2 text-white fill-white size-3.5" />
                   </div>
                 </div>
@@ -382,7 +382,7 @@ export default function Product({ id }: { id: string }) {
           {(product?.agregados?.length || 0 > 0) && product?.stock && (
             <div className="mb-4  space-y-1">
               <h3 className="font-medium">Extras</h3>
-              <p className="text-sm text-gray-500 ">
+              <p className="text-sm text-slate-500 ">
                 Agregados para su encargo
               </p>
 
@@ -391,7 +391,7 @@ export default function Product({ id }: { id: string }) {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-medium">{extra.name}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-slate-500">
                         {smartRound(extra?.price || 0).toFixed(2)}{" "}
                         {store.moneda.find(
                           (m) => m.id == product.default_moneda
@@ -446,7 +446,7 @@ export default function Product({ id }: { id: string }) {
                   </div>
                 </Card>
               ))}
-              <p className="text-xs text-gray-700 text-center w-full">
+              <p className="text-xs text-slate-700 text-center w-full">
                 *El extra es el producto con el agregado incluido
               </p>
             </div>
@@ -590,7 +590,7 @@ export default function Product({ id }: { id: string }) {
               />
             </>
           ) : (
-            <p className="text-base text-gray-700">{product?.descripcion}</p>
+            <p className="text-base text-slate-700">{product?.descripcion}</p>
           )}
         </div>
       </div>

@@ -20,14 +20,14 @@ export default function Details({ compra, setCompra }: Props) {
   return (
     <div>
       <div className="bg-white rounded-lg p-4">
-        <h3 className="font-medium text-gray-900 mb-3">
+        <h3 className="font-medium text-slate-900 mb-3">
           ¿Quién recibe el pedido?
         </h3>
         <div className="space-y-4">
           <div>
-            <Label className="text-sm text-gray-700 mb-1 block">Nombre</Label>
+            <Label className="text-sm text-slate-700 mb-1 block">Nombre</Label>
             <Input
-              className="w-full text-gray-700 "
+              className="w-full text-slate-700 "
               value={compra.people}
               onChange={(e) =>
                 setCompra({
@@ -36,12 +36,14 @@ export default function Details({ compra, setCompra }: Props) {
                 })
               }
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               El nombre de la persona que recibe el pedido.
             </p>
           </div>
           <div>
-            <Label className="text-sm text-gray-700 mb-1 block">Teléfono</Label>
+            <Label className="text-sm text-slate-700 mb-1 block">
+              Teléfono
+            </Label>
             <PhoneInput
               placeholder="Teléfono"
               containerStyle={{ width: "100%" }}
@@ -57,7 +59,7 @@ export default function Details({ compra, setCompra }: Props) {
               inputClass={style.inputClass}
               buttonClass={style.ButtonClass}
             />{" "}
-            <p className="text-xs text-gray-500 mt-1 ">
+            <p className="text-xs text-slate-500 mt-1 ">
               El número de teléfono de la persona que recibe el pedido.
             </p>
           </div>
@@ -65,12 +67,12 @@ export default function Details({ compra, setCompra }: Props) {
       </div>
 
       <div className="bg-white rounded-lg p-4">
-        <h3 className="font-medium text-gray-900 mb-3">
+        <h3 className="font-medium text-slate-900 mb-3">
           ¿Dónde la entregamos?
         </h3>
         <div className="space-y-4">
           <div>
-            <Label className="text-sm text-gray-700 mb-2 block">
+            <Label className="text-sm text-slate-700 mb-2 block">
               Selecciona la zona de tu dirección
             </Label>
             <div className="space-y-2">
@@ -82,7 +84,7 @@ export default function Details({ compra, setCompra }: Props) {
               ].map((obj, index) => (
                 <label
                   key={index}
-                  className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                  className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50"
                 >
                   <input
                     type="radio"
@@ -96,14 +98,14 @@ export default function Details({ compra, setCompra }: Props) {
                         lugar: e.target.value,
                       })
                     }
-                    className="text-gray-800"
+                    className="text-slate-800"
                   />
-                  <MapPin className="h-4 w-4 text-gray-500" />
+                  <MapPin className="h-4 w-4 text-slate-500" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-slate-900">
                       {obj.lugar}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500">
                       {smartRound(obj.precio).toFixed(2)}{" "}
                       {store.moneda.find((m) => m.defecto)?.nombre || ""}
                     </p>
@@ -117,7 +119,7 @@ export default function Details({ compra, setCompra }: Props) {
       {compra.lugar !== "Local" && (
         <>
           <div>
-            <Label className="text-sm text-gray-700 mb-1 block">
+            <Label className="text-sm text-slate-700 mb-1 block">
               Tu dirección exacta
             </Label>
             <Textarea
@@ -131,12 +133,12 @@ export default function Details({ compra, setCompra }: Props) {
                 })
               }
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               La dirección donde se entregará el pedido.
             </p>
           </div>
           <div className="bg-white rounded-lg p-4">
-            <h3 className="font-medium text-gray-900 mb-3">
+            <h3 className="font-medium text-slate-900 mb-3">
               ¿Quieres aclararnos algo?
             </h3>
             <Textarea
@@ -150,7 +152,7 @@ export default function Details({ compra, setCompra }: Props) {
                 })
               }
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Información adicional sobre tu pedido o dirección.
             </p>
           </div>

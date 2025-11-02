@@ -123,9 +123,9 @@ export default function ComparePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-slate-50 p-6">
         <div className="max-w-5xl mx-auto animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-64"></div>
+          <div className="h-8 bg-slate-200 rounded w-64"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg h-80" />
             <div className="bg-white rounded-lg h-80" />
@@ -149,14 +149,14 @@ export default function ComparePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-3">
+    <div className="min-h-screen bg-slate-50 py-6 px-3">
       <div className="max-w-5xl mx-auto">
         {/* Header + volver */}
 
         {/* Main two-column card */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {/* Column selects */}
-          <div className="grid grid-cols-2 gap-2 border-b border-gray-200 p-4 items-center">
+          <div className="grid grid-cols-2 gap-2 border-b border-slate-200 p-4 items-center">
             <PopoverComponent
               open1={open1}
               setOpen1={setOpen1}
@@ -186,7 +186,7 @@ export default function ComparePage() {
           {/* Body: filas comparativas */}
           <div className="space-y-0">
             {/* IMAGEN */}
-            <div className="grid grid-cols-2 border-b border-gray-100 items-center">
+            <div className="grid grid-cols-2 border-b border-slate-100 items-center">
               <div className="p-4 text-center">
                 {left ? (
                   <Link
@@ -224,7 +224,7 @@ export default function ComparePage() {
             </div>
 
             {/* PRECIO */}
-            <div className="grid grid-cols-2 border-b border-gray-100">
+            <div className="grid grid-cols-2 border-b border-slate-100">
               <div className={cellClass("left", "price")}>
                 <div className="space-y-1">
                   <div className="text-2xl font-bold">
@@ -235,7 +235,7 @@ export default function ComparePage() {
                     )}
                   </div>
                   {(left?.oldPrice || 0) > (left?.price || 0) && (
-                    <div className="text-sm text-gray-500 line-through">
+                    <div className="text-sm text-slate-500 line-through">
                       ${smartRound(left?.oldPrice || 0)}
                     </div>
                   )}
@@ -251,7 +251,7 @@ export default function ComparePage() {
                     )}
                   </div>
                   {(right?.oldPrice || 0) > (right?.price || 0) && (
-                    <div className="text-sm text-gray-500 line-through">
+                    <div className="text-sm text-slate-500 line-through">
                       ${smartRound(right?.oldPrice || 0)}
                     </div>
                   )}
@@ -260,7 +260,7 @@ export default function ComparePage() {
             </div>
 
             {/* RATING */}
-            <div className="grid grid-cols-2 border-b border-gray-100">
+            <div className="grid grid-cols-2 border-b border-slate-100">
               <div className={cellClass("left", "rating")}>
                 <div className="flex items-center justify-center gap-2">
                   {left ? (
@@ -292,7 +292,7 @@ export default function ComparePage() {
             </div>
 
             {/* CATEGORIA */}
-            <div className="grid grid-cols-2 border-b border-gray-100">
+            <div className="grid grid-cols-2 border-b border-slate-100">
               <div className="p-3 text-center">
                 {left ? (
                   <Badge variant="outline">
@@ -314,7 +314,7 @@ export default function ComparePage() {
             </div>
 
             {/* DISPONIBILIDAD */}
-            <div className="grid grid-cols-2 border-b border-gray-100">
+            <div className="grid grid-cols-2 border-b border-slate-100">
               <div className={cellClass("left", "stock")}>
                 {left ? (
                   <Badge variant={left.stock ? "default" : "secondary"}>
@@ -336,7 +336,7 @@ export default function ComparePage() {
             </div>
 
             {/* DESCUENTO (comparación simple) */}
-            <div className="grid grid-cols-2 border-b border-gray-100">
+            <div className="grid grid-cols-2 border-b border-slate-100">
               <div className={cellClass("left", "discount")}>
                 {left ? (
                   <div className="text-sm">
@@ -348,7 +348,7 @@ export default function ComparePage() {
                         % off
                       </span>
                     ) : (
-                      <span className="text-gray-400">Sin descuento</span>
+                      <span className="text-slate-400">Sin descuento</span>
                     )}
                   </div>
                 ) : (
@@ -367,7 +367,7 @@ export default function ComparePage() {
                         % off
                       </span>
                     ) : (
-                      <span className="text-gray-400">Sin descuento</span>
+                      <span className="text-slate-400">Sin descuento</span>
                     )}
                   </div>
                 ) : (
@@ -377,7 +377,7 @@ export default function ComparePage() {
             </div>
 
             {/* ACCIONES */}
-            <div className="grid grid-cols-2 border-b border-gray-100">
+            <div className="grid grid-cols-2 border-b border-slate-100">
               <div className="p-4 text-center">
                 {left ? (
                   left.Cant == 0 ? (
@@ -483,14 +483,14 @@ export default function ComparePage() {
 
             {/* DESCRIPCION */}
             <div className="grid grid-cols-2">
-              <div className="p-4 text-xs text-gray-700 line-clamp-6">
+              <div className="p-4 text-xs text-slate-700 line-clamp-6">
                 {left ? (
                   <ExpandableText text={left.descripcion || ""} />
                 ) : (
                   <Skeleton className="w-full h-7 " />
                 )}
               </div>
-              <div className="p-4 text-xs text-gray-700 line-clamp-6">
+              <div className="p-4 text-xs text-slate-700 line-clamp-6">
                 {right ? (
                   <ExpandableText text={right.descripcion || ""} />
                 ) : (
@@ -500,7 +500,7 @@ export default function ComparePage() {
             </div>
           </div>
           <div className="grid grid-cols-2">
-            <div className="p-4 text-xs text-gray-700 line-clamp-6 flex w-full flex-wrap gap-2">
+            <div className="p-4 text-xs text-slate-700 line-clamp-6 flex w-full flex-wrap gap-2">
               {left
                 ? left?.caracteristicas.map((obj, index) => (
                     <Badge key={index}>{obj}</Badge>
@@ -509,7 +509,7 @@ export default function ComparePage() {
                     <Skeleton className="h-4 w-10" key={index} />
                   ))}
             </div>
-            <div className="p-4 text-xs text-gray-700 line-clamp-6 flex w-full flex-wrap gap-2">
+            <div className="p-4 text-xs text-slate-700 line-clamp-6 flex w-full flex-wrap gap-2">
               {right
                 ? right?.caracteristicas.map((obj, index) => (
                     <Badge key={index}>{obj}</Badge>
@@ -523,7 +523,7 @@ export default function ComparePage() {
 
         {/* Pie con resumen de puntos y CTA */}
         <div className="mt-4 flex flex-col items-center justify-between gap-4">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-slate-600">
             {result ? (
               result.global === "tie" ? (
                 <>Empate técnico — ambos tienen {result.points.left} puntos</>

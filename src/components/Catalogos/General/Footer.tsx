@@ -19,7 +19,7 @@ export function CatalogFooter() {
   const { store } = useContext(MyContext);
 
   return (
-    <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
+    <footer className="bg-slate-50 border-t border-slate-200 mt-auto">
       <div className="px-4 py-8 space-y-4">
         <Footer />
 
@@ -31,7 +31,7 @@ export function CatalogFooter() {
             ...store?.contacto,
           ].length > 0 && (
             <div className="flex flex-col items-start mt-4 space-y-2 ">
-              <div className="text-gray-800 uppercase text font-cinzel">
+              <div className="text-slate-800 uppercase text font-cinzel">
                 Contacto
               </div>
               {[
@@ -42,7 +42,7 @@ export function CatalogFooter() {
                 <Link
                   href={UrlContact(obj.url || "", obj.tipo)}
                   key={index}
-                  className="flex items-center gap-2 text-gray-700 text-base"
+                  className="flex items-center gap-2 text-slate-700 text-base"
                 >
                   <IconSelect iconName={obj.tipo} />
                   <div className="line-clamp-1 text-sm">
@@ -56,14 +56,14 @@ export function CatalogFooter() {
           {/*Redes Sociales */}
           {store?.redes.length > 0 && (
             <div className="flex flex-col items-start mt-4 space-y-2 ">
-              <div className="text-gray-800 uppercase text font-cinzel">
+              <div className="text-slate-800 uppercase text font-cinzel">
                 Redes Sociales
               </div>
               {store?.redes.map((obj, index) => (
                 <Link
                   href={obj.url}
                   key={index}
-                  className="flex items-center gap-2 text-gray-700 text-base"
+                  className="flex items-center gap-2 text-slate-700 text-base"
                 >
                   <IconSelect iconName={obj.tipo} />
                   <div className="line-clamp-1 text-sm">
@@ -79,7 +79,7 @@ export function CatalogFooter() {
           <Button
             size="lg"
             asChild
-            className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 hover:from-gray-300 hover:via-gray-200 hover:to-gray-300 text-white hover:text-gray-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
+            className="bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 hover:from-slate-300 hover:via-slate-200 hover:to-slate-300 text-white hover:text-slate-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
           >
             <Link href={"https://rouadmin.vercel.app/createAccount"}>
               <Plus size={16} className="mr-2" />

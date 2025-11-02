@@ -51,7 +51,7 @@ export default function Footer() {
       </div>
       {/*Rutas */}
       <div className="flex flex-col items-start mt-4 space-y-2 ">
-        <div className="text-gray-800 uppercase text font-cinzel">
+        <div className="text-slate-800 uppercase text font-cinzel">
           Otras rutas
         </div>
         {ruta
@@ -60,7 +60,7 @@ export default function Footer() {
             <Link
               href={obj.url}
               key={index}
-              className="flex items-center gap-2 text-gray-700 text-base"
+              className="flex items-center gap-2 text-slate-700 text-base"
             >
               <div className="line-clamp-1 text-sm">{obj.name}</div>
             </Link>

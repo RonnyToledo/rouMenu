@@ -44,13 +44,13 @@ export default function AboutMePage() {
 
                 <div className="grid grid-cols-1  gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <MapPin className="size-6 text-gray-700" />
+                    <MapPin className="size-6 text-slate-700" />
                     <span>
                       {store.Provincia}, {store.country}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Award className="size-6 text-gray-700" />
+                    <Award className="size-6 text-slate-700" />
                     <span>
                       +{store.products.filter((obj) => obj.stock).length}{" "}
                       Productos
@@ -96,7 +96,7 @@ export default function AboutMePage() {
                   className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 py-2"
                 >
                   <CardContent className="p-2 text-center">
-                    <skill.icon className="h-8 w-8 text-gray-700 mx-auto mb-4" />
+                    <skill.icon className="h-8 w-8 text-slate-700 mx-auto mb-4" />
                     <h3 className="font-heading font-semibold mb-2">
                       {skill.name}
                     </h3>

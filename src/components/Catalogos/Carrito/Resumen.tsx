@@ -41,7 +41,7 @@ export default function Resumen({
       <CardContent className="space-y-2 px-4">
         <div className="space-y-2">
           <div className="text-sm space-y-1">
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-slate-700">
               <span>
                 Subtotal (
                 {store.products.reduce(
@@ -68,7 +68,7 @@ export default function Resumen({
               </div>
             )}
 
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-slate-700">
               <div className="flex items-center gap-1">
                 <Truck className="w-4 h-4" />
                 <span>Envío</span>
@@ -79,7 +79,7 @@ export default function Resumen({
                   : `$${smartRound(compra.shipping).toFixed(2)}`}
               </span>
             </div>
-            <div className="flex justify-between text-gray-700">
+            <div className="flex justify-between text-slate-700">
               <div className="flex items-center gap-1">
                 <GrCurrency className="w-4 h-4" />
                 <span>Moneda</span>
@@ -104,7 +104,7 @@ export default function Resumen({
         </div>
 
         {/*shipping > 0 && (
-                  <div className="text-xs text-gray-500 text-center">Envío gratis en compras mayores a $100</div>
+                  <div className="text-xs text-slate-500 text-center">Envío gratis en compras mayores a $100</div>
                 )*/}
 
         <Button className="w-full" size="lg" onClick={handleOrderClick}>
@@ -121,7 +121,7 @@ export default function Resumen({
           )}
         </Button>
 
-        <div className="text-xs text-gray-500 text-center">
+        <div className="text-xs text-slate-500 text-center">
           Envío seguro y protegido
         </div>
       </CardContent>

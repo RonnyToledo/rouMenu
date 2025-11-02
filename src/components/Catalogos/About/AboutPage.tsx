@@ -60,7 +60,7 @@ export default function AboutPage() {
 
   return (
     <div>
-      <main className="bg-gray-50 min-h-screen ">
+      <main className="bg-slate-50 min-h-screen ">
         <AboutMePage />
 
         <div className="p-4">
@@ -128,7 +128,7 @@ export default function AboutPage() {
                     />
                   </Map>
                   <div className="flex items-center">
-                    <FaLocationDot className="h-6 w-6 text-gray-700" />
+                    <FaLocationDot className="h-6 w-6 text-slate-700" />
                     <div className="ml-4">
                       <p className="text-[var(--text-muted)]">
                         {store?.direccion},
@@ -168,7 +168,7 @@ export default function AboutPage() {
                               {[...Array(testimonial.star)].map((_, i) => (
                                 <Star
                                   key={i}
-                                  className="h-5 w-5 fill-gray-300 text-gray-200"
+                                  className="h-5 w-5 fill-slate-300 text-slate-200"
                                 />
                               ))}
                             </div>
@@ -221,8 +221,8 @@ export default function AboutPage() {
                         <Star
                           className={`w-8 h-8 ${
                             starValue <= ratingSelect
-                              ? "fill-gray-600 text-gray-600"
-                              : "text-gray-400"
+                              ? "fill-slate-600 text-slate-600"
+                              : "text-slate-400"
                           }`}
                         />
                       </button>
@@ -372,14 +372,14 @@ const HorariosComponent: React.FC<HorariosComponentProps> = ({
 
     if (horario === "Abierto 24 horas") return "text-green-600";
     if (horario === "Cerrado") return "text-red-500";
-    return "text-gray-600";
+    return "text-slate-600";
   };
 
   const groupedHorarios = agruparHorarios(horario);
 
   if (!horario || horario.length === 0) {
     return (
-      <div className={`flex items-center gap-2 text-gray-500 ${className}`}>
+      <div className={`flex items-center gap-2 text-slate-500 ${className}`}>
         <Clock className="w-4 h-4" />
         <span className="text-sm">Horarios no disponibles</span>
       </div>
@@ -390,7 +390,7 @@ const HorariosComponent: React.FC<HorariosComponentProps> = ({
     <div className={`${className} `}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-md p-1"
+        className="flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-md p-1"
         aria-expanded={isOpen}
         aria-controls="horarios-content"
       >
@@ -416,9 +416,9 @@ const HorariosComponent: React.FC<HorariosComponentProps> = ({
             return (
               <div
                 key={index}
-                className="flex justify-between items-center py-1 text-sm border-b border-gray-100 last:border-b-0"
+                className="flex justify-between items-center py-1 text-sm border-b border-slate-100 last:border-b-0"
               >
-                <span className="text-gray-700 font-medium min-w-0 flex-1">
+                <span className="text-slate-700 font-medium min-w-0 flex-1">
                   {diasTexto}:
                 </span>
                 <span className={`ml-3 ${colorClass} font-medium`}>

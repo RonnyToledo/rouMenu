@@ -57,7 +57,7 @@ export default function Category({ categoria }: Props) {
             </p>
           )}
           <div className={`flex items-center justify-between mt-3`}>
-            <p className="font-medium w-full text-10 text-gray-700">
+            <p className="font-medium w-full text-10 text-slate-700">
               {
                 store?.products.filter((obj) => obj.caja == finCategory?.id)
                   .length

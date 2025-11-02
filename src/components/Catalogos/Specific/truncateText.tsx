@@ -67,7 +67,7 @@ export default function ExpandableText({
           exit={{ opacity: 0.0 }}
           transition={{ duration: 0.25 }}
           className={cn(
-            `whitespace-pre-line text-gray-700`,
+            `whitespace-pre-line text-slate-700`,
             !expanded && shouldClamp ? getLines(lines) : "",
             className
           )}

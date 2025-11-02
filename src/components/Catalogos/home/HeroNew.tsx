@@ -4,12 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
-import { MdDeliveryDining } from "react-icons/md";
-import { FaShop } from "react-icons/fa6";
 import { useAuth } from "@/context/AppContext";
 import { useParams, useSearchParams } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import { logoApp } from "@/lib/image";
+import { Store, Truck } from "lucide-react";
 
 export default function HeroNew({}) {
   const { store } = useContext(MyContext);
@@ -56,57 +55,73 @@ export default function HeroNew({}) {
           />
         </div>
       </div>
+      <div className="container mx-auto px-4 lg:px-8 -mt-12 relative z-10">
+        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4 lg:p-6 mb-6">
+          <div className="flex flex-col  gap-4">
+            <div className="flex-1">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                <Link
+                  href={`/t/${store.sitioweb}/about/ratings`}
+                  className="flex items-start gap-3 mb-3"
+                >
+                  <Star className="w-4 h-4 fill-current text-slate-700" />
+                  <span className="font-medium text-slate-900">
+                    {store?.comentTienda.promedio.toFixed(1)}
+                  </span>
+                  <span>({store?.comentTienda.total} reseñas)</span>
+                  <span className="text-slate-300">•</span>
+                  <span>
+                    $ {store.moneda.find((m) => m.defecto)?.nombre || ""}
+                  </span>
+                </Link>
 
-      <div className="space-y-3">
-        {/* Rating */}
-        <Link
-          href={`/t/${store.sitioweb}/about/ratings`}
-          className="flex items-center gap-2 text-sm text-gray-600"
-        >
-          <Star className="w-4 h-4 fill-current text-gray-700" />
-          <span className="font-medium text-gray-900">
-            {store?.comentTienda.promedio.toFixed(1)}
-          </span>
-          <span>({store?.comentTienda.total} reseñas)</span>
-          <span className="text-gray-300">•</span>
-          <span>$ {store.moneda.find((m) => m.defecto)?.nombre || ""}</span>
-        </Link>
-        {/* Location */}
-        <Link
-          className="inline-flex gap-2 items-center bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-2 px-4 rounded-full border border-[var(--border-gold)]"
-          href={`/t/${store?.sitioweb}/about#ubicacion`}
-        >
-          <MapPin className="size-3.5" />
-          {store?.municipio}, {store?.Provincia}
-        </Link>
+                <Link
+                  href={`/t/${store?.sitioweb}/about#ubicacion`}
+                  className="flex items-center gap-2 text-slate-700 mb-4"
+                >
+                  <MapPin className="w-4 h-4" />
+                  <span className="text-sm">
+                    {store?.municipio}, {store?.Provincia}
+                  </span>
+                </Link>
+              </div>
 
-        {/* Description */}
-        <div>
-          <p className="text-gray-600 leading-relaxed text-sm line-clamp-2">
-            {store?.parrrafo || "Store?..."}
-          </p>
-        </div>
-        <div className="flex items-center justify-start gap-2">
-          {store.domicilio && (
-            <div className="inline-flex gap-4 items-center px-4 bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-1 rounded-full border border-[var(--border-gold)]">
-              <MdDeliveryDining className="size-5" />
-              <div>
-                <h5 className="text-gray-600 text-[10px]">Entrega</h5>
-                <h2 className="text-gray-800 text-sm">Delivery</h2>
-              </div>
+              <p className="text-slate-700 text-sm lg:text-base mb-4 line-clamp-2">
+                {store?.parrrafo || "Store?..."}
+              </p>
             </div>
-          )}
-          {store.local && (
-            <div className="inline-flex gap-4 items-center px-4 bg-[var(--background-dark)] text-[var(--text-gold)] text-sm font-semibold py-1 rounded-full border border-[var(--border-gold)]">
-              <FaShop className="size-5" />
-              <div>
-                <h5 className="text-gray-600 text-[10px]">Entrega</h5>
-                <h2 className="text-gray-800 text-sm">Tienda</h2>
-              </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 ">
+              {store.domicilio && (
+                <div className="flex items-center gap-3 bg-slate-300 rounded-xl p-3 flex-1">
+                  <div className="p-2 bg-slate-400 rounded-lg">
+                    <Truck className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-600">Entrega</p>
+                    <p className="text-sm font-medium text-slate-800">
+                      Delivery
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {store.local && (
+                <div className="flex items-center gap-3 bg-slate-300 rounded-xl p-3 flex-1">
+                  <div className="p-2 bg-slate-400 rounded-lg">
+                    <Store className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-600">Entrega</p>
+                    <p className="text-sm font-medium text-slate-800">Tienda</p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
+
       {/* Popover de Login */}
       <LoginPopover
         isOpen={showLogin}

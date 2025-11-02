@@ -67,7 +67,7 @@ export default function CodeDiscount({ compra, setCompra }: Props) {
                   placeholder="Tienes algun cupón?"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
+                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-slate-500 px-4 text-xs font-normal leading-normal line-clamp-1"
                 />
               </div>
               <Button

@@ -64,7 +64,7 @@ export const Rating: FC<RatingModalProps> = ({
               </Avatar>
               <div className="flex flex-col">
                 <DialogTitle className="text-base">{userName}</DialogTitle>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-slate-400">
                   Las opiniones son públicas.{" "}
                   <span className="underline">Más información</span>
                 </p>
@@ -76,7 +76,7 @@ export const Rating: FC<RatingModalProps> = ({
         <div className="space-y-1">
           <Input
             placeholder="Nombre"
-            className="bg-transparent border-gray-300 text-sm"
+            className="bg-transparent border-slate-300 text-sm"
             readOnly={!!user}
             value={rating.nombre}
             onChange={(e) =>
@@ -96,7 +96,7 @@ export const Rating: FC<RatingModalProps> = ({
                   className={`w-8 h-8 ${
                     star <= rating.selectedRating
                       ? "fill-blue-600 text-blue-600"
-                      : "text-gray-400"
+                      : "text-slate-400"
                   }`}
                 />
               </button>
@@ -105,14 +105,14 @@ export const Rating: FC<RatingModalProps> = ({
 
           <Textarea
             placeholder="Describe tu experiencia (opcional)"
-            className="bg-transparent border-gray-300 text-xs"
+            className="bg-transparent border-slate-300 text-xs"
             value={rating.description}
             onChange={(e) =>
               setRating({ ...rating, description: e.currentTarget.value })
             }
             maxLength={500}
           />
-          <div className="text-right text-xs text-gray-400">
+          <div className="text-right text-xs text-slate-400">
             {rating.description.length}/500
           </div>
         </div>

@@ -107,7 +107,7 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
       <div className="rounded-lg">
         <div className="pb-2">
           <Link
-            className="text-sm uppercase font-cinzel text-center text-gray-700 tracking-widest line-clamp-1"
+            className="text-sm uppercase font-cinzel text-center text-slate-700 tracking-widest line-clamp-1"
             href={`/t/${store?.sitioweb}/category/${categoria.id}`}
           >
             {categoria.name}
@@ -137,7 +137,7 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
           )}
 
           <div className="flex items-center justify-between mt-3">
-            <p className="font-medium w-full text-10 text-gray-700">
+            <p className="font-medium w-full text-10 text-slate-700">
               {productsCount} Productos
             </p>
             <div className="relative h-9 w-full flex justify-end items-center">
@@ -180,7 +180,9 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   const gridClass = useMemo(
     () =>
       `grid grid-flow-row-dense gap-2 p-2 ${
-        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
+        store?.edit?.grid
+          ? "grid-cols-2 md:grid-cols-4"
+          : "grid-cols-1  md:grid-cols-4"
       }`,
     [store?.edit?.grid]
   );

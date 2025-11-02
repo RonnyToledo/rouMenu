@@ -137,7 +137,7 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               onClick={ScrollToId}
-              className="w-full  py-3 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-700 hover:from-gray-300 hover:via-gray-200 hover:to-gray-300 text-white hover:text-gray-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
+              className="w-full  py-3 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 hover:from-slate-300 hover:via-slate-200 hover:to-slate-300 text-white hover:text-slate-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
             >
               Explorar
             </Button>

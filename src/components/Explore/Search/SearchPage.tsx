@@ -273,25 +273,25 @@ export default function BusquedaPage() {
             <TabsList className="flex bg-white w-full max-w-md mx-auto mb-8 p-2">
               <TabsTrigger
                 value="all"
-                className="flex items-center text-xs data-[state=active]:bg-gray-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
               >
                 Todo ({getAllResults().length})
               </TabsTrigger>
               <TabsTrigger
                 value="sitios"
-                className="flex items-center text-xs data-[state=active]:bg-gray-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
               >
                 Tiendas ({results.sitios.length})
               </TabsTrigger>
               <TabsTrigger
                 value="productos"
-                className="flex items-center text-xs data-[state=active]:bg-gray-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
               >
                 Productos ({results.productos.length})
               </TabsTrigger>
               <TabsTrigger
                 value="categorias"
-                className="flex items-center text-xs data-[state=active]:bg-gray-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
               >
                 Categorías ({results.categorias.length})
               </TabsTrigger>

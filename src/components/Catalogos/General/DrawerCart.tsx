@@ -122,16 +122,16 @@ export default function DrawerCart() {
                   </Badge>
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-sm font-medium text-slate-900">
                     {getTotalItems()}{" "}
                     {getTotalItems() === 1 ? "producto" : "productos"}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     Total: ${getTotalFinal(store, store.products)}
                   </p>
                 </div>
               </div>
-              <div className="border border-gray-400 flex items-center p-1 rounded-lg">
+              <div className="border border-slate-400 flex items-center p-1 rounded-lg">
                 <MdOutlineShoppingCart />
                 Ver Pedido
               </div>
@@ -154,11 +154,11 @@ export default function DrawerCart() {
                     </Badge>
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-slate-900">
                       {getTotalItems()}{" "}
                       {getTotalItems() === 1 ? "producto" : "productos"}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500">
                       Total: ${getTotalFinal(store, store.products)}
                     </p>
                   </div>
@@ -308,10 +308,10 @@ export function ListCard({
             </Badge>
           </div>
           <div className="flex flex-col items-start justify-center">
-            <p className="text-sm font-medium text-gray-900 truncate text-center">
+            <p className="text-sm font-medium text-slate-900 truncate text-center">
               {title}
             </p>
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-slate-500 text-center">
               ${price}
               {embalaje > 0 ? ` + ${embalaje} embalaje` : ""}
               {} {" - "}
@@ -335,7 +335,7 @@ export function ListCard({
     </div>
   );
 }
-function DetectCategoria(
+export function DetectCategoria(
   categoria: string,
   allCAtegorias: Categoria[]
 ): boolean {

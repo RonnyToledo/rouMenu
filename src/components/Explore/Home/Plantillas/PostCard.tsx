@@ -29,7 +29,7 @@ export default function PostCard({ filterIndex }: { filterIndex: number }) {
             <p className="text-[#0d141c] text-base font-medium leading-normal line-clamp-1">
               {obj.store_name}
             </p>
-            <p className="text-gray-600 text-sm font-normal leading-normal line-clamp-2">
+            <p className="text-slate-600 text-sm font-normal leading-normal line-clamp-2">
               <RelativeTime datetime={obj.product_created_at || new Date()} />
             </p>
           </div>
@@ -53,17 +53,17 @@ export default function PostCard({ filterIndex }: { filterIndex: number }) {
               </p>
               <div className="flex items-end gap-3 justify-between  ">
                 <div className="flex flex-col gap-1 w-full">
-                  <p className="text-gray-600 text-base font-normal leading-normal">
+                  <p className="text-slate-600 text-base font-normal leading-normal">
                     {obj.category_name}
                   </p>
                   <div className="flex justify-evenly items-center my-4">
-                    <div className="flex text-gray-600 items-center gap-1 ">
+                    <div className="flex text-slate-600 items-center gap-1 ">
                       <p className=" text-base font-normal leading-normal">
                         {obj.product_visitas}
                       </p>
                       <FaRegEye />
                     </div>
-                    <div className="flex text-gray-600 items-center gap-1 ">
+                    <div className="flex text-slate-600 items-center gap-1 ">
                       <p className=" text-base font-normal leading-normal">
                         {obj.cnt_comments}
                       </p>

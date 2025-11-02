@@ -83,7 +83,7 @@ export function StepByStepSheet({
                 className={`w-full text-left p-3 rounded-lg text-sm transition-all duration-200 border flex items-center justify-between ${
                   activeSection === section?.slug
                     ? "bg-emerald-100 border-emerald-300 shadow-sm text-emerald-700 font-medium"
-                    : "hover:bg-gray-50 border-transparent hover:border-gray-200"
+                    : "hover:bg-slate-50 border-transparent hover:border-slate-200"
                 }`}
               >
                 <span>{section?.title}</span>
@@ -100,7 +100,7 @@ export function StepByStepSheet({
                         className={`w-full text-left p-2 rounded text-sm transition-all duration-200 ${
                           activeSection === subsection?.slug
                             ? "bg-emerald-50 text-emerald-600 font-medium"
-                            : "hover:bg-gray-50 text-muted-foreground"
+                            : "hover:bg-slate-50 text-muted-foreground"
                         }`}
                       >
                         {subsection?.title}

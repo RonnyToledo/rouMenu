@@ -113,7 +113,7 @@ function ItemCard({
 }: ItemCardInterface) {
   return (
     <div className="shadow-xs space-y-1">
-      <div className="flex items-center  border-b border-b-gray-200 p-2">
+      <div className="flex items-center  border-b border-b-slate-200 p-2">
         <Image
           width={100}
           height={100}
@@ -125,7 +125,7 @@ function ItemCard({
           <h4 className="font-bold font-cinzel line-clamp-1 text-[var(--text-dark)] text-lg">
             {title}
           </h4>
-          <p className=" text-sm text-gray-700 mt-1">
+          <p className=" text-sm text-slate-700 mt-1">
             ${price} {moneda}
           </p>
         </div>
@@ -187,7 +187,7 @@ function ItemCard({
           </Button>
         </div>
       </div>
-      <div className="text-gray-700 text-xs">
+      <div className="text-slate-700 text-xs">
         <p>{embalaje > 0 && `Embalaje P/U: ${embalaje}`}</p>
       </div>
     </div>

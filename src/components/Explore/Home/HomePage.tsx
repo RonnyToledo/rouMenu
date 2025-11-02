@@ -90,7 +90,7 @@ export default function HomePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <main className="relative bg-background mb-6  py-2">
         <ArcGalleryHero images={images} />
       </main>
@@ -100,10 +100,10 @@ export default function HomePage() {
         <div className="hidden grid-cols-1  gap-8 mb-8  md:grid md:sticky top-20 p-2 h-fit">
           <div className="space-y-6">
             <div>
-              <h3 className="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2 uppercase">
+              <h3 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2 uppercase">
                 RouMenu
               </h3>
-              <div className="space-y-3 text-gray-600">
+              <div className="space-y-3 text-slate-600">
                 <div>
                   <Link href="/">
                     Herramienta para la creacion y diseño de catalogos onlines
@@ -120,19 +120,19 @@ export default function HomePage() {
           </div>
           <div className="space-y-6">
             <div>
-              <h4 className="font-semibold text-gray-800 mb-3">
+              <h4 className="font-semibold text-slate-800 mb-3">
                 Guía para potenciar tu negocio
               </h4>
               <div className="space-y-2">
-                <div className=" text-gray-600 text-sm">
+                <div className=" text-slate-600 text-sm">
                   <Link href={"/services"}>
                     Preguntas frecuentes nuestro servicio?
                   </Link>
                 </div>
-                <div className=" text-gray-600 text-sm">
+                <div className=" text-slate-600 text-sm">
                   <Link href={"/info"}>Guia para usar nuestra plataforma?</Link>
                 </div>
-                <div className=" text-gray-600 text-sm">
+                <div className=" text-slate-600 text-sm">
                   <Link href={"/contact"}>Contactanos</Link>
                 </div>
               </div>

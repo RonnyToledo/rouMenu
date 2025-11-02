@@ -66,10 +66,10 @@ export default function Header({ children }: { children: ReactNode }) {
       {/* LoginPopover: se abrirá si no hay user y no se mostró antes */}
 
       {!pathname.includes("/t/") && (
-        <div className="sticky top-0 flex items-center bg-gray-100 p-2 gap-2 justify-between z-50 shadow-lg">
+        <div className="sticky top-0 flex items-center bg-slate-100 p-2 gap-2 justify-between z-50 shadow-lg">
           <div className="bg-white rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2">
             <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-white text-gray-600 text-sm font-medium">
+              <AvatarFallback className="bg-white text-slate-600 text-sm font-medium">
                 {"RouMenu".charAt(0).toUpperCase()}
               </AvatarFallback>
               <AvatarImage src={logoApp} alt={"RouMenu"} />
@@ -81,10 +81,10 @@ export default function Header({ children }: { children: ReactNode }) {
                 className="w-full flex items-center min-w-40 h-10"
               >
                 <div className="w-full flex flex-col text-left">
-                  <div className="flex items-center w-full h-full font-normal text-[10px] text-gray-400 gap-0">
+                  <div className="flex items-center w-full h-full font-normal text-[10px] text-slate-400 gap-0">
                     Buscar en
                   </div>
-                  <div className="flex items-center w-full h-full font-normal text-[14px] text-gray-600">
+                  <div className="flex items-center w-full h-full font-normal text-[14px] text-slate-600">
                     RouMenu
                   </div>
                 </div>
@@ -94,7 +94,7 @@ export default function Header({ children }: { children: ReactNode }) {
                 <Input
                   placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-gray-500 px-4 text-xs font-normal leading-normal line-clamp-1"
+                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-slate-500 px-4 text-xs font-normal leading-normal line-clamp-1"
                   value={search}
                 />
               </div>
@@ -106,7 +106,7 @@ export default function Header({ children }: { children: ReactNode }) {
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button variant="ghost" className="p-0 m-0 md:hidden">
-                    <HiMiniBars3BottomRight className="size-6 text-gray-700 " />
+                    <HiMiniBars3BottomRight className="size-6 text-slate-700 " />
                   </Button>
                 </DrawerTrigger>
                 <DrawerContent>
