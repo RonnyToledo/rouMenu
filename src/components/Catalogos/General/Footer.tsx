@@ -19,7 +19,7 @@ export function CatalogFooter() {
   const { store } = useContext(MyContext);
 
   return (
-    <footer className="bg-slate-50 border-t border-slate-200 mt-auto">
+    <footer className="bg-gradient-to-br from-slate-700 to-slate-900 mt-auto">
       <div className="px-4 py-8 space-y-4">
         <Footer />
 
@@ -31,7 +31,7 @@ export function CatalogFooter() {
             ...store?.contacto,
           ].length > 0 && (
             <div className="flex flex-col items-start mt-4 space-y-2 ">
-              <div className="text-slate-800 uppercase text font-cinzel">
+              <div className="text-slate-100 uppercase text font-cinzel">
                 Contacto
               </div>
               {[
@@ -42,7 +42,7 @@ export function CatalogFooter() {
                 <Link
                   href={UrlContact(obj.url || "", obj.tipo)}
                   key={index}
-                  className="flex items-center gap-2 text-slate-700 text-base"
+                  className="flex items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
                 >
                   <IconSelect iconName={obj.tipo} />
                   <div className="line-clamp-1 text-sm">
@@ -56,14 +56,14 @@ export function CatalogFooter() {
           {/*Redes Sociales */}
           {store?.redes.length > 0 && (
             <div className="flex flex-col items-start mt-4 space-y-2 ">
-              <div className="text-slate-800 uppercase text font-cinzel">
+              <div className="text-slate-100 uppercase text font-cinzel">
                 Redes Sociales
               </div>
               {store?.redes.map((obj, index) => (
                 <Link
                   href={obj.url}
                   key={index}
-                  className="flex items-center gap-2 text-slate-700 text-base"
+                  className="flex items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
                 >
                   <IconSelect iconName={obj.tipo} />
                   <div className="line-clamp-1 text-sm">
@@ -79,7 +79,7 @@ export function CatalogFooter() {
           <Button
             size="lg"
             asChild
-            className="bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 hover:from-slate-300 hover:via-slate-200 hover:to-slate-300 text-white hover:text-slate-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
+            className="bg-gradient-to-tr from-slate-100 via-slate-400 to-slate-300 hover:from-slate-700 hover:via-slate-800 hover:to-slate-900 text-slate-800 hover:text-slate-100 px-8 transform  transition-all duration-500 shadow-lg "
           >
             <Link href={"https://rouadmin.vercel.app/createAccount"}>
               <Plus size={16} className="mr-2" />
@@ -105,7 +105,7 @@ export function CatalogFooter() {
     </footer>
   );
 }
-function SelectUser(iconName: string, name: string) {
+export function SelectUser(iconName: string, name: string) {
   if (iconName == "insta" || iconName == "twitter") {
     return name.includes("@") ? name : `@${name}`;
   }
@@ -114,30 +114,35 @@ function SelectUser(iconName: string, name: string) {
   }
   return name;
 }
-function IconSelect({ iconName }: { iconName: string }) {
-  const classStyle = "size-6";
+export function IconSelect({
+  iconName,
+  className = "size-6",
+}: {
+  iconName: string;
+  className?: string;
+}) {
   if (iconName == "insta") {
-    return <FaInstagram className={classStyle} />;
+    return <FaInstagram className={className} />;
   }
   if (iconName == "face") {
-    return <FaFacebook className={classStyle} />;
+    return <FaFacebook className={className} />;
   }
   if (iconName == "twitter") {
-    return <FaSquareXTwitter className={classStyle} />;
+    return <FaSquareXTwitter className={className} />;
   }
   if (iconName == "linkenid") {
-    return <FaLinkedin className={classStyle} />;
+    return <FaLinkedin className={className} />;
   }
   if (iconName == "wa") {
-    return <FaWhatsapp className={classStyle} />;
+    return <FaWhatsapp className={className} />;
   }
   if (iconName == "cell") {
-    return <FaPhone className={classStyle} />;
+    return <FaPhone className={className} />;
   }
   if (iconName == "mail") {
-    return <GoMail className={classStyle} />;
+    return <GoMail className={className} />;
   }
-  return <FaSignal className={classStyle} />;
+  return <FaSignal className={className} />;
 }
 
 function UrlContact(tipo: string, url: string): string {

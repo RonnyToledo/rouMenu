@@ -33,6 +33,8 @@ export default function Resumen({
       0
     );
   };
+  
+  
   return (
     <Card className="p-2 gap-2">
       <CardHeader className="p-2 gap-0">

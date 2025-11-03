@@ -12,6 +12,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ButtonOfCart } from "./ButtonOfCart";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface ProductGridInterface {
   product: Product;
@@ -185,6 +186,9 @@ const ProductImage = React.memo(function ProductImage({
         className={imageClasses}
         src={image}
         style={imageStyle}
+        onError={() => {
+          toast.error(`Error al cargar la imagen del producto ${title} `);
+        }}
       />
 
       {isNew && (

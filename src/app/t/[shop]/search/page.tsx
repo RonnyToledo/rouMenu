@@ -16,9 +16,5 @@ export async function generateMetadata({
   return await buildShopMetadata(shop, pageName);
 }
 export default function page() {
-  return (
-    <div>
-      <SearchPage />
-    </div>
-  );
+  return <SearchPage />;
 }

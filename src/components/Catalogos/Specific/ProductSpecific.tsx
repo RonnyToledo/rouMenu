@@ -12,14 +12,11 @@ import { Product as ProductInterface } from "@/context/InitialStatus";
 import { logoApp } from "@/lib/image";
 import { Button } from "@/components/ui/button";
 import RatingSection from "./RatingSection";
-import { smartRound } from "@/functions/precios";
-import { useRouter, useSearchParams } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Star, Minus, Plus, ShoppingCart, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import ExpandableText from "./truncateText";
 import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,11 +26,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import ShareButton from "@/components/myUI/buttonShare";
 import ClipboardProduct from "@/components/myUI/clipboardProduct";
-import RelativeTime from "@/components/GeneralComponents/DateTime";
 import { Card } from "@/components/ui/card";
+
 export default function Product({ id }: { id: string }) {
   const { store, dispatchStore } = useContext(MyContext);
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [product, setProduct] = useState<ProductInterface>();
   const [countAddCart, setCountAddCart] = useState<number>(1);
@@ -43,15 +39,10 @@ export default function Product({ id }: { id: string }) {
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
 
-  const swipeDirection = searchParams.get("direction") || "next";
-  const swipeComponents =
-    swipeDirection === "next"
-      ? { amplio: "slide-in-from-right-4", corto: "slide-in-from-right-2" }
-      : { amplio: "slide-in-from-left-4", corto: "slide-in-from-left-2" };
-
   useEffect(() => {
     const value = store.products.find((obj) => obj.productId == id);
     setProduct(value);
+    if (!value) return notFound();
     const initialCount =
       (value?.stock || 0) -
         (value?.Cant || 0) -
@@ -158,102 +149,107 @@ export default function Product({ id }: { id: string }) {
       link: `/t/${store.sitioweb}/producto/${product?.productId}`,
     },
   ];
+
   return (
     <main className="flex items-start min-h-dvh">
-      <div className="grid grid-cols-1  gap-2 items-start p-4">
-        <BreadCrumpParent list={links} />
-        <AnimatePresence>
-          <motion.div
-            key={`Product-motion-${product?.productId}`} // Necesario para que Framer Motion detecte cambios
-            initial={{
-              opacity: 0,
-            }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="relative rounded-b-2xl overflow-hidden"
-            onTouchStart={handleSwipeStart}
-            onTouchEnd={handleSwipeEnd}
-          >
-            <Image
-              width={500}
-              height={500}
-              alt={product?.title || "Product"}
-              className={`w-full rounded-lg shadow-lg object-cover object-center aspect-square`}
-              src={product?.image || store.urlPoster || logoApp}
-            />
-          </motion.div>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 md:p-6">
+        {/* Left Column - Images */}
+        <div className="flex flex-col gap-2">
+          {/* Breadcrumb */}
+          <BreadCrumpParent list={links} />
 
-          {/* Miniaturas */}
-          <div className="grid grid-cols-3 gap-2">
-            {product?.imagesecondary.map((image, index) => (
-              <Button
-                key={index}
-                className="p-0 m-0 aspect-square h-auto"
-                variant={"ghost"}
-                onClick={() =>
-                  setProduct({
-                    ...product,
-                    image,
-                    imagesecondary: product.imagesecondary.map((obj) =>
-                      obj == image ? product.image || store.urlPoster : obj
-                    ),
-                  })
-                }
-              >
-                <Image
-                  width={100}
-                  height={100}
-                  src={image || store.urlPoster || logoApp}
-                  alt={`${product?.title} vista ${index + 1}`}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </Button>
-            ))}
-          </div>
-        </AnimatePresence>
-        <div
-          className={`space-y-4 animate-in ${swipeComponents.corto} duration-700`}
-        >
-          {/* Título y precio */}
-          <div className="flex flex-col items-start justify-between space-y-1">
-            <h1
-              className={`line-clamp-1 text-3xl font-bold text-slate-900 animate-in ${swipeComponents.corto} duration-500 delay-200`}
+          {/* Main Image */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={product?.image}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="relative rounded-2xl overflow-hidden bg-[#E8DCC8] aspect-square"
+              onTouchStart={handleSwipeStart}
+              onTouchEnd={handleSwipeEnd}
             >
-              {product?.title}
-            </h1>
-            {product?.venta && (
-              <div
-                className={`flex justify-between items-center w-full gap-2 animate-in ${swipeComponents.corto} duration-500 delay-300`}
-              >
+              <Image
+                width={600}
+                height={600}
+                alt={product?.title || "Producto"}
+                className="w-full h-full object-cover"
+                src={product?.image || store.urlPoster || logoApp}
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Thumbnails */}
+          {(product?.imagesecondary || []).length > 0 && (
+            <div className="grid grid-cols-3 gap-3">
+              {(product?.imagesecondary || []).map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (!product) {
+                      return;
+                    }
+                    setProduct({
+                      ...product,
+                      image,
+                      imagesecondary: product?.imagesecondary.map((obj) =>
+                        obj === image ? product?.image : obj
+                      ) as string[],
+                    });
+                  }}
+                  className="aspect-square rounded-lg overflow-hidden bg-slate-200/50 hover:bg-slate-300/50 border-2 border-slate-300 hover:border-slate-400 transition-all"
+                >
+                  <Image
+                    width={150}
+                    height={150}
+                    src={image || logoApp}
+                    alt={`${product?.title} vista ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Right Column - Product Info */}
+        <div className="space-y-4">
+          {/* Title and Actions */}
+          <div className="sapce-y-2">
+            <div className="space-y-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
+                {product?.title}
+              </h1>
+
+              <div className="flex items-center justify-between">
                 <Link
-                  href={`/t/${store.sitioweb}/producto/${product.productId}/coment`}
-                  className="flex gap-2"
+                  href={`/catalog/${store.sitioweb}/product/${product?.productId}/reviews`}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
                         className={`w-4 h-4 ${
-                          i < Math.floor(product?.coment?.promedio || 0)
-                            ? "text-yellow-400 fill-current"
-                            : "text-slate-500"
+                          i < Math.floor(product?.coment.promedio || 0)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-slate-400"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-slate-600">
-                    {product?.coment?.promedio || 0} ({product?.coment.total}{" "}
-                    reseñas)
+                  <span className="text-sm text-slate-700">
+                    {product?.coment.promedio} ({product?.coment.total} reseñas)
                   </span>
                 </Link>
 
-                <div className="flex ">
+                <div className="flex gap-2">
                   <ClipboardProduct
                     title={`${product?.title || ""}`}
                     descripcion={product?.descripcion || ""}
                     url={product?.image}
-                    price={product?.price || 0}
+                    price={product?.price || 0 || 0}
                     oldPrice={product?.oldPrice || 0}
                     className="p-0 m-0"
                   />
@@ -264,26 +260,19 @@ export default function Product({ id }: { id: string }) {
                   />
                 </div>
               </div>
-            )}
-          </div>
-          {/* Precio */}
-          {product?.venta && (
-            <>
-              <div className="flex items-center justify-between">
-                <div
-                  className={`flex items-center gap-3 animate-in ${swipeComponents.corto} duration-500 delay-400 leading-relaxed text-slate-900`}
-                >
-                  <p className="leading-relaxed text-slate-900">
-                    ${smartRound(product?.price || 0)}{" "}
-                    {store.moneda.find((m) => m.id == product.default_moneda)
-                      ?.nombre || ""}
-                  </p>
-                  {(product?.oldPrice || 0) > (product?.price || 0) && (
-                    <p className=" text-slate-500 line-through">
-                      ${product?.oldPrice}
+            </div>
+
+            {/* Price and Stock */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <p className="text-3xl font-bold text-slate-800">
+                  ${product?.price || 0} CUP
+                </p>
+                {(product?.oldPrice || 0) > (product?.price || 0) && (
+                  <>
+                    <p className="text-lg text-slate-600 line-through">
+                      ${product?.oldPrice || 0}
                     </p>
-                  )}
-                  {(product?.oldPrice || 0) > (product?.price || 0) && (
                     <Badge variant="destructive" className="animate-pulse">
                       {Math.round(
                         (((product?.oldPrice || 0) - (product?.price || 0)) /
@@ -292,306 +281,232 @@ export default function Product({ id }: { id: string }) {
                       )}
                       % OFF
                     </Badge>
-                  )}
-                </div>
-
-                <div className="flex gap-1">
-                  <div
-                    className={`animate-in ${swipeComponents.corto} duration-500 delay-1100`}
-                  >
-                    {product?.stock ? (
-                      store.stocks && product?.stock <= 10 ? (
-                        <>
-                          <div className="flex items-center gap-2 text-green-600">
-                            <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                            <span className="text-sm font-medium">
-                              {product.stock} u.
-                            </span>
-                          </div>
-                          {product.Cant +
-                            product.agregados.reduce(
-                              (sum, agg) => sum + agg.cant,
-                              0
-                            ) >
-                            0 && (
-                            <div className="flex items-center gap-2 text-green-600">
-                              <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                              <span className="text-xs font-medium text-green-700">
-                                Pedidas{" "}
-                                {product.Cant +
-                                  product.agregados.reduce(
-                                    (sum, agg) => sum + agg.cant,
-                                    0
-                                  )}{" "}
-                              </span>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="flex items-center gap-2 text-green-600">
-                          <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse" />
-                          <span className="text-sm font-medium">En stock</span>
-                        </div>
-                      )
-                    ) : (
-                      <div className="flex items-center gap-2 text-red-600">
-                        <div className="w-2 h-2 bg-red-600 rounded-full" />
-                        <span className="text-sm font-medium">Agotado</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
-              {/* Tags */}
-              {product.caracteristicas.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {product.caracteristicas.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+
+              <div className="flex items-center gap-2 text-emerald-400">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="text-sm font-medium">En stock</span>
+              </div>
+            </div>
+
+            {/* Tags */}
+            {(product?.caracteristicas || []).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(product?.caracteristicas || []).map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="bg-slate-300 text-slate-800 border-slate-400 hover:bg-slate-400"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Packaging */}
           {(product?.embalaje || 0) > 0 && (
-            <div className="mb-4 space-y-1">
-              <h3 className="font-medium">Embalaje</h3>
-              <Card className="p-3 border-slate-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div>
-                      <div className="font-medium">Costo</div>
-                      <div className="text-sm text-slate-800">
-                        {smartRound(product?.embalaje || 0).toFixed(2)}{" "}
-                        {store.moneda.find(
-                          (m) => m.id == product?.default_moneda
-                        )?.nombre || ""}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-slate-500 rounded-full ">
-                    <Check className="m-2 text-white fill-white size-3.5" />
-                  </div>
+            <Card className="p-4 bg-slate-200/50 border-slate-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-slate-800 mb-1">Embalaje</h3>
+                  <p className="text-sm text-slate-700">
+                    ${product?.embalaje.toFixed(2)} CUP
+                  </p>
                 </div>
-              </Card>
-            </div>
+                <div className="bg-emerald-500 rounded-full p-2">
+                  <Check className="w-4 h-4 text-slate-800" />
+                </div>
+              </div>
+            </Card>
           )}
+
           {/* Extras */}
-          {(product?.agregados?.length || 0 > 0) && product?.stock && (
-            <div className="mb-4  space-y-1">
-              <h3 className="font-medium">Extras</h3>
-              <p className="text-sm text-slate-500 ">
-                Agregados para su encargo
-              </p>
+          {(product?.agregados || []).length > 0 && (
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-medium text-slate-800 mb-1">Extras</h3>
+                <p className="text-sm text-slate-600">
+                  Agregados para su encargo
+                </p>
+              </div>
 
               {product?.agregados.map((extra) => (
-                <Card key={extra.id} className="p-3 mb-2">
+                <Card
+                  key={extra.id}
+                  className="p-4 bg-slate-200/50 border-slate-300"
+                >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium">{extra.name}</div>
-                      <div className="text-sm text-slate-500">
-                        {smartRound(extra?.price || 0).toFixed(2)}{" "}
-                        {store.moneda.find(
-                          (m) => m.id == product.default_moneda
-                        )?.nombre || ""}
+                      <div className="font-medium text-slate-800">
+                        {extra.name}
+                      </div>
+                      <div className="text-sm text-slate-700">
+                        ${extra.price.toFixed(2)} CUP
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-2">
                       {extra.cant > 0 && (
                         <>
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="icon"
                             onClick={() =>
                               setProduct({
                                 ...product,
-                                agregados: product.agregados.map((obj) =>
+                                agregados: product?.agregados.map((obj) =>
                                   obj.id === extra.id
                                     ? { ...obj, cant: obj.cant - 1 }
                                     : obj
                                 ),
                               })
                             }
-                            className={"bg-blue-50 rounded-full p-1 m-1"}
+                            className="h-8 w-8 bg-slate-300 hover:bg-slate-400 border-slate-400 rounded-full"
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-4 w-4 text-slate-800" />
                           </Button>
-                          <Badge variant={"outline"}>{extra.cant}</Badge>
+                          <Badge
+                            variant="outline"
+                            className="bg-slate-300 text-slate-800 border-slate-400 px-3"
+                          >
+                            {extra.cant}
+                          </Badge>
                         </>
                       )}
                       <Button
                         variant="outline"
-                        size="sm"
-                        disabled={
-                          (product.stock || 0) - product.Cant - countAddCart <=
-                          extra.cant
-                        }
+                        size="icon"
                         onClick={() =>
                           setProduct({
                             ...product,
-                            agregados: product.agregados.map((obj) =>
+                            agregados: product?.agregados.map((obj) =>
                               obj.id === extra.id
                                 ? { ...obj, cant: obj.cant + 1 }
                                 : obj
                             ),
                           })
                         }
-                        className={"bg-blue-50 rounded-full p-1 m-1"}
+                        className="h-8 w-8 bg-slate-300 hover:bg-slate-400 border-slate-400 rounded-full"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-4 w-4 text-slate-800" />
                       </Button>
                     </div>
                   </div>
                 </Card>
               ))}
-              <p className="text-xs text-slate-700 text-center w-full">
+              <p className="text-xs text-slate-600 text-center">
                 *El extra es el producto con el agregado incluido
               </p>
             </div>
           )}
-          {product?.venta && store.carrito && (
-            <>
-              <div className="flex flex-col h-full">
-                {/* Cantidad */}
-                <div
-                  className={`animate-in ${swipeComponents.corto} duration-500 delay-900`}
-                >
-                  <div className="flex items-center justify-center gap-6">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={countAddCart === 0 || !product?.stock}
-                      onClick={() => setCountAddCart(countAddCart - 1)}
-                      className="hover:scale-105 transition-transform duration-200"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                    <span className="w-12 text-center font-medium">
-                      {countAddCart}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={
-                        store.stocks &&
-                        (product.stock || 0) -
-                          product.Cant -
-                          product.agregados.reduce(
-                            (sum, agg) => sum + agg.cant,
-                            0
-                          ) <=
-                          countAddCart
-                      }
-                      onClick={() => {
-                        setCountAddCart(countAddCart + 1);
-                        setButtonClick(true);
-                      }}
-                      className="hover:scale-105 transition-transform duration-200"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
+
+          {/* Quantity Selector */}
+          <div className="flex items-center justify-center gap-6 py-4">
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={countAddCart === 0}
+              onClick={() => setCountAddCart(countAddCart - 1)}
+              className="h-10 w-10 bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 rounded-full"
+            >
+              <Minus className="w-5 h-5" />
+            </Button>
+            <span className="text-2xl font-semibold text-slate-800 w-16 text-center">
+              {countAddCart}
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setCountAddCart(countAddCart + 1);
+                setButtonClick(true);
+              }}
+              className="h-10 w-10 bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 rounded-full"
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <Button
+              disabled={
+                (product?.stock || 0) - (product?.Cant || 0) < countAddCart
+              }
+              onClick={() => {
+                handleToCart({
+                  ...product,
+                  Cant: (product?.Cant || 0) + countAddCart || 0,
+                } as ProductInterface);
+              }}
+              className={`w-full h-12 text-base font-medium rounded-3xl transition-all duration-300 ${
+                showSuccess
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "hover:scale-105"
+              } ${isAddingToCart ? "scale-95" : ""}`}
+            >
+              {isAddingToCart ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Agregando...
+                </div>
+              ) : showSuccess ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-green-600 rounded-full" />
                   </div>
+                  ¡Agregado al carrito!
                 </div>
-              </div>
-              {/* Botones de acción */}
-              <div
-                className={`space-y-3 animate-in ${swipeComponents.corto} duration-500 delay-1000`}
-              >
-                <Button
-                  disabled={(product.stock || 0) - product.Cant < countAddCart}
-                  onClick={() => {
-                    handleToCart({
-                      ...product,
-                      Cant: (product?.Cant || 0) + countAddCart || 0,
-                    } as ProductInterface);
-                  }}
-                  className={`w-full h-12 text-base font-medium rounded-3xl transition-all duration-300 ${
-                    showSuccess
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "hover:scale-105"
-                  } ${isAddingToCart ? "scale-95" : ""}`}
-                >
-                  {isAddingToCart ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Agregando...
-                    </div>
-                  ) : showSuccess ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-green-600 rounded-full" />
-                      </div>
-                      ¡Agregado al carrito!
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <ShoppingCart className="w-4 h-4" />
-                      Agregar al carrito - $
-                      {(
-                        ((product?.price || 0) + (product?.embalaje || 0)) *
-                          countAddCart +
-                        (product?.agregados.reduce(
-                          (sum, agg) =>
-                            (sum =
-                              sum +
-                              (agg.price + (product?.embalaje || 0)) *
-                                agg.cant),
-                          0
-                        ) || 0)
-                      ).toFixed(2)}
-                    </div>
-                  )}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="w-full h-12 rounded-3xl hover:scale-105 transition-transform duration-200 bg-transparent"
-                  onClick={() => router.push(`/t/${store.sitioweb}/carrito`)}
-                >
-                  Comprar ahora
-                </Button>
-              </div>
-              {/* Features <div className="space-y-2 pt-4 border-t">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Truck className="w-4 h-4" />
-                  Envío gratis en pedidos mayores a $50
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Shield className="w-4 h-4" />
-                  Garantía de 1 año
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <RotateCcw className="w-4 h-4" />
-                  Devoluciones gratuitas en 30 días
-                </div>
-              </div> */}
-            </>
-          )}
-          {product?.venta ? (
-            <>
-              <Separator />
-
-              {product?.descripcion && (
-                <div
-                  className={`animate-in ${swipeComponents.amplio} duration-500 delay-500`}
-                >
-                  Posteado:{" "}
-                  <RelativeTime datetime={product?.creado || new Date()} />
-                  <ExpandableText text={product?.descripcion || "..."} />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Agregar al carrito - $
+                  {(
+                    ((product?.price || 0 || 0) + (product?.embalaje || 0)) *
+                      countAddCart +
+                    (product?.agregados.reduce(
+                      (sum, agg) =>
+                        (sum =
+                          sum +
+                          (agg.price + (product?.embalaje || 0)) * agg.cant),
+                      0
+                    ) || 0)
+                  ).toFixed(2)}
                 </div>
               )}
-              <Separator />
+            </Button>
 
-              <RatingSection
-                specific={product?.productId || id}
-                sitioweb={store.sitioweb || ""}
-              />
-            </>
-          ) : (
-            <p className="text-base text-slate-700">{product?.descripcion}</p>
-          )}
+            <Button
+              variant="outline"
+              className="w-full h-12 rounded-3xl hover:scale-105 transition-transform duration-200 bg-transparent"
+              onClick={() => router.push(`/t/${store.sitioweb}/carrito`)}
+            >
+              Comprar ahora
+            </Button>
+          </div>
+
+          {/* Description */}
+          <div className="pt-6 border-t border-slate-300">
+            <h3 className="font-semibold text-slate-800 mb-2">Descripción</h3>
+            <p className="text-slate-700 leading-relaxed">
+              <span className="text-slate-600">
+                Posteado: hace más de 1 año
+              </span>
+              <br />
+              {product?.descripcion}
+            </p>
+          </div>
+
+          {/* Ratings Summary */}
+          <div className="pt-6 border-t border-slate-300">
+            <RatingSection
+              specific={product?.productId || id}
+              sitioweb={store.sitioweb || ""}
+            />
+          </div>
         </div>
       </div>
     </main>

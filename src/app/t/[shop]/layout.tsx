@@ -1,5 +1,4 @@
 import React from "react";
-import { CatalogFooter } from "@/components/Catalogos/General/Footer";
 import MyProvider from "@/context/MyContext";
 import { AppState } from "@/context/InitialStatus";
 import { supabase } from "@/lib/supabase";
@@ -49,10 +48,7 @@ export default async function RootLayout({
     <div>
       <MyProvider storeSSD={store}>
         <div className="min-h-[80vh]">{children}</div>
-        <aside className="flex md:hidden">
-          <DrawerCart />
-        </aside>
-        <CatalogFooter />
+        <DrawerCart />
       </MyProvider>
     </div>
   );

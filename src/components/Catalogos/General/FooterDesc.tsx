@@ -42,16 +42,16 @@ export default function Footer() {
   return (
     <div>
       <div className="text-center">
-        <h3 className="text-2xl font-cinzel text-[var(--text-dark)] tracking-wider uppercase">
+        <h3 className="text-2xl font-cinzel text-slate-50 tracking-wider uppercase">
           {store?.name}
         </h3>
-        <p className="text-sm text-[var(--text-muted)] mt-2 line-clamp-5">
+        <p className="text-sm text-slate-400 mt-2 line-clamp-5">
           {store?.parrrafo || "..."}
         </p>
       </div>
       {/*Rutas */}
       <div className="flex flex-col items-start mt-4 space-y-2 ">
-        <div className="text-slate-800 uppercase text font-cinzel">
+        <div className="text-slate-300 uppercase text font-cinzel">
           Otras rutas
         </div>
         {ruta
@@ -60,7 +60,7 @@ export default function Footer() {
             <Link
               href={obj.url}
               key={index}
-              className="flex items-center gap-2 text-slate-700 text-base"
+              className="flex items-center gap-2 text-slate-400 text-base hover:text-slate-100 transition-all duration-500 hover:scale-105"
             >
               <div className="line-clamp-1 text-sm">{obj.name}</div>
             </Link>

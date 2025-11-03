@@ -97,29 +97,29 @@ export default function RatingSection({
             <p className="text-slate-500 mb-2 text-sm">
               {obj.coment?.total == 0
                 ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
-                : "Las calificaciones y opiniones provienen de personas que comparten sus expariencias con otros usuarios."}
+                : "Las calificaciones y opiniones provienen de personas que compraron este producto con otros usuarios."}
             </p>
 
             <div className="grid grid-cols-2 items-center gap-2 mb-2">
               <div className="flex flex-col items-center">
-                <div className="text-6xl font-light text-slate-700">
-                  {(obj?.coment?.promedio).toFixed(1)}
+                <div className="text-6xl font-bold text-slate-800 mb-2">
+                  {product?.coment.promedio}
                 </div>
-                <div className="flex gap-1 my-2">
-                  {[1, 2, 3, 4, 5].map((star) => (
+                <div className="flex items-center justify-center mb-1">
+                  {[...Array(5)].map((_, i) => (
                     <Star
-                      key={star}
-                      className={`w-4 h-4 ${
-                        star <= Number(obj.coment?.promedio)
-                          ? "fill-yellow-600 text-yellow-600"
-                          : "text-yellow-600"
+                      key={i}
+                      className={`w-5 h-5 ${
+                        i < Math.floor(product?.coment.promedio || 0)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-slate-400"
                       }`}
                     />
                   ))}
                 </div>
-                <div className="text-sm text-slate-600">
-                  {obj.coment?.total.toLocaleString()} reseñas
-                </div>
+                <p className="text-sm text-slate-600">
+                  {product?.coment.total} reseñas
+                </p>
               </div>
 
               <StarSpecifications datos={obj.coment.porEstrellas} />
@@ -127,10 +127,10 @@ export default function RatingSection({
             <div>
               <Button asChild variant="ghost">
                 <Link
-                  href={`/t/${store.sitioweb}/producto/${obj.productId}/coment`}
-                  className="w-full flex justify-between text-lg text-slate-700"
+                  href={`/t/${store.sitioweb}/product/${product?.productId}/reviews`}
+                  className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                 >
-                  <h2>Todos los comentarios →</h2>
+                  Todos los comentarios →
                 </Link>
               </Button>
             </div>
@@ -185,7 +185,7 @@ export default function RatingSection({
     </>
   );
 }
-function StarSpecifications({ datos }: { datos: StarDistribution }) {
+export function StarSpecifications({ datos }: { datos: StarDistribution }) {
   const porEstrellas = datos || {
     "5": 0,
     "4": 0,
