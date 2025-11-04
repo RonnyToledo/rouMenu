@@ -100,40 +100,44 @@ export default function RatingSection({
                 : "Las calificaciones y opiniones provienen de personas que compraron este producto con otros usuarios."}
             </p>
 
-            <div className="grid grid-cols-2 items-center gap-2 mb-2">
-              <div className="flex flex-col items-center">
-                <div className="text-6xl font-bold text-slate-800 mb-2">
-                  {product?.coment.promedio}
-                </div>
-                <div className="flex items-center justify-center mb-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product?.coment.promedio || 0)
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-slate-400"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="text-sm text-slate-600">
-                  {product?.coment.total} reseñas
-                </p>
-              </div>
+            {product?.coment.promedio ? (
+              <>
+                <div className="grid grid-cols-2 items-center gap-2 mb-2">
+                  <div className="flex flex-col items-center">
+                    <div className="text-6xl font-bold text-slate-800 mb-2">
+                      {product?.coment.promedio}
+                    </div>
+                    <div className="flex items-center justify-center mb-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-5 h-5 ${
+                            i < Math.floor(product?.coment.promedio || 0)
+                              ? "text-yellow-400 fill-yellow-400"
+                              : "text-slate-400"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm text-slate-600">
+                      {product?.coment.total} reseñas
+                    </p>
+                  </div>
 
-              <StarSpecifications datos={obj.coment.porEstrellas} />
-            </div>
-            <div>
-              <Button asChild variant="ghost">
-                <Link
-                  href={`/t/${store.sitioweb}/product/${product?.productId}/reviews`}
-                  className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                >
-                  Todos los comentarios →
-                </Link>
-              </Button>
-            </div>
+                  <StarSpecifications datos={obj.coment.porEstrellas} />
+                </div>
+                <div>
+                  <Button asChild variant="ghost">
+                    <Link
+                      href={`/t/${store.sitioweb}/product/${product?.productId}/reviews`}
+                      className="text-blue-400 hover:text-blue-300 text-sm font-medium"
+                    >
+                      Todos los comentarios →
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            ) : null}
             <Separator />
             <div className="pt-2">
               <h3 className="text-lg mb-1 text-center text-slate-700 font-medium">
