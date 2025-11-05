@@ -79,7 +79,7 @@ export function CatalogFooter() {
           <Button
             size="lg"
             asChild
-            className="bg-gradient-to-tr from-slate-100 via-slate-400 to-slate-300 hover:from-slate-700 hover:via-slate-800 hover:to-slate-900 text-slate-800 hover:text-slate-100 px-8 transform  transition-all duration-500 shadow-lg "
+            className="bg-gradient-to-r from-slate-400 via-slate-500 to-slate-400 hover:from-slate-700 hover:via-slate-800 hover:to-slate-900 text-slate-800 hover:text-slate-100 px-8 transform  transition-all duration-500 shadow-lg "
           >
             <Link href={"https://rouadmin.vercel.app/createAccount"}>
               <Plus size={16} className="mr-2" />

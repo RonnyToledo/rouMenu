@@ -27,6 +27,7 @@ import {
 import ShareButton from "@/components/myUI/buttonShare";
 import ClipboardProduct from "@/components/myUI/clipboardProduct";
 import { Card } from "@/components/ui/card";
+import { isNewProduct } from "../home/ProductGrid";
 
 export default function Product({ id }: { id: string }) {
   const { store, dispatchStore } = useContext(MyContext);
@@ -149,6 +150,14 @@ export default function Product({ id }: { id: string }) {
       link: `/t/${store.sitioweb}/producto/${product?.productId}`,
     },
   ];
+  const tags = [
+    !product?.stock && "Agotado",
+    product?.favorito && "Top",
+    isNewProduct(product?.creado) && "Nuevo",
+    ...(product?.caracteristicas || []),
+  ]
+    .flat()
+    .filter(Boolean);
 
   return (
     <main className="flex items-start min-h-dvh">
@@ -292,11 +301,11 @@ export default function Product({ id }: { id: string }) {
             </div>
 
             {/* Tags */}
-            {(product?.caracteristicas || []).length > 0 && (
+            {(tags || []).length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {(product?.caracteristicas || []).map((tag) => (
+                {(tags || []).map((tag, index) => (
                   <Badge
-                    key={tag}
+                    key={index}
                     variant="secondary"
                     className="bg-slate-300 text-slate-800 border-slate-400 hover:bg-slate-400"
                   >

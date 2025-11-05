@@ -1,6 +1,5 @@
 "use client";
 import React, { useContext, useMemo, useCallback } from "react";
-import { MdNewReleases } from "react-icons/md";
 import { TbShoppingCartOff, TbShoppingCartPlus } from "react-icons/tb";
 import { smartRound } from "@/functions/precios";
 import { motion } from "framer-motion";
@@ -13,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ButtonOfCart } from "./ButtonOfCart";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface ProductGridInterface {
   product: Product;
@@ -110,7 +110,6 @@ export default React.memo(function ProductGrid({
         title={product.title}
         index={i}
         isInStock={product.stock}
-        isNew={isNew}
         imageClasses={imageClasses}
       />
 
@@ -120,7 +119,11 @@ export default React.memo(function ProductGrid({
         {!store?.edit?.minimalista && (
           <p className={descriptionClasses}>{product.descripcion || "..."}</p>
         )}
-
+        <div className="flex">
+          {isNew && <Badge className="bg-slate-700">Nuevo</Badge>}
+          {product.favorito && <Badge className="bg-slate-700">Top</Badge>}
+          {!product.stock && <Badge className="bg-slate-700">Agotado</Badge>}
+        </div>
         <div className="flex items-center justify-between mt-3">
           {product.venta ? (
             <ProductPrice
@@ -132,7 +135,7 @@ export default React.memo(function ProductGrid({
           )}
 
           <div className="relative h-9 w-full flex justify-end items-center">
-            {showAddToCartButton ? (
+            {showAddToCartButton || product.venta ? (
               <AddToCartButton
                 totalItems={totalCartItems}
                 onNavigate={handleNavigateToProduct}
@@ -157,7 +160,6 @@ interface ProductImageProps {
   title?: string;
   index: number;
   isInStock?: number;
-  isNew: boolean;
   imageClasses: string;
 }
 
@@ -167,7 +169,6 @@ const ProductImage = React.memo(function ProductImage({
   title,
   index,
   isInStock,
-  isNew,
   imageClasses,
 }: ProductImageProps) {
   const imageStyle = useMemo(
@@ -190,12 +191,6 @@ const ProductImage = React.memo(function ProductImage({
           toast.error(`Error al cargar la imagen del producto ${title} `);
         }}
       />
-
-      {isNew && (
-        <div className="absolute top-2 left-2 backdrop-blur-3xl rounded-full">
-          <MdNewReleases className="fill-red-600 shadow-md h-4 w-4" />
-        </div>
-      )}
     </Link>
   );
 });
@@ -266,7 +261,7 @@ const CartActionButton = React.memo(function CartActionButton({
 });
 
 // Función auxiliar
-function isNewProduct(date?: string): boolean {
+export function isNewProduct(date?: string): boolean {
   if (!date) return false;
   const createdAt = new Date(date);
   const diffMs = Date.now() - createdAt.getTime();
