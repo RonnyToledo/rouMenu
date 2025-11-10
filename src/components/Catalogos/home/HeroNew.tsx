@@ -22,8 +22,6 @@ export default function HeroNew({}) {
 
   const shopName = params.shop as string;
 
-console.log(store)
-
   useEffect(() => {
     // Verificar si debe mostrar el login
     const shouldShowLogin = searchParams.get("showLogin") === "true";

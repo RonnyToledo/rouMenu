@@ -30,7 +30,7 @@ export function CatalogFooter() {
             { tipo: "mail", url: store?.email },
             ...store?.contacto,
           ].length > 0 && (
-            <div className="flex flex-col items-start mt-4 space-y-2 ">
+            <div className="flex flex-col items-start mt-4 space-y-2  w-12/12">
               <div className="text-slate-100 uppercase text font-cinzel">
                 Contacto
               </div>
@@ -42,7 +42,7 @@ export function CatalogFooter() {
                 <Link
                   href={UrlContact(obj.url || "", obj.tipo)}
                   key={index}
-                  className="flex items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
+                  className="line-clamp-1 w-full flex items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
                 >
                   <IconSelect iconName={obj.tipo} />
                   <div className="line-clamp-1 text-sm">
@@ -55,7 +55,7 @@ export function CatalogFooter() {
 
           {/*Redes Sociales */}
           {store?.redes.length > 0 && (
-            <div className="flex flex-col items-start mt-4 space-y-2 ">
+            <div className="flex flex-col items-start mt-4 space-y-2  w-12/12">
               <div className="text-slate-100 uppercase text font-cinzel">
                 Redes Sociales
               </div>
@@ -63,10 +63,10 @@ export function CatalogFooter() {
                 <Link
                   href={obj.url}
                   key={index}
-                  className="flex items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
+                  className="flex truncate items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
                 >
                   <IconSelect iconName={obj.tipo} />
-                  <div className="line-clamp-1 text-sm">
+                  <div className="truncate text-sm">
                     {SelectUser(obj.tipo, obj.user)}
                   </div>
                 </Link>
@@ -147,7 +147,11 @@ export function IconSelect({
 
 function UrlContact(tipo: string, url: string): string {
   if (tipo == "wa") {
-    return `https://wa.me/${url}/`;
+    if (url.includes("http")) {
+      return url;
+    } else {
+      return `https://wa.me/${url}/`;
+    }
   }
   if (tipo == "cell") {
     return `tel:+${url}/`;
@@ -160,7 +164,11 @@ function UrlContact(tipo: string, url: string): string {
 }
 function userContact(tipo: string, url: string): string {
   if (tipo == "wa" || tipo == "cell") {
-    return `+${url}`;
+    if (url.includes("http")) {
+      return url;
+    } else {
+      return `+${url}`;
+    }
   }
   if (tipo == "mail") {
     return url;

@@ -90,7 +90,7 @@ export default function CommentsPage() {
         }
 
         const { data, count, error } = await query;
-        console.log("Datos de comentarios obtenidos:", data);
+
         if (error) throw error;
         if (data) {
           setReviews(ReordenateData(data, store));

@@ -37,7 +37,6 @@ export default async function Pagea({ params }: PageProps) {
     );
   }
   const { posts, error } = await BlogService.getPostsBySite(uuid.UUID);
-  console.log(posts);
   if (error) {
     // Podrías retornar un componente de error personalizado
     return (

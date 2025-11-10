@@ -275,7 +275,9 @@ export default function Product({ id }: { id: string }) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <p className="text-3xl font-bold text-slate-800">
-                  ${product?.price || 0} CUP
+                  ${product?.price || 0}{" "}
+                  {store.moneda.find((m) => m.id === product?.default_moneda)
+                    ?.nombre || ""}
                 </p>
                 {(product?.oldPrice || 0) > (product?.price || 0) && (
                   <>
@@ -323,7 +325,9 @@ export default function Product({ id }: { id: string }) {
                 <div>
                   <h3 className="font-medium text-slate-800 mb-1">Embalaje</h3>
                   <p className="text-sm text-slate-700">
-                    ${product?.embalaje.toFixed(2)} CUP
+                    ${product?.embalaje.toFixed(2)}{" "}
+                    {store.moneda.find((m) => m.id === product?.default_moneda)
+                      ?.nombre || ""}
                   </p>
                 </div>
                 <div className="bg-emerald-500 rounded-full p-2">
@@ -354,7 +358,10 @@ export default function Product({ id }: { id: string }) {
                         {extra.name}
                       </div>
                       <div className="text-sm text-slate-700">
-                        ${extra.price.toFixed(2)} CUP
+                        ${extra.price.toFixed(2)}{" "}
+                        {store.moneda.find(
+                          (m) => m.id === product?.default_moneda
+                        )?.nombre || ""}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
