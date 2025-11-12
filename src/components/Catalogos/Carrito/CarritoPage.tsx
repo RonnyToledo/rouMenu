@@ -66,6 +66,7 @@ export default function CarritoPage() {
 
   const newUID = uuidv4();
   const [currentStep, setCurrentStep] = useState(1);
+  const [iDCompra, setIDCompra] = useState<number>(1);
   const { store, dispatchStore } = useContext(MyContext);
   const [count, setCount] = useState<number>(3);
   const [downloading, setDownloading] = useState(false);
@@ -279,13 +280,13 @@ export default function CarritoPage() {
             phonenumber: compra.phonenumber,
             user_id: user?.id || "",
           });
-          console.log(data);
+          setIDCompra(data.event_id);
           // Pausa para calificar la tienda (lógica después de subir)
           const saved = window.localStorage.getItem(
             `${store.sitioweb}-userRating`
           );
           if (saved !== null) {
-            await sendToWhatsapp();
+            await sendToWhatsapp(data.event_id);
             if (store.compraUUID) router.push("/user");
           } else {
             setShowRatingModal(true);
@@ -310,16 +311,16 @@ export default function CarritoPage() {
       });
     }
   };
-
-  const sendToWhatsapp = async () => {
+  const sendToWhatsapp = async (id: number) => {
     // Abrir WhatsApp
 
     let mensaje = `Hola, Quiero modificar este pedido:\n- Metodo de envio: ${
       compra.lugar
-    }\n`;
-    mensaje += `- ID de Venta: ${newUID}\n`;
+    }\nA nombre de:${compra.people}\n`;
+
+    mensaje += `- ID de Venta: ${id}\n`;
     if (compra.direccion) mensaje += `- Direccion: ${compra.direccion}\n`;
-    if (compra.descripcion) mensaje += `- Adicional: ${compra.descripcion}\n`;
+    if (compra.descripcion) mensaje += `- Aclaración: ${compra.descripcion}\n`;
 
     mensaje += `\n- Productos:\n`;
     compra.pedido.forEach((producto, index) => {
@@ -451,7 +452,7 @@ export default function CarritoPage() {
           reviewOpen={showRatingModal}
           onClose={() => {
             setShowRatingModal(false);
-            sendToWhatsapp();
+            sendToWhatsapp(iDCompra);
           }}
         />
       </div>
