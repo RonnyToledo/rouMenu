@@ -83,7 +83,33 @@ export default function CarritoPage() {
         `/t/${shopName}?showLogin=true&message=Debes iniciar sesión para ver el carrito`
       );
     }
-  }, [user, loading, shopName, router]);
+    const valueAux = store.products.reduce(
+      (total, item) =>
+        total +
+        ((item.price || 0) + item.embalaje) * item.Cant +
+        (item?.agregados.reduce(
+          (sum, agg) => (sum = sum + (agg.price + item.embalaje)) * agg.cant,
+          0
+        ) || 0),
+      0
+    );
+    if (valueAux < store.limite) {
+      toast.info(
+        `Esta tienda tiene un minimo de compra de ${store.limite} ${store.moneda.find((m) => m.defecto)?.nombre || ""}`
+      );
+      router.push(
+        `/t/${shopName}?showLogin=true&message=Debes iniciar sesión para ver el carrito`
+      );
+    }
+  }, [
+    user,
+    loading,
+    shopName,
+    router,
+    store.limite,
+    store.products,
+    store.moneda,
+  ]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -242,7 +268,7 @@ export default function CarritoPage() {
       const uploadFlow = async () => {
         setDownloading(true);
         try {
-          await UploadPedido({
+          const data = await UploadPedido({
             UUID_Shop: store.UUID,
             events: "compra",
             descripcion: compra.descripcion,
@@ -253,7 +279,7 @@ export default function CarritoPage() {
             phonenumber: compra.phonenumber,
             user_id: user?.id || "",
           });
-
+          console.log(data);
           // Pausa para calificar la tienda (lógica después de subir)
           const saved = window.localStorage.getItem(
             `${store.sitioweb}-userRating`
@@ -293,7 +319,7 @@ export default function CarritoPage() {
     }\n`;
     mensaje += `- ID de Venta: ${newUID}\n`;
     if (compra.direccion) mensaje += `- Direccion: ${compra.direccion}\n`;
-    if (compra.descripcion) mensaje += `- Extra: ${compra.descripcion}\n`;
+    if (compra.descripcion) mensaje += `- Adicional: ${compra.descripcion}\n`;
 
     mensaje += `\n- Productos:\n`;
     compra.pedido.forEach((producto, index) => {
@@ -302,7 +328,7 @@ export default function CarritoPage() {
           producto.Cant * producto.price
         ).toFixed(
           2
-        )} - ${producto.embalaje > 0 && `Embalaje:${producto.embalaje}`}\n`;
+        )} - ${producto.embalaje > 0 ? `Embalaje:${producto.embalaje}` : ""}\n`;
       }
       producto.agregados
         .filter((o) => o.cant > 0)
@@ -311,7 +337,7 @@ export default function CarritoPage() {
             obj.cant * obj.price
           ).toFixed(
             2
-          )} - ${producto.embalaje > 0 && `Embalaje:${producto.embalaje}`}\n`;
+          )} - ${producto.embalaje > 0 ? `Embalaje:${producto.embalaje}` : ""}\n`;
         });
     });
     const discountTotal =

@@ -164,7 +164,7 @@ export default function AboutPage() {
             ) : null}
 
             {/* Website */}
-            {false && (
+            {false ? (
               <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <Globe className="w-5 h-5 text-slate-700 mt-0.5" />
@@ -179,10 +179,10 @@ export default function AboutPage() {
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Category */}
-            {store.tipo && (
+            {store.tipo ? (
               <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <Tag className="w-5 h-5 text-slate-700 mt-0.5" />
@@ -192,7 +192,7 @@ export default function AboutPage() {
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
           </section>
 
           {/* Rating Section */}

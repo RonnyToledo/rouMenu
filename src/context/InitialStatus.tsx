@@ -157,6 +157,7 @@ export interface AppState {
   compraUUID?: string;
   login: boolean;
   marketing: boolean;
+  limite: number;
   moneda: Current[];
   municipio?: string;
   name?: string; // Nombre de la tienda
@@ -200,6 +201,7 @@ export const initialState: AppState = {
   reservas: false,
   Editor: "",
   cell: 0,
+  limite: 0,
   horario: [
     {
       dia: "Domingo",

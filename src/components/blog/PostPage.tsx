@@ -62,19 +62,18 @@ export default function PostPage({ post }: PostPageProps) {
     <div className="min-h-screen bg-background">
       <article className="container mx-auto px-4 py-2">
         {/* Featured Image */}
-        {post.image && (
-          <div className="max-w-3xl mx-auto mb-8">
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-muted">
-              <Image
-                src={post.image}
-                alt={post.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
+
+        <div className="max-w-3xl mx-auto mb-8">
+          <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-muted">
+            <Image
+              src={post.image || logoApp}
+              alt={post.title || ""}
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
-        )}
+        </div>
 
         <header className="max-w-3xl mx-auto mb-8 text-center">
           <Badge variant="secondary" className="mb-4">
@@ -105,13 +104,13 @@ export default function PostPage({ post }: PostPageProps) {
           </div>
         </header>
 
-        {post.abstract && (
+        {post.abstract ? (
           <div className="max-w-3xl mx-auto mb-8">
             <p className="text-lg text-muted-foreground leading-relaxed line-clamp-[10]">
               {post.abstract}
             </p>
           </div>
-        )}
+        ) : null}
 
         <div className="max-w-3xl mx-auto">
           <TableOfContents headings={headings} />

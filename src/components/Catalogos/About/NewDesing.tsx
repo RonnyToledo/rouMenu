@@ -33,14 +33,14 @@ export default function AboutMePage() {
                 />
               </div>
               <div className=" p-8 space-y-2">
-                {store.history && (
+                {store.history ? (
                   <>
                     <h2 className="font-heading text-2xl font-bold text-card-foreground ">
                       Sobre Mí
                     </h2>
                     <ExpandableText text={store.history || "..."} lines={6} />
                   </>
-                )}
+                ) : null}
 
                 <div className="grid grid-cols-1  gap-4 text-sm">
                   <div className="flex items-center gap-2">

@@ -43,7 +43,7 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
           className={`h-5 w-5 transition-transform ${isOpen ? "rotate-180" : ""}`}
         />
       </Button>
-      {isOpen && (
+      {isOpen ? (
         <div className="px-4 pb-4">
           <ul className="space-y-2">
             {headings.map((heading) => (
@@ -62,7 +62,7 @@ export function TableOfContents({ headings }: TableOfContentsProps) {
             ))}
           </ul>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

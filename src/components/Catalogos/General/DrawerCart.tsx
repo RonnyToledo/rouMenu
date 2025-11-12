@@ -25,6 +25,7 @@ import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { Trash2 } from "lucide-react";
 import { getTotalFinal } from "@/functions/getTotalPedido";
+import { toast } from "sonner";
 
 export default function DrawerCart() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -94,14 +95,17 @@ export default function DrawerCart() {
     setOpenDrawer(false);
   }
   const GoToCart = async () => {
-    setIsAddingToCart(true);
-    await new Promise((resolve) => setTimeout(resolve, 1700));
-    setIsAddingToCart(false);
-    setShowSuccess(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setShowSuccess(false);
-    router.push(`/t/${store.sitioweb}/carrito`);
-    setOpenDrawer(false);
+    if (contentCart >= store.limite) {
+      setIsAddingToCart(true);
+      await new Promise((resolve) => setTimeout(resolve, 1700));
+      setIsAddingToCart(false);
+      setShowSuccess(true);
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      setShowSuccess(false);
+      router.push(`/t/${store.sitioweb}/carrito`);
+      setOpenDrawer(false);
+    } else
+      toast.info(`Esta tienda tiene un minimo de compra de ${store.limite}`);
   };
 
   return (

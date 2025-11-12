@@ -4,7 +4,6 @@ import React, {
   createContext,
   useReducer,
   ReactNode,
-  useState,
   Dispatch,
   useMemo,
   useEffect,
@@ -53,21 +52,18 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const pathname = usePathname();
   const afiliate = searchParams.get("afiliate");
 
-  const [afiliateNew, setafiliateNew] = useState("false");
+  let afiliateNew;
   //Verificar, salvar o buscar afiliado
-  useEffect(() => {
-    if (afiliate) {
-      setafiliateNew(
-        verifyAndSavedAfiliate(
-          storeSSD.sitioweb || "",
-          storeSSD.codeDiscount,
-          afiliate
-        )
-      );
-    } else {
-      setafiliateNew(getAfiliate(storeSSD.sitioweb || ""));
-    }
-  }, [afiliate, storeSSD.codeDiscount, storeSSD.sitioweb]);
+
+  if (afiliate) {
+    afiliateNew = verifyAndSavedAfiliate(
+      storeSSD.sitioweb || "",
+      storeSSD.codeDiscount,
+      afiliate
+    );
+  } else {
+    afiliateNew = getAfiliate(storeSSD.sitioweb || "");
+  }
 
   // Nota: ya NO cargamos el carrito desde localStorage aquí.
   // Inicializamos el reducer con los productos del servidor (storeSSD)

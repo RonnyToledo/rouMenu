@@ -507,10 +507,10 @@ export default function Product({ id }: { id: string }) {
           {/* Description */}
           <div className="pt-6 border-t border-slate-300">
             <h3 className="font-semibold text-slate-800 mb-2">Descripción</h3>
-            <p className="text-slate-700 leading-relaxed">
-              <span className="text-slate-600">
+            <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+              {/* <span className="text-slate-600">
                 Posteado: hace más de 1 año
-              </span>
+              </span> */}
               <br />
               {product?.descripcion}
             </p>

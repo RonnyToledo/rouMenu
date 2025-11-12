@@ -199,7 +199,7 @@ export default function CommentsPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalPages > 1 ? (
           <div className="flex items-center justify-between p-4 bg-card rounded-lg border shadow-sm">
             <Button
               onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
@@ -227,7 +227,7 @@ export default function CommentsPage() {
               <ChevronRight className="size-4" />
             </Button>
           </div>
-        )}
+        ) : null}
       </div>
       <MultiStepLoader
         loadingStates={loadingStates}

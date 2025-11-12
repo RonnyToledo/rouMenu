@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { formatTopic } from "@/utils/formatTip";
 import { Post } from "@/types/blog";
 import { usePathname } from "next/navigation";
+import { logoApp } from "@/lib/image";
 
 interface BlogPageProps {
   posts: Post[];
@@ -69,16 +70,15 @@ export default function BlogPage({ posts, global = false }: BlogPageProps) {
               key={post.id}
               className="flex flex-col overflow-hidden hover:shadow-lg transition-shadow"
             >
-              {post.image && (
-                <div className="relative h-48 w-full overflow-hidden bg-muted">
-                  <Image
-                    src={post.image}
-                    alt={post.title}
-                    fill
-                    className="object-cover transition-transform hover:scale-105"
-                  />
-                </div>
-              )}
+              <div className="relative h-48 w-full overflow-hidden bg-muted">
+                <Image
+                  src={post.image || logoApp}
+                  alt={post.title || ""}
+                  fill
+                  className="object-cover transition-transform hover:scale-105"
+                />
+              </div>
+
               <CardHeader>
                 <CardTitle className="text-xl text-balance">
                   <Link href={`/blog/${post.slug}`} className="hover:underline">
