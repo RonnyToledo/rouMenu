@@ -46,8 +46,8 @@ export default function MenuBar({
   }, [isMenuOpen, isMounted]);
 
   const stylesFromScreens = [
-    `translate-x-[240px] sm:translate-x-[300px] md:translate-x-[400px] lg:translate-x-[600px] scale-85`,
-    `translate-x-[190px] sm:translate-x-[250px] md:translate-x-[250px] lg:translate-x-[400px] scale-75`,
+    `translate-x-[240px]  scale-85`,
+    `translate-x-[190px]  scale-75`,
   ];
 
   // Handler para navegación
@@ -111,9 +111,7 @@ export default function MenuBar({
       {/* Pantalla principal - renderizado consistente */}
       <div
         className={`fixed inset-0 bg-white min-h-dvh transition-all duration-500 ease-out ${
-          isMounted && isMenuOpen
-            ? "translate-x-[300px] sm:translate-x-[400px] md:translate-x-[600px] lg:translate-x-[900px]"
-            : "translate-x-0"
+          isMounted && isMenuOpen ? "translate-x-[300px] " : "translate-x-0"
         }`}
         style={{
           zIndex: 30,

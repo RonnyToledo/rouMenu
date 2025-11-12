@@ -49,10 +49,10 @@ export default function BlogPage({ posts, global = false }: BlogPageProps) {
         <section className="border-b bg-muted/30">
           <div className="container mx-auto p-4">
             <div className="max-w-3xl">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance mb-6">
+              <h1 className="text-4xlfont-bold tracking-tight text-balance mb-6">
                 Blog de {siteName}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+              <p className="text-lg  text-muted-foreground leading-relaxed">
                 Explora tutoriales, guías y las últimas tendencias {topicPhrase}
                 .
               </p>
@@ -62,8 +62,8 @@ export default function BlogPage({ posts, global = false }: BlogPageProps) {
       ) : null}
 
       {/* Posts Grid */}
-      <section className="container mx-auto p-4 md:py-16">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <section className="container mx-auto p-4 ">
+        <div className="grid gap-8 ">
           {posts.map((post) => (
             <Card
               key={post.id}

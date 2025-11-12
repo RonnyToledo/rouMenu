@@ -135,7 +135,7 @@ export default React.memo(function ProductGrid({
           )}
 
           <div className="relative h-9 w-full flex justify-end items-center">
-            {showAddToCartButton || product.venta ? (
+            {showAddToCartButton ? (
               <AddToCartButton
                 totalItems={totalCartItems}
                 onNavigate={handleNavigateToProduct}

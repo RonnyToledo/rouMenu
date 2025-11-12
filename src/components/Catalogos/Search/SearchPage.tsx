@@ -125,35 +125,35 @@ export default function SearchPage() {
   };
 
   return (
-    <main className="p-4">
-      <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-8">
-        {/* Search Bar */}
-        <div className="mb-6 lg:mb-8">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600" />
-            <Input
-              ref={inputRef}
-              placeholder="Buscar productos..."
-              autoFocus
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => {
-                // delay para permitir click en sugerencia (porque usamos onMouseDown allí)
-                setTimeout(() => setFocused(false), 150);
-              }}
-              onKeyDown={handleKeyDown}
-              className="w-full bg-slate-200/50 border border-slate-300 rounded-xl pl-12 pr-4 py-3 lg:py-4 text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:border-transparent transition-all"
-            />
-          </div>
-        </div>
+    <main className="">
+      {/* Search Bar */}
 
+      <header className="sticky top-0 z-50  bg-gradient-to-br from-slate-50 to-slate-100 h-16 p-2 w-full  shadow-md mb-6">
+        <div className="relative flex items-center justify-between border rounded-full h-full bg-white overflow-hidden">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600" />
+          <Input
+            ref={inputRef}
+            placeholder="Buscar productos..."
+            autoFocus
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => {
+              // delay para permitir click en sugerencia (porque usamos onMouseDown allí)
+              setTimeout(() => setFocused(false), 150);
+            }}
+            onKeyDown={handleKeyDown}
+            className="w-full h-full border-none rounded-xl pl-12 pr-4 py-3 text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-0 focus:ring-slate-400 focus:border-transparent transition-all"
+          />
+        </div>
+      </header>
+      <div className="container mx-auto px-4">
         {/* Desktop Sidebar + Products Grid */}
-        <div className="flex gap-6 lg:gap-8">
+        <div className="flex gap-6 ">
           {/* Filters Sidebar (Desktop) */}
           {false ? (
-            <aside className="hidden lg:block w-64 flex-shrink-0">
+            <aside className="hidden w-64 flex-shrink-0">
               <div className="sticky top-24 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
                 <h3 className="text-white font-semibold mb-4">Filtros</h3>
                 <div className="space-y-4">
@@ -219,20 +219,20 @@ export default function SearchPage() {
 
           {/* Products List */}
           <div className="flex-1">
-            <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mb-4 lg:mb-6">
+            <h2 className="text-xl  font-bold text-slate-900 mb-4 ">
               Encuentra tus productos
             </h2>
 
-            <div className="space-y-3 lg:space-y-4">
+            <div className="space-y-1 ">
               {ListSearch.map((product) => (
                 <Link
                   key={product.id}
                   href={`/t/${store.sitioweb}/producto/${product.productId}`}
-                  className="block bg-slate-200/50 backdrop-blur-sm border border-slate-300 rounded-xl p-3 lg:p-4 hover:bg-slate-200/70 hover:border-slate-400 transition-all group"
+                  className="block rounded-xl p-3   transition-all group"
                 >
-                  <div className="flex gap-3 lg:gap-4">
+                  <div className="flex gap-3 ">
                     {/* Product Image */}
-                    <div className="w-20 h-20 lg:w-24 lg:h-24 flex-shrink-0 bg-slate-300 rounded-lg overflow-hidden">
+                    <div className="w-20 h-20 flex-shrink-0 bg-slate-300 rounded-lg overflow-hidden">
                       <Image
                         width={100}
                         height={100}
@@ -244,14 +244,14 @@ export default function SearchPage() {
 
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-salte-900 font-semibold text-base lg:text-lg mb-1 group-hover:text-slate-800 transition-colors">
+                      <h3 className="text-salte-900 font-semibold text-base mb-1 group-hover:text-slate-800 transition-colors">
                         {product.title}
                       </h3>
-                      <p className="text-slate-600 text-xs lg:text-sm mb-2 line-clamp-1">
+                      <p className="text-slate-600 text-xs mb-2 line-clamp-1">
                         {product.descripcion || "..."}
                       </p>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-slate-700 font-bold text-base lg:text-lg">
+                        <span className="text-slate-700 font-bold text-base">
                           ${smartRound(product.price || 0)}{" "}
                           {store.moneda.find(
                             (m) => m.id == product.default_moneda
@@ -275,14 +275,14 @@ export default function SearchPage() {
             </div>
 
             {ListSearch.length === 0 && (
-              <div className="text-center py-12 lg:py-16">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 lg:w-10 lg:h-10 text-slate-400" />
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-slate-400" />
                 </div>
-                <h3 className="text-slate-800 font-semibold text-lg lg:text-xl mb-2">
+                <h3 className="text-slate-800 font-semibold text-lg mb-2">
                   No se encontraron productos
                 </h3>
-                <p className="text-slate-600 text-sm lg:text-base">
+                <p className="text-slate-600 text-sm">
                   Intenta con otros términos de búsqueda
                 </p>
               </div>

@@ -51,15 +51,15 @@ export default function HeroNew({}) {
             alt={store?.name || "Store"}
             width={400}
             height={500}
-            className="w-full aspect-square md:aspect-video lg:aspect-[30/10] object-cover"
+            className="w-full aspect-square  object-cover"
           />
         </div>
       </div>
-      <div className="container mx-auto px-4 lg:px-8 -mt-12 relative z-10">
-        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4 lg:p-6 mb-6">
+      <div className="container mx-auto px-4  -mt-12 relative z-10">
+        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4 mb-6">
           <div className="flex flex-col  gap-4">
             <div className="flex-1">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col">
                 <Link
                   href={`/t/${store.sitioweb}/about/ratings`}
                   className="flex items-start gap-3 mb-3"
@@ -86,7 +86,7 @@ export default function HeroNew({}) {
                 </Link>
               </div>
 
-              <p className="text-slate-700 text-sm lg:text-base mb-4 line-clamp-2">
+              <p className="text-slate-700 text-sm mb-4 line-clamp-2">
                 {store?.parrrafo || "Store?..."}
               </p>
             </div>

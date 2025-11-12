@@ -12,7 +12,7 @@ import React, {
 import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
 import { AppState, CodeDiscount, initialState, Product } from "./InitialStatus";
 import SitioRealtime from "@/components/Catalogos/General/RealTime";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Header from "@/components/Catalogos/General/Header";
-import MenuBar from "@/components/Catalogos/General/MenuBar";
 
 interface ContextType {
   store: AppState;
@@ -51,8 +50,9 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   //Buscar afiliado
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const afiliate = searchParams.get("afiliate");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const [afiliateNew, setafiliateNew] = useState("false");
   //Verificar, salvar o buscar afiliado
   useEffect(() => {
@@ -102,48 +102,46 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
   return (
     <MyContext.Provider value={contextValue}>
-      <MenuBar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen}>
-        <Header onOpen={() => setIsMenuOpen(true)} />
-        <SitioRealtime uuid={store.UUID || ""} />
-        {children}
-        {store.compraUUID ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="icon"
-                className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
+      {!pathname.includes("/search") ? <Header /> : null}
+      <SitioRealtime uuid={store.UUID || ""} />
+      {children}
+      {store.compraUUID ? (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              size="icon"
+              className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
+            >
+              <Pencil />
+              <span className="sr-only">Edicion</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta seguro que desea salir de la edicion de compras?. Los
+                cambios efectuados se perderan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  dispatchStore({
+                    type: "SetPurchaseUuid",
+                    payload: "",
+                  });
+                  dispatchStore({ type: "Clean" });
+                  router.push("/user");
+                }}
               >
-                <Pencil />
-                <span className="sr-only">Edicion</span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta seguro que desea salir de la edicion de compras?. Los
-                  cambios efectuados se perderan.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    dispatchStore({
-                      type: "SetPurchaseUuid",
-                      payload: "",
-                    });
-                    dispatchStore({ type: "Clean" });
-                    router.push("/user");
-                  }}
-                >
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        ) : null}
-      </MenuBar>
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : null}
     </MyContext.Provider>
   );
 }

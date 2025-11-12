@@ -126,7 +126,7 @@ export default function ComparePage() {
       <div className="min-h-screen bg-slate-50 p-6">
         <div className="max-w-5xl mx-auto animate-pulse space-y-4">
           <div className="h-8 bg-slate-200 rounded w-64"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1  gap-6">
             <div className="bg-white rounded-lg h-80" />
             <div className="bg-white rounded-lg h-80" />
           </div>

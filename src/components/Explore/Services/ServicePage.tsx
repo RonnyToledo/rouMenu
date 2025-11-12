@@ -260,7 +260,7 @@ export default function ServiciosPage() {
                     <p className="text-muted-foreground">{step.description}</p>
                   </CardContent>
                   {index < process.length - 1 && (
-                    <div className="hidden lg:block absolute right-4 top-1/2 transform -translate-y-1/2">
+                    <div className="hidden absolute right-4 top-1/2 transform -translate-y-1/2">
                       <ArrowRight className="h-6 w-6 text-green-900/30" />
                     </div>
                   )}

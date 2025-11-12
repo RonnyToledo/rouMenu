@@ -180,9 +180,7 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   const gridClass = useMemo(
     () =>
       `grid grid-flow-row-dense gap-2 p-2 ${
-        store?.edit?.grid
-          ? "grid-cols-2 md:grid-cols-4"
-          : "grid-cols-1  md:grid-cols-4"
+        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1 "
       }`,
     [store?.edit?.grid]
   );
@@ -190,12 +188,12 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   return (
     <motion.div className="mb-12">
       <motion.div
-        className="p-1 sticky top-12 bg-white/85 z-10"
+        className="p-1 sticky top-16 bg-gradient-to-r from-slate-50/80 via-slate-100 to-slate-50/80 z-10"
         variants={headerVariants}
         id={categoria.id}
       >
         <Link
-          className="text-sm uppercase font-cinzel text-center text-[var(--text-gold)] tracking-widest pb-2 line-clamp-1"
+          className="text-sm uppercase font-cinzel text-center text-slate-800 tracking-widest pb-2 line-clamp-1"
           href={`/t/${store?.sitioweb}/category/${categoria.id}`}
         >
           {categoria.name}

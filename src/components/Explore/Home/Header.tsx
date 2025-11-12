@@ -105,7 +105,7 @@ export default function Header({ children }: { children: ReactNode }) {
             pathname.includes("/info") ? (
               <Drawer>
                 <DrawerTrigger asChild>
-                  <Button variant="ghost" className="p-0 m-0 md:hidden">
+                  <Button variant="ghost" className="p-0 m-0">
                     <HiMiniBars3BottomRight className="size-6 text-slate-700 " />
                   </Button>
                 </DrawerTrigger>

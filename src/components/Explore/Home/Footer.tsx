@@ -23,7 +23,7 @@ export function ExplorationFooter() {
           </Button>
         </div>
         <Separator className="my-4 " />
-        <div className="grid grid-cols-1  gap-8 mb-8  md:hidden">
+        <div className="grid grid-cols-1 gap-8 mb-8">
           <div className="space-y-6">
             <div>
               <h3 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2 uppercase">
@@ -69,7 +69,7 @@ export function ExplorationFooter() {
 
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-slate-200">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col justify-between items-center gap-4">
             <p className="text-slate-600 text-sm">
               © {now.getFullYear()} RouDev - Todos los derechos reservados.
             </p>

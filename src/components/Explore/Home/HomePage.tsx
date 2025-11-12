@@ -95,9 +95,9 @@ export default function HomePage() {
         <ArcGalleryHero images={images} />
       </main>
 
-      <main id="main-general" className="grid gap-6 md:grid-cols-4">
+      <main id="main-general" className="grid gap-6">
         {/* Renderizamos la lista intercalada */}
-        <div className="hidden grid-cols-1  gap-8 mb-8  md:grid md:sticky top-20 p-2 h-fit">
+        <div className="hidden grid-cols-1  gap-8 mb-8 top-20 p-2 h-fit">
           <div className="space-y-6">
             <div>
               <h3 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2 uppercase">
@@ -139,10 +139,8 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-6 space-y-4 md:col-span-2">
-          {interleaved}
-        </div>
-        <div className="hidden md:grid h-fit sticky top-20">
+        <div className="grid grid-cols-1 gap-6 space-y-4">{interleaved}</div>
+        <div className="hidden h-fit sticky top-20">
           {cardsinfo
             .filter((obj) => obj.path !== "/info")
             .map((card, index) => (

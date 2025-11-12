@@ -60,7 +60,7 @@ export default function PostPage({ post }: PostPageProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <article className="container mx-auto px-4 py-2 md:py-12">
+      <article className="container mx-auto px-4 py-2">
         {/* Featured Image */}
         {post.image && (
           <div className="max-w-3xl mx-auto mb-8">
@@ -80,7 +80,7 @@ export default function PostPage({ post }: PostPageProps) {
           <Badge variant="secondary" className="mb-4">
             Artículo
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-balance mb-6">
+          <h1 className="text-4xl  font-bold tracking-tight text-balance mb-6">
             {post.title}
           </h1>
 

@@ -128,7 +128,7 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
           className="text-center max-w-2xl px-6 animate-fade-in"
           style={{ animationDelay: "800ms", animationFillMode: "forwards" }}
         >
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
             Bienvenidos a RouMenu
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">

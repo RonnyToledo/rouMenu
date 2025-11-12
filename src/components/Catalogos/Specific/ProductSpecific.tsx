@@ -161,7 +161,7 @@ export default function Product({ id }: { id: string }) {
 
   return (
     <main className="flex items-start min-h-dvh">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 md:p-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 gap-6 p-4">
         {/* Left Column - Images */}
         <div className="flex flex-col gap-2">
           {/* Breadcrumb */}
@@ -227,7 +227,7 @@ export default function Product({ id }: { id: string }) {
           {/* Title and Actions */}
           <div className="sapce-y-2">
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
+              <h1 className="text-3xl font-bold text-slate-800 leading-tight">
                 {product?.title}
               </h1>
 

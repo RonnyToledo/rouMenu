@@ -37,7 +37,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex-1 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full">
+      <div className="flex-1 mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full">
         <ProfileHeader />
 
         <div className="">

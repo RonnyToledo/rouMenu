@@ -41,10 +41,10 @@ export default function AllCategoryShowcase() {
               />
               <div>
                 <div className="flex flex-col justify-between items-start text-center p-3">
-                  <h1 className="text-base md:text-lg text-start font-bold mb-1 md:mb-2 line-clamp-2">
+                  <h1 className="text-base text-start font-bold mb-1 line-clamp-2">
                     {obj?.name}
                   </h1>
-                  <p className="text-sm md:text-base text-muted-foreground line-clamp-1">
+                  <p className="text-sm text-muted-foreground line-clamp-1">
                     {
                       store.products.filter((prod) => prod.caja === obj.id)
                         .length

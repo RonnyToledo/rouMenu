@@ -384,7 +384,7 @@ export default function EditOrderPage() {
           </div>
 
           <Card className="p-6 bg-muted/30">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 gap-4 text-sm">
               <div>
                 <p className="text-muted-foreground mb-1">Pedido</p>
                 <p className="font-medium">#{event.event_id}</p>
