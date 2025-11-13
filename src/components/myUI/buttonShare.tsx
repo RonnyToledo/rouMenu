@@ -4,13 +4,14 @@ import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { FaRegShareFromSquare } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
-
+type iconType = "icon" | "letter";
 type ShareButtonProps = {
   title?: string;
   text?: string;
   url?: string;
   className?: string;
   children?: React.ReactNode;
+  tipo?: iconType;
   onSuccess?: () => void;
   onError?: (err: unknown) => void;
 };

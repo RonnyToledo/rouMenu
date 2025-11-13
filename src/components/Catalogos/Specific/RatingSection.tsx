@@ -94,7 +94,7 @@ export default function RatingSection({
         .filter((env) => env.productId === specific)
         .map((obj, ind) => (
           <div key={ind} className="max-w-xl mx-auto p-2 ">
-            <p className="text-slate-500 mb-2 text-sm">
+            <p className="text-slate-500 mb-2 text-sm text-center">
               {obj.coment?.total == 0
                 ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
                 : "Las calificaciones y opiniones provienen de personas que compraron este producto con otros usuarios."}

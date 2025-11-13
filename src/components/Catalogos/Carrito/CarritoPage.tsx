@@ -94,7 +94,7 @@ export default function CarritoPage() {
         ) || 0),
       0
     );
-    if (valueAux < store.limite) {
+    if (valueAux < store.limite && valueAux) {
       toast.info(
         `Esta tienda tiene un minimo de compra de ${store.limite} ${store.moneda.find((m) => m.defecto)?.nombre || ""}`
       );
@@ -346,7 +346,7 @@ export default function CarritoPage() {
 
     mensaje += `- Total de la orden: ${discountTotal} ${store.moneda.find((m) => m.defecto)?.nombre || ""}\n`;
     if (compra.lugar !== "Local") {
-      mensaje += `- Domicilio: $${compra.shipping}`;
+      mensaje += `- Domicilio: $${compra.shipping}\n`;
     }
     mensaje += `- Moneda: $${compra.moneda}\n`;
     if (compra.code.name) {

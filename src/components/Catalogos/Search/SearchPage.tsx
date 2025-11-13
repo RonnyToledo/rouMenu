@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
+import SheetComponent from "../General/SheetComponent";
 
 const options = {
   includeScore: true,
@@ -146,6 +147,7 @@ export default function SearchPage() {
             onKeyDown={handleKeyDown}
             className="w-full h-full border-none rounded-xl pl-12 pr-4 py-3 text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-0 focus:ring-slate-400 focus:border-transparent transition-all"
           />
+          <SheetComponent className="absolute right-4 " />
         </div>
       </header>
       <div className="container mx-auto px-4">

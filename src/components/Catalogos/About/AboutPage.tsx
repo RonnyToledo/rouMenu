@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Mail, Globe, Tag, LinkIcon, Phone, Info } from "lucide-react";
+import { MapPin, Mail, Globe, Tag, Phone, Info, Share2 } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
 import Image from "next/image";
 import React, { useContext, useState } from "react";
@@ -17,6 +17,7 @@ import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
 import { useAuth } from "@/context/AppContext";
 import { logoApp } from "@/lib/image";
 import { IconSelect, SelectUser } from "../General/Footer";
+import ShareButton from "@/components/myUI/buttonShare";
 
 export default function AboutPage() {
   const { store } = useContext(MyContext);
@@ -66,7 +67,7 @@ export default function AboutPage() {
             </div>
 
             {/* Business Name */}
-            <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+            <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
               <div className="flex items-start gap-3">
                 <Info className="w-5 h-5 text-slate-700 mt-0.5" />
                 <div className="flex-1">
@@ -80,7 +81,7 @@ export default function AboutPage() {
 
             {/* Description */}
             {store.history ? (
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
@@ -95,30 +96,30 @@ export default function AboutPage() {
 
             {/* Address */}
             {store.ubicacion?.latitude && store.ubicacion?.longitude ? (
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
-                <div className="flex items-start gap-3">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 space-y-2 mb-3">
+                <div className="rounded-xl overflow-hidden ">
+                  <Map
+                    height={300}
+                    defaultCenter={[
+                      store.ubicacion?.latitude || 0,
+                      store.ubicacion?.longitude || 0,
+                    ]}
+                    mouseEvents={false}
+                    touchEvents={false}
+                    defaultZoom={15}
+                  >
+                    <Marker
+                      width={50}
+                      anchor={[
+                        store.ubicacion?.latitude || 0,
+                        store.ubicacion?.longitude || 0,
+                      ]}
+                    />
+                  </Map>
+                </div>
+                <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
-                    <div className="rounded-xl overflow-hidden">
-                      <Map
-                        height={300}
-                        defaultCenter={[
-                          store.ubicacion?.latitude || 0,
-                          store.ubicacion?.longitude || 0,
-                        ]}
-                        mouseEvents={false}
-                        touchEvents={false}
-                        defaultZoom={15}
-                      >
-                        <Marker
-                          width={50}
-                          anchor={[
-                            store.ubicacion?.latitude || 0,
-                            store.ubicacion?.longitude || 0,
-                          ]}
-                        />
-                      </Map>
-                    </div>
                     <div className="ml-4">
                       <p className="text-[var(--text-muted)]">
                         {store?.direccion},
@@ -133,7 +134,7 @@ export default function AboutPage() {
             ) : null}
 
             {/* Business Hours */}
-            <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+            <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
               <div className="flex items-start gap-3">
                 <Clock className="w-5 h-5 text-slate-700 mt-0.5" />
                 <div className="flex-1">
@@ -150,7 +151,7 @@ export default function AboutPage() {
 
             {/* Email */}
             {store.email ? (
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <Mail className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
@@ -165,7 +166,7 @@ export default function AboutPage() {
 
             {/* Website */}
             {false ? (
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <Globe className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
@@ -183,7 +184,7 @@ export default function AboutPage() {
 
             {/* Category */}
             {store.tipo ? (
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
                 <div className="flex items-start gap-3">
                   <Tag className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
@@ -193,11 +194,28 @@ export default function AboutPage() {
                 </div>
               </div>
             ) : null}
+            <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4 mb-3">
+              <div className="flex items-start gap-3">
+                <Share2 className="w-5 h-5 text-slate-700 mt-0.5" />
+                <div className="flex-1">
+                  <ShareButton
+                    title={store.name}
+                    text={store.parrrafo}
+                    url={`https://roumenu.vercel.app/t/${store.sitioweb}`}
+                    className="p-0 text-base"
+                  >
+                    Compartir Perfil
+                  </ShareButton>
+
+                  <p className="text-slate-700 text-sm">Categoría</p>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Rating Section */}
           <section className="mb-6">
-            <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-6">
+            <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-6">
               <h3 className="text-slate-900 font-semibold text-lg mb-4">
                 Califica este catálogo
               </h3>
@@ -227,7 +245,7 @@ export default function AboutPage() {
 
           {/* Reviews Section */}
           <section className="mb-6">
-            <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-6">
+            <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-slate-900 font-semibold text-lg">
                   Reseñas
@@ -289,12 +307,12 @@ export default function AboutPage() {
           </section>
 
           {/* Social Media */}
-          <section className="mb-6">
-            <h3 className="text-slate-900 font-semibold text-lg mb-3 px-1">
-              Facebook e Instagram
-            </h3>
-            <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4">
-              {store.redes.length > 0 ? (
+          {store.redes.length > 0 ? (
+            <section className="mb-6">
+              <h3 className="text-slate-900 font-semibold text-lg mb-3 px-1">
+                Facebook e Instagram
+              </h3>
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4">
                 <div className="flex flex-col gap-3">
                   {store.redes.map((red, idx) => (
                     <div className="flex items-center gap-3" key={idx}>
@@ -313,19 +331,9 @@ export default function AboutPage() {
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <LinkIcon className="w-5 h-5 text-slate-700" />
-                  <Link
-                    href="#"
-                    className="text-cyan-800 hover:text-cyan-600 transition-colors"
-                  >
-                    Añadir cuentas
-                  </Link>
-                </div>
-              )}
-            </div>
-          </section>
+              </div>
+            </section>
+          ) : null}
 
           {/* Contact Info */}
           <section className="mb-6">
@@ -333,7 +341,7 @@ export default function AboutPage() {
               Info. y número de teléfono
             </h3>
             <div className="space-y-3">
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
@@ -345,7 +353,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-100 backdrop-blur-sm border border-slate-300 rounded-xl p-4">
+              <div className="bg-slate-50 backdrop-blur-sm border border-slate-300 rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <Phone className="w-5 h-5 text-slate-700 mt-0.5" />
                   <div className="flex-1">
@@ -504,7 +512,7 @@ const HorariosComponent: React.FC<HorariosComponentProps> = ({
     <div className={`${className} `}>
       <div
         id="horarios-content"
-        className="mt-3 space-y-2 animate-in slide-in-from-top-2 duration-200"
+        className="space-y-2 animate-in slide-in-from-top-2 duration-200"
       >
         {groupedHorarios.map((group, index) => {
           const horarioTexto = formatearHorario(group.apertura, group.cierre);

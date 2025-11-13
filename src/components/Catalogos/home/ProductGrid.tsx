@@ -13,6 +13,7 @@ import { ButtonOfCart } from "./ButtonOfCart";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Star } from "lucide-react";
 
 interface ProductGridInterface {
   product: Product;
@@ -111,6 +112,7 @@ export default React.memo(function ProductGrid({
         index={i}
         isInStock={product.stock}
         imageClasses={imageClasses}
+        promedioStar={product.coment.promedio || 0}
       />
 
       <div className="p-2 flex flex-col justify-evenly">
@@ -159,6 +161,7 @@ interface ProductImageProps {
   image: string;
   title?: string;
   index: number;
+  promedioStar: number;
   isInStock?: number;
   imageClasses: string;
 }
@@ -170,6 +173,7 @@ const ProductImage = React.memo(function ProductImage({
   index,
   isInStock,
   imageClasses,
+  promedioStar,
 }: ProductImageProps) {
   const imageStyle = useMemo(
     () => ({ filter: isInStock ? "initial" : "grayscale(1)" }),
@@ -191,6 +195,12 @@ const ProductImage = React.memo(function ProductImage({
           toast.error(`Error al cargar la imagen del producto ${title} `);
         }}
       />
+      {promedioStar ? (
+        <Badge className="absolute top-2 left-2 flex items-center text-xs">
+          {promedioStar}
+          <Star className="fill-slate-50" />
+        </Badge>
+      ) : null}
     </Link>
   );
 });

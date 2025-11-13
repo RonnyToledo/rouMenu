@@ -76,7 +76,7 @@ export default async function RootLayout({
       </Script>
       <body className={inter.className}>
         <div className="flex justify-center bg-gradient-to-br from-slate-50 to-slate-300">
-          <div className="max-w-md w-full bg-white shadow-xl/30">
+          <div className="max-w-md w-full bg-white shadow-xl/30 min-h-dvh">
             <AppProvider storeSSD={newData}>
               <Header>
                 {children}

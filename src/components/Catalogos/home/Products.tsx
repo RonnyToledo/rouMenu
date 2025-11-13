@@ -184,11 +184,11 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
       }`,
     [store?.edit?.grid]
   );
-  console.log(store);
+
   return (
     <motion.div className="mb-12">
       <motion.div
-        className="p-1 sticky top-16 bg-gradient-to-r from-slate-50/80 via-slate-100 to-slate-50/80 z-10"
+        className="p-1 sticky top-16 bg-gradient-to-r from-white/80 via-white to-white/80 z-10"
         variants={headerVariants}
         id={categoria.id}
       >

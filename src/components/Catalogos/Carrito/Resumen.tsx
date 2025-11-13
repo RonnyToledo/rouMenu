@@ -33,8 +33,7 @@ export default function Resumen({
       0
     );
   };
-  
-  
+
   return (
     <Card className="p-2 gap-2">
       <CardHeader className="p-2 gap-0">
@@ -109,7 +108,12 @@ export default function Resumen({
                   <div className="text-xs text-slate-500 text-center">Envío gratis en compras mayores a $100</div>
                 )*/}
 
-        <Button className="w-full" size="lg" onClick={handleOrderClick}>
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={handleOrderClick}
+          disabled={downloading}
+        >
           {!downloading ? (
             <>
               <MdOutlineShoppingCart className="h-8 w-8 text-white" />
