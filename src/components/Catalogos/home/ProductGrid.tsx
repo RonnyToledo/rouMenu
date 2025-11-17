@@ -115,8 +115,8 @@ export default React.memo(function ProductGrid({
         promedioStar={product.coment.promedio || 0}
       />
 
-      <div className="p-2 flex flex-col justify-evenly">
-        <h4 className={titleClasses}>{product.title}</h4>
+      <div className="p-1 flex flex-col justify-evenly ">
+        <h4 className={cn(titleClasses, "text-[14px]")}>{product.title}</h4>
 
         {!store?.edit?.minimalista && (
           <p className={descriptionClasses}>{product.descripcion || "..."}</p>
@@ -126,11 +126,12 @@ export default React.memo(function ProductGrid({
           {product.favorito && <Badge className="bg-slate-700">Top</Badge>}
           {!product.stock && <Badge className="bg-slate-700">Agotado</Badge>}
         </div>
-        <div className="flex items-center justify-between mt-3">
+        <div className="flex items-center justify-between ">
           {product.venta ? (
             <ProductPrice
               price={product.price || 0}
               currency={currentCurrency}
+              oldPrice={product.oldPrice > product.price ? product.oldPrice : 0}
             />
           ) : (
             <div />
@@ -207,17 +208,28 @@ const ProductImage = React.memo(function ProductImage({
 
 interface ProductPriceProps {
   price: number;
+  oldPrice: number;
   currency: string;
 }
 
 const ProductPrice = React.memo(function ProductPrice({
   price,
   currency,
+  oldPrice,
 }: ProductPriceProps) {
   return (
-    <p className="font-bold w-full text-[10px] text-[var(--text-light)]">
-      ${smartRound(price)} {currency}
-    </p>
+    <>
+      {oldPrice ? (
+        <p className="font-bold w-full text-[8px] text-[var(--text-light)]">
+          ${smartRound(oldPrice)} {currency}
+        </p>
+      ) : null}
+      <p
+        className={`font-bold w-full text-[8px] text-[var(--text-light)] ${oldPrice ? "line-through" : ""}`}
+      >
+        ${smartRound(price)} {currency}
+      </p>
+    </>
   );
 });
 
