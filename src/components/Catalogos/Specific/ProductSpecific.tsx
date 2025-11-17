@@ -185,6 +185,7 @@ export default function Product({ id }: { id: string }) {
                 alt={product?.title || "Producto"}
                 className="w-full h-full object-cover"
                 src={product?.image || store.urlPoster || logoApp}
+                style={{ filter: product?.stock ? "initial" : "grayscale(1)" }}
               />
             </motion.div>
           </AnimatePresence>
