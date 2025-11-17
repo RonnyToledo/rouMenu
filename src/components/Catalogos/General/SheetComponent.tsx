@@ -1,21 +1,21 @@
 "use client";
+
 import React, {
   useState,
   useEffect,
   useCallback,
   useContext,
   useMemo,
+  createContext,
 } from "react";
 import { User } from "lucide-react";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTrigger,
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { TbMenuDeep } from "react-icons/tb";
 import { useAuth } from "@/context/AppContext";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
@@ -30,31 +30,98 @@ import { MdTravelExplore } from "react-icons/md";
 import { useRouter, usePathname } from "next/navigation";
 import PreviewRatingGeneral from "./PreviewRatingGeneral";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { AppState, Categoria, Current } from "@/context/InitialStatus";
+import { Categoria, Current } from "@/context/InitialStatus";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 type SheetView = "home" | "categories" | "coins";
 
-export default function SheetComponent({ className }: { className?: string }) {
+// Context para controlar el Sheet
+interface SheetContextType {
+  open: () => void;
+  close: () => void;
+  toggle: () => void;
+  openToView: (view: SheetView) => void;
+  isOpen: boolean;
+}
+
+const SheetContext = createContext<SheetContextType | undefined>(undefined);
+
+// Hook personalizado para usar el contexto
+export function useSheet() {
+  const context = useContext(SheetContext);
+  if (!context) {
+    throw new Error("useSheet debe ser usado dentro de SheetProvider");
+  }
+  return context;
+}
+
+// Provider Component
+export function SheetProvider({ children }: { children: React.ReactNode }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showState, setShowState] = useState<SheetView>("home");
+
+  const open = useCallback(() => setIsMenuOpen(true), []);
+  const close = useCallback(() => setIsMenuOpen(false), []);
+  const toggle = useCallback(() => setIsMenuOpen((prev) => !prev), []);
+  const openToView = useCallback((view: SheetView) => {
+    setShowState(view);
+    setIsMenuOpen(true);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      open,
+      close,
+      toggle,
+      openToView,
+      isOpen: isMenuOpen,
+    }),
+    [open, close, toggle, openToView, isMenuOpen]
+  );
+
+  return (
+    <SheetContext.Provider value={value}>
+      {children}
+      <SheetComponent
+        isOpen={isMenuOpen}
+        onOpenChange={setIsMenuOpen}
+        showState={showState}
+        setShowState={setShowState}
+      />
+    </SheetContext.Provider>
+  );
+}
+
+// Componente Sheet actualizado para recibir props del Provider
+interface SheetComponentProps {
+  className?: string;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  showState: SheetView;
+  setShowState: (view: SheetView) => void;
+}
+
+function SheetComponent({
+  isOpen,
+  onOpenChange,
+  showState,
+  setShowState,
+}: SheetComponentProps) {
   const { store, dispatchStore } = useContext(MyContext);
   const { user, loading, signOut } = useAuth();
-
   const router = useRouter();
 
-  const [showState, setShowState] = useState<SheetView>("home");
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // Estado para detectar montaje del cliente
   const [isMounted, setIsMounted] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
 
   // Reset view when sheet closes
   useEffect(() => {
-    if (!isMenuOpen) setShowState("home");
-  }, [isMenuOpen]);
+    if (!isOpen) setShowState("home");
+  }, [isOpen, setShowState]);
 
-  const closeSheet = useCallback(() => setIsMenuOpen(false), [setIsMenuOpen]);
+  const closeSheet = useCallback(() => onOpenChange(false), [onOpenChange]);
 
   const handleReviewAction = useCallback(() => {
     if (user && !loading) {
@@ -73,7 +140,6 @@ export default function SheetComponent({ className }: { className?: string }) {
     [closeSheet, dispatchStore]
   );
 
-  // Home menu items
   const homeItems = useMemo(
     () => [
       {
@@ -140,10 +206,9 @@ export default function SheetComponent({ className }: { className?: string }) {
         },
       },
     ],
-    [store.sitioweb, router, closeSheet, handleReviewAction]
+    [store.sitioweb, router, closeSheet, handleReviewAction, setShowState]
   );
 
-  // Nombre de usuario para display
   const displayName = useMemo(() => {
     if (!isMounted || loading) return "Cargando...";
     if (user?.user_metadata?.full_name) {
@@ -152,17 +217,13 @@ export default function SheetComponent({ className }: { className?: string }) {
     return "Guest";
   }, [user, isMounted, loading]);
 
-  // Detectar montaje del cliente
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   return (
     <>
-      <Sheet onOpenChange={setIsMenuOpen} open={isMenuOpen}>
-        <SheetTrigger className={cn("p-2", className)}>
-          <TbMenuDeep className="size-6 text-slate-600 cursor-pointer" />
-        </SheetTrigger>
+      <Sheet onOpenChange={onOpenChange} open={isOpen}>
         <SheetContent className="bg-gradient-to-br from-slate-100 to-slate-300 p-4">
           <SheetHeader>
             <SheetTitle>
@@ -192,13 +253,12 @@ export default function SheetComponent({ className }: { className?: string }) {
             </SheetTitle>
             <SheetDescription></SheetDescription>
           </SheetHeader>
-          {/* Contenido principal */}
+
           <div className="flex-1 overflow-y-auto overflow-x-hidden">
             {showState === "home" && <HomeView items={homeItems} />}
 
             {showState === "categories" && (
               <CategoriesView
-                store={store}
                 onBack={() => setShowState("home")}
                 onClose={closeSheet}
               />
@@ -212,7 +272,7 @@ export default function SheetComponent({ className }: { className?: string }) {
               />
             )}
           </div>
-          {/* Footer con perfil */}
+
           <div className="space-y-2">
             <Separator className="bg-white/20" />
             <ListSheet
@@ -254,14 +314,14 @@ function HomeView({ items }: HomeViewProps) {
 }
 
 interface CategoriesViewProps {
-  store: AppState;
   onBack: () => void;
   onClose: () => void;
 }
 
-function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
+function CategoriesView({ onBack, onClose }: CategoriesViewProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { store } = useContext(MyContext);
 
   const handleCategoryClick = useCallback(
     (category: Categoria) => {
@@ -295,7 +355,7 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
       });
     }
   };
-
+  console.log(ExtraerCategorias(store?.categorias, store.products), store);
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
       <ListSheet name="Atrás" icon2={<ChevronLeft />} action={onBack} />

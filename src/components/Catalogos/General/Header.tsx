@@ -5,16 +5,17 @@ import { Button } from "@/components/ui/button";
 import { MyContext } from "@/context/MyContext";
 import { useHistory } from "@/context/AppContext";
 import Link from "next/link";
-import SheetComponent from "./SheetComponent";
+import { useSheet } from "./SheetComponent";
+import { TbMenuDeep } from "react-icons/tb";
 
 export default function Header() {
   const { smartBack } = useHistory();
-
+  const { open } = useSheet();
   const { store } = useContext(MyContext);
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-br from-slate-50 to-slate-100 h-16 p-2 w-full  shadow-md">
-      <div className="flex items-center justify-between border rounded-full h-full p-1 gap-3 bg-white ">
+    <header className="sticky top-0 z-50 bg-gradient-to-b from-slate-50 to-transparent h-16 p-2 w-full">
+      <div className="flex items-center justify-between shadow-md rounded-full h-full p-1 gap-3 bg-white ">
         <div className="flex items-center w-full">
           <Button
             variant="ghost"
@@ -41,7 +42,9 @@ export default function Header() {
           </Link>
         </div>
 
-        <SheetComponent />
+        <Button className={"p-2"} variant="ghost" onClick={open}>
+          <TbMenuDeep className="size-6 text-slate-600 cursor-pointer" />
+        </Button>
       </div>
     </header>
   );

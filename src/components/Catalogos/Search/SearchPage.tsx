@@ -11,7 +11,9 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
-import SheetComponent from "../General/SheetComponent";
+import { TbMenuDeep } from "react-icons/tb";
+import { Button } from "@/components/ui/button";
+import { useSheet } from "../General/SheetComponent";
 
 const options = {
   includeScore: true,
@@ -24,6 +26,7 @@ const options = {
 };
 
 export default function SearchPage() {
+  const { open } = useSheet();
   const { store } = useContext(MyContext);
   const [search, setSearch] = useState<string>("");
   const [ListSearch, setListSearch] = useState<Product[]>([]);
@@ -129,8 +132,8 @@ export default function SearchPage() {
     <main className="">
       {/* Search Bar */}
 
-      <header className="sticky top-0 z-50  bg-gradient-to-br from-slate-50 to-slate-100 h-16 p-2 w-full  shadow-md mb-6">
-        <div className="relative flex items-center justify-between border rounded-full h-full bg-white overflow-hidden">
+      <header className="sticky top-0 z-50 bg-gradient-to-b from-slate-50 to-transparent h-16 p-2 w-full">
+        <div className="relative flex items-center justify-between shadow-lg rounded-full h-full p-1 gap-3 bg-white overflow-hidden">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600" />
           <Input
             ref={inputRef}
@@ -147,7 +150,13 @@ export default function SearchPage() {
             onKeyDown={handleKeyDown}
             className="w-full h-full border-none rounded-xl pl-12 pr-4 py-3 text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-0 focus:ring-slate-400 focus:border-transparent transition-all"
           />
-          <SheetComponent className="absolute right-4 " />
+          <Button
+            className={"p-2 absolute right-4"}
+            variant="ghost"
+            onClick={open}
+          >
+            <TbMenuDeep className="size-6 text-slate-600 cursor-pointer" />
+          </Button>
         </div>
       </header>
       <div className="container mx-auto px-4">

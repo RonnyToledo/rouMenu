@@ -28,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import Header from "@/components/Catalogos/General/Header";
+import { SheetProvider } from "@/components/Catalogos/General/SheetComponent";
 
 interface ContextType {
   store: AppState;
@@ -98,46 +99,48 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
   return (
     <MyContext.Provider value={contextValue}>
-      {!pathname.includes("/search") ? <Header /> : null}
-      <SitioRealtime uuid={store.UUID || ""} />
-      {children}
-      {store.compraUUID ? (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              size="icon"
-              className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
-            >
-              <Pencil />
-              <span className="sr-only">Edicion</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta seguro que desea salir de la edicion de compras?. Los
-                cambios efectuados se perderan.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  dispatchStore({
-                    type: "SetPurchaseUuid",
-                    payload: "",
-                  });
-                  dispatchStore({ type: "Clean" });
-                  router.push("/user");
-                }}
+      <SheetProvider>
+        {!pathname.includes("/search") ? <Header /> : null}
+        <SitioRealtime uuid={store.UUID || ""} />
+        {children}
+        {store.compraUUID ? (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="icon"
+                className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
               >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      ) : null}
+                <Pencil />
+                <span className="sr-only">Edicion</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta seguro que desea salir de la edicion de compras?. Los
+                  cambios efectuados se perderan.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    dispatchStore({
+                      type: "SetPurchaseUuid",
+                      payload: "",
+                    });
+                    dispatchStore({ type: "Clean" });
+                    router.push("/user");
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : null}
+      </SheetProvider>
     </MyContext.Provider>
   );
 }

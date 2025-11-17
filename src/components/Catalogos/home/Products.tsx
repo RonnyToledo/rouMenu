@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import ProductGrid from "./ProductGrid";
+import { useSheet } from "../General/SheetComponent";
 
 const headerVariants = {
   normal: {
@@ -170,7 +171,6 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   products,
 }: AnimatedCategorySectionProps) {
   const { store } = useContext(MyContext);
-
   // Memoizar productos ordenados
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
@@ -186,22 +186,8 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   );
 
   return (
-    <motion.div className="mb-12">
-      <motion.div
-        className="p-1 sticky top-16 bg-gradient-to-r from-white/80 via-white to-white/80 z-10"
-        variants={headerVariants}
-        id={categoria.id}
-      >
-        <Link
-          className="pb-2"
-          href={`/t/${store?.sitioweb}/category/${categoria.id}`}
-        >
-          <span className="text-sm uppercase font-cinzel text-center text-slate-800 tracking-widest  line-clamp-1">
-            {categoria.name}
-          </span>
-        </Link>
-      </motion.div>
-
+    <div className="mb-12">
+      <CategoryHeader id={categoria.id} name={categoria.name || ""} />
       <div className={gridClass}>
         {sortedProducts.map((product, i) => (
           <ProductGrid
@@ -212,6 +198,24 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
           />
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 });
+function CategoryHeader({ id, name }: { id: string; name: string }) {
+  const { openToView } = useSheet();
+  return (
+    <motion.div
+      className="sticky top-16 bg-transparent z-10 flex items-center justify-center"
+      variants={headerVariants}
+      id={id}
+    >
+      <Button
+        variant={"outline"}
+        className="rounded-full shadow-md truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest"
+        onClick={() => openToView("categories")}
+      >
+        {name}
+      </Button>
+    </motion.div>
+  );
+}
