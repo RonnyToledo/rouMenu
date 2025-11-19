@@ -1,21 +1,38 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/realtime-js";
 import { toast } from "sonner";
+import { MyContext } from "@/context/MyContext";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 interface Props {
   uuid: string;
 }
 
 export default function SitioRealtime({ uuid }: Props) {
+  const { store } = useContext(MyContext);
   const router = useRouter();
-
+  const pathname = usePathname();
   const channelRef = useRef<RealtimeChannel | null>(null);
   const channelRefProducts = useRef<RealtimeChannel | null>(null);
   const lastToastAtRef = useRef<number>(0); // para evitar spam de toasts
+
+  const NewProduct = useCallback(
+    (productId: string, category: string) => {
+      if (
+        pathname == `/t/${store.sitioweb}` ||
+        pathname == `/t/${store.sitioweb}/category/${category}`
+      ) {
+        ScrollTo(productId, 120);
+      } else {
+        router.push(`/t/${store.sitioweb}/producto/${productId}`);
+      }
+    },
+    [pathname, router, store.sitioweb]
+  );
 
   useEffect(() => {
     if (!uuid) {
@@ -40,14 +57,9 @@ export default function SitioRealtime({ uuid }: Props) {
           const now = Date.now();
           if (now - lastToastAtRef.current > 3000) {
             lastToastAtRef.current = now;
+            router.refresh();
             toast.info(
-              'La página ha sido actualizada. Pulsa "Refrescar" para aplicar los cambios.',
-              {
-                action: {
-                  label: "Refrescar",
-                  onClick: () => window.location.reload(),
-                },
-              }
+              "La página ha sido actualizada. Se estan aplicando los cambios los cambios."
             );
           }
         }
@@ -80,11 +92,17 @@ export default function SitioRealtime({ uuid }: Props) {
           const now = Date.now();
           if (now - lastToastAtRef.current > 3000) {
             lastToastAtRef.current = now;
+            router.refresh();
+
             toast.info("Nueva Disponibilidad.", {
               description: payload.new?.title ? `${payload.new?.title}` : "",
               action: {
-                label: "Refrescar",
-                onClick: () => window.location.reload(),
+                label: "Ver",
+                onClick: () =>
+                  NewProduct(
+                    payload.new?.productId || payload.new?.title || "",
+                    payload.new?.caja || ""
+                  ),
               },
             });
           }
@@ -112,7 +130,7 @@ export default function SitioRealtime({ uuid }: Props) {
         console.error(err);
       }
     };
-  }, [uuid, router]);
+  }, [uuid, router, NewProduct]);
 
   // componente invisible: no renderiza UI (lo puedes cambiar para render status si quieres)
   return <></>;

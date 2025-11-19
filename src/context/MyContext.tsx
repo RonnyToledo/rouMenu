@@ -72,6 +72,9 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     ...(storeArregaldo || initialState),
     afiliate: afiliateNew,
   });
+  useEffect(() => {
+    dispatchStore({ type: "Add", payload: storeSSD });
+  }, [storeSSD]);
 
   useEffect(() => {
     (async () => {

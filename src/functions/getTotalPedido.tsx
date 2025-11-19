@@ -5,7 +5,6 @@ import { AppState, Current, Product } from "@/context/InitialStatus";
  */
 export function getTotalFinal(store: AppState, products: Product[]) {
   // tus funciones de redondeo (usa tus implementaciones reales)
-  const redondearAMultiploDe5 = (n: number) => Math.round(n); // reemplaza
   const smartRound = (n: number) =>
     Math.round((n + Number.EPSILON) * 100) / 100; // 2 decimales
 
@@ -34,7 +33,7 @@ export function getTotalFinal(store: AppState, products: Product[]) {
     const vd = Number(valorDst ?? 1) || 1;
     if (vd === 0) return 0;
     const converted = (a * vs) / vd;
-    return smartRound(redondearAMultiploDe5(converted));
+    return smartRound(converted);
   };
 
   let total = 0;

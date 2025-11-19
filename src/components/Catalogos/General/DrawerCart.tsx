@@ -66,9 +66,10 @@ export default function DrawerCart() {
       0
     );
     setContentCart(value);
+
     if (value === 0) setOpenDrawer(false);
   }, [store.products]);
-
+  console.log("Content Cart:", contentCart);
   function RedirectLink(Id: string, categoria: string) {
     if (DetectCategoria(categoria, store.categorias)) {
       //IR a categoria especifica

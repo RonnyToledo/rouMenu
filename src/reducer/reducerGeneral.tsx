@@ -148,6 +148,11 @@ export function persistCartIDB(
 export function reducerStore(state: AppState, action: AppAction): AppState {
   console.log(action.type);
   switch (action.type) {
+    case "Add":
+      return {
+        ...state,
+        ...action.payload,
+      };
     case "AddCart": {
       const newProduct = JSON.parse(action.payload);
       const updatedProducts = state.products.map((p) =>
