@@ -1,7 +1,7 @@
 export const logoApp =
-  "https://res.cloudinary.com/dbgnyc842/image/upload/v1763183077/Identidades/Generated_Image_November_15_2025_-_12_01AM_tirk0c.png";
+  "https://res.cloudinary.com/dbgnyc842/image/upload/c_crop,w_600,h_600,ar_1:1/v1763566308/Identidades/Generated_Image_November_19_2025_-_10_19AM_1_inwecg.png";
 export const logoAdmin =
-  "https://res.cloudinary.com/dbgnyc842/image/upload/v1763183077/Identidades/Generated_Image_November_15_2025_-_12_03AM_nfehqf.png";
+  "https://res.cloudinary.com/dbgnyc842/image/upload/c_crop,w_600,h_600,ar_1:1/v1763566308/Identidades/Generated_Image_November_19_2025_-_10_19AM_1_inwecg.png";
 export const logoUser =
   "https://res.cloudinary.com/dbgnyc842/image/upload/v1753625183/Identidades/%C3%8Dcono-de-usuario-minimalista-en-gris_z11vpk.jpg";
 export const logoDev =

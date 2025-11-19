@@ -312,7 +312,7 @@ export function ListCard({
             </Badge>
           </div>
           <div className="flex flex-col items-start justify-center">
-            <p className="text-sm font-medium text-slate-900 truncate text-center">
+            <p className="text-sm font-medium text-slate-900 truncate text-center w-[50vw]">
               {title}
             </p>
             <p className="text-xs text-slate-500 text-center">

@@ -12,6 +12,7 @@ import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import ProductGrid from "./ProductGrid";
 import { useSheet } from "../General/SheetComponent";
+import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 
 const headerVariants = {
   normal: {
@@ -37,10 +38,33 @@ export default function Products() {
     );
   }, [store?.categorias, store?.products]);
 
+  const next_before_Category = useMemo(() => {
+    if (!store?.categorias) return {};
+    const sorted = [...store.categorias].sort(
+      (a, b) => (a.order || 0) - (b.order || 0)
+    );
+    const mapping: { [key: string]: { nextID: string; prevID: string } } = {};
+    sorted.forEach((cat, index) => {
+      const nextCat = sorted[(index + 1) % sorted.length];
+      const prevCat = sorted[(index - 1 + sorted.length) % sorted.length];
+      mapping[cat.id] = { nextID: nextCat.id, prevID: prevCat.id };
+    });
+
+    return mapping;
+  }, [store?.categorias]);
+
+  console.log(next_before_Category, sortedCategories);
+
   return (
     <div className="bg-[var(--background-dark)] mt-5">
       {sortedCategories.map((categoria) => (
-        <CategoryItem key={categoria.id} categoria={categoria} store={store} />
+        <CategoryItem
+          key={categoria.id}
+          categoria={categoria}
+          store={store}
+          nextID={next_before_Category[categoria.id]?.nextID || ""}
+          prevID={next_before_Category[categoria.id]?.prevID || ""}
+        />
       ))}
     </div>
   );
@@ -49,11 +73,15 @@ export default function Products() {
 interface CategoryItemProps {
   categoria: Categoria;
   store: AppState;
+  prevID: string;
+  nextID: string;
 }
 
 const CategoryItem = React.memo(function CategoryItem({
   categoria,
   store,
+  nextID,
+  prevID,
 }: CategoryItemProps) {
   const router = useRouter();
 
@@ -84,6 +112,8 @@ const CategoryItem = React.memo(function CategoryItem({
       categoria={categoria}
       banner={store?.urlPoster || logoApp}
       products={categoryProducts}
+      nextID={nextID}
+      prevID={prevID}
     />
   );
 });
@@ -163,12 +193,16 @@ interface AnimatedCategorySectionProps {
   categoria: Categoria;
   banner: string;
   products: Product[];
+  prevID: string;
+  nextID: string;
 }
 
 const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   categoria,
   banner,
   products,
+  prevID,
+  nextID,
 }: AnimatedCategorySectionProps) {
   const { store } = useContext(MyContext);
   // Memoizar productos ordenados
@@ -187,7 +221,12 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
 
   return (
     <div className="mb-12">
-      <CategoryHeader id={categoria.id} name={categoria.name || ""} />
+      <div id={categoria.id} />
+      <CategoryHeader
+        name={categoria.name || ""}
+        prevID={prevID}
+        nextID={nextID}
+      />
       <div className={gridClass}>
         {sortedProducts.map((product, i) => (
           <ProductGrid
@@ -201,21 +240,54 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
     </div>
   );
 });
-function CategoryHeader({ id, name }: { id: string; name: string }) {
+function CategoryHeader({
+  name,
+  prevID,
+  nextID,
+}: {
+  name: string;
+  prevID: string;
+  nextID: string;
+}) {
   const { openToView } = useSheet();
+
+  const ScrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
     <motion.div
       className="sticky top-16 bg-transparent z-10 flex items-center justify-center"
       variants={headerVariants}
-      id={id}
     >
-      <Button
-        variant={"outline"}
-        className="rounded-full shadow-md truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest"
-        onClick={() => openToView("categories")}
-      >
-        {name}
-      </Button>
+      <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
+        <Button
+          onClick={() => ScrollTo(prevID)}
+          variant={"ghost"}
+          className="p-2"
+          size={"icon"}
+        >
+          <MdNavigateBefore />
+        </Button>
+        <Button
+          variant={"ghost"}
+          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
+          onClick={() => openToView("categories")}
+        >
+          {name}
+        </Button>
+
+        <Button
+          className="p-2"
+          onClick={() => ScrollTo(nextID)}
+          variant={"ghost"}
+          size={"icon"}
+        >
+          <MdNavigateNext />
+        </Button>
+      </div>
     </motion.div>
   );
 }
