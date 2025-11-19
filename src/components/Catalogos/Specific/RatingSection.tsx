@@ -129,7 +129,7 @@ export default function RatingSection({
                 <div>
                   <Button asChild variant="ghost">
                     <Link
-                      href={`/t/${store.sitioweb}/product/${product?.productId}/reviews`}
+                      href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
                       className="text-blue-400 hover:text-blue-300 text-sm font-medium"
                     >
                       Todos los comentarios →

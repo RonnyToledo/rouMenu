@@ -7,6 +7,7 @@ import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/context/InitialStatus";
 import { FaRegTrashCan } from "react-icons/fa6";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 export function ButtonOfCart({
   product,
@@ -100,8 +101,7 @@ export function ButtonOfCart({
         className="size-8 flex justify-center items-center rounded-full"
         onClick={() => {
           if (slideOpen) {
-            const el = document.getElementById(product.productId);
-            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            ScrollTo(product.productId, 120);
             handleToCart({ ...product, Cant: (product.Cant || 0) + 1 });
           }
           setSlideOpen(true);

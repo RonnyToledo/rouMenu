@@ -27,6 +27,7 @@ import { User, X } from "lucide-react";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import Link from "next/link";
 import { MdTravelExplore } from "react-icons/md";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 type SheetView = "home" | "categories" | "coins";
 
@@ -291,28 +292,17 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
         const targetId = category.id;
 
         if (pathname === targetUrl) {
-          scrollToElement(targetId);
+          ScrollTo(targetId);
           onClose();
         } else {
           router.push(targetUrl);
           onClose();
-          setTimeout(() => scrollToElement(targetId), 100);
+          setTimeout(() => ScrollTo(targetId), 100);
         }
       }
     },
     [store?.sitioweb, pathname, router, onClose]
   );
-
-  const scrollToElement = (elementId: string) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "nearest",
-      });
-    }
-  };
 
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">

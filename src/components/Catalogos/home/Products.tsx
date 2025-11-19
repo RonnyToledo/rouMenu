@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import ProductGrid from "./ProductGrid";
 import { useSheet } from "../General/SheetComponent";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 const headerVariants = {
   normal: {
@@ -39,8 +40,8 @@ export default function Products() {
   }, [store?.categorias, store?.products]);
 
   const next_before_Category = useMemo(() => {
-    if (!store?.categorias) return {};
-    const sorted = [...store.categorias].sort(
+    if (!sortedCategories) return {};
+    const sorted = [...sortedCategories].sort(
       (a, b) => (a.order || 0) - (b.order || 0)
     );
     const mapping: { [key: string]: { nextID: string; prevID: string } } = {};
@@ -51,9 +52,7 @@ export default function Products() {
     });
 
     return mapping;
-  }, [store?.categorias]);
-
-  console.log(next_before_Category, sortedCategories);
+  }, [sortedCategories]);
 
   return (
     <div className="bg-[var(--background-dark)] mt-5">
@@ -251,12 +250,6 @@ function CategoryHeader({
 }) {
   const { openToView } = useSheet();
 
-  const ScrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
   return (
     <motion.div
       className="sticky top-16 bg-transparent z-10 flex items-center justify-center"

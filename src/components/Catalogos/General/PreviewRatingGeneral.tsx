@@ -18,7 +18,6 @@ export default function PreviewRatingGeneral({
 }) {
   const { user } = useAuth();
   const { store, dispatchStore } = useContext(MyContext);
-  const [progress, setProgress] = useState<number>(0);
   const [rating, setRating] = useState<RatingInterface>({
     ...initialState,
     selectedRating: ratingSelect || 0,
@@ -60,12 +59,6 @@ export default function PreviewRatingGeneral({
         },
         {
           headers: { "Content-Type": "application/json" },
-          onUploadProgress: (event) => {
-            const percent = Math.round(
-              ((event?.loaded || 0) * 100) / (event.total || 1)
-            );
-            setProgress(percent);
-          },
         } // Cambia a application/json
       );
 
@@ -90,7 +83,7 @@ export default function PreviewRatingGeneral({
 
   const userAvatar = user?.user_metadata.avatar_url || logoUser;
   const userName = user?.user_metadata.full_name || "user";
-  console.log(progress);
+
   return (
     <Rating
       rating={rating}

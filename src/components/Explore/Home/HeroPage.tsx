@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { Button } from "@/components/ui/button";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 type ArcGalleryHeroProps = {
   images: string[];
@@ -59,12 +60,6 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   const count = Math.max(images.length, 2);
   const step = (endAngle - startAngle) / (count - 1);
 
-  function ScrollToId() {
-    const element = document.getElementById("main-general");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  }
   return (
     <section
       className={`relative overflow-hidden bg-background flex flex-col ${className}`}
@@ -136,7 +131,7 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
-              onClick={ScrollToId}
+              onClick={() => ScrollTo("main-general")}
               className="w-full  py-3 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 hover:from-slate-300 hover:via-slate-200 hover:to-slate-300 text-white hover:text-slate-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
             >
               Explorar

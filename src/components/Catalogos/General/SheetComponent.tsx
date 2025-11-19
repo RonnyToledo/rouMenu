@@ -34,6 +34,7 @@ import { Categoria, Current } from "@/context/InitialStatus";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 type SheetView = "home" | "categories" | "coins";
 
@@ -333,29 +334,18 @@ function CategoriesView({ onBack, onClose }: CategoriesViewProps) {
         const targetId = category.id;
 
         if (pathname === targetUrl) {
-          scrollToElement(targetId);
+          ScrollTo(targetId);
           onClose();
         } else {
           router.push(targetUrl);
           onClose();
-          setTimeout(() => scrollToElement(targetId), 100);
+          setTimeout(() => ScrollTo(targetId), 100);
         }
       }
     },
     [store?.sitioweb, pathname, router, onClose]
   );
 
-  const scrollToElement = (elementId: string) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "nearest",
-      });
-    }
-  };
-  console.log(ExtraerCategorias(store?.categorias, store.products), store);
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
       <ListSheet name="Atrás" icon2={<ChevronLeft />} action={onBack} />

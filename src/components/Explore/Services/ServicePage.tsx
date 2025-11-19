@@ -17,6 +17,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ScrollTo } from "@/functions/ScrollTo";
 export default function ServiciosPage() {
   const router = useRouter();
   const benefits = [
@@ -88,12 +89,7 @@ export default function ServiciosPage() {
         "Optimización de velocidad para una experiencia de usuario excepcional.",
     },
   ];
-  function GotoSection(params: string) {
-    const element = document.getElementById(params);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }
+
   const process = [
     {
       step: "01",
@@ -246,7 +242,7 @@ export default function ServiciosPage() {
               <button
                 key={index}
                 className="p-0 m-0"
-                onClick={() => GotoSection(`process_${index}`)}
+                onClick={() => ScrollTo(`process_${index}`)}
                 id={`process_${index}`}
               >
                 <Card className="relative hover:shadow-lg transition-shadow">

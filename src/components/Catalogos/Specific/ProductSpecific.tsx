@@ -234,7 +234,7 @@ export default function Product({ id }: { id: string }) {
 
               <div className="flex items-center justify-between">
                 <Link
-                  href={`/catalog/${store.sitioweb}/product/${product?.productId}/reviews`}
+                  href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
                   <div className="flex items-center">

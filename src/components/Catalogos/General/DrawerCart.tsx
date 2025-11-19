@@ -26,6 +26,7 @@ import { logoApp } from "@/lib/image";
 import { Trash2 } from "lucide-react";
 import { getTotalFinal } from "@/functions/getTotalPedido";
 import { toast } from "sonner";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 export default function DrawerCart() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -73,10 +74,7 @@ export default function DrawerCart() {
       //IR a categoria especifica
       if (pathname.includes("/category/")) {
         // Si estamos en la pagina de categorias
-        const element = document.getElementById(Id);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        ScrollTo(Id, 70);
       } else {
         router.push(`/t/${store.sitioweb}/category/${categoria}#${Id}`);
       }
@@ -84,10 +82,7 @@ export default function DrawerCart() {
       // IR a home"
       if (!pathname.includes("/category/")) {
         // Si estamos en la pagina de home
-        const element = document.getElementById(Id);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        ScrollTo(Id, 70);
       } else {
         router.push(`/t/${store.sitioweb}#${Id}`);
       }

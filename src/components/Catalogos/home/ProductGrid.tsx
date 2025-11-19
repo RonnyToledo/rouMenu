@@ -28,7 +28,7 @@ export default React.memo(function ProductGrid({
 }: ProductGridInterface) {
   const { store } = useContext(MyContext);
   const router = useRouter();
-  console.log(store?.edit);
+
   // Memoizar valores calculados
   const isNew = useMemo(() => isNewProduct(product.creado), [product.creado]);
 

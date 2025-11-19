@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useApp } from "@/context/AppContext";
 import { FaHome, FaInfo } from "react-icons/fa";
 import { RiCustomerServiceFill } from "react-icons/ri";
-import { MdContactPage } from "react-icons/md";
+import { MdBook, MdContactPage } from "react-icons/md";
 
 export const cardsinfo = [
   {
@@ -42,6 +42,12 @@ export const cardsinfo = [
     icon: RiCustomerServiceFill,
   },
   {
+    path: "/blog",
+    name: "Blog",
+    descripcion: "Consejos y novedades",
+    icon: MdBook,
+  },
+  {
     path: "/contact",
     name: "Contacto",
     descripcion: "Contactenos ante dudas o nuevas ideas",
@@ -54,6 +60,7 @@ export default function Header({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (pathname !== "/buscar" && !search) return;
@@ -99,18 +106,17 @@ export default function Header({ children }: { children: ReactNode }) {
                 />
               </div>
             )}
-            {pathname == "/" ||
-            pathname == "/services" ||
-            pathname == "/contact" ||
-            pathname.includes("/info") ? (
-              <Drawer>
+            {["/info", "/blog", "/contact", "/services", "/"].some((r) =>
+              pathname.startsWith(r)
+            ) ? (
+              <Drawer open={open} onOpenChange={setOpen}>
                 <DrawerTrigger asChild>
                   <Button variant="ghost" className="p-0 m-0">
                     <HiMiniBars3BottomRight className="size-6 text-slate-700 " />
                   </Button>
                 </DrawerTrigger>
                 <DrawerContent>
-                  <div className="mx-auto w-full max-w-sm">
+                  <div className="mx-auto w-full max-w-sm p-2">
                     <DrawerHeader>
                       <DrawerTitle>rouMenu</DrawerTitle>
                       <DrawerDescription>
@@ -126,9 +132,14 @@ export default function Header({ children }: { children: ReactNode }) {
                             <CardDrawerActive
                               key={`Active_${index}`}
                               card={card}
+                              onClick={() => setOpen(false)}
                             />
                           ) : (
-                            <CardDrawer key={`No_acive_${index}`} card={card} />
+                            <CardDrawer
+                              key={`No_acive_${index}`}
+                              card={card}
+                              onClick={() => setOpen(false)}
+                            />
                           )
                         )}
                     </div>
@@ -155,11 +166,18 @@ interface CardDrawerInterface {
   path: string;
   icon: IconType;
 }
-export function CardDrawerActive({ card }: { card: CardDrawerInterface }) {
+export function CardDrawerActive({
+  card,
+  onClick,
+}: {
+  card: CardDrawerInterface;
+  onClick: () => void;
+}) {
   return (
     <Link
       href={card.path}
       className="bg-primary text-primary-foreground p-4 rounded-xl shadow-sm"
+      onClick={onClick}
     >
       <card.icon className="w-6 h-6 mb-2" />
       <h3 className="font-semibold text-sm">{card.name}</h3>
@@ -167,11 +185,18 @@ export function CardDrawerActive({ card }: { card: CardDrawerInterface }) {
     </Link>
   );
 }
-export function CardDrawer({ card }: { card: CardDrawerInterface }) {
+export function CardDrawer({
+  card,
+  onClick,
+}: {
+  card: CardDrawerInterface;
+  onClick: () => void;
+}) {
   return (
     <Link
       href={card.path}
       className="bg-accent text-accent-foreground p-4 rounded-xl shadow-sm"
+      onClick={onClick}
     >
       <card.icon className="w-6 h-6 mb-2" />
       <h3 className="font-semibold text-sm">{card.name}</h3>
