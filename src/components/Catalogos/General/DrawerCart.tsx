@@ -105,7 +105,11 @@ export default function DrawerCart() {
 
   return (
     contentCart > 0 &&
-    !(pathname.includes("/carrito") || pathname.includes("/producto")) && (
+    !(
+      pathname.includes("/carrito") ||
+      pathname.includes("/producto") ||
+      pathname.includes("/blog")
+    ) && (
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
         <DrawerTrigger asChild>
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-10 shadow-xl  max-w-md mx-auto rounded-t-2xl ">

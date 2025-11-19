@@ -121,10 +121,16 @@ export default React.memo(function ProductGrid({
         {!store?.edit?.minimalista && (
           <p className={descriptionClasses}>{product.descripcion || "..."}</p>
         )}
-        <div className="flex">
-          {isNew && <Badge className="bg-slate-700">Nuevo</Badge>}
-          {product.favorito && <Badge className="bg-slate-700">Top</Badge>}
-          {!product.stock && <Badge className="bg-slate-700">Agotado</Badge>}
+        <div className="flex gap-0.5">
+          {isNew && (
+            <Badge className="bg-slate-700 text-[0.5rem] px-1.5">Nuevo</Badge>
+          )}
+          {product.favorito && (
+            <Badge className="bg-slate-700 text-[0.5rem] px-1.5">Top</Badge>
+          )}
+          {!product.stock && (
+            <Badge className="bg-slate-700 text-[0.5rem] px-1.5">Agotado</Badge>
+          )}
         </div>
         <div className="flex items-center justify-between ">
           {product.venta ? (
