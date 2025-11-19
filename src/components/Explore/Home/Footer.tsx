@@ -5,7 +5,7 @@ import Link from "next/link";
 export function ExplorationFooter() {
   const now = new Date();
   return (
-    <footer className="bg-slate-50 border-t border-slate-200 mt-auto">
+    <footer className="bg-gradient-to-b from-slate-50 to-slate-300 border-t border-slate-200 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-12 ">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-slate-800 mb-4">
