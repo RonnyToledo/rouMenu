@@ -44,6 +44,7 @@ interface SheetContextType {
   close: () => void;
   toggle: () => void;
   openToView: (view: SheetView) => void;
+  highlightCategory: (categoryId: string) => void;
   isOpen: boolean;
 }
 
@@ -62,6 +63,9 @@ export function useSheet() {
 export function SheetProvider({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showState, setShowState] = useState<SheetView>("home");
+  const [highlightCategoryId, setHighlightCategoryId] = useState<string | null>(
+    null
+  );
 
   const open = useCallback(() => setIsMenuOpen(true), []);
   const close = useCallback(() => setIsMenuOpen(false), []);
@@ -71,15 +75,27 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
     setIsMenuOpen(true);
   }, []);
 
+  const highlightCategory = useCallback((categoryId: string) => {
+    // Abrir el sheet en la vista de categorías
+    setShowState("categories");
+    setIsMenuOpen(true);
+
+    // Esperar un poco para que el sheet se abra y renderice
+    setTimeout(() => {
+      setHighlightCategoryId(categoryId);
+    }, 300);
+  }, []);
+
   const value = useMemo(
     () => ({
       open,
       close,
       toggle,
       openToView,
+      highlightCategory,
       isOpen: isMenuOpen,
     }),
-    [open, close, toggle, openToView, isMenuOpen]
+    [open, close, toggle, openToView, highlightCategory, isMenuOpen]
   );
 
   return (
@@ -90,6 +106,8 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
         onOpenChange={setIsMenuOpen}
         showState={showState}
         setShowState={setShowState}
+        highlightCategoryId={highlightCategoryId}
+        onHighlightComplete={() => setHighlightCategoryId(null)}
       />
     </SheetContext.Provider>
   );
@@ -102,6 +120,8 @@ interface SheetComponentProps {
   onOpenChange: (open: boolean) => void;
   showState: SheetView;
   setShowState: (view: SheetView) => void;
+  highlightCategoryId: string | null;
+  onHighlightComplete: () => void;
 }
 
 function SheetComponent({
@@ -109,6 +129,8 @@ function SheetComponent({
   onOpenChange,
   showState,
   setShowState,
+  highlightCategoryId,
+  onHighlightComplete,
 }: SheetComponentProps) {
   const { store, dispatchStore } = useContext(MyContext);
   const { user, loading, signOut } = useAuth();
@@ -262,6 +284,8 @@ function SheetComponent({
               <CategoriesView
                 onBack={() => setShowState("home")}
                 onClose={closeSheet}
+                highlightCategoryId={highlightCategoryId}
+                onHighlightComplete={onHighlightComplete}
               />
             )}
 
@@ -317,12 +341,46 @@ function HomeView({ items }: HomeViewProps) {
 interface CategoriesViewProps {
   onBack: () => void;
   onClose: () => void;
+  highlightCategoryId: string | null;
+  onHighlightComplete: () => void;
 }
 
-function CategoriesView({ onBack, onClose }: CategoriesViewProps) {
+function CategoriesView({
+  onBack,
+  onClose,
+  highlightCategoryId,
+  onHighlightComplete,
+}: CategoriesViewProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { store } = useContext(MyContext);
+  const [blinkingCategoryId, setBlinkingCategoryId] = useState<string | null>(
+    null
+  );
+
+  // Efecto para manejar el highlight cuando cambia el ID
+  useEffect(() => {
+    if (highlightCategoryId !== null) {
+      // Hacer scroll a la categoría
+      const categoryElement = document.getElementById(
+        `category-${highlightCategoryId}`
+      );
+      if (categoryElement) {
+        categoryElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // Iniciar el pestañeo
+      setBlinkingCategoryId(highlightCategoryId);
+
+      // Detener el pestañeo después de 1 segundo
+      const timeout = setTimeout(() => {
+        setBlinkingCategoryId(null);
+        onHighlightComplete();
+      }, 1000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [highlightCategoryId, onHighlightComplete]);
 
   const handleCategoryClick = useCallback(
     (category: Categoria) => {
@@ -365,9 +423,13 @@ function CategoriesView({ onBack, onClose }: CategoriesViewProps) {
         (category: Categoria) => (
           <React.Fragment key={category.id}>
             <ListSheet
+              id={`category-${category.id}`}
               name={category.name || ""}
               icon2={<ChevronRight />}
               action={() => handleCategoryClick(category)}
+              className={
+                blinkingCategoryId === category.id ? "animate-blink" : ""
+              }
             />
           </React.Fragment>
         )
@@ -407,6 +469,7 @@ interface ListSheetProps {
   action?: () => void;
   className?: string;
   final?: boolean;
+  id?: string;
 }
 
 const ListSheet = React.memo(function ListSheet({
@@ -416,10 +479,12 @@ const ListSheet = React.memo(function ListSheet({
   action,
   className,
   final = false,
+  id,
 }: ListSheetProps) {
   return (
     <>
       <Button
+        id={id}
         onClick={action}
         variant="ghost"
         className={cn(

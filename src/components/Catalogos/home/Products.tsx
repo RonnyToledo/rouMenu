@@ -222,6 +222,7 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
     <div className="mb-12">
       <div id={categoria.id} />
       <CategoryHeader
+        id={categoria.id}
         name={categoria.name || ""}
         prevID={prevID}
         nextID={nextID}
@@ -240,15 +241,17 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   );
 });
 function CategoryHeader({
+  id,
   name,
   prevID,
   nextID,
 }: {
+  id: string;
   name: string;
   prevID: string;
   nextID: string;
 }) {
-  const { openToView } = useSheet();
+  const { highlightCategory } = useSheet();
 
   return (
     <motion.div
@@ -267,7 +270,7 @@ function CategoryHeader({
         <Button
           variant={"ghost"}
           className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
-          onClick={() => openToView("categories")}
+          onClick={() => highlightCategory(id)}
         >
           {name}
         </Button>
