@@ -7,11 +7,12 @@ import { useHistory } from "@/context/AppContext";
 import Link from "next/link";
 import { useSheet } from "./SheetComponent";
 import { TbMenuDeep } from "react-icons/tb";
+import { logoApp } from "@/lib/image";
 
 export default function Header() {
   const { smartBack } = useHistory();
   const { open } = useSheet();
-  const { store } = useContext(MyContext);
+  const { store, dispatchStore } = useContext(MyContext);
 
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-b from-slate-50 to-transparent h-16 p-2 w-full">
@@ -28,7 +29,16 @@ export default function Header() {
               width={100}
               height={100}
               className="rounded-full size-10"
-              src={store?.urlPoster || "/default-logo.png"}
+              src={store?.urlPoster || logoApp}
+              onError={() => {
+                dispatchStore({
+                  type: "Add",
+                  payload: {
+                    ...store,
+                    urlPoster: "",
+                  },
+                });
+              }}
             />
           </Button>
           <Link

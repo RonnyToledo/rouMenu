@@ -270,7 +270,7 @@ export default function AboutPage() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <h4 className="text-slate-900 font-medium">
-                          {review.name}
+                          {review.user.name}
                         </h4>
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex gap-0.5">
@@ -291,7 +291,9 @@ export default function AboutPage() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-slate-700 text-sm mb-3">{review.cmt}</p>
+                    <p className="text-slate-700 text-sm mb-3 line-clamp-2">
+                      {review.cmt}
+                    </p>
                   </div>
                 ))}
               </div>

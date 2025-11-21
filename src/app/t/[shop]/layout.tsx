@@ -4,7 +4,6 @@ import { AppState } from "@/context/InitialStatus";
 import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import Unavailable from "@/components/Catalogos/General/Unavailable";
-import DrawerCart from "@/components/Catalogos/General/DrawerCart";
 import { Metadata } from "next";
 import { buildShopMetadata } from "@/lib/shopMeta";
 
@@ -48,7 +47,6 @@ export default async function RootLayout({
     <div>
       <MyProvider storeSSD={store}>
         <div className="min-h-[80vh]">{children}</div>
-        <DrawerCart />
       </MyProvider>
     </div>
   );

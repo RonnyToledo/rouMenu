@@ -166,7 +166,7 @@ function SheetComponent({
   const homeItems = useMemo(
     () => [
       {
-        name: "Home",
+        name: "Inicio",
         icon: <IoIosHome />,
         action: () => {
           router.push(`/t/${store.sitioweb}/`);
@@ -174,7 +174,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Buscar",
+        name: "Buscar Productos",
         icon: <IoSearch />,
         action: () => {
           router.push(`/t/${store.sitioweb}/search`);
@@ -182,7 +182,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Info",
+        name: "Sobre Nosotros",
         icon: <IoStorefrontOutline />,
         action: () => {
           router.push(`/t/${store.sitioweb}/about`);
@@ -190,7 +190,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Categorias",
+        name: "Ver Categorias",
         icon: <MdCategory />,
         action: () => setShowState("categories"),
       },
@@ -221,7 +221,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Explorar",
+        name: "Explorar mas Catalogos",
         icon: <MdTravelExplore />,
         action: () => {
           router.push(`/`);

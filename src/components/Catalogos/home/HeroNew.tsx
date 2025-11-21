@@ -11,7 +11,7 @@ import { logoApp } from "@/lib/image";
 import { Store, Truck } from "lucide-react";
 
 export default function HeroNew({}) {
-  const { store } = useContext(MyContext);
+  const { store, dispatchStore } = useContext(MyContext);
   const searchParams = useSearchParams();
   const params = useParams();
   const { user } = useAuth();
@@ -52,24 +52,33 @@ export default function HeroNew({}) {
             width={400}
             height={500}
             className="w-full aspect-square  object-cover"
+            onError={() => {
+              dispatchStore({
+                type: "Add",
+                payload: {
+                  ...store,
+                  banner: "",
+                },
+              });
+            }}
           />
         </div>
       </div>
       <div className="container mx-auto px-4  -mt-12 relative z-10">
-        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4 mb-6">
-          <div className="flex flex-col  gap-4">
-            <div className="flex-1">
-              <div className="flex flex-col">
+        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4 mb-2">
+          <div className="flex flex-col  gap-2">
+            <div className="flex-1 gap-1">
+              <div className="flex flex-col gap-1">
                 <Link
                   href={`/t/${store.sitioweb}/about/ratings`}
-                  className="flex items-start gap-3 mb-3"
+                  className="flex items-center gap-2"
                 >
                   <Star className="w-4 h-4 fill-current text-slate-700" />
                   <span className="font-medium text-slate-900">
                     {store?.comentTienda.promedio.toFixed(1)}
                   </span>
                   <span>({store?.comentTienda.total} reseñas)</span>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-700">•</span>
                   <span>
                     $ {store.moneda.find((m) => m.defecto)?.nombre || ""}
                   </span>
@@ -77,7 +86,7 @@ export default function HeroNew({}) {
 
                 <Link
                   href={`/t/${store?.sitioweb}/about#ubicacion`}
-                  className="flex items-center gap-2 text-slate-700 mb-4"
+                  className="flex items-center gap-2 text-slate-700 "
                 >
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm">
@@ -86,12 +95,12 @@ export default function HeroNew({}) {
                 </Link>
               </div>
 
-              <p className="text-slate-700 text-sm mb-4 line-clamp-2">
+              <p className="text-slate-700 text-sm line-clamp-2">
                 {store?.parrrafo || "Store?..."}
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 ">
+            <div className="flex flex-col sm:flex-row gap-1 ">
               {store.domicilio && (
                 <div className="flex items-center gap-3 bg-slate-300 rounded-xl p-3 flex-1">
                   <div className="p-2 bg-slate-400 rounded-lg">

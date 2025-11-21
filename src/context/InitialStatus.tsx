@@ -99,11 +99,16 @@ export interface StarDistribution {
 export interface DataComentTienda {
   id: number;
   cmt: string;
-  name: string;
   star: number;
   title: string;
   UIStore: string;
   created_at: string;
+  user: {
+    email: string;
+    name: string;
+    image: string;
+    id: string;
+  };
 }
 export interface ComentTienda {
   porEstrellas: StarDistribution;

@@ -100,6 +100,7 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   }, [store.sitioweb]);
 
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
+
   return (
     <MyContext.Provider value={contextValue}>
       <SheetProvider>

@@ -122,8 +122,10 @@ export default function CommentsPage({ id }: { id: string }) {
               <div className="flex flex-col items-center gap-2">
                 <Star className="size-5 fill-yellow-500 text-yellow-500" />
                 <p className="text-2xl font-bold">
-                  {reviews.reduce((sum, rev) => rev.star + sum, 0) /
-                    reviews.length || 0}
+                  {(
+                    reviews.reduce((sum, rev) => rev.star + sum, 0) /
+                      reviews.length || 0
+                  ).toFixed(1)}
                 </p>
                 <p className="text-xs text-muted-foreground text-center">
                   Promedio

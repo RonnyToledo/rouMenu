@@ -40,7 +40,7 @@ export function CatalogFooter() {
                 ...store?.contacto,
               ].map((obj, index) => (
                 <Link
-                  href={UrlContact(obj.url || "", obj.tipo)}
+                  href={UrlContact(obj.tipo, obj.url || "")}
                   key={index}
                   className="line-clamp-1 w-full flex items-center gap-2 text-slate-400 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
                 >
@@ -147,7 +147,7 @@ export function IconSelect({
 
 function UrlContact(tipo: string, url: string): string {
   if (tipo == "wa") {
-    if (url.includes("http")) {
+    if (url.startsWith("http")) {
       return url;
     } else {
       return `https://wa.me/${url}/`;
@@ -165,7 +165,7 @@ function UrlContact(tipo: string, url: string): string {
 function userContact(tipo: string, url: string): string {
   if (tipo == "wa" || tipo == "cell") {
     if (url.includes("http")) {
-      return url;
+      return "Grupo de WhatsApp";
     } else {
       return `+${url}`;
     }

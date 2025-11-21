@@ -186,6 +186,19 @@ export default function Product({ id }: { id: string }) {
                 className="w-full h-full object-cover"
                 src={product?.image || store.urlPoster || logoApp}
                 style={{ filter: product?.stock ? "initial" : "grayscale(1)" }}
+                onError={() => {
+                  dispatchStore({
+                    type: "Add",
+                    payload: {
+                      ...store,
+                      products: store.products.map((prod) =>
+                        product?.productId == prod.productId
+                          ? { ...prod, image: "" }
+                          : prod
+                      ),
+                    },
+                  });
+                }}
               />
             </motion.div>
           </AnimatePresence>
@@ -228,7 +241,7 @@ export default function Product({ id }: { id: string }) {
           {/* Title and Actions */}
           <div className="sapce-y-2">
             <div className="space-y-1">
-              <h1 className="text-3xl font-bold text-slate-800 leading-tight">
+              <h1 className="text-2xl font-bold text-slate-800 leading-tight line-clamp-3">
                 {product?.title}
               </h1>
 
@@ -297,10 +310,17 @@ export default function Product({ id }: { id: string }) {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 text-emerald-400">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-sm font-medium">En stock</span>
-              </div>
+              {product?.stock ? (
+                <div className="flex items-center gap-2 text-emerald-400">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium">En stock</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-red-400">
+                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium">Off Stock</span>
+                </div>
+              )}
             </div>
 
             {/* Tags */}

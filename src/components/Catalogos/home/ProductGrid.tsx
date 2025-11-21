@@ -11,7 +11,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ButtonOfCart } from "./ButtonOfCart";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 
@@ -66,12 +65,9 @@ export default React.memo(function ProductGrid({
   const titleClasses = useMemo(
     () =>
       cn(
-        "font-cinzel font-bold text-[var(--text-gold)] text-base flex items-center w-full",
-        store?.edit?.minimalista
-          ? "line-clamp-1 h-6"
-          : `line-clamp-2 ${product?.span && store?.edit?.grid ? "h-6" : "h-12"}`
+        "font-cinzel font-bold text-[var(--text-gold)] text-base flex items-center w-full line-clamp-2"
       ),
-    [store?.edit?.minimalista, store?.edit?.grid, product?.span]
+    []
   );
 
   const descriptionClasses = useMemo(
@@ -106,6 +102,7 @@ export default React.memo(function ProductGrid({
       transition={{ delay: 0.2 + i * 0.05, duration: 0.4 }}
     >
       <ProductImage
+        productId={product.productId}
         productUrl={productUrl}
         image={product.image || banner}
         title={product.title}
@@ -116,20 +113,26 @@ export default React.memo(function ProductGrid({
       />
 
       <div className="p-1 flex flex-col justify-evenly ">
-        <h4 className={cn(titleClasses, "text-[14px]")}>{product.title}</h4>
+        <h4 className={cn(titleClasses)}>{product.title}</h4>
 
         {!store?.edit?.minimalista && (
           <p className={descriptionClasses}>{product.descripcion || "..."}</p>
         )}
         <div className="flex gap-0.5">
           {isNew && (
-            <Badge className="bg-slate-700 text-[0.5rem] px-1.5">Nuevo</Badge>
+            <Badge className="bg-green-700/50 text-[0.5rem] px-1.5">
+              Nuevo
+            </Badge>
           )}
           {product.favorito && (
-            <Badge className="bg-slate-700 text-[0.5rem] px-1.5">Top</Badge>
+            <Badge className="bg-cyan-700/50 text-[0.5rem] px-1.5">
+              Popular
+            </Badge>
           )}
           {!product.stock && (
-            <Badge className="bg-slate-700 text-[0.5rem] px-1.5">Agotado</Badge>
+            <Badge className="bg-red-700/50 text-[0.5rem] px-1.5">
+              Agotado
+            </Badge>
           )}
         </div>
         <div className="flex items-center justify-between ">
@@ -164,6 +167,7 @@ export default React.memo(function ProductGrid({
 // Subcomponentes optimizados
 
 interface ProductImageProps {
+  productId: string;
   productUrl: string;
   image: string;
   title?: string;
@@ -174,6 +178,7 @@ interface ProductImageProps {
 }
 
 const ProductImage = React.memo(function ProductImage({
+  productId,
   productUrl,
   image,
   title,
@@ -182,6 +187,8 @@ const ProductImage = React.memo(function ProductImage({
   imageClasses,
   promedioStar,
 }: ProductImageProps) {
+  const { store, dispatchStore } = useContext(MyContext);
+
   const imageStyle = useMemo(
     () => ({ filter: isInStock ? "initial" : "grayscale(1)" }),
     [isInStock]
@@ -199,7 +206,15 @@ const ProductImage = React.memo(function ProductImage({
         src={image}
         style={imageStyle}
         onError={() => {
-          toast.error(`Error al cargar la imagen del producto ${title} `);
+          dispatchStore({
+            type: "Add",
+            payload: {
+              ...store,
+              products: store.products.map((prod) =>
+                productId == prod.productId ? { ...prod, image: "" } : prod
+              ),
+            },
+          });
         }}
       />
       {promedioStar ? (

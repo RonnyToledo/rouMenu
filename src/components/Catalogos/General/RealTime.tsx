@@ -83,7 +83,7 @@ export default function SitioRealtime({ uuid }: Props) {
       const channelP = supabase.channel(channelNameProducts).on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "Products",
           filter: filterProducts,
@@ -93,18 +93,24 @@ export default function SitioRealtime({ uuid }: Props) {
           if (now - lastToastAtRef.current > 3000) {
             lastToastAtRef.current = now;
             router.refresh();
-
-            toast.info("Nueva Disponibilidad.", {
-              description: payload.new?.title ? `${payload.new?.title}` : "",
-              action: {
-                label: "Ver",
-                onClick: () =>
-                  NewProduct(
-                    payload.new?.productId || payload.new?.title || "",
-                    payload.new?.caja || ""
-                  ),
-              },
-            });
+            if (payload.new) {
+              const newRow = (payload.new ?? {}) as {
+                title?: string;
+                productId?: string;
+                caja?: string;
+              };
+              toast.info("Nueva Disponibilidad.", {
+                description: newRow.title ? `${newRow.title}` : "",
+                action: {
+                  label: "Ver",
+                  onClick: () =>
+                    NewProduct(
+                      newRow.productId || newRow.title || "",
+                      newRow.caja || ""
+                    ),
+                },
+              });
+            }
           }
         }
       );

@@ -69,7 +69,7 @@ export default function DrawerCart() {
 
     if (value === 0) setOpenDrawer(false);
   }, [store.products]);
-  console.log("Content Cart:", contentCart);
+
   function RedirectLink(Id: string, categoria: string) {
     if (DetectCategoria(categoria, store.categorias)) {
       //IR a categoria especifica
@@ -113,7 +113,7 @@ export default function DrawerCart() {
     ) && (
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
         <DrawerTrigger asChild>
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-10 shadow-xl  max-w-md mx-auto rounded-t-2xl ">
+          <div className="sticky bottom-0 bg-white border-t z-10   max-w-md mx-auto rounded-t-2xl ">
             <Button
               variant={"ghost"}
               className="flex items-center w-full justify-between py-2 px-4 h-auto"
