@@ -17,7 +17,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-b from-slate-50 to-transparent h-16 p-2 w-full">
       <div className="flex items-center justify-between shadow-md rounded-full h-full p-1 gap-3 bg-white ">
-        <div className="flex items-center w-full">
+        <div className="flex items-center w-full gap-1">
           <Button
             variant="ghost"
             onClick={smartBack}
@@ -43,7 +43,7 @@ export default function Header() {
           </Button>
           <Link
             href={`/t/${store.sitioweb}/search`}
-            className="ml-4 w-full flex gap-1 items-center text-base font-cinzel tracking-wider text-slate-700"
+            className="w-fit flex gap-1 items-center text-base font-cinzel tracking-wider text-slate-700"
           >
             <h1 className=" line-clamp-1 truncate">
               {`Buscar en ${store?.name || "Rou-Menu"}`}
