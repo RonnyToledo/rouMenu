@@ -255,7 +255,7 @@ function CategoryHeader({
 
   return (
     <motion.div
-      className="sticky top-14 bg-transparent z-10 flex items-center justify-center"
+      className="sticky top-16 bg-transparent z-10 flex items-center justify-center"
       variants={headerVariants}
     >
       <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
