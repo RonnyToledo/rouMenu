@@ -1,5 +1,12 @@
 "use client";
-import React, { useCallback, useContext, useState, useEffect } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  memo,
+} from "react";
 import { Badge } from "@/components/ui/badge";
 import { TbShoppingCartPlus, TbShoppingCartMinus } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,86 +16,139 @@ import { Product } from "@/context/InitialStatus";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { ScrollTo } from "@/functions/ScrollTo";
 
-export function ButtonOfCart({
-  product,
-  variant = "default",
-}: {
+// Variantes de animación fuera del componente (se crean solo una vez)
+const slideVariants = {
+  initial: { opacity: 0, width: 0 },
+  animate: { opacity: 1, width: "100%" },
+  exit: { opacity: 0, width: 0 },
+};
+
+const iconVariants = {
+  trash: {
+    initial: { opacity: 0, scale: 0.8, rotate: -45 },
+    animate: { opacity: 1, scale: 1, rotate: 0 },
+    exit: { opacity: 0, scale: 0.8, rotate: 45 },
+  },
+  minus: {
+    initial: { opacity: 0, scale: 0.8, y: -8 },
+    animate: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, scale: 0.8, y: 8 },
+  },
+};
+
+const transition = { duration: 0.4 };
+
+interface ButtonOfCartProps {
   product: Product;
   variant?: "outline" | "default";
-}) {
+}
+
+export const ButtonOfCart = memo(function ButtonOfCart({
+  product,
+  variant = "default",
+}: ButtonOfCartProps) {
   const { store, dispatchStore } = useContext(MyContext);
   const [slideOpen, setSlideOpen] = useState(false);
 
-  const handleToCart = useCallback(
-    (productToCart: Product) => {
-      dispatchStore({
-        type: "AddCart",
-        payload: JSON.stringify(productToCart),
-      });
-    },
-    [dispatchStore]
+  const productCant = product.Cant || 0;
+  const productStock = product.stock || 0;
+
+  // Memoizar valores calculados
+  const isDisabled = useMemo(
+    () => store.stocks && productCant >= productStock,
+    [store.stocks, productCant, productStock]
   );
+
+  const isLastItem = productCant === 1;
+
+  // Handlers optimizados
+  const handleIncrement = useCallback(() => {
+    ScrollTo(product.productId, 120);
+    dispatchStore({
+      type: "AddCart",
+      payload: JSON.stringify({ ...product, Cant: productCant + 1 }),
+    });
+    setSlideOpen(true);
+  }, [dispatchStore, product, productCant]);
+
+  const handleDecrement = useCallback(() => {
+    dispatchStore({
+      type: "AddCart",
+      payload: JSON.stringify({ ...product, Cant: productCant - 1 }),
+    });
+    if (isLastItem) setSlideOpen(false);
+  }, [dispatchStore, product, productCant, isLastItem]);
+
+  // Efecto optimizado
   useEffect(() => {
-    if (product.Cant == 0) setSlideOpen(false);
-  }, [product.Cant]);
+    if (productCant === 0) setSlideOpen(false);
+  }, [productCant]);
+
+  // Clases memoizadas
+  const containerClasses = useMemo(
+    () =>
+      `absolute flex items-center justify-end rounded-full right-0 overflow-hidden z-1 ${
+        variant === "default" ? "bg-primary" : ""
+      }`,
+    [variant]
+  );
 
   return (
-    <motion.div
-      className={`absolute flex items-center justify-end rounded-full right-0 overflow-hidden z-1 ${
-        variant && variant == "default" && "bg-primary"
-      }`}
-      transition={{ duration: 0.4 }}
-    >
+    <motion.div className={containerClasses} transition={transition}>
       <AnimatePresence>
         {slideOpen && (
           <motion.div
             className="flex items-center rounded-l-full"
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: "100%" }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.4 }}
+            variants={slideVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={transition}
           >
-            <div className="flex justify-center items-center">
-              <Button
-                size="icon"
-                type="button"
-                variant={variant || "default"}
-                className="size-8 flex justify-center items-center rounded-full"
-                onClick={() => {
-                  handleToCart({ ...product, Cant: (product.Cant || 0) - 1 });
-                  if (product.Cant == 1) setSlideOpen(false);
-                }}
-                disabled={product.Cant === 0}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {product.Cant === 1 ? (
-                    <motion.span
-                      key="trash"
-                      initial={{ opacity: 0, scale: 0.8, rotate: -45 }}
-                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, rotate: 45 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="inline-flex"
-                    >
-                      <FaRegTrashCan />
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="chevron"
-                      initial={{ opacity: 0, scale: 0.8, y: -8 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.8, y: 8 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="inline-flex"
-                    >
-                      <TbShoppingCartMinus className="size-4" />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </Button>
-            </div>
+            <Button
+              size="icon"
+              type="button"
+              variant={variant}
+              className="size-8 flex justify-center items-center rounded-full"
+              onClick={handleDecrement}
+              disabled={productCant === 0}
+              aria-label={
+                isLastItem ? "Eliminar del carrito" : "Reducir cantidad"
+              }
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {isLastItem ? (
+                  <motion.span
+                    key="trash"
+                    variants={iconVariants.trash}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    className="inline-flex"
+                  >
+                    <FaRegTrashCan aria-hidden="true" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="minus"
+                    variants={iconVariants.minus}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    className="inline-flex"
+                  >
+                    <TbShoppingCartMinus
+                      className="size-4"
+                      aria-hidden="true"
+                    />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Button>
             <div className="flex items-center justify-center">
-              <Badge variant={variant || "default"}>{product.Cant}</Badge>
+              <Badge variant={variant} aria-label={`Cantidad: ${productCant}`}>
+                {productCant}
+              </Badge>
             </div>
           </motion.div>
         )}
@@ -96,23 +156,18 @@ export function ButtonOfCart({
       <Button
         size="icon"
         type="button"
-        variant={variant || "default"}
-        disabled={store.stocks && product.Cant >= (product.stock || 0)}
+        variant={variant}
+        disabled={isDisabled}
         className="size-8 flex justify-center items-center rounded-full"
-        onClick={() => {
-          if (slideOpen) {
-            ScrollTo(product.productId, 120);
-            handleToCart({ ...product, Cant: (product.Cant || 0) + 1 });
-          }
-          setSlideOpen(true);
-        }}
+        onClick={handleIncrement}
+        aria-label="Añadir al carrito"
       >
-        {!slideOpen && product.Cant > 0 ? (
-          product.Cant
+        {!slideOpen && productCant > 0 ? (
+          productCant
         ) : (
-          <TbShoppingCartPlus className="size-5" />
+          <TbShoppingCartPlus className="size-5" aria-hidden="true" />
         )}
       </Button>
     </motion.div>
   );
-}
+});

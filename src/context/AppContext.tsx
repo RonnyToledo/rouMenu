@@ -22,6 +22,9 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  requireAuth: (message?: string) => Promise<boolean>;
+  openLoginPopover: (message?: string) => void;
+  closeLoginPopover: () => void;
 }
 
 // General Types
@@ -165,6 +168,9 @@ const AppContext = createContext<AppContextType>({
   session: null,
   loading: true,
   signOut: async () => {},
+  requireAuth: async () => false,
+  openLoginPopover: () => {},
+  closeLoginPopover: () => {},
   // General defaults
   generalData: defaultGeneralData,
   setGeneralData: () => null,
@@ -189,13 +195,19 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [loginMessage, setLoginMessage] = useState<string | undefined>(
+    undefined
+  );
   const supabase = createClientComponentClient();
+
+  // Promise resolver para manejar el resultado del login
+  const authResolverRef = useRef<((value: boolean) => void) | null>(null);
 
   // General State
   const [generalData, setGeneralData] = useState<AppState>(
     storeSSD ?? defaultGeneralData
   );
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // History State
   const [record, setRecord] = useState<HistoryEntry[]>([]);
@@ -221,6 +233,14 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Si hay un resolver esperando y el usuario se autenticó
+      if (authResolverRef.current && session?.user) {
+        authResolverRef.current(true);
+        authResolverRef.current = null;
+        setIsLoginOpen(false);
+        setLoginMessage(undefined);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -238,15 +258,16 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pathname]);
 
-  // Mostrar login popover si no hay usuario
+  // Mostrar login popover si no hay usuario (comportamiento inicial)
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (loading) return;
 
-    if (user) {
-      setIsLoginOpen(false);
-    } else {
+    // Solo mostrar automáticamente si no es una solicitud manual
+    if (!authResolverRef.current && !user) {
       setIsLoginOpen(true);
+    } else if (user) {
+      setIsLoginOpen(false);
     }
   }, [loading, user]);
 
@@ -274,8 +295,51 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
     setSession(null);
   };
 
-  const handleCloseLogin = () => {
+  // Función para requerir autenticación (para reviews, etc.)
+  const requireAuth = async (message?: string): Promise<boolean> => {
+    // Si ya está autenticado, retornar true inmediatamente
+    if (user && session) {
+      return true;
+    }
+
+    // Si ya hay un proceso de auth en curso, esperar a que termine
+    if (authResolverRef.current) {
+      return false;
+    }
+
+    // Crear una nueva Promise que se resolverá cuando el usuario se autentique
+    return new Promise<boolean>((resolve) => {
+      authResolverRef.current = resolve;
+      setLoginMessage(message || "Debes iniciar sesión para continuar");
+      setIsLoginOpen(true);
+
+      // Timeout de 5 minutos para cancelar si el usuario no se loguea
+      setTimeout(() => {
+        if (authResolverRef.current) {
+          authResolverRef.current(false);
+          authResolverRef.current = null;
+          setIsLoginOpen(false);
+          setLoginMessage(undefined);
+        }
+      }, 300000); // 5 minutos
+    });
+  };
+
+  // Función para abrir el popover de login manualmente
+  const openLoginPopover = (message?: string) => {
+    setLoginMessage(message);
+    setIsLoginOpen(true);
+  };
+
+  // Función para cerrar el popover de login manualmente
+  const closeLoginPopover = () => {
+    // Si hay un resolver esperando, cancelar el proceso
+    if (authResolverRef.current) {
+      authResolverRef.current(false);
+      authResolverRef.current = null;
+    }
     setIsLoginOpen(false);
+    setLoginMessage(undefined);
   };
 
   const smartBack = () => {
@@ -306,6 +370,9 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
         session,
         loading,
         signOut,
+        requireAuth,
+        openLoginPopover,
+        closeLoginPopover,
         // General
         generalData,
         setGeneralData,
@@ -316,8 +383,9 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
     >
       <LoginPopover
         isOpen={isLoginOpen}
-        onClose={handleCloseLogin}
+        onClose={closeLoginPopover}
         redirectTo={pathname ?? "/"}
+        message={loginMessage}
       />
       <main>{children}</main>
     </AppContext.Provider>
@@ -336,8 +404,24 @@ export const useApp = () => {
 
 // Hooks específicos para mantener compatibilidad
 export const useAuth = () => {
-  const { user, session, loading, signOut } = useApp();
-  return { user, session, loading, signOut };
+  const {
+    user,
+    session,
+    loading,
+    signOut,
+    requireAuth,
+    openLoginPopover,
+    closeLoginPopover,
+  } = useApp();
+  return {
+    user,
+    session,
+    loading,
+    signOut,
+    requireAuth,
+    openLoginPopover,
+    closeLoginPopover,
+  };
 };
 
 export const useHistory = () => {

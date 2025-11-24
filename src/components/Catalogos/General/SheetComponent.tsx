@@ -133,7 +133,7 @@ function SheetComponent({
   onHighlightComplete,
 }: SheetComponentProps) {
   const { store, dispatchStore } = useContext(MyContext);
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, requireAuth } = useAuth();
   const router = useRouter();
 
   const [isMounted, setIsMounted] = useState(false);
@@ -146,14 +146,20 @@ function SheetComponent({
 
   const closeSheet = useCallback(() => onOpenChange(false), [onOpenChange]);
 
-  const handleReviewAction = useCallback(() => {
-    if (user && !loading) {
-      setReviewOpen(true);
+  const handleReviewAction = useCallback(async () => {
+    // Verificar autenticación antes de enviar la review
+    const isAuthenticated = await requireAuth(
+      "Debes iniciar sesión para dejar una reseña"
+    );
+    // Si el usuario no se autenticó o canceló, detener el proceso
+    if (!isAuthenticated) {
+      console.info("Usuario no autenticado, review cancelada");
       closeSheet();
-    } else {
-      closeSheet();
+      return;
     }
-  }, [user, loading, closeSheet]);
+    setReviewOpen(true);
+    closeSheet();
+  }, [requireAuth, closeSheet]);
 
   const handleCoinChange = useCallback(
     (coinId: number) => {
@@ -202,7 +208,10 @@ function SheetComponent({
       {
         name: "Dejar una reseña",
         icon: <MdRateReview />,
-        action: handleReviewAction,
+        action: () => {
+          handleReviewAction();
+          closeSheet();
+        },
       },
       {
         name: "Comparar produtos",
@@ -304,7 +313,10 @@ function SheetComponent({
               name={"Cerrar Sesion"}
               icon={<User className="w-8 h-8 text-slate-800" />}
               icon2={<ChevronRight />}
-              action={signOut}
+              action={() => {
+                signOut();
+                closeSheet();
+              }}
             />
           </div>
         </SheetContent>

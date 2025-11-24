@@ -7,8 +7,6 @@ import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useAuth } from "@/context/AppContext";
-import { usePathname } from "next/navigation";
-import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
 import { toast } from "sonner";
@@ -20,11 +18,9 @@ export default function RatingSection({
   specific: string;
   sitioweb: string;
 }) {
-  const pathname = usePathname();
   const { store, dispatchStore } = useContext(MyContext);
   const [product, setproduct] = useState<Product>();
-  const { user, loading } = useAuth();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const { user, requireAuth } = useAuth();
   const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
   const [rating, setRating] = useState<RatingInterface>(initialState);
 
@@ -37,19 +33,22 @@ export default function RatingSection({
     }
   }, [user?.user_metadata.full_name]);
 
-  const handleStarClick = (rating: number) => {
+  const handleStarClick = async (rating: number) => {
     setRating((prev) => ({
       ...prev,
       selectedRating: rating,
     }));
 
-    if (user && loading === false) {
-      setReviewOpen(true);
+    const isAuthenticated = await requireAuth(
+      "Debes iniciar sesión para dejar una reseña"
+    );
+    // Si el usuario no se autenticó o canceló, detener el proceso
+    if (!isAuthenticated) {
+      console.info("Usuario no autenticado, review cancelada");
       return;
     }
 
-    // Si no está logueado -> marcar pending y abrir LoginPopover
-    setIsLoginOpen(true);
+    setReviewOpen(true);
   };
 
   useEffect(() => {
@@ -164,14 +163,7 @@ export default function RatingSection({
                 ))}
               </div>
             </div>
-            <LoginPopover
-              isOpen={isLoginOpen}
-              onClose={() => {
-                setIsLoginOpen(false);
-                // Si el usuario cerró el popover sin loguearse, desistimos de la intención
-              }}
-              redirectTo={pathname} // Ruta dinámica
-            />
+
             <Rating
               rating={rating}
               setRating={setRating}

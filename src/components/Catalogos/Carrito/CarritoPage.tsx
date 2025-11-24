@@ -251,6 +251,8 @@ export default function CarritoPage() {
   }, [compra.pedido.length, store.sitioweb, router]);
 
   const handleOrderClick = async () => {
+    setDownloading(true);
+
     if (compra.people === "") {
       toast.error("Tiene que introducir un encargado de su compra");
       return;
@@ -267,7 +269,6 @@ export default function CarritoPage() {
     if (store.sitioweb) {
       // Inicializa Analytics
       const uploadFlow = async () => {
-        setDownloading(true);
         try {
           const data = await UploadPedido({
             UUID_Shop: store.UUID,
@@ -288,6 +289,7 @@ export default function CarritoPage() {
           if (saved !== null) {
             await sendToWhatsapp(data.event_id);
             if (store.compraUUID) router.push("/user");
+            else router.back();
           } else {
             setShowRatingModal(true);
           }

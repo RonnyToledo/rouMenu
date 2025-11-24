@@ -89,6 +89,7 @@ export default function SitioRealtime({ uuid }: Props) {
           filter: filterProducts,
         },
         (payload) => {
+          if (payload.eventType !== "INSERT") return;
           const now = Date.now();
           if (now - lastToastAtRef.current > 3000) {
             lastToastAtRef.current = now;

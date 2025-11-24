@@ -1,4 +1,4 @@
-// app/auth/callback/route.ts
+// ===== 1. app/auth/callback/route.ts =====
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -13,6 +13,10 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  // Redirigir a la ruta dinámica que se pasó como parámetro
-  return NextResponse.redirect(new URL(redirectTo, request.url));
+  // Si es un popup (detectamos por window.opener en el cliente)
+  // Redirigir a una página que cierre el popup
+  const successUrl = new URL("/auth/success", request.url);
+  successUrl.searchParams.set("redirectTo", redirectTo);
+
+  return NextResponse.redirect(successUrl);
 }

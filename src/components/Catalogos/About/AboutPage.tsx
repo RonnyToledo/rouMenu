@@ -11,8 +11,6 @@ import { Star, ChevronRight, Clock } from "lucide-react";
 import { ScheduleInterface } from "@/context/InitialStatus";
 import { Separator } from "@/components/ui/separator";
 import { format } from "@formkit/tempo";
-import LoginPopover from "@/components/GeneralComponents/LoginPopover";
-import { usePathname } from "next/navigation";
 import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
 import { useAuth } from "@/context/AppContext";
 import { logoApp } from "@/lib/image";
@@ -21,23 +19,23 @@ import ShareButton from "@/components/myUI/buttonShare";
 
 export default function AboutPage() {
   const { store } = useContext(MyContext);
-  const { user, loading } = useAuth();
-  const pathname = usePathname();
+  const { requireAuth } = useAuth();
   const [ratingSelect, setRatingSelect] = useState<number>(0);
   // nuevo: control del popover de login y del modal de reseña
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
 
-  const handleStarClick = (rating: number) => {
+  const handleStarClick = async (rating: number) => {
     setRatingSelect(rating);
 
-    if (user && loading === false) {
-      setReviewOpen(true);
+    const isAuthenticated = await requireAuth(
+      "Debes iniciar sesión para dejar una reseña"
+    );
+    // Si el usuario no se autenticó o canceló, detener el proceso
+    if (!isAuthenticated) {
+      console.info("Usuario no autenticado, review cancelada");
       return;
     }
-
-    // Si no está logueado -> marcar pending y abrir LoginPopover
-    setIsLoginOpen(true);
+    setReviewOpen(true);
   };
 
   return (
@@ -207,7 +205,7 @@ export default function AboutPage() {
                     Compartir Perfil
                   </ShareButton>
 
-                  <p className="text-slate-700 text-sm">Categoría</p>
+                  <p className="text-slate-700 text-sm"></p>
                 </div>
               </div>
             </div>
@@ -386,14 +384,7 @@ export default function AboutPage() {
         </footer>
         <Separator />
       </div>
-      <LoginPopover
-        isOpen={isLoginOpen}
-        onClose={() => {
-          setIsLoginOpen(false);
-          // Si el usuario cerró el popover sin loguearse, desistimos de la intención
-        }}
-        redirectTo={pathname} // Ruta dinámica
-      />
+
       {/* Modal de reseña: ajusta props/import si tu componente es distinto */}
       <PreviewRatingGeneral
         reviewOpen={reviewOpen}

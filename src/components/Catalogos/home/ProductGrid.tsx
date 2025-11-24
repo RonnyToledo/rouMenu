@@ -112,7 +112,7 @@ export default React.memo(function ProductGrid({
         promedioStar={product.coment.promedio || 0}
       />
 
-      <div className="p-1 flex flex-col justify-evenly ">
+      <div className="p-1 flex flex-col justify-between ">
         <h4 className={cn(titleClasses)}>{product.title}</h4>
 
         {!store?.edit?.minimalista && (
@@ -195,7 +195,7 @@ const ProductImage = React.memo(function ProductImage({
   );
 
   return (
-    <Link href={productUrl} className="relative">
+    <Link href={productUrl} className="relative size-fit">
       <Image
         width={250}
         height={250}
