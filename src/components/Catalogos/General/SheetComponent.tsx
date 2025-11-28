@@ -179,14 +179,7 @@ function SheetComponent({
           closeSheet();
         },
       },
-      {
-        name: "Buscar Productos",
-        icon: <IoSearch />,
-        action: () => {
-          router.push(`/t/${store.sitioweb}/search`);
-          closeSheet();
-        },
-      },
+
       {
         name: "Sobre Nosotros",
         icon: <IoStorefrontOutline />,
@@ -286,39 +279,55 @@ function SheetComponent({
             <SheetDescription></SheetDescription>
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden">
-            {showState === "home" && <HomeView items={homeItems} />}
-
-            {showState === "categories" && (
-              <CategoriesView
-                onBack={() => setShowState("home")}
-                onClose={closeSheet}
-                highlightCategoryId={highlightCategoryId}
-                onHighlightComplete={onHighlightComplete}
-              />
-            )}
-
-            {showState === "coins" && (
-              <CoinsView
-                coins={store?.moneda || []}
-                onBack={() => setShowState("home")}
-                onSelectCoin={handleCoinChange}
-              />
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Separator className="bg-white/20" />
-            <ListSheet
-              name={"Cerrar Sesion"}
-              icon={<User className="w-8 h-8 text-slate-800" />}
-              icon2={<ChevronRight />}
-              action={() => {
-                signOut();
+          <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-3">
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                router.push(`/t/${store.sitioweb}/search`);
                 closeSheet();
               }}
-            />
+              className="justify-start rounded-full h-fit p-2 w-full"
+            >
+              <IoSearch />
+              <span className=" text-slate-500">Busqueda avanzada</span>
+            </Button>
+            <div className="min-h-fit">
+              {showState === "home" && <HomeView items={homeItems} />}
+
+              {showState === "categories" && (
+                <CategoriesView
+                  onBack={() => setShowState("home")}
+                  onClose={closeSheet}
+                  highlightCategoryId={highlightCategoryId}
+                  onHighlightComplete={onHighlightComplete}
+                />
+              )}
+
+              {showState === "coins" && (
+                <CoinsView
+                  coins={store?.moneda || []}
+                  onBack={() => setShowState("home")}
+                  onSelectCoin={handleCoinChange}
+                />
+              )}
+            </div>
           </div>
+          {user ? (
+            <>
+              <div className="space-y-2">
+                <Separator className="bg-white/20" />
+                <ListSheet
+                  name={"Cerrar Sesion"}
+                  icon={<User className="w-8 h-8 text-slate-800" />}
+                  icon2={<ChevronRight />}
+                  action={() => {
+                    signOut();
+                    closeSheet();
+                  }}
+                />
+              </div>
+            </>
+          ) : null}
         </SheetContent>
       </Sheet>
       <PreviewRatingGeneral

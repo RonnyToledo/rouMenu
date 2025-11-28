@@ -14,6 +14,7 @@ export default function CartItems({ compra }: Props) {
   const { store, dispatchStore } = useContext(MyContext);
 
   const handleToCart = (productToCart: Product) => {
+    console.log(productToCart);
     dispatchStore({
       type: "AddCart",
       payload: JSON.stringify(productToCart),
@@ -111,6 +112,8 @@ function ItemCard({
   handleToCart,
   handleToCartMinus,
 }: ItemCardInterface) {
+  const { store } = useContext(MyContext);
+
   return (
     <div className="shadow-xs space-y-1">
       <div className="flex items-center  border-b border-b-slate-200 p-2">
@@ -133,8 +136,8 @@ function ItemCard({
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleToCart}
-            disabled={camtidad >= top}
+            onClick={() => handleToCart()}
+            disabled={camtidad >= top && store.stocks}
             className="size-6 p-0 hover:bg-green-50 hover:border-green-300 hover:scale-110 transition-all duration-200"
           >
             <FaChevronUp className="w-4 h-4" />
@@ -156,7 +159,7 @@ function ItemCard({
             variant="ghost"
             size="icon"
             disabled={camtidad == 0}
-            onClick={handleToCartMinus}
+            onClick={() => handleToCartMinus()}
             className="size-6 p-0 hover:bg-red-50 hover:border-red-300 hover:scale-110 transition-all duration-200"
           >
             <AnimatePresence mode="wait" initial={false}>
