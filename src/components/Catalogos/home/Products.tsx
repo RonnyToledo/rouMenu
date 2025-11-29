@@ -1,12 +1,22 @@
 "use client";
 import Image from "next/image";
-import React, { useContext, useMemo, useCallback } from "react";
+import React, {
+  useContext,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
-import { ExtraerCategorias } from "@/functions/extraerCategoriass";
+import {
+  ExtraerCategorias,
+  ExtraerProductosSinCategoria,
+} from "@/functions/extraerCategoriass";
 import { logoApp } from "@/lib/image";
 import { AppState, Categoria, Product } from "@/context/InitialStatus";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
@@ -39,6 +49,11 @@ export default function Products() {
     );
   }, [store?.categorias, store?.products]);
 
+  const sortedsWithOutCategories = useMemo(() => {
+    if (!store?.categorias || !store?.products) return [];
+    return ExtraerProductosSinCategoria(store.categorias, store.products);
+  }, [store?.categorias, store?.products]);
+
   const next_before_Category = useMemo(() => {
     if (!sortedCategories) return {};
     const sorted = [...sortedCategories].sort(
@@ -65,6 +80,14 @@ export default function Products() {
           prevID={next_before_Category[categoria.id]?.prevID || ""}
         />
       ))}
+
+      {/* Sección de productos sin categoría */}
+      {sortedsWithOutCategories.length > 0 && (
+        <UncategorizedSection
+          products={sortedsWithOutCategories}
+          banner={store?.urlPoster || logoApp}
+        />
+      )}
     </div>
   );
 }
@@ -204,6 +227,9 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   nextID,
 }: AnimatedCategorySectionProps) {
   const { store } = useContext(MyContext);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+
   // Memoizar productos ordenados
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
@@ -218,14 +244,35 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
     [store?.edit?.grid]
   );
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+
+      const rect = sectionRef.current.getBoundingClientRect();
+      const headerHeight = 64;
+
+      const shouldShow = rect.top <= headerHeight && rect.bottom > headerHeight;
+
+      setIsHeaderVisible(shouldShow);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <div className="mb-12">
+    <div ref={sectionRef} className="mb-12">
       <div id={categoria.id} />
       <CategoryHeader
         id={categoria.id}
         name={categoria.name || ""}
         prevID={prevID}
         nextID={nextID}
+        isVisible={isHeaderVisible}
       />
       <div className={gridClass}>
         {sortedProducts.map((product, i) => (
@@ -240,50 +287,150 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
     </div>
   );
 });
+
 function CategoryHeader({
   id,
   name,
   prevID,
   nextID,
+  isVisible,
 }: {
   id: string;
   name: string;
   prevID: string;
   nextID: string;
+  isVisible: boolean;
 }) {
   const { highlightCategory } = useSheet();
 
   return (
-    <motion.div
-      className="sticky top-16 bg-transparent z-10 flex items-center justify-center"
-      variants={headerVariants}
-    >
-      <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
-        <Button
-          onClick={() => ScrollTo(prevID)}
-          variant={"ghost"}
-          className="p-2"
-          size={"icon"}
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="fixed top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center"
+          variants={headerVariants}
         >
-          <MdNavigateBefore />
-        </Button>
-        <Button
-          variant={"ghost"}
-          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
-          onClick={() => highlightCategory(id)}
-        >
-          {name}
-        </Button>
+          <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
+            <Button
+              onClick={() => ScrollTo(prevID)}
+              variant={"ghost"}
+              className="p-2"
+              size={"icon"}
+            >
+              <MdNavigateBefore />
+            </Button>
+            <Button
+              variant={"ghost"}
+              className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
+              onClick={() => highlightCategory(id)}
+            >
+              {name}
+            </Button>
 
-        <Button
-          className="p-2"
-          onClick={() => ScrollTo(nextID)}
-          variant={"ghost"}
-          size={"icon"}
-        >
-          <MdNavigateNext />
-        </Button>
+            <Button
+              className="p-2"
+              onClick={() => ScrollTo(nextID)}
+              variant={"ghost"}
+              size={"icon"}
+            >
+              <MdNavigateNext />
+            </Button>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// Nuevo componente para productos sin categoría
+interface UncategorizedSectionProps {
+  products: Product[];
+  banner: string;
+}
+
+const UncategorizedSection = React.memo(function UncategorizedSection({
+  products,
+  banner,
+}: UncategorizedSectionProps) {
+  const { store } = useContext(MyContext);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+
+  const sortedProducts = useMemo(
+    () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
+    [products]
+  );
+
+  const gridClass = useMemo(
+    () =>
+      `grid grid-flow-row-dense gap-2 p-2 ${
+        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
+      }`,
+    [store?.edit?.grid]
+  );
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+
+      const rect = sectionRef.current.getBoundingClientRect();
+      const headerHeight = 64;
+
+      const shouldShow = rect.top <= headerHeight && rect.bottom > headerHeight;
+
+      setIsHeaderVisible(shouldShow);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  return (
+    <div ref={sectionRef} className="mb-12">
+      <div id="sin-categoria" />
+      <UncategorizedHeader isVisible={isHeaderVisible} />
+      <div className={gridClass}>
+        {sortedProducts.map((product, i) => (
+          <ProductGrid
+            product={product}
+            key={product.id || i}
+            banner={banner}
+            i={i}
+          />
+        ))}
       </div>
-    </motion.div>
+    </div>
+  );
+});
+
+// Header especial para productos sin categoría (sin funciones de categoría)
+function UncategorizedHeader({ isVisible }: { isVisible: boolean }) {
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="fixed top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center"
+          variants={headerVariants}
+        >
+          <div className="flex items-center justify-center rounded-full shadow-md bg-white max-w-4/5 w-full py-2 px-4">
+            <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700">
+              Otros Productos
+            </span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -43,7 +43,7 @@ export default function HeroNew({}) {
   }, [searchParams, user, shopName]);
 
   return (
-    <div className="p-3 space-y-3">
+    <div className="p-3 space-y-3 bg-slate-50">
       <div className="">
         <div className="relative rounded-2xl overflow-hidden shadow-lg">
           <Image
@@ -65,7 +65,7 @@ export default function HeroNew({}) {
         </div>
       </div>
       <div className="container mx-auto px-4  -mt-12 relative z-10">
-        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4 mb-2">
+        <div className="bg-slate-100 backdrop-blur-md border border-slate-200 rounded-2xl p-4">
           <div className="flex flex-col  gap-2">
             <div className="flex-1 gap-1">
               <div className="flex flex-col gap-1">
@@ -100,7 +100,7 @@ export default function HeroNew({}) {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-1 ">
+            <div className="flex flex-row gap-1 ">
               {store.domicilio && (
                 <div className="flex items-center gap-3 bg-slate-300 rounded-xl p-3 flex-1">
                   <div className="p-2 bg-slate-400 rounded-lg">

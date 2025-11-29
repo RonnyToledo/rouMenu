@@ -33,6 +33,7 @@ export default async function RootLayout({
 
   if (error) {
     console.error("Error al obtener tienda:", error);
+    notFound();
   } else {
     console.info("Store listo");
   }

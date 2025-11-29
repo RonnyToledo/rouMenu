@@ -177,6 +177,8 @@ export interface AppState {
   redes: RedesInterface[];
   contacto: ContactInterface[];
   stocks: boolean;
+  productEnStock: string;
+
   afiliate: string | null;
 }
 
@@ -185,6 +187,8 @@ export const initialState: AppState = {
   edit: { grid: true, square: false, horizontal: false, minimalista: false },
   urlPoster: "",
   id: 0,
+  productEnStock: "",
+
   products: [],
   categorias: [],
   codeDiscount: [],

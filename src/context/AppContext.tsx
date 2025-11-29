@@ -343,14 +343,45 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
   };
 
   const smartBack = () => {
-    // Buscar la última ruta válida
+    // Función helper para extraer la ruta base sin query params
+    const getBasePath = (path: string) => {
+      return path.split("?")[0];
+    };
+
+    // Buscar la última ruta válida (saltando productos y búsquedas repetidas)
     for (let i = record.length - 2; i >= 0; i--) {
       const candidate = record[i];
-      if (!/^\/t\/[^/]+\/producto\/[^/]+/.test(candidate.path)) {
-        router.push(candidate.path);
-        return;
+      const candidateBasePath = getBasePath(candidate.path);
+
+      // Saltar páginas de productos
+      if (/^\/t\/[^/]+\/producto\/[^/]+/.test(candidateBasePath)) {
+        continue;
       }
+
+      // Saltar páginas de búsqueda consecutivas (mismo base path)
+      if (/^\/t\/[^/]+\/search/.test(candidateBasePath)) {
+        // Verificar si la siguiente entrada también es una búsqueda del mismo shop
+        let isConsecutiveSearch = false;
+
+        for (let j = i + 1; j < record.length; j++) {
+          const nextBasePath = getBasePath(record[j].path);
+          if (nextBasePath === candidateBasePath) {
+            isConsecutiveSearch = true;
+            break;
+          }
+        }
+
+        // Si es una búsqueda consecutiva, continuar buscando
+        if (isConsecutiveSearch) {
+          continue;
+        }
+      }
+
+      // Esta es una ruta válida, navegar a ella
+      router.push(candidate.path);
+      return;
     }
+
     // Si no hay ninguna válida, usar el último shop registrado
     const lastShop = record.at(-1)?.shop;
     if (lastShop) {

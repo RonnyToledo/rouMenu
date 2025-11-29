@@ -2,9 +2,16 @@
 import { Input } from "@/components/ui/input";
 import { MyContext } from "@/context/MyContext";
 import { Product } from "@/context/InitialStatus";
-import { Search } from "lucide-react";
+import { Search, X, Clock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import Fuse from "fuse.js";
 import { smartRound } from "@/functions/precios";
 import Link from "next/link";
@@ -14,6 +21,8 @@ import { logoApp } from "@/lib/image";
 import { TbMenuDeep } from "react-icons/tb";
 import { Button } from "@/components/ui/button";
 import { useSheet } from "../General/SheetComponent";
+import { useApp } from "@/context/AppContext";
+import { FaChevronLeft } from "react-icons/fa";
 
 const options = {
   includeScore: true,
@@ -25,7 +34,11 @@ const options = {
   keys: ["title", "descripcion"],
 };
 
+const SUGGESTIONS_LIMIT = 10;
+
 export default function SearchPage() {
+  const { smartBack } = useApp();
+
   const { open } = useSheet();
   const { store } = useContext(MyContext);
   const [search, setSearch] = useState<string>("");
@@ -37,28 +50,22 @@ export default function SearchPage() {
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // clave por tienda para almacenar búsquedas recientes
-  const storageKey = `recent_searches_${store.sitioweb || "global"}`;
-  const SUGGESTIONS_LIMIT = 10;
+  // Clave por tienda para almacenar búsquedas recientes
+  const storageKey = useMemo(
+    () => `recent_searches_${store.sitioweb || "global"}`,
+    [store.sitioweb]
+  );
 
-  useEffect(() => {
-    // inicializar valor desde query string
-    setSearch(searchParams.get("buscar") || "");
-  }, [searchParams]);
+  // Memoizar Fuse.js para evitar recrearlo en cada render
+  const fuse = useMemo(
+    () => new Fuse(store.products, options),
+    [store.products]
+  );
 
+  // Cargar búsquedas recientes desde localStorage
   useEffect(() => {
-    // cuando cambia la búsqueda, actualizamos la URL
-    // (tu código original hacía esto en cada cambio; lo mantenemos)
-    router.push(
-      `/t/${store.sitioweb}/search?buscar=${encodeURIComponent(search)}`
-    );
-  }, [search, store.sitioweb, router]);
-
-  useEffect(() => {
-    // cargar sugerencias desde localStorage al montar o al cambiar de tienda
     try {
       const raw = localStorage.getItem(storageKey);
-
       const arr: string[] = raw ? JSON.parse(raw) : [];
       setSuggestions(Array.isArray(arr) ? arr : []);
     } catch (e) {
@@ -67,60 +74,81 @@ export default function SearchPage() {
     }
   }, [storageKey]);
 
+  // Inicializar valor desde query string solo una vez
   useEffect(() => {
-    const productos = obtenerMejoresProductos(store.products, 5);
-    const fuse = new Fuse(store.products, options);
+    const querySearch = searchParams.get("buscar") || "";
+    if (querySearch) {
+      setSearch(querySearch);
+    }
+  }, [searchParams]); // Solo al montar
 
-    if (search) {
+  // Función para guardar búsqueda (memoizada)
+  const saveSearch = useCallback(
+    (term: string) => {
+      const t = term?.trim();
+      if (!t) return;
+
+      try {
+        const raw = localStorage.getItem(storageKey);
+        let arr: string[] = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(arr)) arr = [];
+
+        // Eliminar duplicados (case-insensitive)
+        arr = arr.filter((s) => s.toLowerCase() !== t.toLowerCase());
+        arr.unshift(t); // Más reciente al principio
+        if (arr.length > SUGGESTIONS_LIMIT)
+          arr = arr.slice(0, SUGGESTIONS_LIMIT);
+
+        localStorage.setItem(storageKey, JSON.stringify(arr));
+        setSuggestions(arr);
+      } catch (e) {
+        console.warn("Error guardando búsqueda:", e);
+      }
+    },
+    [storageKey]
+  );
+
+  // Realizar búsqueda (memoizada con debounce implícito)
+  useEffect(() => {
+    // Actualizar URL solo si hay cambios reales
+    const currentQuery = searchParams.get("buscar") || "";
+    if (search !== currentQuery) {
+      const timeoutId = setTimeout(() => {
+        router.push(
+          `/t/${store.sitioweb}/search?buscar=${encodeURIComponent(search)}`,
+          { scroll: false }
+        );
+      }, 300); // Debounce de 300ms
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [search, store.sitioweb, router, searchParams]);
+
+  // Filtrar productos
+  useEffect(() => {
+    if (search.trim()) {
       const results = fuse.search(search);
       const filteredResults = results.map((obj) => obj.item);
-
       setListSearch(filteredResults);
-    } else if (suggestions.length > 0) {
-      setListSearch(
-        suggestions
-          .map((arr) => {
-            const results = fuse.search(arr);
-            return results.map((obj) => obj.item).slice(0, 1);
-          })
-          .flat()
-      );
     } else {
-      const filteredProducts = productos.slice(0, 5);
+      // Mostrar favoritos cuando no hay búsqueda
+      const filteredProducts = store.products
+        .filter((obj) => obj.favorito)
+        .slice(0, 5);
       setListSearch(filteredProducts);
     }
-  }, [store.products, search, focused, suggestions]);
+  }, [search, fuse, store.products]);
 
-  // guarda la búsqueda en localStorage (mantiene orden reciente, sin duplicados)
-  const saveSearch = (term: string) => {
-    const t = term?.trim();
-    if (!t) return;
-    try {
-      const raw = localStorage.getItem(storageKey);
-      let arr: string[] = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(arr)) arr = [];
-
-      // eliminar duplicados (case-insensitive)
-      arr = arr.filter((s) => s.toLowerCase() !== t.toLowerCase());
-      arr.unshift(t); // más reciente al principio
-      if (arr.length > SUGGESTIONS_LIMIT) arr = arr.slice(0, SUGGESTIONS_LIMIT);
-
-      localStorage.setItem(storageKey, JSON.stringify(arr));
-      setSuggestions(arr);
-    } catch (e) {
-      console.warn("Error guardando búsqueda:", e);
-    }
-  };
-
+  // Manejar Enter y Escape
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const t = search.trim();
-      if (!t) return;
-      saveSearch(t);
-      // router.push ya lo hace el useEffect. Si quieres forzar:
-      // router.push(`/t/${store.sitioweb}/search?buscar=${encodeURIComponent(t)}`);
-      inputRef.current?.blur();
+      if (t) {
+        saveSearch(t);
+        inputRef.current?.blur();
+        setFocused(false);
+      }
     }
     if (e.key === "Escape") {
       inputRef.current?.blur();
@@ -128,13 +156,69 @@ export default function SearchPage() {
     }
   };
 
-  return (
-    <main className="">
-      {/* Search Bar */}
+  // Cerrar sugerencias al hacer scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (focused) {
+        setFocused(false);
+        inputRef.current?.blur();
+      }
+    };
 
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [focused]);
+
+  // Seleccionar sugerencia
+  const handleSelectSuggestion = (suggestion: string) => {
+    setSearch(suggestion);
+    saveSearch(suggestion);
+    setFocused(false);
+  };
+
+  // Eliminar sugerencia individual
+  const handleRemoveSuggestion = (suggestion: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const updated = suggestions.filter((s) => s !== suggestion);
+      localStorage.setItem(storageKey, JSON.stringify(updated));
+      setSuggestions(updated);
+    } catch (e) {
+      console.warn("Error eliminando sugerencia:", e);
+    }
+  };
+
+  // Limpiar todas las sugerencias
+  const handleClearSuggestions = () => {
+    try {
+      localStorage.removeItem(storageKey);
+      setSuggestions([]);
+    } catch (e) {
+      console.warn("Error limpiando sugerencias:", e);
+    }
+  };
+
+  // Guardar búsqueda al hacer clic en un producto
+  const handleProductClick = () => {
+    const t = search.trim();
+    if (t) {
+      saveSearch(t);
+    }
+  };
+
+  return (
+    <main className="scroll-smooth">
+      {/* Search Bar */}
       <header className="sticky top-0 z-50 bg-gradient-to-b from-slate-50 to-transparent h-16 p-2 w-full">
         <div className="relative flex items-center justify-between shadow-lg rounded-full h-full p-1 gap-3 bg-white overflow-hidden">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-600" />
+          <Button
+            variant="ghost"
+            onClick={smartBack}
+            size="sm"
+            className="w-fit text-slate-700 absolute left-2"
+          >
+            <FaChevronLeft className="size-6" />
+          </Button>{" "}
           <Input
             ref={inputRef}
             placeholder="Buscar productos..."
@@ -144,7 +228,6 @@ export default function SearchPage() {
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => {
-              // delay para permitir click en sugerencia (porque usamos onMouseDown allí)
               setTimeout(() => setFocused(false), 150);
             }}
             onKeyDown={handleKeyDown}
@@ -158,90 +241,60 @@ export default function SearchPage() {
             <TbMenuDeep className="size-6 text-slate-600 cursor-pointer" />
           </Button>
         </div>
-      </header>
-      <div className="container mx-auto px-4">
-        {/* Desktop Sidebar + Products Grid */}
-        <div className="flex gap-6 ">
-          {/* Filters Sidebar (Desktop) */}
-          {false ? (
-            <aside className="hidden w-64 flex-shrink-0">
-              <div className="sticky top-24 bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6">
-                <h3 className="text-white font-semibold mb-4">Filtros</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-slate-300 text-sm mb-2 block">
-                      Precio
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-slate-300 text-sm mb-2 block">
-                      Calificación
-                    </label>
-                    <select className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-slate-500">
-                      <option>Todas</option>
-                      <option>4+ estrellas</option>
-                      <option>3+ estrellas</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-slate-300 text-sm mb-2 block">
-                      Categoría
-                    </label>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded bg-slate-700 border-slate-600"
-                        />
-                        <span>Bebidas</span>
-                      </label>
-                      <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded bg-slate-700 border-slate-600"
-                        />
-                        <span>Postres</span>
-                      </label>
-                      <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded bg-slate-700 border-slate-600"
-                        />
-                        <span>Comida</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </aside>
-          ) : null}
 
+        {/* Dropdown de Sugerencias */}
+        {focused && suggestions.length > 0 && search && (
+          <div className="absolute top-full left-2 right-2 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200">
+              <span className="text-xs font-medium text-slate-500">
+                Búsquedas recientes
+              </span>
+              <button
+                onClick={handleClearSuggestions}
+                className="text-xs text-slate-600 hover:text-slate-900"
+              >
+                Limpiar todo
+              </button>
+            </div>
+            <div className="max-h-64 overflow-y-auto scroll-smooth">
+              {suggestions.map((sug, index) => (
+                <div
+                  key={index}
+                  onMouseDown={() => handleSelectSuggestion(sug)}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Clock className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    <span className="text-sm text-slate-700 truncate">
+                      {sug}
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => handleRemoveSuggestion(sug, e)}
+                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-opacity"
+                  >
+                    <X className="w-4 h-4 text-slate-500" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </header>
+
+      <div className="container mx-auto px-4">
+        <div className="flex gap-6">
           {/* Products List */}
           <div className="flex-1">
-            <h2 className="text-xl  font-bold text-slate-900 mb-4 ">
-              Encuentra tus productos
-            </h2>
-
-            <div className="space-y-1 ">
+            <div className="space-y-1">
               {ListSearch.map((product) => (
                 <Link
                   key={product.id}
                   href={`/t/${store.sitioweb}/producto/${product.productId}`}
-                  className="block rounded-xl p-3   transition-all group"
+                  onClick={handleProductClick}
+                  className="block p-3 transition-all group shadow-md"
                 >
-                  <div className="flex gap-3 ">
+                  <div className="flex gap-3">
                     {/* Product Image */}
                     <div className="w-20 h-20 flex-shrink-0 bg-slate-300 rounded-lg overflow-hidden">
                       <Image
@@ -255,7 +308,7 @@ export default function SearchPage() {
 
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-salte-900 font-semibold text-base mb-1 group-hover:text-slate-800 transition-colors">
+                      <h3 className="text-slate-900 font-semibold text-base mb-1 group-hover:text-slate-800 transition-colors">
                         {product.title}
                       </h3>
                       <p className="text-slate-600 text-xs mb-2 line-clamp-1">
@@ -285,7 +338,7 @@ export default function SearchPage() {
               ))}
             </div>
 
-            {ListSearch.length === 0 && (
+            {ListSearch.length === 0 && search.trim() && (
               <div className="text-center py-12">
                 <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Search className="w-8 h-8 text-slate-400" />
@@ -303,19 +356,4 @@ export default function SearchPage() {
       </div>
     </main>
   );
-}
-/**
- * Devuelve los N mejores productos ordenados por visitas/día
- */
-function obtenerMejoresProductos(productos: Product[], limit: number) {
-  const ahoraMs = Date.now();
-  return productos
-    .map((p) => {
-      const creadoMs = new Date(p.creado).getTime();
-      const dias = (ahoraMs - creadoMs) / (1000 * 60 * 60 * 24) || 1;
-      const visitasPorDia = p.visitas / dias;
-      return { ...p, visitasPorDia } as Product & { visitasPorDia: number };
-    })
-    .sort((a, b) => b.visitasPorDia - a.visitasPorDia)
-    .slice(0, limit);
 }
