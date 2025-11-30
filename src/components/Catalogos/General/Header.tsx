@@ -84,7 +84,6 @@ export default function Header() {
         <div className="relative flex items-center justify-between shadow-lg rounded-full h-full p-1 gap-3 bg-white overflow-hidden">
           <Input
             placeholder="Buscar productos..."
-            autoFocus
             type="text"
             value={searchWord}
             onChange={(e) => setSearchWord(e.target.value)}
