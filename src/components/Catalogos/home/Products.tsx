@@ -1,13 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, {
-  useContext,
-  useMemo,
-  useCallback,
-  useRef,
-  useEffect,
-  useState,
-} from "react";
+import React, { useContext, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
 import {
@@ -16,7 +9,6 @@ import {
 } from "@/functions/extraerCategoriass";
 import { logoApp } from "@/lib/image";
 import { AppState, Categoria, Product } from "@/context/InitialStatus";
-import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
@@ -24,19 +16,6 @@ import ProductGrid from "./ProductGrid";
 import { useSheet } from "../General/SheetComponent";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { ScrollTo } from "@/functions/ScrollTo";
-
-const headerVariants = {
-  normal: {
-    scale: 1,
-    boxShadow: "none",
-    backgroundColor: "rgba(255,255,255,0.8)",
-  },
-  sticky: {
-    scale: 0.98,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-    backgroundColor: "rgba(255,255,255,1)",
-  },
-};
 
 export default function Products() {
   const { store } = useContext(MyContext);
@@ -228,7 +207,6 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
 }: AnimatedCategorySectionProps) {
   const { store } = useContext(MyContext);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   // Memoizar productos ordenados
   const sortedProducts = useMemo(
@@ -244,26 +222,6 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
     [store?.edit?.grid]
   );
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-
-      const rect = sectionRef.current.getBoundingClientRect();
-      const headerHeight = 64;
-
-      const shouldShow = rect.top <= headerHeight && rect.bottom > headerHeight;
-
-      setIsHeaderVisible(shouldShow);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   return (
     <div ref={sectionRef} className="mb-12">
       <div id={categoria.id} />
@@ -272,7 +230,6 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
         name={categoria.name || ""}
         prevID={prevID}
         nextID={nextID}
-        isVisible={isHeaderVisible}
       />
       <div className={gridClass}>
         {sortedProducts.map((product, i) => (
@@ -293,56 +250,43 @@ function CategoryHeader({
   name,
   prevID,
   nextID,
-  isVisible,
 }: {
   id: string;
   name: string;
   prevID: string;
   nextID: string;
-  isVisible: boolean;
 }) {
   const { highlightCategory } = useSheet();
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="fixed top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center"
-          variants={headerVariants}
+    <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
+      <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
+        <Button
+          onClick={() => ScrollTo(prevID)}
+          variant={"ghost"}
+          className="p-2"
+          size={"icon"}
         >
-          <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
-            <Button
-              onClick={() => ScrollTo(prevID)}
-              variant={"ghost"}
-              className="p-2"
-              size={"icon"}
-            >
-              <MdNavigateBefore />
-            </Button>
-            <Button
-              variant={"ghost"}
-              className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
-              onClick={() => highlightCategory(id)}
-            >
-              {name}
-            </Button>
+          <MdNavigateBefore />
+        </Button>
+        <Button
+          variant={"ghost"}
+          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
+          onClick={() => highlightCategory(id)}
+        >
+          {name}
+        </Button>
 
-            <Button
-              className="p-2"
-              onClick={() => ScrollTo(nextID)}
-              variant={"ghost"}
-              size={"icon"}
-            >
-              <MdNavigateNext />
-            </Button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        <Button
+          className="p-2"
+          onClick={() => ScrollTo(nextID)}
+          variant={"ghost"}
+          size={"icon"}
+        >
+          <MdNavigateNext />
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -358,7 +302,6 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
 }: UncategorizedSectionProps) {
   const { store } = useContext(MyContext);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
@@ -373,30 +316,10 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
     [store?.edit?.grid]
   );
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!sectionRef.current) return;
-
-      const rect = sectionRef.current.getBoundingClientRect();
-      const headerHeight = 64;
-
-      const shouldShow = rect.top <= headerHeight && rect.bottom > headerHeight;
-
-      setIsHeaderVisible(shouldShow);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
   return (
     <div ref={sectionRef} className="mb-12">
       <div id="sin-categoria" />
-      <UncategorizedHeader isVisible={isHeaderVisible} />
+      <UncategorizedHeader />
       <div className={gridClass}>
         {sortedProducts.map((product, i) => (
           <ProductGrid
@@ -412,25 +335,14 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
 });
 
 // Header especial para productos sin categoría (sin funciones de categoría)
-function UncategorizedHeader({ isVisible }: { isVisible: boolean }) {
+function UncategorizedHeader() {
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="fixed top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center"
-          variants={headerVariants}
-        >
-          <div className="flex items-center justify-center rounded-full shadow-md bg-white max-w-4/5 w-full py-2 px-4">
-            <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700">
-              Otros Productos
-            </span>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
+      <div className="flex items-center justify-center rounded-full shadow-md bg-white max-w-4/5 w-full py-2 px-4">
+        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700">
+          Otros Productos
+        </span>
+      </div>
+    </div>
   );
 }

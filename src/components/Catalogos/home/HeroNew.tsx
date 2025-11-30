@@ -43,7 +43,7 @@ export default function HeroNew({}) {
   }, [searchParams, user, shopName]);
 
   return (
-    <div className="p-3 space-y-3 bg-slate-50">
+    <div className="px-3 space-y-3 bg-slate-50">
       <div className="">
         <div className="relative rounded-2xl overflow-hidden shadow-lg">
           <Image
@@ -51,7 +51,7 @@ export default function HeroNew({}) {
             alt={store?.name || "Store"}
             width={400}
             height={500}
-            className="w-full aspect-square  object-cover"
+            className="w-full aspect-[5/4]  object-cover"
             onError={() => {
               dispatchStore({
                 type: "Add",
