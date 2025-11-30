@@ -11,6 +11,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import HeroNew from "../home/HeroNew";
 import { Input } from "@/components/ui/input";
+import { ScrollTo } from "@/functions/ScrollTo";
 
 export default function Header() {
   const { user, smartBack } = useApp();
@@ -83,9 +84,11 @@ export default function Header() {
       <header className="bg-gradient-to-b from-slate-50 to-transparent h-16 p-2 w-full">
         <div className="relative flex items-center justify-between shadow-lg rounded-full h-full p-1 gap-3 bg-white overflow-hidden">
           <Input
+            id="input-header"
             placeholder="Buscar productos..."
             type="text"
             value={searchWord}
+            onFocus={() => ScrollTo("input-header", 100)}
             onChange={(e) => setSearchWord(e.target.value)}
             className="w-full h-full border-none rounded-xl pl-4 pr-4 py-3 text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-0 focus:ring-slate-400 focus:border-transparent transition-all"
           />
