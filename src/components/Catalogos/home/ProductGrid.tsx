@@ -53,10 +53,9 @@ export default React.memo(function ProductGrid({
   const gridClasses = useMemo(
     () =>
       cn(
-        "grid rounded-md overflow-hidden shadow-md",
+        "grid rounded-xl overflow-hidden bg-card border border-border/50",
         horizontal ? "grid-cols-2" : span && grid ? "col-span-2" : "col-span-1",
       ),
-    // las dependencias son exactamente las variables usadas arriba
     [horizontal, grid, span],
   );
 
@@ -68,7 +67,7 @@ export default React.memo(function ProductGrid({
   const titleClasses = useMemo(
     () =>
       cn(
-        "font-cinzel text-[var(--text-gold)] text-sm flex items-center w-full line-clamp-2 font-semibold",
+        "font-cinzel text-foreground text-sm flex items-center w-full line-clamp-2 font-semibold leading-snug",
       ),
     [],
   );
@@ -76,10 +75,9 @@ export default React.memo(function ProductGrid({
   const descriptionClasses = useMemo(
     () =>
       cn(
-        "text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2 whitespace-pre-line",
-        product.span ? "h-4" : "h-8",
+        "text-xs text-muted-foreground mt-0.5 line-clamp-2 whitespace-pre-line leading-relaxed",
       ),
-    [product.span],
+    [],
   );
 
   const handleNavigateToProduct = useCallback(() => {
@@ -118,38 +116,44 @@ export default React.memo(function ProductGrid({
         promedioStar={product.coment.promedio || 0}
       />
 
-      <div className="p-1 flex flex-col justify-between ">
+      <div className="p-2.5 flex flex-col gap-1.5">
         <h4 className={cn(titleClasses)}>{product.title}</h4>
 
         {!store?.edit?.minimalista && (
           <p className={descriptionClasses}>{product.descripcion || "..."}</p>
         )}
-        <div className="flex gap-0.5">
+
+        {/* Badges */}
+        <div className="flex flex-wrap gap-1">
           {isNew && (
-            <Badge className="bg-red-700/80 text-[0.5rem] px-1.5">Nuevo</Badge>
+            <Badge className="bg-red-600 text-white text-[0.6rem] px-1.5 py-0 font-medium">
+              Nuevo
+            </Badge>
           )}
           {product.favorito && (
-            <Badge className="bg-yellow-500/80 text-[0.5rem] px-1.5">
+            <Badge className="bg-amber-500 text-white text-[0.6rem] px-1.5 py-0 font-medium">
               Popular
             </Badge>
           )}
           {!product.stock && (
-            <Badge className="bg-violet-700/50 text-[0.5rem] px-1.5">
+            <Badge className="bg-muted text-muted-foreground text-[0.6rem] px-1.5 py-0 font-medium">
               Agotado
             </Badge>
           )}
           {product.oldPrice > product.price && (
-            <Badge className="bg-cyan-700/50 text-[0.5rem] px-1.5">
+            <Badge className="bg-emerald-600 text-white text-[0.6rem] px-1.5 py-0 font-medium">
               -
               {Math.round(
                 ((product.oldPrice - product.price) / product.oldPrice) * 100,
               )}
-              % Off
+              %
             </Badge>
           )}
         </div>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center justify-start gap-1">
+
+        {/* Price + Cart */}
+        <div className="flex items-center justify-between w-full pt-1">
+          <div className="flex items-baseline gap-1.5">
             {product.venta ? (
               <ProductPrice
                 price={product.price || 0}
@@ -237,9 +241,9 @@ const ProductImage = React.memo(function ProductImage({
         }}
       />
       {promedioStar ? (
-        <Badge className="absolute top-2 left-2 flex items-center text-xs bg-primary/50">
+        <Badge className="absolute top-2 left-2 flex items-center gap-0.5 text-xs bg-foreground/70 text-background backdrop-blur-sm">
           {promedioStar}
-          <Star className="fill-slate-50" />
+          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
         </Badge>
       ) : null}
     </Link>
@@ -259,12 +263,12 @@ const ProductPrice = React.memo(function ProductPrice({
 }: ProductPriceProps) {
   return (
     <>
-      <p className={`font-semibold  text-[8px] text-slate-800 `}>
+      <p className="font-bold text-sm text-foreground">
         ${smartRound(price)} {currency}
       </p>
       {oldPrice ? (
-        <p className="font-semibold  text-[8px]  text-red-800 line-through">
-          ${smartRound(oldPrice)} {currency}
+        <p className="text-xs text-muted-foreground line-through">
+          ${smartRound(oldPrice)}
         </p>
       ) : null}
     </>

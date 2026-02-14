@@ -54,15 +54,17 @@ export default function HeroNew() {
   }, [searchParams, shopName, user]);
 
   return (
-    <div className=" space-y-3 bg-slate-50 ">
-      <div className="">
-        <div className="relative rounded-b-2xl overflow-hidden shadow-lg">
+    <div className="bg-background">
+      {/* Banner - compact 16/9 aspect ratio */}
+      <div className="relative">
+        <div className="relative overflow-hidden">
           <Image
             src={store?.banner || logoApp}
             alt={store?.name || "Store"}
-            width={400}
-            height={500}
-            className="w-full aspect-square  object-cover"
+            width={800}
+            height={450}
+            className="w-full aspect-[16/9] object-cover"
+            priority
             onError={() => {
               dispatchStore({
                 type: "Add",
@@ -73,73 +75,69 @@ export default function HeroNew() {
               });
             }}
           />
+          {/* Gradient overlay for smooth transition */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
         </div>
       </div>
 
-      <div className="container mx-auto  px-6 -mt-12 relative z-10">
-        <div className="bg-primary/5 backdrop-blur-3xl border border-primary/20 rounded-2xl p-3">
-          <div className="flex flex-col  gap-2">
-            <div className="flex-1 gap-1">
-              <div className="flex flex-col gap-1">
-                <Link
-                  href={`/t/${store.sitioweb}/about/ratings`}
-                  className="flex items-center gap-2 text-sm"
-                >
-                  <Star className="w-4 h-4 fill-current text-slate-700" />
-                  <span className="font-medium text-slate-900 ">
-                    {store?.comentTienda.promedio.toFixed(1)}
-                  </span>
-                  <span>({store?.comentTienda.total} reseñas)</span>
-                  <span className="text-slate-700">•</span>
-                  <span>
-                    $ {store.moneda.find((m) => m.defecto)?.nombre || ""}
-                  </span>
-                </Link>
+      {/* Info card - overlapping the banner */}
+      <div className="px-4 -mt-10 relative z-10 pb-4">
+        <div className="bg-card border border-border rounded-2xl p-4 shadow-sm">
+          {/* Ratings and currency */}
+          <Link
+            href={`/t/${store.sitioweb}/about/ratings`}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground"
+          >
+            <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            <span className="font-semibold text-foreground">
+              {store?.comentTienda.promedio.toFixed(1)}
+            </span>
+            <span>({store?.comentTienda.total})</span>
+            <span className="text-border">|</span>
+            <span>
+              {store.moneda.find((m) => m.defecto)?.nombre || ""}
+            </span>
+          </Link>
 
-                <Link
-                  href={`/t/${store?.sitioweb}/about#ubicacion`}
-                  className="flex items-center gap-2 text-slate-700 "
-                >
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">
-                    {store?.municipio}, {store?.Provincia}
-                  </span>
-                </Link>
-              </div>
+          {/* Location */}
+          <Link
+            href={`/t/${store?.sitioweb}/about#ubicacion`}
+            className="flex items-center gap-1.5 text-muted-foreground mt-1.5"
+          >
+            <MapPin className="w-3.5 h-3.5" />
+            <span className="text-sm">
+              {store?.municipio}, {store?.Provincia}
+            </span>
+          </Link>
 
-              <p className="text-slate-700 text-sm line-clamp-2">
-                {store?.parrrafo || "..."}
-              </p>
-            </div>
+          {/* Description */}
+          {store?.parrrafo && (
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2 mt-2">
+              {store.parrrafo}
+            </p>
+          )}
 
-            <div className="flex flex-row gap-1 ">
+          {/* Delivery options */}
+          {(store.domicilio || store.local) && (
+            <div className="flex gap-2 mt-3">
               {store.domicilio && (
-                <div className="flex items-center gap-2 bg-primary/15 rounded-xl p-2 flex-1">
-                  <div className="p-2 bg-primary/15 rounded-lg">
-                    <Truck className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-600">Entrega</p>
-                    <p className="text-sm font-medium text-slate-800">
-                      Delivery
-                    </p>
-                  </div>
+                <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 flex-1">
+                  <Truck className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-foreground">
+                    Delivery
+                  </span>
                 </div>
               )}
-
               {store.local && (
-                <div className="flex items-center gap-2 bg-primary/15 rounded-xl p-2 flex-1">
-                  <div className="p-2 bg-primary/15 rounded-lg">
-                    <Store className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-600">Entrega</p>
-                    <p className="text-sm font-medium text-slate-800">Tienda</p>
-                  </div>
+                <div className="flex items-center gap-2 bg-primary/10 rounded-xl px-3 py-2 flex-1">
+                  <Store className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium text-foreground">
+                    Tienda
+                  </span>
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
       </div>
 

@@ -50,9 +50,9 @@ export default function Products() {
   }, [sortedCategories]);
 
   return (
-    <div>
+    <div className="bg-background">
       <HeroNew />
-      <div className="bg-(--background-dark) mt-5">
+      <div className="mt-2 pb-6">
         {sortedCategories.map((categoria) => (
           <CategoryItem
             key={categoria.id}
@@ -63,7 +63,7 @@ export default function Products() {
           />
         ))}
 
-        {/* Sección de productos sin categoría */}
+        {/* Seccion de productos sin categoria */}
         {sortedsWithOutCategories.length > 0 && (
           <UncategorizedSection
             products={sortedsWithOutCategories}
@@ -139,54 +139,50 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
   const categoryImage = categoria.image || store?.urlPoster || logoApp;
 
   return (
-    <div className="p-2 mb-2">
-      <div className="rounded-lg">
-        <div className="pb-2">
-          <Link
-            className="text-sm uppercase font-cinzel text-center text-slate-700 tracking-widest truncate flex items-center"
-            href={`/t/${store?.sitioweb}/category/${categoria.id}`}
-          >
-            {categoria.name}
-          </Link>
-        </div>
-
+    <div className="px-3 mb-4">
+      <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
         <Link
           href={`/t/${store?.sitioweb}/category/${categoria.id}`}
-          className="flex items-center justify-center"
+          className="block"
         >
           <Image
-            width={250}
-            height={250}
+            width={400}
+            height={400}
             placeholder="blur"
             blurDataURL={categoryImage}
-            alt={categoria.name || "Categoría"}
-            className="aspect-square object-cover rounded-lg"
+            alt={categoria.name || "Categoria"}
+            className="w-full aspect-[16/9] object-cover"
             src={categoryImage}
           />
         </Link>
 
-        <div className="p-2 flex flex-col justify-evenly">
+        <div className="p-3">
+          <Link
+            className="text-sm uppercase font-cinzel text-foreground tracking-widest truncate flex items-center font-semibold"
+            href={`/t/${store?.sitioweb}/category/${categoria.id}`}
+          >
+            {categoria.name}
+          </Link>
+
           {!store?.edit?.minimalista && categoria.description && (
-            <p className="text-[10px] text-(--text-muted) mt-1 line-clamp-2 whitespace-pre-line">
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 whitespace-pre-line leading-relaxed">
               {categoria.description}
             </p>
           )}
 
-          <div className="flex items-center justify-between mt-3">
-            <p className="font-medium w-full text-10 text-slate-700">
+          <div className="flex items-center justify-between mt-2.5">
+            <p className="text-xs font-medium text-muted-foreground">
               {productsCount} Productos
             </p>
-            <div className="relative h-9 w-full flex justify-end items-center">
-              <Button
-                size="icon"
-                type="button"
-                className="size-8 flex justify-center items-center rounded-full"
-                onClick={onNavigate}
-                aria-label={`Ver productos de ${categoria.name}`}
-              >
-                <FaArrowRight className="size-4" />
-              </Button>
-            </div>
+            <Button
+              size="icon"
+              type="button"
+              className="size-8 flex justify-center items-center rounded-full"
+              onClick={onNavigate}
+              aria-label={`Ver productos de ${categoria.name}`}
+            >
+              <FaArrowRight className="size-3.5" />
+            </Button>
           </div>
         </div>
       </div>
@@ -220,14 +216,14 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
 
   const gridClass = useMemo(
     () =>
-      `grid grid-flow-row-dense gap-2 p-2 ${
-        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1 "
+      `grid grid-flow-row-dense gap-3 px-3 ${
+        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
       }`,
     [store?.edit?.grid],
   );
 
   return (
-    <div ref={sectionRef} className="mb-12">
+    <div ref={sectionRef} className="mb-8">
       <div id={categoria.id} />
       <CategoryHeader
         id={categoria.id}
@@ -263,29 +259,29 @@ function CategoryHeader({
   const { highlightCategory } = useSheet();
 
   return (
-    <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
+    <div className="sticky top-16 z-10 flex items-center justify-center px-3 py-2">
+      <div className="flex items-center justify-between rounded-full bg-card border border-border/60 shadow-sm max-w-[85%] w-full">
         <Button
           onClick={() => ScrollTo(prevID)}
-          variant={"ghost"}
-          className="p-2"
-          size={"icon"}
+          variant="ghost"
+          className="p-2 rounded-full text-muted-foreground hover:text-foreground"
+          size="icon"
         >
           <MdNavigateBefore />
         </Button>
         <Button
-          variant={"ghost"}
-          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
+          variant="ghost"
+          className="rounded-full truncate max-w-[70%] w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1 text-sm text-foreground"
           onClick={() => highlightCategory(id)}
         >
           {name}
         </Button>
 
         <Button
-          className="p-2"
+          className="p-2 rounded-full text-muted-foreground hover:text-foreground"
           onClick={() => ScrollTo(nextID)}
-          variant={"ghost"}
-          size={"icon"}
+          variant="ghost"
+          size="icon"
         >
           <MdNavigateNext />
         </Button>
@@ -314,14 +310,14 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
 
   const gridClass = useMemo(
     () =>
-      `grid grid-flow-row-dense gap-2 p-2 ${
+      `grid grid-flow-row-dense gap-3 px-3 ${
         store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
       }`,
     [store?.edit?.grid],
   );
 
   return (
-    <div ref={sectionRef} className="mb-12">
+    <div ref={sectionRef} className="mb-8">
       <div id="sin-categoria" />
       <UncategorizedHeader />
       <div className={gridClass}>
@@ -341,9 +337,9 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
 // Header especial para productos sin categoría (sin funciones de categoría)
 function UncategorizedHeader() {
   return (
-    <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-center rounded-full shadow-md bg-white max-w-4/5 w-full py-2 px-4">
-        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700">
+    <div className="sticky top-16 z-10 flex items-center justify-center px-3 py-2">
+      <div className="flex items-center justify-center rounded-full bg-card border border-border/60 shadow-sm max-w-[85%] w-full py-2 px-4">
+        <span className="truncate max-w-[70%] w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-sm text-foreground">
           Otros Productos
         </span>
       </div>
