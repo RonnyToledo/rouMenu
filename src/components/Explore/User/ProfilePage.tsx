@@ -36,7 +36,7 @@ export default function ProfilePage() {
   }, [signOut, router]);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container dark:bg-slate-900 mx-auto px-4 py-8 max-w-2xl">
       <div className="flex-1 mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full">
         <ProfileHeader />
 
@@ -47,11 +47,11 @@ export default function ProfilePage() {
 
       {/* Purchase History Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-800 mb-4">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">
           Historial de Compras
         </h2>
         <Link href="/user/compra">
-          <Button className="w-full bg-slate-700 hover:bg-slate-600 text-white border-0 h-12 text-base rounded-xl">
+          <Button className="w-full bg-slate-700 hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500 text-white border-0 h-12 text-base rounded-xl">
             Ver Historial Completo
           </Button>
         </Link>
@@ -61,7 +61,7 @@ export default function ProfilePage() {
       <Button
         variant="outline"
         onClick={() => handleSignOut()}
-        className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500 h-12 text-base rounded-xl bg-transparent"
+        className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500 dark:border-red-600/50 dark:text-red-400 dark:hover:bg-red-600/10 dark:hover:text-red-300 dark:hover:border-red-600 h-12 text-base rounded-xl bg-transparent"
       >
         <LogOut className="w-5 h-5 mr-2" />
         Cerrar Sesión

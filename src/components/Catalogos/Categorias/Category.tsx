@@ -13,7 +13,6 @@ interface Props {
 
 export default function Category({ categoria }: Props) {
   const { store } = useContext(MyContext);
-
   const finCategory = store?.categorias?.find((obj) => obj.id === categoria);
 
   useEffect(() => {
@@ -24,14 +23,13 @@ export default function Category({ categoria }: Props) {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className=" ">
+      <section>
         <Image
           width={250}
           height={250}
           placeholder={"blur"}
           blurDataURL={finCategory?.image || store?.urlPoster || logoApp}
-          alt={finCategory?.name || `CAtegoria `}
+          alt={finCategory?.name || `Categoria`}
           className={`${
             store?.edit?.square ? "aspect-square" : "w-full h-72"
           } object-cover rounded-b-3xl`}
@@ -39,15 +37,13 @@ export default function Category({ categoria }: Props) {
         />
         <div className="p-2 flex flex-col justify-evenly">
           {!store?.edit?.minimalista && (
-            <p
-              className={`text-[10px] text-(--text-muted) mt-1 line-clamp-2 whitespace-pre-line `}
-            >
+            <p className="text-[10px] text-(--text-muted) dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line">
               {finCategory?.description}
             </p>
           )}
-          <div className={`flex items-center justify-between px-2 gap-1`}>
-            <FaBookmark className="size-6" />
-            <p className="font-medium w-full text-10 text-slate-700">
+          <div className="flex items-center justify-between px-2 gap-1">
+            <FaBookmark className="size-6 text-slate-700 dark:text-slate-400" />
+            <p className="font-medium w-full text-10 text-slate-700 dark:text-slate-300">
               {
                 store?.products.filter((obj) => obj.caja == finCategory?.id)
                   .length
@@ -59,8 +55,7 @@ export default function Category({ categoria }: Props) {
         </div>
       </section>
 
-      {/* Products Section */}
-      <section className="bg-white rounded-xl p-2">
+      <section className="bg-white dark:bg-slate-900 rounded-xl p-2">
         <div className="grid grid-cols-2 gap-2 grid-flow-row-dense">
           {store?.products
             .filter((obj) => obj.caja == categoria)

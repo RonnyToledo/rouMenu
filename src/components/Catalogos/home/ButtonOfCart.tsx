@@ -1,12 +1,5 @@
 "use client";
-import React, {
-  useCallback,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-  memo,
-} from "react";
+import React, { useCallback, useContext, useState, useMemo, memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { TbShoppingCartPlus, TbShoppingCartMinus } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,7 +49,7 @@ export const ButtonOfCart = memo(function ButtonOfCart({
   // Memoizar valores calculados
   const isDisabled = useMemo(
     () => store.stocks && productCant >= productStock,
-    [store.stocks, productCant, productStock]
+    [store.stocks, productCant, productStock],
   );
 
   const isLastItem = productCant === 1;
@@ -72,17 +65,13 @@ export const ButtonOfCart = memo(function ButtonOfCart({
   }, [dispatchStore, product, productCant]);
 
   const handleDecrement = useCallback(() => {
+    const newCant = productCant - 1;
     dispatchStore({
       type: "AddCart",
-      payload: JSON.stringify({ ...product, Cant: productCant - 1 }),
+      payload: JSON.stringify({ ...product, Cant: newCant }),
     });
-    if (isLastItem) setSlideOpen(false);
-  }, [dispatchStore, product, productCant, isLastItem]);
-
-  // Efecto optimizado
-  useEffect(() => {
-    if (productCant === 0) setSlideOpen(false);
-  }, [productCant]);
+    if (newCant <= 0) setSlideOpen(false);
+  }, [dispatchStore, product, productCant]);
 
   // Clases memoizadas
   const containerClasses = useMemo(
@@ -90,7 +79,7 @@ export const ButtonOfCart = memo(function ButtonOfCart({
       `absolute flex items-center justify-end rounded-full right-0 overflow-hidden z-1 ${
         variant === "default" ? "bg-primary" : ""
       }`,
-    [variant]
+    [variant],
   );
 
   return (

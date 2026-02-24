@@ -36,7 +36,7 @@ export function StepByStepSheet({
 
   const handleSectionClick = (
     section: SectionsInterace,
-    subsection?: SubsectionsInterace
+    subsection?: SubsectionsInterace,
   ) => {
     const targetSlug = subsection ? subsection?.slug : section?.slug;
 
@@ -49,7 +49,7 @@ export function StepByStepSheet({
   if (!data) {
     return (
       <Button
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 z-50"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 z-50"
         disabled
       >
         <BookOpen className="h-6 w-6" />
@@ -61,16 +61,18 @@ export function StepByStepSheet({
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         <Button
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 z-50"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 z-50"
           onClick={() => setIsOpen(true)}
         >
           <BookOpen className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+      <SheetContent className="w-100 sm:w-135 overflow-y-auto dark:bg-slate-900 dark:border-slate-700">
         <SheetHeader>
-          <SheetTitle className="text-emerald-700">Guía de RouAdmin</SheetTitle>
-          <SheetDescription>
+          <SheetTitle className="text-emerald-700 dark:text-emerald-400">
+            Guía de RouAdmin
+          </SheetTitle>
+          <SheetDescription className="dark:text-slate-400">
             Navega por las diferentes secciones de la documentación
           </SheetDescription>
         </SheetHeader>
@@ -82,8 +84,8 @@ export function StepByStepSheet({
                 onClick={() => handleSectionClick(section)}
                 className={`w-full text-left p-3 rounded-lg text-sm transition-all duration-200 border flex items-center justify-between ${
                   activeSection === section?.slug
-                    ? "bg-emerald-100 border-emerald-300 shadow-sm text-emerald-700 font-medium"
-                    : "hover:bg-slate-50 border-transparent hover:border-slate-200"
+                    ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-medium"
+                    : "hover:bg-slate-50 dark:hover:bg-slate-900 border-transparent hover:border-slate-200 dark:hover:border-slate-700 dark:text-slate-300"
                 }`}
               >
                 <span>{section?.title}</span>
@@ -99,13 +101,13 @@ export function StepByStepSheet({
                         onClick={() => handleSectionClick(section, subsection)}
                         className={`w-full text-left p-2 rounded text-sm transition-all duration-200 ${
                           activeSection === subsection?.slug
-                            ? "bg-emerald-50 text-emerald-600 font-medium"
-                            : "hover:bg-slate-50 text-muted-foreground"
+                            ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-medium"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-900 text-muted-foreground dark:text-slate-400"
                         }`}
                       >
                         {subsection?.title}
                       </button>
-                    )
+                    ),
                   )}
                 </div>
               )}
@@ -114,14 +116,16 @@ export function StepByStepSheet({
         </div>
 
         {/* Enlaces útiles */}
-        <div className="border-t pt-4 mt-6 space-y-2">
-          <h4 className="font-medium text-sm">Enlaces útiles:</h4>
+        <div className="border-t dark:border-slate-700 pt-4 mt-6 space-y-2">
+          <h4 className="font-medium text-sm dark:text-slate-200">
+            Enlaces útiles:
+          </h4>
           <div className="space-y-1 text-sm">
             <a
               href="https://rouadmin.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-emerald-600 hover:text-emerald-700 underline transition-colors"
+              className="block text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 underline transition-colors"
             >
               → Acceder a RouAdmin
             </a>
@@ -129,7 +133,7 @@ export function StepByStepSheet({
               href="https://github.com/RonnyToledo/adminWebShop"
               target="_blank"
               rel="noopener noreferrer"
-              className="block text-emerald-600 hover:text-emerald-700 underline transition-colors"
+              className="block text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 underline transition-colors"
             >
               → Ver código fuente en GitHub
             </a>

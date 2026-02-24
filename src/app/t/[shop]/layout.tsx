@@ -28,20 +28,23 @@ export default async function RootLayout({
   const { shop } = await params;
   const { data: storeOne, error } = await supabase.rpc(
     "get_store_with_transform",
-    { tienda_slug: shop }
+    { tienda_slug: shop },
   );
 
   if (error) {
     console.error("Error al obtener tienda:", error);
     notFound();
   } else {
-    console.info("Store listo");
+    console.info("Store OK");
   }
   let store = transformData(storeOne);
   if (typeof storeOne.edit == "string") {
     store = transformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
   }
-  if (!store.sitioweb) notFound();
+  if (!store.sitioweb) {
+    console.info("Tienda no encontrada, redirigiendo a notFound");
+    notFound();
+  }
 
   if (!storeOne.active) return <Unavailable />;
   return (

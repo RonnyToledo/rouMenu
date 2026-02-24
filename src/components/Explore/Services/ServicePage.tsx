@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ScrollTo } from "@/functions/ScrollTo";
+
 export default function ServiciosPage() {
   const router = useRouter();
   const benefits = [
@@ -118,19 +119,22 @@ export default function ServiciosPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-slate-950">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-300/20 via-background to-green-300/20 border-b">
-        <div className="container mx-auto px-4 py-16">
+      <section className="bg-linear-to-br from-green-300/20 via-background to-green-300/20 dark:from-green-900/20 dark:via-slate-950 dark:to-green-900/20 border-b dark:border-slate-800">
+        <div className="container dark:bg-slate-900 mx-auto px-4 py-16">
           <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-4 bg-green-900/10 text-green-900 border-primary/20">
+            <Badge className="mb-4 bg-green-900/10 dark:bg-green-900/30 text-green-900 dark:text-green-400 border-primary/20 dark:border-green-700">
               Servicios de E-commerce
             </Badge>
-            <h1 className="text-5xl font-bold text-foreground mb-6">
+            <h1 className="text-5xl font-bold text-foreground dark:text-slate-100 mb-6">
               Transforma tu Negocio con una
-              <span className="text-green-900"> Tienda Online</span>
+              <span className="text-green-900 dark:text-green-400">
+                {" "}
+                Tienda Online
+              </span>
             </h1>
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+            <p className="text-xl text-muted-foreground dark:text-slate-400 mb-8 leading-relaxed">
               Descubre los beneficios de tener presencia digital y cómo una
               tienda online profesional puede revolucionar tu negocio y
               multiplicar tus ventas.
@@ -139,7 +143,7 @@ export default function ServiciosPage() {
               <Button
                 onClick={() => router.push(`https://wa.me/5352489105`)}
                 size="lg"
-                className="bg-green-900 hover:bg-green-800/90"
+                className="bg-green-900 hover:bg-green-800/90 dark:bg-green-700 dark:hover:bg-green-600"
               >
                 Solicitar Consulta Gratuita
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -148,6 +152,7 @@ export default function ServiciosPage() {
                 onClick={() => router.push(`/`)}
                 size="lg"
                 variant="outline"
+                className="dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-900"
               >
                 Ver Portfolio
               </Button>
@@ -158,12 +163,12 @@ export default function ServiciosPage() {
 
       {/* Benefits Section */}
       <section className="py-16">
-        <div className="container mx-auto px-4">
+        <div className="container dark:bg-slate-900 mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-4">
               ¿Por qué necesitas una Tienda Online?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
               Los beneficios de digitalizar tu negocio van más allá de las
               ventas online
             </p>
@@ -173,19 +178,26 @@ export default function ServiciosPage() {
             {benefits.map((benefit, index) => (
               <Card
                 key={index}
-                className="text-center hover:shadow-lg transition-shadow"
+                className="text-center hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700"
               >
                 <CardHeader>
-                  <div className="mx-auto mb-4 p-3 bg-green-900/10 rounded-full w-fit">
-                    <benefit.icon className="h-8 w-8 text-green-900" />
+                  <div className="mx-auto mb-4 p-3 bg-green-900/10 dark:bg-green-900/30 rounded-full w-fit">
+                    <benefit.icon className="h-8 w-8 text-green-900 dark:text-green-400" />
                   </div>
-                  <CardTitle className="text-xl">{benefit.title}</CardTitle>
-                  <Badge variant="secondary" className="mx-auto">
+                  <CardTitle className="text-xl dark:text-slate-100">
+                    {benefit.title}
+                  </CardTitle>
+                  <Badge
+                    variant="secondary"
+                    className="mx-auto dark:bg-slate-700 dark:text-slate-200"
+                  >
                     {benefit.stats}
                   </Badge>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{benefit.description}</p>
+                  <p className="text-muted-foreground dark:text-slate-400">
+                    {benefit.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -194,30 +206,37 @@ export default function ServiciosPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-16 bg-muted/30 dark:bg-slate-900/50">
+        <div className="container dark:bg-slate-900 mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-4">
               Características de Nuestras Tiendas Online
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
               Tecnología de vanguardia para maximizar tus resultados
             </p>
           </div>
 
           <div className="grid gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700"
+              >
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-900/10 rounded-lg">
-                      <feature.icon className="h-6 w-6 text-green-900" />
+                    <div className="p-2 bg-green-900/10 dark:bg-green-900/30 rounded-lg">
+                      <feature.icon className="h-6 w-6 text-green-900 dark:text-green-400" />
                     </div>
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
+                    <CardTitle className="text-lg dark:text-slate-100">
+                      {feature.title}
+                    </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <p className="text-muted-foreground dark:text-slate-400">
+                    {feature.description}
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -227,12 +246,12 @@ export default function ServiciosPage() {
 
       {/* Process Section */}
       <section className="py-16">
-        <div className="container mx-auto px-4">
+        <div className="container dark:bg-slate-900 mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-4">
               Nuestro Proceso de Implementación
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
               Un enfoque estructurado para garantizar el éxito de tu proyecto
             </p>
           </div>
@@ -245,19 +264,23 @@ export default function ServiciosPage() {
                 onClick={() => ScrollTo(`process_${index}`)}
                 id={`process_${index}`}
               >
-                <Card className="relative hover:shadow-lg transition-shadow">
+                <Card className="relative hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700">
                   <CardHeader>
-                    <div className="text-4xl font-bold text-green-900/20 mb-2">
+                    <div className="text-4xl font-bold text-green-900/20 dark:text-green-400/20 mb-2">
                       {step.step}
                     </div>
-                    <CardTitle className="text-xl">{step.title}</CardTitle>
+                    <CardTitle className="text-xl dark:text-slate-100">
+                      {step.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">{step.description}</p>
+                    <p className="text-muted-foreground dark:text-slate-400">
+                      {step.description}
+                    </p>
                   </CardContent>
                   {index < process.length - 1 && (
                     <div className="hidden absolute right-4 top-1/2 transform -translate-y-1/2">
-                      <ArrowRight className="h-6 w-6 text-green-900/30" />
+                      <ArrowRight className="h-6 w-6 text-green-900/30 dark:text-green-400/30" />
                     </div>
                   )}
                 </Card>
@@ -268,23 +291,23 @@ export default function ServiciosPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-green-900/5">
-        <div className="container mx-auto px-4">
-          <Card className="bg-linear-to-r from-green-700 via-green-400 to-green-700  text-green-900-foreground">
+      <section className="py-16 bg-green-900/5 dark:bg-green-900/10">
+        <div className="container dark:bg-slate-900 mx-auto px-4">
+          <Card className="bg-linear-to-r from-green-700 via-green-400 to-green-700 dark:from-green-800 dark:via-green-600 dark:to-green-800 text-green-900-foreground dark:bg-slate-900 dark:border-slate-700">
             <CardContent className="py-16 text-center">
-              <h3 className="text-3xl font-bold mb-4">
+              <h3 className="text-3xl font-bold mb-4 dark:text-slate-100">
                 ¿Listo para Impulsar tu Negocio?
               </h3>
-              <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
+              <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90 dark:text-slate-300">
                 No esperes más. Cada día sin una tienda online es una
                 oportunidad perdida. Contacta con nosotros y descubre cómo
                 podemos transformar tu negocio.
               </p>
-              <div className="flex flex-col  gap-4 justify-center">
+              <div className="flex flex-col gap-4 justify-center">
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="bg-white text-green-900 hover:bg-white/90"
+                  className="bg-white text-green-900 hover:bg-white/90 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
                   onClick={() => router.push(`https://wa.me/5352489105`)}
                 >
                   <CheckCircle className="mr-2 h-4 w-4" />
@@ -294,7 +317,7 @@ export default function ServiciosPage() {
                   onClick={() => router.push(`/t/moondust`)}
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 bg-transparent"
+                  className="border-white text-white hover:bg-white/10 bg-transparent dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-900"
                 >
                   Ver Casos de Éxito
                 </Button>

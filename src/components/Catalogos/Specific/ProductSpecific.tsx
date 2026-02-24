@@ -37,28 +37,23 @@ export default function Product({ id }: { id: string }) {
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
 
-  // Memoizar el producto inicial para evitar recalcular en cada render
   const initialProduct = useMemo(() => {
     return store.products.find((obj) => obj.productId === id);
   }, [store.products, id]);
 
-  // Verificar si el producto existe
   useEffect(() => {
     if (!initialProduct) {
       notFound();
     }
   }, [initialProduct]);
 
-  // Calcular el conteo inicial basado en el producto
   const initialCount = useMemo(() => {
     if (!initialProduct) return 0;
-
     const totalAgregados =
       initialProduct.agregados?.reduce(
         (sum, agg) => sum + (agg.cant || 0),
         0,
       ) || 0;
-
     return totalAgregados > 0
       ? 0
       : (initialProduct.stock || 0) -
@@ -72,7 +67,6 @@ export default function Product({ id }: { id: string }) {
         : 0;
   }, [initialProduct]);
 
-  // Inicializar estados con valores calculados
   const [product, setProduct] = useState<ProductInterface | undefined>(
     initialProduct,
   );
@@ -83,17 +77,12 @@ export default function Product({ id }: { id: string }) {
   const handleToCart = (productToCart: ProductInterface) => {
     setIsAddingToCart(true);
     setTimeout(() => setIsAddingToCart(false), 800);
-    dispatchStore({
-      type: "AddCart",
-      payload: JSON.stringify(productToCart),
-    });
-
+    dispatchStore({ type: "AddCart", payload: JSON.stringify(productToCart) });
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
     router.push(`/t/${store.sitioweb}`);
   };
 
-  // Si recibimos la pagina fuera de la posicion de inicio ponerla en top 0
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -106,14 +95,8 @@ export default function Product({ id }: { id: string }) {
   const handleSwipeEnd = (e: React.TouchEvent<HTMLDivElement>): void => {
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-
-    // Solo swipes horizontales significativos
     if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0) {
-        navigateToProduct("previous");
-      } else {
-        navigateToProduct("next");
-      }
+      navigateToProduct(deltaX > 0 ? "previous" : "next");
     }
   };
 
@@ -124,13 +107,8 @@ export default function Product({ id }: { id: string }) {
         direction === "next"
           ? (currentIndex + 1) % store.products.length
           : (currentIndex - 1 + store.products.length) % store.products.length;
-
       const newProductId = store.products[newIndex].productId;
-
-      const path = `/t/${store.sitioweb || ""}/producto/${
-        newProductId || ""
-      }?direction=${direction}`;
-
+      const path = `/t/${store.sitioweb || ""}/producto/${newProductId || ""}?direction=${direction}`;
       if (path.includes("undefined")) {
         console.error("Path generado contiene valores no válidos:", path);
         return;
@@ -142,21 +120,13 @@ export default function Product({ id }: { id: string }) {
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent): void => {
-      if (event.key === "ArrowLeft") {
-        navigateToProduct("previous");
-      } else if (event.key === "ArrowRight") {
-        navigateToProduct("next");
-      }
+      if (event.key === "ArrowLeft") navigateToProduct("previous");
+      else if (event.key === "ArrowRight") navigateToProduct("next");
     };
-
     window.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [navigateToProduct]);
 
-  // Copiar informacion para repostear
   const links = useMemo(
     () => [
       { name: "Inicio", link: `/t/${store.sitioweb}` },
@@ -197,15 +167,10 @@ export default function Product({ id }: { id: string }) {
     ],
   );
 
-  // Si no hay producto, no renderizar nada (notFound se encargará)
-  if (!product) {
-    return null;
-  }
+  if (!product) return null;
 
   return (
     <main className="flex flex-col items-start min-h-dvh">
-      {/* Left Column - Images */}
-
       <div className="flex flex-col gap-1 w-full">
         {/* Main Image */}
         <AnimatePresence mode="wait">
@@ -258,7 +223,7 @@ export default function Product({ id }: { id: string }) {
                     ) as string[],
                   });
                 }}
-                className="aspect-square rounded-lg overflow-hidden bg-slate-200/50 hover:bg-slate-300/50 border-2 border-slate-300 hover:border-slate-400 transition-all"
+                className="aspect-square rounded-lg overflow-hidden bg-slate-200/50 dark:bg-slate-700/50 hover:bg-slate-300/50 dark:hover:bg-slate-600/50 border-2 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 transition-all"
               >
                 <Image
                   width={150}
@@ -272,13 +237,12 @@ export default function Product({ id }: { id: string }) {
           </div>
         )}
       </div>
+
       <div className="max-w-7xl mx-auto grid grid-cols-1 gap-1 px-4 py-1">
-        {/* Breadcrumb */}
         <BreadCrumpParent list={links} />
-        {/* Right Column - Product Info */}
         <div className="space-y-2">
           {/* Title and Actions */}
-          <div className="sapce-y-2">
+          <div className="space-y-2">
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <Link
@@ -289,25 +253,20 @@ export default function Product({ id }: { id: string }) {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(product.coment.promedio || 0)
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-slate-400"
-                        }`}
+                        className={`w-4 h-4 ${i < Math.floor(product.coment.promedio || 0) ? "text-yellow-400 fill-yellow-400" : "text-slate-400 dark:text-slate-600"}`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
                     {product.coment.promedio} ({product.coment.total} reseñas)
                   </span>
                 </Link>
-
                 <div className="flex gap-2">
                   <ClipboardProduct
                     title={`${product.title || ""}`}
                     descripcion={product.descripcion || ""}
                     url={product.image}
-                    price={product.price || 0 || 0}
+                    price={product.price || 0}
                     oldPrice={product.oldPrice || 0}
                     className="p-0 m-0"
                   />
@@ -323,14 +282,14 @@ export default function Product({ id }: { id: string }) {
             {/* Price and Stock */}
             <div className="flex items-center justify-between gap-1">
               <div className="flex items-center gap-3">
-                <p className="text-3xl font-bold text-slate-800">
+                <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">
                   ${product.price || 0}{" "}
                   {store.moneda.find((m) => m.id === product.default_moneda)
                     ?.nombre || ""}
                 </p>
                 {(product.oldPrice || 0) > (product.price || 0) && (
                   <>
-                    <p className="text-lg text-slate-600 line-through">
+                    <p className="text-lg text-slate-600 dark:text-slate-400 line-through">
                       ${product.oldPrice || 0}
                     </p>
                     <Badge variant="destructive" className="animate-pulse">
@@ -344,15 +303,14 @@ export default function Product({ id }: { id: string }) {
                   </>
                 )}
               </div>
-
               {product.stock ? (
-                <div className="flex items-center gap-2 text-emerald-400">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                <div className="flex items-center gap-2 text-emerald-400 dark:text-emerald-500">
+                  <div className="w-2 h-2 bg-emerald-400 dark:bg-emerald-500 rounded-full animate-pulse" />
                   <span className="text-sm font-medium">En stock</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-red-400">
-                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+                <div className="flex items-center gap-2 text-red-400 dark:text-red-500">
+                  <div className="w-2 h-2 bg-red-400 dark:bg-red-500 rounded-full animate-pulse" />
                   <span className="text-sm font-medium">Off Stock</span>
                 </div>
               )}
@@ -365,7 +323,7 @@ export default function Product({ id }: { id: string }) {
                   <Badge
                     key={index}
                     variant="secondary"
-                    className="bg-slate-300 text-slate-800 border-slate-400 hover:bg-slate-400"
+                    className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-400 dark:border-slate-600 hover:bg-slate-400 dark:hover:bg-slate-600"
                   >
                     {tag}
                   </Badge>
@@ -376,18 +334,20 @@ export default function Product({ id }: { id: string }) {
 
           {/* Packaging */}
           {(product.embalaje || 0) > 0 && (
-            <Card className="p-4 bg-slate-200/50 border-slate-300">
+            <Card className="p-4 bg-slate-200/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-slate-800 mb-1">Embalaje</h3>
-                  <p className="text-sm text-slate-700">
+                  <h3 className="font-medium text-slate-800 dark:text-slate-200 mb-1">
+                    Embalaje
+                  </h3>
+                  <p className="text-sm text-slate-700 dark:text-slate-400">
                     ${product.embalaje.toFixed(2)}{" "}
                     {store.moneda.find((m) => m.id === product.default_moneda)
                       ?.nombre || ""}
                   </p>
                 </div>
                 <div className="bg-emerald-500 rounded-full p-2">
-                  <Check className="w-4 h-4 text-slate-800" />
+                  <Check className="w-4 h-4 text-white" />
                 </div>
               </div>
             </Card>
@@ -397,23 +357,24 @@ export default function Product({ id }: { id: string }) {
           {(product.agregados || []).length > 0 && (
             <div className="space-y-1">
               <div>
-                <h3 className="font-medium text-slate-800">Extras</h3>
-                <p className="text-sm text-slate-600">
+                <h3 className="font-medium text-slate-800 dark:text-slate-200">
+                  Extras
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Agregados para su encargo
                 </p>
               </div>
-
               {product.agregados.map((extra) => (
                 <Card
                   key={extra.id}
-                  className="p-4 bg-slate-200/50 border-slate-300"
+                  className="p-4 bg-slate-200/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-slate-800">
+                      <div className="font-medium text-slate-800 dark:text-slate-200">
                         {extra.name}
                       </div>
-                      <div className="text-sm text-slate-700">
+                      <div className="text-sm text-slate-700 dark:text-slate-400">
                         ${extra.price.toFixed(2)}{" "}
                         {store.moneda.find(
                           (m) => m.id === product.default_moneda,
@@ -436,13 +397,13 @@ export default function Product({ id }: { id: string }) {
                                 ),
                               })
                             }
-                            className="h-8 w-8 bg-slate-300 hover:bg-slate-400 border-slate-400 rounded-full"
+                            className="h-8 w-8 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 border-slate-400 dark:border-slate-600 rounded-full"
                           >
-                            <Minus className="h-4 w-4 text-slate-800" />
+                            <Minus className="h-4 w-4 text-slate-800 dark:text-slate-200" />
                           </Button>
                           <Badge
                             variant="outline"
-                            className="bg-slate-300 text-slate-800 border-slate-400 px-3"
+                            className="bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-400 dark:border-slate-600 px-3"
                           >
                             {extra.cant}
                           </Badge>
@@ -461,15 +422,15 @@ export default function Product({ id }: { id: string }) {
                             ),
                           })
                         }
-                        className="h-8 w-8 bg-slate-300 hover:bg-slate-400 border-slate-400 rounded-full"
+                        className="h-8 w-8 bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 dark:hover:bg-slate-600 border-slate-400 dark:border-slate-600 rounded-full"
                       >
-                        <Plus className="h-4 w-4 text-slate-800" />
+                        <Plus className="h-4 w-4 text-slate-800 dark:text-slate-200" />
                       </Button>
                     </div>
                   </div>
                 </Card>
               ))}
-              <p className="text-xs text-slate-600 text-center">
+              <p className="text-xs text-slate-600 dark:text-slate-400 text-center">
                 *El extra es el producto con el agregado incluido
               </p>
             </div>
@@ -482,20 +443,18 @@ export default function Product({ id }: { id: string }) {
               size="icon"
               disabled={countAddCart === 0}
               onClick={() => setCountAddCart(countAddCart - 1)}
-              className="h-10 w-10 bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 rounded-full"
+              className="h-10 w-10 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-full"
             >
               <Minus className="w-5 h-5" />
             </Button>
-            <span className="text-2xl font-semibold text-slate-800 w-16 text-center">
+            <span className="text-2xl font-semibold text-slate-800 dark:text-slate-200 w-16 text-center">
               {countAddCart}
             </span>
             <Button
               variant="outline"
               size="icon"
-              onClick={() => {
-                setCountAddCart(countAddCart + 1);
-              }}
-              className="h-10 w-10 bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 rounded-full"
+              onClick={() => setCountAddCart(countAddCart + 1)}
+              className="h-10 w-10 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-full"
             >
               <Plus className="w-5 h-5" />
             </Button>
@@ -513,11 +472,7 @@ export default function Product({ id }: { id: string }) {
                   Cant: (product.Cant || 0) + countAddCart || 0,
                 } as ProductInterface);
               }}
-              className={`w-full h-12 text-base font-medium rounded-3xl transition-all duration-300 ${
-                showSuccess
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "hover:scale-105"
-              } ${isAddingToCart ? "scale-95" : ""}`}
+              className={`w-full h-12 text-base font-medium rounded-3xl transition-all dark:text-slate-100 duration-300 ${showSuccess ? "bg-green-600 hover:bg-green-700" : "hover:scale-105"} ${isAddingToCart ? "scale-95" : ""}`}
             >
               {isAddingToCart ? (
                 <div className="flex items-center gap-2">
@@ -536,7 +491,7 @@ export default function Product({ id }: { id: string }) {
                   <ShoppingCart className="w-4 h-4" />
                   Agregar al carrito - $
                   {(
-                    ((product.price || 0 || 0) + (product.embalaje || 0)) *
+                    ((product.price || 0) + (product.embalaje || 0)) *
                       countAddCart +
                     (product.agregados.reduce(
                       (sum, agg) =>
@@ -549,10 +504,9 @@ export default function Product({ id }: { id: string }) {
                 </div>
               )}
             </Button>
-
             <Button
               variant="outline"
-              className="w-full h-12 rounded-3xl hover:scale-105 transition-transform duration-200 bg-transparent"
+              className="w-full h-12 rounded-3xl hover:scale-105 transition-transform duration-200 bg-transparent dark:border-slate-600 dark:text-slate-300"
               onClick={() => router.push(`/t/${store.sitioweb}/carrito`)}
             >
               Comprar ahora
@@ -561,16 +515,18 @@ export default function Product({ id }: { id: string }) {
 
           {/* Description */}
           {product.descripcion ? (
-            <div className="pt-1 border-t border-slate-300">
-              <h3 className="font-semibold text-slate-800 mb-2">Descripción</h3>
-              <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+            <div className="pt-1 border-t border-slate-300 dark:border-slate-700">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">
+                Descripción
+              </h3>
+              <p className="text-slate-700 dark:text-slate-400 leading-relaxed whitespace-pre-line">
                 {product.descripcion}
               </p>
             </div>
           ) : null}
 
           {/* Ratings Summary */}
-          <div className="pt-6 border-t border-slate-300">
+          <div className="pt-6 border-t border-slate-300 dark:border-slate-700">
             <RatingSection
               specific={product.productId || id}
               sitioweb={store.sitioweb || ""}
@@ -595,7 +551,10 @@ function BreadCrumpParent({ list }: { list: BreadcrumbInterface[] }) {
           <div key={`Bread-${index}`} className="flex items-center">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={item.link} className="max-w-28 line-clamp-1">
+                <Link
+                  href={item.link}
+                  className="max-w-28 line-clamp-1 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                >
                   {item.name === "Inicio" ? (
                     <HomeIcon className="size-4" />
                   ) : (

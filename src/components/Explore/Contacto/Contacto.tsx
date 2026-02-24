@@ -70,7 +70,7 @@ export default function ContactoPage() {
   const router = useRouter();
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setForm((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
@@ -129,12 +129,14 @@ export default function ContactoPage() {
     }
   };
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background dark:bg-slate-950">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-6">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Contacto</h1>
-          <p className="text-lg text-muted-foreground">
+      <header className="border-b dark:border-slate-800 bg-card dark:bg-slate-900">
+        <div className="container dark:bg-slate-900 mx-auto px-4 py-6">
+          <h1 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-2">
+            Contacto
+          </h1>
+          <p className="text-lg text-muted-foreground dark:text-slate-400">
             Conecta con nuestro equipo de desarrolladores especializados en
             tiendas online
           </p>
@@ -142,14 +144,14 @@ export default function ContactoPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
+      <main className="container dark:bg-slate-900 mx-auto px-4 py-12">
         {/* Contact Info Section */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl font-bold text-foreground dark:text-slate-100 mb-4">
               ¿Listo para crear tu tienda online?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
               Nuestro equipo de expertos está aquí para ayudarte a transformar
               tu negocio con una tienda online profesional y optimizada.
             </p>
@@ -157,55 +159,59 @@ export default function ContactoPage() {
 
           <div className="grid gap-8 mb-8">
             {/* Company Contact */}
-            <Card className="bg-primary/5 border-primary/20">
+            <Card className="bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-primary">
+                <CardTitle className="text-2xl text-primary dark:text-blue-400">
                   Información General
                 </CardTitle>
-                <CardDescription>Datos de contacto principales</CardDescription>
+                <CardDescription className="dark:text-slate-400">
+                  Datos de contacto principales
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-primary" />
+                  <Mail className="h-5 w-5 text-primary dark:text-blue-400" />
                   <div>
-                    <p className="font-medium">Email Principal</p>
+                    <p className="font-medium dark:text-slate-200">
+                      Email Principal
+                    </p>
                     <a
                       href="mailto:info@ronnytoledo87@proton.me"
-                      className="text-sm text-muted-foreground hover:text-primary"
+                      className="text-sm text-muted-foreground dark:text-slate-400 hover:text-primary dark:hover:text-blue-400"
                     >
                       ronnytoledo87@proton.me
                     </a>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-primary" />
+                  <Phone className="h-5 w-5 text-primary dark:text-blue-400" />
                   <div>
-                    <p className="font-medium">Teléfono</p>
+                    <p className="font-medium dark:text-slate-200">Teléfono</p>
                     <a
                       href="tel:+5352489105"
-                      className="text-sm text-muted-foreground hover:text-primary"
+                      className="text-sm text-muted-foreground dark:text-slate-400 hover:text-primary dark:hover:text-blue-400"
                     >
                       +53 52489105
                     </a>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <MessageCircle className="h-5 w-5 text-primary" />
+                  <MessageCircle className="h-5 w-5 text-primary dark:text-blue-400" />
                   <div>
-                    <p className="font-medium">WhatsApp</p>
+                    <p className="font-medium dark:text-slate-200">WhatsApp</p>
                     <a
                       href="https://wa.me/5352489105"
-                      className="text-sm text-muted-foreground hover:text-primary"
+                      className="text-sm text-muted-foreground dark:text-slate-400 hover:text-primary dark:hover:text-blue-400"
                     >
                       +53 52489105
                     </a>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-primary" />
+                  <MapPin className="h-5 w-5 text-primary dark:text-blue-400" />
                   <div>
-                    <p className="font-medium">Ubicación</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium dark:text-slate-200">Ubicación</p>
+                    <p className="text-sm text-muted-foreground dark:text-slate-400">
                       Moron
                       <br />
                       28013 Ciego de Avila, Cuba
@@ -215,42 +221,35 @@ export default function ContactoPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-secondary/5 border-secondary/20">
+            <Card className="bg-secondary/5 dark:bg-secondary/10 border-secondary/20 dark:border-secondary/30">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Horarios & Respuesta</CardTitle>
-                <CardDescription>Cuándo y cómo contactarnos</CardDescription>
+                <CardTitle className="text-2xl dark:text-slate-100">
+                  Horarios & Respuesta
+                </CardTitle>
+                <CardDescription className="dark:text-slate-400">
+                  Cuándo y cómo contactarnos
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-secondary" />
+                  <Clock className="h-5 w-5 text-muted-foreground dark:text-slate-400" />
                   <div>
-                    <p className="font-medium">Horario de Atención</p>
-                    <p className="text-sm text-muted-foreground">
-                      Lunes a Viernes: 9:00 - 18:00
-                      <br />
-                      Sábados: 10:00 - 14:00
+                    <p className="font-medium dark:text-slate-200">
+                      Horario de Atención
+                    </p>
+                    <p className="text-sm text-muted-foreground dark:text-slate-400">
+                      Lunes a Viernes: 9:00 AM - 6:00 PM
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 text-secondary" />
+                  <MessageCircle className="h-5 w-5 text-muted-foreground dark:text-slate-400" />
                   <div>
-                    <p className="font-medium">Tiempo de Respuesta</p>
-                    <p className="text-sm text-muted-foreground">
-                      Email: 2-4 horas laborables
-                      <br />
-                      WhatsApp: 30 minutos
+                    <p className="font-medium dark:text-slate-200">
+                      Tiempo de Respuesta
                     </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 text-secondary" />
-                  <div>
-                    <p className="font-medium">Consultas Urgentes</p>
-                    <p className="text-sm text-muted-foreground">
-                      Disponible 24/7 para clientes
-                      <br />
-                      con proyectos en producción
+                    <p className="text-sm text-muted-foreground dark:text-slate-400">
+                      Email: 24-48 horas | WhatsApp: Inmediato
                     </p>
                   </div>
                 </div>
@@ -259,83 +258,103 @@ export default function ContactoPage() {
           </div>
         </section>
 
+        {/* Contact Form */}
         <section className="mb-16">
-          <Card className="max-w-2xl mx-auto">
+          <Card className="max-w-2xl mx-auto dark:bg-slate-900 dark:border-slate-700">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Envíanos un Mensaje</CardTitle>
-              <CardDescription>
-                Cuéntanos sobre tu proyecto y te responderemos en menos de 24
-                horas
+              <CardTitle className="text-2xl dark:text-slate-100">
+                Envíanos un Mensaje
+              </CardTitle>
+              <CardDescription className="dark:text-slate-400">
+                Completa el formulario y te responderemos lo antes posible
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form className="space-y-6" onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nombre Completo</Label>
+                    <Label htmlFor="name" className="dark:text-slate-200">
+                      Nombre Completo
+                    </Label>
                     <Input
                       id="name"
                       placeholder="Tu nombre"
                       value={form.name}
                       onChange={handleChange}
+                      className="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email" className="dark:text-slate-200">
+                      Email
+                    </Label>
                     <Input
                       id="email"
                       type="email"
                       placeholder="tu@email.com"
                       value={form.email}
                       onChange={handleChange}
+                      className="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-400"
                     />
                   </div>
                 </div>
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Teléfono</Label>
+                    <Label htmlFor="phone" className="dark:text-slate-200">
+                      Teléfono
+                    </Label>
                     <Input
                       id="phone"
                       placeholder="+34 600 000 000"
                       value={form.phone}
                       onChange={handleChange}
+                      className="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-400"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="company">Empresa (Opcional)</Label>
+                    <Label htmlFor="company" className="dark:text-slate-200">
+                      Empresa (Opcional)
+                    </Label>
                     <Input
                       id="company"
                       placeholder="Tu empresa"
                       value={form.company}
                       onChange={handleChange}
+                      className="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-400"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Asunto</Label>
+                  <Label htmlFor="subject" className="dark:text-slate-200">
+                    Asunto
+                  </Label>
                   <Input
                     id="subject"
                     placeholder="¿En qué podemos ayudarte?"
                     value={form.subject}
                     onChange={handleChange}
+                    className="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-400"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="message">Mensaje</Label>
+                  <Label htmlFor="message" className="dark:text-slate-200">
+                    Mensaje
+                  </Label>
                   <Textarea
                     id="message"
                     placeholder="Cuéntanos sobre tu proyecto..."
                     rows={5}
                     value={form.message}
                     onChange={handleChange}
+                    className="dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-400"
                   />
                 </div>
                 {status && (
                   <div
                     className={
                       status.type === "success"
-                        ? "text-green-600"
-                        : "text-red-600"
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
                     }
                   >
                     {status.msg}
@@ -343,7 +362,7 @@ export default function ContactoPage() {
                 )}
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full dark:bg-blue-600 dark:hover:bg-blue-700"
                   size="lg"
                   disabled={loading}
                 >
@@ -357,15 +376,20 @@ export default function ContactoPage() {
 
         {/* Developers Section */}
         <section>
-          <h2 className="text-3xl font-bold text-center mb-12">
+          <h2 className="text-3xl font-bold text-center mb-12 dark:text-slate-100">
             Nuestro Equipo
           </h2>
           <div className="grid gap-8">
             {developers.map((dev, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700"
+              >
                 <CardHeader>
-                  <CardTitle className="text-xl">{dev.name}</CardTitle>
-                  <CardDescription className="text-primary font-medium">
+                  <CardTitle className="text-xl dark:text-slate-100">
+                    {dev.name}
+                  </CardTitle>
+                  <CardDescription className="text-primary dark:text-blue-400 font-medium">
                     {dev.role}
                   </CardDescription>
                 </CardHeader>
@@ -373,31 +397,34 @@ export default function ContactoPage() {
                   {/* Contact Info */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <Mail className="h-4 w-4 text-muted-foreground dark:text-slate-400" />
                       <a
                         href={`mailto:${dev.email}`}
-                        className="hover:text-primary"
+                        className="hover:text-primary dark:hover:text-blue-400 dark:text-slate-300"
                       >
                         {dev.email}
                       </a>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <Phone className="h-4 w-4 text-muted-foreground dark:text-slate-400" />
                       <a
                         href={`tel:${dev.phone}`}
-                        className="hover:text-primary"
+                        className="hover:text-primary dark:hover:text-blue-400 dark:text-slate-300"
                       >
                         {dev.phone}
                       </a>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Badge variant="outline" className="text-xs">
+                      <Badge
+                        variant="outline"
+                        className="text-xs dark:border-slate-600 dark:text-slate-300"
+                      >
                         {dev.experience}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-xs text-muted-foreground">
+                      <Clock className="h-4 w-4 text-muted-foreground dark:text-slate-400" />
+                      <span className="text-xs text-muted-foreground dark:text-slate-400">
                         {dev.availability}
                       </span>
                     </div>
@@ -405,7 +432,12 @@ export default function ContactoPage() {
 
                   {/* Social Links */}
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
                       <Link
                         href={`https://github.com/${dev.github}`}
                         target="_blank"
@@ -414,7 +446,12 @@ export default function ContactoPage() {
                         <Github className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
                       <Link
                         href={`https://linkedin.com/in/${dev.linkedin}`}
                         target="_blank"
@@ -423,7 +460,12 @@ export default function ContactoPage() {
                         <Linkedin className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
                       <Link
                         href={`https://${dev.website}`}
                         target="_blank"
@@ -436,13 +478,15 @@ export default function ContactoPage() {
 
                   {/* Specialties */}
                   <div>
-                    <p className="text-sm font-medium mb-2">Especialidades:</p>
+                    <p className="text-sm font-medium mb-2 dark:text-slate-200">
+                      Especialidades:
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {dev.specialties.map((specialty, idx) => (
                         <Badge
                           key={idx}
                           variant="secondary"
-                          className="text-xs"
+                          className="text-xs dark:bg-slate-700 dark:text-slate-200"
                         >
                           {specialty}
                         </Badge>
@@ -457,19 +501,19 @@ export default function ContactoPage() {
 
         {/* CTA Section */}
         <section className="text-center mt-16">
-          <Card className="bg-primary/5 border-primary/20">
+          <Card className="bg-primary/5 dark:bg-primary/10 border-primary/20 dark:border-primary/30">
             <CardContent className="py-12">
-              <h3 className="text-2xl font-bold mb-4">
+              <h3 className="text-2xl font-bold mb-4 dark:text-slate-100">
                 ¿Tienes un proyecto en mente?
               </h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              <p className="text-muted-foreground dark:text-slate-400 mb-6 max-w-md mx-auto">
                 Contáctanos hoy mismo y descubre cómo podemos ayudarte a crear
                 la tienda online perfecta para tu negocio.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   size="lg"
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-primary hover:bg-primary/90 dark:bg-blue-600 dark:hover:bg-blue-700"
                   onClick={() =>
                     router.push("mailto:info@ronnytoledo87@gmail.com")
                   }
@@ -477,7 +521,12 @@ export default function ContactoPage() {
                   <Mail className="h-4 w-4 mr-2" />
                   Enviar Mensaje
                 </Button>
-                <Button size="lg" variant="outline" asChild>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  asChild
+                  className="dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-900"
+                >
                   <a
                     href="https://wa.me/5352489105"
                     target="_blank"

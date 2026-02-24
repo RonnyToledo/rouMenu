@@ -77,7 +77,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
       closeSheet();
       dispatchStore({ type: "ChangeCurrent", payload: coinId });
     },
-    [closeSheet, dispatchStore]
+    [closeSheet, dispatchStore],
   );
 
   // Home menu items
@@ -147,7 +147,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
         },
       },
     ],
-    [store.sitioweb, router, closeSheet, handleReviewAction]
+    [store.sitioweb, router, closeSheet, handleReviewAction],
   );
 
   // Nombre de usuario para display
@@ -161,7 +161,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
   return (
     <div
-      className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-900 transition-opacity duration-500"
+      className="absolute inset-0 bg-linear-to-r from-slate-600 to-slate-900 transition-opacity duration-500"
       style={{
         opacity: isMenuOpen ? 1 : 0,
         pointerEvents: isMenuOpen ? "auto" : "none",
@@ -301,7 +301,7 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
         }
       }
     },
-    [store?.sitioweb, pathname, router, onClose]
+    [store?.sitioweb, pathname, router, onClose],
   );
 
   return (
@@ -328,7 +328,7 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
               action={() => handleCategoryClick(category)}
             />
           </React.Fragment>
-        )
+        ),
       )}
     </div>
   );
@@ -382,14 +382,14 @@ const ListSheet = React.memo(function ListSheet({
         variant="ghost"
         className={cn(
           "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-100",
-          className
+          className,
         )}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {icon && <span className="flex-shrink-0">{icon}</span>}
+          {icon && <span className="shrink-0">{icon}</span>}
           <span className="truncate">{name}</span>
         </div>
-        {icon2 && <span className="flex-shrink-0">{icon2}</span>}
+        {icon2 && <span className="shrink-0">{icon2}</span>}
       </Button>
       {final && <Separator className="bg-white/20" />}
     </>

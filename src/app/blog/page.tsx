@@ -24,7 +24,7 @@ export default async function Page() {
   if (error) {
     // Podrías retornar un componente de error personalizado
     return (
-      <div className="container mx-auto p-4">
+      <div className="container dark:bg-slate-900 mx-auto p-4">
         <p className="text-red-500">Error al cargar los posts</p>
       </div>
     );

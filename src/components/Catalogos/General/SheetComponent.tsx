@@ -35,10 +35,11 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ScrollTo } from "@/functions/ScrollTo";
+import { useTheme } from "next-themes";
+import { SunIcon, MoonIcon } from "lucide-react";
 
 type SheetView = "home" | "categories" | "coins";
 
-// Context para controlar el Sheet
 interface SheetContextType {
   open: () => void;
   close: () => void;
@@ -50,7 +51,6 @@ interface SheetContextType {
 
 const SheetContext = createContext<SheetContextType | undefined>(undefined);
 
-// Hook personalizado para usar el contexto
 export function useSheet() {
   const context = useContext(SheetContext);
   if (!context) {
@@ -59,7 +59,6 @@ export function useSheet() {
   return context;
 }
 
-// Provider Component
 export function SheetProvider({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showState, setShowState] = useState<SheetView>("home");
@@ -76,11 +75,8 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const highlightCategory = useCallback((categoryId: string) => {
-    // Abrir el sheet en la vista de categorías
     setShowState("categories");
     setIsMenuOpen(true);
-
-    // Esperar un poco para que el sheet se abra y renderice
     setTimeout(() => {
       setHighlightCategoryId(categoryId);
     }, 300);
@@ -113,7 +109,6 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Componente Sheet actualizado para recibir props del Provider
 interface SheetComponentProps {
   className?: string;
   isOpen: boolean;
@@ -132,6 +127,7 @@ function SheetComponent({
   highlightCategoryId,
   onHighlightComplete,
 }: SheetComponentProps) {
+  const { theme, setTheme } = useTheme();
   const { store, dispatchStore } = useContext(MyContext);
   const { user, loading, signOut, requireAuth } = useAuth();
   const router = useRouter();
@@ -139,7 +135,6 @@ function SheetComponent({
   const [isMounted, setIsMounted] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
 
-  // Reset view when sheet closes
   useEffect(() => {
     if (!isOpen) setShowState("home");
   }, [isOpen, setShowState]);
@@ -147,13 +142,10 @@ function SheetComponent({
   const closeSheet = useCallback(() => onOpenChange(false), [onOpenChange]);
 
   const handleReviewAction = useCallback(async () => {
-    // Verificar autenticación antes de enviar la review
     const isAuthenticated = await requireAuth(
       "Debes iniciar sesión para dejar una reseña",
     );
-    // Si el usuario no se autenticó o canceló, detener el proceso
     if (!isAuthenticated) {
-      console.info("Usuario no autenticado, review cancelada");
       closeSheet();
       return;
     }
@@ -179,7 +171,6 @@ function SheetComponent({
           closeSheet();
         },
       },
-
       {
         name: "Sobre Nosotros",
         icon: <IoStorefrontOutline />,
@@ -223,6 +214,18 @@ function SheetComponent({
         },
       },
       {
+        name: "Theme",
+        icon:
+          theme === "dark" ? (
+            <SunIcon className="h-5 w-5" />
+          ) : (
+            <MoonIcon className="h-5 w-5" />
+          ),
+        action: () => {
+          setTheme(theme === "dark" ? "light" : "dark");
+        },
+      },
+      {
         name: "Explorar mas Catalogos",
         icon: <MdTravelExplore />,
         action: () => {
@@ -231,29 +234,39 @@ function SheetComponent({
         },
       },
     ],
-    [store.sitioweb, router, closeSheet, handleReviewAction, setShowState],
+    [
+      theme,
+      router,
+      store.sitioweb,
+      closeSheet,
+      setShowState,
+      handleReviewAction,
+      setTheme,
+    ],
   );
 
   const displayName = useMemo(() => {
     if (!isMounted || loading) return "Cargando...";
-    if (user?.user_metadata?.full_name) {
+    if (user?.user_metadata?.full_name)
       return user.user_metadata.full_name.split(" ")[0];
-    }
     return "Guest";
   }, [user, isMounted, loading]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
+
+  if (!isMounted) return null;
 
   return (
     <>
       <Sheet onOpenChange={onOpenChange} open={isOpen}>
-        <SheetContent className="bg-linear-to-br from-primary/5 to-primary/30 p-4">
+        <SheetContent className="bg-linear-to-br from-primary/5 to-primary/30 dark:from-slate-900 dark:to-slate-800 p-4 dark:border-slate-700">
           <SheetHeader>
             <SheetTitle>
               <Link href={"/user"} className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center overflow-hidden">
                   {isMounted && user?.user_metadata?.avatar_url ? (
                     <Image
                       width={40}
@@ -263,14 +276,14 @@ function SheetComponent({
                       alt="Avatar"
                     />
                   ) : (
-                    <User className="w-5 h-5 text-slate-800" />
+                    <User className="w-5 h-5 text-slate-800 dark:text-slate-200" />
                   )}
                 </div>
                 <div>
-                  <p className="text-slate-800 font-semibold text-sm">
+                  <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm">
                     Hi, {displayName}
                   </p>
-                  <p className="text-slate-800/70 text-xs">
+                  <p className="text-slate-800/70 dark:text-slate-400 text-xs">
                     {isMounted && user ? "Welcome back" : "Guest"}
                   </p>
                 </div>
@@ -281,19 +294,20 @@ function SheetComponent({
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-3">
             <Button
-              variant={"outline"}
+              variant="outline"
               onClick={() => {
                 router.push(`/t/${store.sitioweb}/search`);
                 closeSheet();
               }}
-              className="justify-start rounded-full h-fit p-2 w-full"
+              className="justify-start rounded-full h-fit p-2 w-full dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <IoSearch />
-              <span className=" text-slate-500">Busqueda avanzada</span>
+              <span className="text-slate-500 dark:text-slate-400">
+                Busqueda avanzada
+              </span>
             </Button>
             <div className="min-h-fit">
               {showState === "home" && <HomeView items={homeItems} />}
-
               {showState === "categories" && (
                 <CategoriesView
                   onBack={() => setShowState("home")}
@@ -302,7 +316,6 @@ function SheetComponent({
                   onHighlightComplete={onHighlightComplete}
                 />
               )}
-
               {showState === "coins" && (
                 <CoinsView
                   coins={store?.moneda || []}
@@ -312,22 +325,22 @@ function SheetComponent({
               )}
             </div>
           </div>
-          {user ? (
-            <>
-              <div className="space-y-2">
-                <Separator className="bg-slate-200/20" />
 
-                <ListSheet
-                  name={"Cerrar Sesion"}
-                  icon={<User className="w-8 h-8 text-slate-800" />}
-                  icon2={<ChevronRight />}
-                  action={() => {
-                    signOut();
-                    closeSheet();
-                  }}
-                />
-              </div>
-            </>
+          {user ? (
+            <div className="space-y-2">
+              <Separator className="bg-slate-200/20 dark:bg-slate-700/40" />
+              <ListSheet
+                name="Cerrar Sesion"
+                icon={
+                  <User className="w-8 h-8 text-slate-800 dark:text-slate-300" />
+                }
+                icon2={<ChevronRight />}
+                action={() => {
+                  signOut();
+                  closeSheet();
+                }}
+              />
+            </div>
           ) : null}
         </SheetContent>
       </Sheet>
@@ -339,7 +352,6 @@ function SheetComponent({
   );
 }
 
-// Subcomponents
 interface HomeViewProps {
   items: Array<{ name: string; icon: React.ReactNode; action: () => void }>;
 }
@@ -380,26 +392,18 @@ function CategoriesView({
     null,
   );
 
-  // Efecto para manejar el highlight cuando cambia el ID
   useEffect(() => {
     if (highlightCategoryId !== null) {
-      // Hacer scroll a la categoría
       const categoryElement = document.getElementById(
         `category-${highlightCategoryId}`,
       );
-      if (categoryElement) {
+      if (categoryElement)
         categoryElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-
-      // Iniciar el pestañeo
       setBlinkingCategoryId(highlightCategoryId);
-
-      // Detener el pestañeo después de 1 segundo
       const timeout = setTimeout(() => {
         setBlinkingCategoryId(null);
         onHighlightComplete();
       }, 1000);
-
       return () => clearTimeout(timeout);
     }
   }, [highlightCategoryId, onHighlightComplete]);
@@ -412,7 +416,6 @@ function CategoriesView({
       } else {
         const targetUrl = `/t/${store?.sitioweb}`;
         const targetId = category.id;
-
         if (pathname === targetUrl) {
           ScrollTo(targetId);
           onClose();
@@ -434,8 +437,7 @@ function CategoriesView({
         action={onBack}
         className="font-bold"
       />
-      <Separator className="bg-slate-200/20" />
-
+      <Separator className="bg-slate-200/20 dark:bg-slate-700/40" />
       <ListSheet
         name="Todas"
         icon2={<ChevronRight />}
@@ -445,8 +447,7 @@ function CategoriesView({
         }}
         className="font-bold"
       />
-      <Separator className="bg-slate-200/20" />
-
+      <Separator className="bg-slate-200/20 dark:bg-slate-700/40" />
       {ExtraerCategorias(store?.categorias, store.products).map(
         (category: Categoria) => (
           <React.Fragment key={category.id}>
@@ -481,8 +482,7 @@ function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
         action={onBack}
         className="font-bold"
       />
-      <Separator className="bg-slate-200/20" />
-
+      <Separator className="bg-slate-200/20 dark:bg-slate-700/40" />
       {coins.map((coin) => (
         <ListSheet
           key={coin.id}
@@ -521,7 +521,7 @@ const ListSheet = React.memo(function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-700",
+          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 dark:hover:bg-white/5 transition-colors text-slate-700 dark:text-slate-300",
           className,
         )}
       >
@@ -531,7 +531,7 @@ const ListSheet = React.memo(function ListSheet({
         </div>
         {icon2 && <span className="shrink-0">{icon2}</span>}
       </Button>
-      {final && <Separator className="bg-slate-200/20" />}
+      {final && <Separator className="bg-slate-200/20 dark:bg-slate-700/40" />}
     </>
   );
 });

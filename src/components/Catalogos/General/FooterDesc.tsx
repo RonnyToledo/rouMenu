@@ -34,7 +34,7 @@ export default function Footer() {
     if (store?.sitioweb) {
       const startRuta = `/t/${store?.sitioweb}`;
       setRuta(
-        prevRuta.map((obj) => ({ ...obj, url: startRuta.concat(obj.url) }))
+        prevRuta.map((obj) => ({ ...obj, url: startRuta.concat(obj.url) })),
       );
     }
   }, [store?.sitioweb]);

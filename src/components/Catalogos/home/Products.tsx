@@ -21,7 +21,6 @@ import HeroNew from "./HeroNew";
 export default function Products() {
   const { store } = useContext(MyContext);
 
-  // Memoizar categorías ordenadas
   const sortedCategories = useMemo(() => {
     if (!store?.categorias || !store?.products) return [];
     return ExtraerCategorias(store.categorias, store.products).sort(
@@ -45,14 +44,13 @@ export default function Products() {
       const prevCat = sorted[(index - 1 + sorted.length) % sorted.length];
       mapping[cat.id] = { nextID: nextCat.id, prevID: prevCat.id };
     });
-
     return mapping;
   }, [sortedCategories]);
 
   return (
     <div>
       <HeroNew />
-      <div className="bg-(--background-dark) mt-5">
+      <div className="bg-(--background-dark) dark:bg-slate-900 mt-5">
         {sortedCategories.map((categoria) => (
           <CategoryItem
             key={categoria.id}
@@ -62,8 +60,6 @@ export default function Products() {
             prevID={next_before_Category[categoria.id]?.prevID || ""}
           />
         ))}
-
-        {/* Sección de productos sin categoría */}
         {sortedsWithOutCategories.length > 0 && (
           <UncategorizedSection
             products={sortedsWithOutCategories}
@@ -90,7 +86,6 @@ const CategoryItem = React.memo(function CategoryItem({
 }: CategoryItemProps) {
   const router = useRouter();
 
-  // Memoizar productos filtrados
   const categoryProducts = useMemo(
     () =>
       store?.products?.filter((p: Product) => p.caja === categoria.id) || [],
@@ -143,7 +138,7 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
       <div className="rounded-lg">
         <div className="pb-2">
           <Link
-            className="text-sm uppercase font-cinzel text-center text-slate-700 tracking-widest truncate flex items-center"
+            className="text-sm uppercase font-cinzel text-center text-slate-700 dark:text-slate-300 tracking-widest truncate flex items-center"
             href={`/t/${store?.sitioweb}/category/${categoria.id}`}
           >
             {categoria.name}
@@ -167,13 +162,12 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
 
         <div className="p-2 flex flex-col justify-evenly">
           {!store?.edit?.minimalista && categoria.description && (
-            <p className="text-[10px] text-(--text-muted) mt-1 line-clamp-2 whitespace-pre-line">
+            <p className="text-[10px] text-(--text-muted) dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line">
               {categoria.description}
             </p>
           )}
-
           <div className="flex items-center justify-between mt-3">
-            <p className="font-medium w-full text-10 text-slate-700">
+            <p className="font-medium w-full text-10 text-slate-700 dark:text-slate-300">
               {productsCount} Productos
             </p>
             <div className="relative h-9 w-full flex justify-end items-center">
@@ -212,7 +206,6 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   const { store } = useContext(MyContext);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Memoizar productos ordenados
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
     [products],
@@ -221,7 +214,7 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   const gridClass = useMemo(
     () =>
       `grid grid-flow-row-dense gap-2 p-2 ${
-        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1 "
+        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
       }`,
     [store?.edit?.grid],
   );
@@ -264,28 +257,27 @@ function CategoryHeader({
 
   return (
     <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
+      <div className="flex items-center justify-between rounded-full shadow-md bg-white dark:bg-slate-900 max-w-4/5 w-full">
         <Button
           onClick={() => ScrollTo(prevID)}
-          variant={"ghost"}
-          className="p-2"
-          size={"icon"}
+          variant="ghost"
+          className="p-2 dark:text-slate-300 dark:hover:bg-slate-700"
+          size="icon"
         >
           <MdNavigateBefore />
         </Button>
         <Button
-          variant={"ghost"}
-          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
+          variant="ghost"
+          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1 text-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
           onClick={() => highlightCategory(id)}
         >
           {name}
         </Button>
-
         <Button
-          className="p-2"
+          className="p-2 dark:text-slate-300 dark:hover:bg-slate-700"
           onClick={() => ScrollTo(nextID)}
-          variant={"ghost"}
-          size={"icon"}
+          variant="ghost"
+          size="icon"
         >
           <MdNavigateNext />
         </Button>
@@ -294,7 +286,6 @@ function CategoryHeader({
   );
 }
 
-// Nuevo componente para productos sin categoría
 interface UncategorizedSectionProps {
   products: Product[];
   banner: string;
@@ -338,12 +329,11 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
   );
 });
 
-// Header especial para productos sin categoría (sin funciones de categoría)
 function UncategorizedHeader() {
   return (
     <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-center rounded-full shadow-md bg-white max-w-4/5 w-full py-2 px-4">
-        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700">
+      <div className="flex items-center justify-center rounded-full shadow-md bg-white dark:bg-slate-900 max-w-4/5 w-full py-2 px-4">
+        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700 dark:text-slate-200">
           Otros Productos
         </span>
       </div>

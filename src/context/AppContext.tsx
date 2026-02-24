@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase";
 import { User, Session } from "@supabase/supabase-js";
 import { logoApp } from "@/lib/image";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
+import { ThemeProvider } from "next-themes";
 
 // ============== TIPOS ==============
 
@@ -193,6 +194,7 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
   const params = useParams();
 
   // Auth State
+  const [isMounted, setIsMounted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -394,7 +396,12 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
       router.push("/");
     }
   };
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsMounted(true);
+  }, []);
 
+  if (!isMounted) return null;
   // ============== RENDER ==============
 
   return (
@@ -416,13 +423,15 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
         smartBack,
       }}
     >
-      <LoginPopover
-        isOpen={isLoginOpen}
-        onClose={closeLoginPopover}
-        redirectTo={pathname ?? "/"}
-        message={loginMessage}
-      />
-      <main>{children}</main>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <LoginPopover
+          isOpen={isLoginOpen}
+          onClose={closeLoginPopover}
+          redirectTo={pathname ?? "/"}
+          message={loginMessage}
+        />
+        <main>{children}</main>
+      </ThemeProvider>
     </AppContext.Provider>
   );
 }

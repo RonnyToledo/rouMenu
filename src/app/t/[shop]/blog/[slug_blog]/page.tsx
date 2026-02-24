@@ -16,7 +16,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug_blog } = await params;
   const slug = await buildPostMetadata(slug_blog);
-  console.log("generateStaticParams - slugs:", slug);
 
   // Si quieres pasar opciones: buildPostMetadata(params.slug_blog, { siteName: "rouMenu", canonicalBase: "https://roumenu.vercel.app" });
   return slug;
@@ -25,10 +24,8 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { slug_blog } = await params;
   const { post, error } = await BlogService.getPostBySlug(slug_blog);
-  console.log(post, error);
 
   if (error || !post) {
-    console.log("Not found:", slug_blog);
     notFound();
   }
 

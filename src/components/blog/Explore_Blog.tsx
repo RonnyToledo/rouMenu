@@ -28,7 +28,7 @@ export default function BlogPage({ posts, global = false }: BlogPageProps) {
     return (
       <div className="min-h-screen bg-background">
         <div className="h-16"></div>
-        <section className="container mx-auto p-4">
+        <section className="container dark:bg-slate-900 mx-auto p-4">
           <div className="text-center py-12">
             <h1 className="text-3xl font-bold mb-4">Blog</h1>
             <p className="text-muted-foreground text-lg">
@@ -51,7 +51,7 @@ export default function BlogPage({ posts, global = false }: BlogPageProps) {
       {/* Hero Section */}
       {!global ? (
         <section className="border-b bg-muted/30">
-          <div className="container mx-auto p-4">
+          <div className="container dark:bg-slate-900 mx-auto p-4">
             <div className="max-w-3xl">
               <h1 className="text-4xlfont-bold tracking-tight text-balance mb-6">
                 Blog de {siteName}
@@ -66,7 +66,7 @@ export default function BlogPage({ posts, global = false }: BlogPageProps) {
       ) : null}
 
       {/* Posts Grid */}
-      <section className="container mx-auto p-4 ">
+      <section className="container dark:bg-slate-900 mx-auto p-4 ">
         <div className="grid gap-8 ">
           {posts.map((post) => (
             <Card

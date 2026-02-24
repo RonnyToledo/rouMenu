@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Star, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
-
 import { Product } from "@/context/InitialStatus";
 import Image from "next/image";
 import { smartRound } from "@/functions/precios";
@@ -29,12 +28,6 @@ import {
 } from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import ExpandableText from "../Specific/truncateText";
-/**
- * CompareTwoCols.tsx
- * - Dos estados fijos: leftProduct / rightProduct
- * - Select para reemplazar cualquiera de los dos
- * - Destaca el ganador por fila y ganador global
- */
 
 export default function ComparePage() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -46,14 +39,13 @@ export default function ComparePage() {
   const [right, setRight] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Inicializar columnas a los primeros dos productos comparados si existen
   useEffect(() => {
     setIsLoading(true);
     const leftInit = compareFromStore[0] || null;
     const rightInit = compareFromStore[1] || compareFromStore[0] || null;
     setLeft(leftInit || null);
     setRight(rightInit || null);
-    setTimeout(() => setIsLoading(false), 350); // pequeño pulso UX
+    setTimeout(() => setIsLoading(false), 350);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.products]);
 
@@ -62,17 +54,12 @@ export default function ComparePage() {
       type: "AddCart",
       payload: JSON.stringify(productToCart),
     });
-    dispatchStore({
-      type: "balanceMode",
-      payload: false,
-    });
+    dispatchStore({ type: "balanceMode", payload: false });
   };
 
-  // Lista de productos disponibles para seleccionar (excluye el otro seleccionado)
   const availableOptions = (excludeId?: string | number) =>
     store.products.filter((p: Product) => p.id !== excludeId);
 
-  // Cambiar producto por lado
   const replaceProduct = (side: "left" | "right", productId: string) => {
     const found =
       store.products.find((p: Product) => p.productId == productId) || null;
@@ -80,10 +67,8 @@ export default function ComparePage() {
     else setRight(found);
   };
 
-  // Calcula ganadores por fila y ganador global
   function computeWinners(a: Product | null, b: Product | null) {
     if (!a || !b) return null;
-
     const winners = {
       price: a.price < b.price ? "left" : a.price > b.price ? "right" : "tie",
       rating:
@@ -100,22 +85,18 @@ export default function ComparePage() {
         return da > db ? "left" : da < db ? "right" : "tie";
       })(),
     };
-
-    // Puntos simples: cada fila ganada suma 1 punto
     const points = { left: 0, right: 0 };
     (Object.keys(winners) as Array<keyof typeof winners>).forEach((k) => {
       const v = winners[k];
       if (v === "left") points.left += 1;
       else if (v === "right") points.right += 1;
     });
-
     const global =
       points.left > points.right
         ? "left"
         : points.right > points.left
           ? "right"
           : "tie";
-
     return { winners, points, global };
   }
 
@@ -123,42 +104,38 @@ export default function ComparePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
         <div className="max-w-5xl mx-auto animate-pulse space-y-4">
-          <div className="h-8 bg-slate-200 rounded w-64"></div>
-          <div className="grid grid-cols-1  gap-6">
-            <div className="bg-white rounded-lg h-80" />
-            <div className="bg-white rounded-lg h-80" />
+          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-64"></div>
+          <div className="grid grid-cols-1 gap-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg h-80" />
+            <div className="bg-white dark:bg-slate-900 rounded-lg h-80" />
           </div>
         </div>
       </div>
     );
   }
 
-  // Helper UI para clase si ganó esa celda
   const cellClass = (
     side: "left" | "right",
-    field: keyof NonNullable<typeof result>["winners"]
+    field: keyof NonNullable<typeof result>["winners"],
   ) => {
     if (!result) return "p-2 text-center";
     const winner = result.winners[field];
     if (winner === "tie") return "p-2 text-center";
     return winner === side
-      ? "p-2 text-center ring-2 ring-green-300 bg-green-50 rounded-md transition-shadow"
+      ? "p-2 text-center ring-2 ring-green-300 dark:ring-green-700 bg-green-50 dark:bg-green-900/20 rounded-md transition-shadow"
       : "p-2 text-center opacity-90";
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-6 px-3">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-6 px-3">
       <div className="h-16"></div>
 
       <div className="max-w-5xl mx-auto">
-        {/* Header + volver */}
-
-        {/* Main two-column card */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden dark:border dark:border-slate-700">
           {/* Column selects */}
-          <div className="grid grid-cols-2 gap-2 border-b border-slate-200 p-4 items-center">
+          <div className="grid grid-cols-2 gap-2 border-b border-slate-200 dark:border-slate-700 p-4 items-center">
             <PopoverComponent
               open1={open1}
               setOpen1={setOpen1}
@@ -185,10 +162,9 @@ export default function ComparePage() {
             />
           </div>
 
-          {/* Body: filas comparativas */}
           <div className="space-y-0">
             {/* IMAGEN */}
-            <div className="grid grid-cols-2 border-b border-slate-100 items-center">
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800 items-center">
               <div className="p-4 text-center">
                 {left ? (
                   <Link
@@ -203,7 +179,7 @@ export default function ComparePage() {
                     />
                   </Link>
                 ) : (
-                  <Skeleton className="w-36 h-36 " />
+                  <Skeleton className="w-36 h-36 dark:bg-slate-700" />
                 )}
               </div>
               <div className="p-4 text-center">
@@ -220,24 +196,24 @@ export default function ComparePage() {
                     />
                   </Link>
                 ) : (
-                  <Skeleton className="w-36 h-36 " />
+                  <Skeleton className="w-36 h-36 dark:bg-slate-700" />
                 )}
               </div>
             </div>
 
             {/* PRECIO */}
-            <div className="grid grid-cols-2 border-b border-slate-100">
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
               <div className={cellClass("left", "price")}>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                     {left ? (
                       `$${smartRound(left.price)}`
                     ) : (
-                      <Skeleton className="w-full h-7 " />
+                      <Skeleton className="w-full h-7 dark:bg-slate-700" />
                     )}
                   </div>
                   {(left?.oldPrice || 0) > (left?.price || 0) && (
-                    <div className="text-sm text-slate-500 line-through">
+                    <div className="text-sm text-slate-500 dark:text-slate-400 line-through">
                       ${smartRound(left?.oldPrice || 0)}
                     </div>
                   )}
@@ -245,15 +221,15 @@ export default function ComparePage() {
               </div>
               <div className={cellClass("right", "price")}>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                     {right ? (
                       `$${smartRound(right.price)}`
                     ) : (
-                      <Skeleton className="w-full h-7 " />
+                      <Skeleton className="w-full h-7 dark:bg-slate-700" />
                     )}
                   </div>
                   {(right?.oldPrice || 0) > (right?.price || 0) && (
-                    <div className="text-sm text-slate-500 line-through">
+                    <div className="text-sm text-slate-500 dark:text-slate-400 line-through">
                       ${smartRound(right?.oldPrice || 0)}
                     </div>
                   )}
@@ -262,18 +238,18 @@ export default function ComparePage() {
             </div>
 
             {/* RATING */}
-            <div className="grid grid-cols-2 border-b border-slate-100">
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
               <div className={cellClass("left", "rating")}>
                 <div className="flex items-center justify-center gap-2">
                   {left ? (
                     <>
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
                         {left?.coment?.promedio ?? 0}
                       </span>
                     </>
                   ) : (
-                    <Skeleton className="w-full h-7 " />
+                    <Skeleton className="w-full h-7 dark:bg-slate-700" />
                   )}
                 </div>
               </div>
@@ -282,48 +258,54 @@ export default function ComparePage() {
                   {right ? (
                     <>
                       <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium">
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
                         {right?.coment?.promedio ?? 0}
                       </span>
                     </>
                   ) : (
-                    <Skeleton className="w-full h-7 " />
+                    <Skeleton className="w-full h-7 dark:bg-slate-700" />
                   )}
                 </div>
               </div>
             </div>
 
             {/* CATEGORIA */}
-            <div className="grid grid-cols-2 border-b border-slate-100">
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
               <div className="p-3 text-center">
                 {left ? (
-                  <Badge variant="outline">
+                  <Badge
+                    variant="outline"
+                    className="dark:border-slate-600 dark:text-slate-300"
+                  >
                     {store.categorias.find((cat) => cat.id == left.caja)?.name}
                   </Badge>
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
               <div className="p-3 text-center">
                 {right ? (
-                  <Badge variant="outline">
+                  <Badge
+                    variant="outline"
+                    className="dark:border-slate-600 dark:text-slate-300"
+                  >
                     {store.categorias.find((cat) => cat.id == right.caja)?.name}
                   </Badge>
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
             </div>
 
             {/* DISPONIBILIDAD */}
-            <div className="grid grid-cols-2 border-b border-slate-100">
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
               <div className={cellClass("left", "stock")}>
                 {left ? (
                   <Badge variant={left.stock ? "default" : "secondary"}>
                     {left.stock ? "En stock" : "Agotado"}
                   </Badge>
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
               <div className={cellClass("right", "stock")}>
@@ -332,60 +314,64 @@ export default function ComparePage() {
                     {right.stock ? "En stock" : "Agotado"}
                   </Badge>
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
             </div>
 
-            {/* DESCUENTO (comparación simple) */}
-            <div className="grid grid-cols-2 border-b border-slate-100">
+            {/* DESCUENTO */}
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
               <div className={cellClass("left", "discount")}>
                 {left ? (
-                  <div className="text-sm">
+                  <div className="text-sm text-slate-700 dark:text-slate-300">
                     {left.oldPrice > left.price ? (
                       <span>
                         {Math.round(
-                          ((left.oldPrice - left.price) / left.oldPrice) * 100
+                          ((left.oldPrice - left.price) / left.oldPrice) * 100,
                         )}
                         % off
                       </span>
                     ) : (
-                      <span className="text-slate-400">Sin descuento</span>
+                      <span className="text-slate-400 dark:text-slate-500">
+                        Sin descuento
+                      </span>
                     )}
                   </div>
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
               <div className={cellClass("right", "discount")}>
                 {right ? (
-                  <div className="text-sm">
+                  <div className="text-sm text-slate-700 dark:text-slate-300">
                     {right.oldPrice > right.price ? (
                       <span>
                         {Math.round(
                           ((right.oldPrice - right.price) / right.oldPrice) *
-                            100
+                            100,
                         )}
                         % off
                       </span>
                     ) : (
-                      <span className="text-slate-400">Sin descuento</span>
+                      <span className="text-slate-400 dark:text-slate-500">
+                        Sin descuento
+                      </span>
                     )}
                   </div>
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
             </div>
 
             {/* ACCIONES */}
-            <div className="grid grid-cols-2 border-b border-slate-100">
+            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
               <div className="p-4 text-center">
                 {left ? (
                   left.Cant == 0 ? (
                     <Button
-                      variant={"outline"}
-                      className="text-xs w-full"
+                      variant="outline"
+                      className="text-xs w-full dark:border-slate-600 dark:text-slate-300"
                       disabled={!left.stock}
                       onClick={() =>
                         handleToCart({
@@ -402,6 +388,7 @@ export default function ComparePage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="dark:border-slate-600 dark:text-slate-300"
                         onClick={() =>
                           handleToCart({
                             ...left,
@@ -411,10 +398,13 @@ export default function ComparePage() {
                       >
                         <Minus className="w-4 h-4" />
                       </Button>
-                      <span className="font-medium">{left.Cant}</span>
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                        {left.Cant}
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
+                        className="dark:border-slate-600 dark:text-slate-300"
                         onClick={() =>
                           handleToCart({
                             ...left,
@@ -427,16 +417,15 @@ export default function ComparePage() {
                     </div>
                   )
                 ) : (
-                  <Skeleton className="w-full h-16 " />
+                  <Skeleton className="w-full h-16 dark:bg-slate-700" />
                 )}
               </div>
-
               <div className="p-4 text-center">
                 {right ? (
                   right.Cant == 0 ? (
                     <Button
-                      variant={"outline"}
-                      className="text-xs w-full"
+                      variant="outline"
+                      className="text-xs w-full dark:border-slate-600 dark:text-slate-300"
                       disabled={!right.stock}
                       onClick={() =>
                         handleToCart({
@@ -453,6 +442,7 @@ export default function ComparePage() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="dark:border-slate-600 dark:text-slate-300"
                         onClick={() =>
                           handleToCart({
                             ...right,
@@ -462,10 +452,13 @@ export default function ComparePage() {
                       >
                         <Minus className="w-4 h-4" />
                       </Button>
-                      <span className="font-medium">{right.Cant}</span>
+                      <span className="font-medium text-slate-900 dark:text-slate-100">
+                        {right.Cant}
+                      </span>
                       <Button
                         variant="outline"
                         size="sm"
+                        className="dark:border-slate-600 dark:text-slate-300"
                         onClick={() =>
                           handleToCart({
                             ...right,
@@ -478,54 +471,70 @@ export default function ComparePage() {
                     </div>
                   )
                 ) : (
-                  <Skeleton className="w-full h-16 " />
+                  <Skeleton className="w-full h-16 dark:bg-slate-700" />
                 )}
               </div>
             </div>
 
             {/* DESCRIPCION */}
             <div className="grid grid-cols-2">
-              <div className="p-4 text-xs text-slate-700 line-clamp-6">
+              <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6">
                 {left ? (
                   <ExpandableText text={left.descripcion || ""} />
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
-              <div className="p-4 text-xs text-slate-700 line-clamp-6">
+              <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6">
                 {right ? (
                   <ExpandableText text={right.descripcion || ""} />
                 ) : (
-                  <Skeleton className="w-full h-7 " />
+                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
                 )}
               </div>
             </div>
           </div>
+
           <div className="grid grid-cols-2">
-            <div className="p-4 text-xs text-slate-700 line-clamp-6 flex w-full flex-wrap gap-2">
+            <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6 flex w-full flex-wrap gap-2">
               {left
                 ? left?.caracteristicas.map((obj, index) => (
-                    <Badge key={index}>{obj}</Badge>
+                    <Badge
+                      key={index}
+                      className="dark:bg-slate-700 dark:text-slate-200"
+                    >
+                      {obj}
+                    </Badge>
                   ))
                 : Array.from({ length: 3 }).map((_, index) => (
-                    <Skeleton className="h-4 w-10" key={index} />
+                    <Skeleton
+                      className="h-4 w-10 dark:bg-slate-700"
+                      key={index}
+                    />
                   ))}
             </div>
-            <div className="p-4 text-xs text-slate-700 line-clamp-6 flex w-full flex-wrap gap-2">
+            <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6 flex w-full flex-wrap gap-2">
               {right
                 ? right?.caracteristicas.map((obj, index) => (
-                    <Badge key={index}>{obj}</Badge>
+                    <Badge
+                      key={index}
+                      className="dark:bg-slate-700 dark:text-slate-200"
+                    >
+                      {obj}
+                    </Badge>
                   ))
                 : Array.from({ length: 5 }).map((_, index) => (
-                    <Skeleton className="w-10 h-4 " key={index} />
+                    <Skeleton
+                      className="w-10 h-4 dark:bg-slate-700"
+                      key={index}
+                    />
                   ))}
             </div>
           </div>
         </div>
 
-        {/* Pie con resumen de puntos y CTA */}
         <div className="mt-4 flex flex-col items-center justify-between gap-4">
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-slate-600 dark:text-slate-400">
             {result ? (
               result.global === "tie" ? (
                 <>Empate técnico — ambos tienen {result.points.left} puntos</>
@@ -543,13 +552,13 @@ export default function ComparePage() {
     </div>
   );
 }
+
 interface PopoverInterface {
   open1: boolean;
   setOpen1: React.Dispatch<React.SetStateAction<boolean>>;
   title: string;
   idString: string;
   point: "left" | "right";
-
   array: Product[];
   replaceProduct: (side: "left" | "right", productId: string) => void;
 }
@@ -569,20 +578,22 @@ function PopoverComponent({
         <Button
           variant="outline"
           role="combobox"
-          className="w-full justify-between truncate"
+          className="w-full justify-between truncate dark:border-slate-600 dark:text-slate-300 dark:bg-slate-900"
         >
           <ChevronsUpDown className="opacity-50" />
           {idString ? title : "Select product..."}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-fit p-0">
-        <Command>
+      <PopoverContent className="w-fit p-0 dark:bg-slate-900 dark:border-slate-700">
+        <Command className="dark:bg-slate-900">
           <CommandInput
             placeholder="Search product..."
-            className="h-9 w-full truncate"
+            className="h-9 w-full truncate dark:text-slate-200 dark:placeholder:text-slate-500"
           />
           <CommandList>
-            <CommandEmpty>No product found.</CommandEmpty>
+            <CommandEmpty className="dark:text-slate-400">
+              No product found.
+            </CommandEmpty>
             <CommandGroup>
               {array.map((p: Product) => (
                 <CommandItem
@@ -592,12 +603,13 @@ function PopoverComponent({
                     replaceProduct(point, currentValue);
                     setOpen1(false);
                   }}
+                  className="dark:text-slate-200 dark:hover:bg-slate-700"
                 >
                   {p.title}
                   <Check
                     className={cn(
                       "ml-auto",
-                      idString === p.productId ? "opacity-100" : "opacity-0"
+                      idString === p.productId ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>

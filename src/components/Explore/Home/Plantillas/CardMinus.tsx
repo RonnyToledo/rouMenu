@@ -12,8 +12,8 @@ export default function CardMinus({ value = 1 }: { value?: number }) {
   if (!data) return null;
 
   return (
-    <div className="flex h-full flex-1 flex-col gap-2 p-4 rounded-lg min-w-60  shadow-lg">
-      <p className="text-[#0d141c] text-base font-medium leading-normal">
+    <div className="flex h-full flex-1 flex-col gap-2 p-4 rounded-lg min-w-60 shadow-lg bg-white dark:bg-slate-900">
+      <p className="text-[#0d141c] dark:text-slate-100 text-base font-medium leading-normal">
         Explorar {data?.provincia || ""}
       </p>
       <Image
@@ -24,38 +24,38 @@ export default function CardMinus({ value = 1 }: { value?: number }) {
         className="w-full aspect-square object-center object-cover rounded-lg"
       />
       <div>
-        <p className="text-[#49739c] text-sm font-normal leading-normal">
+        <p className="text-[#49739c] dark:text-blue-400 text-sm font-normal leading-normal">
           Explora por provincia ({data.top_sites.length} tienda
           {data.top_sites.length > 1 ? "s" : ""})
         </p>
       </div>
       <div>
-        <h3 className="text-[#0d141c] text-lg font-bold leading-tight tracking-[-0.015em] pb-1 pt-2">
+        <h3 className="text-[#0d141c] dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] pb-1 pt-2">
           Destacados
         </h3>
-        <ScrollArea className="w-full h-fit  rounded-md  whitespace-nowrap">
+        <ScrollArea className="w-full h-fit rounded-md whitespace-nowrap">
           <div className="flex h-full w-max space-x-4">
             {generalData.top_provinces[value]?.top_sites.map((site, index) => (
               <Link
                 href={`/t/${site.sitioweb}`}
                 key={index}
-                className="flex  flex-1 flex-col gap-1 rounded-lg "
+                className="flex flex-1 flex-col gap-1 rounded-lg hover:opacity-80 transition-opacity"
               >
                 <Image
                   src={site.image || logoApp}
                   alt={site.name || ""}
                   width={300}
                   height={300}
-                  className="w-full h-32 bg-center bg-no-repeat aspect-square bg-cover rounded-lg border"
+                  className="w-full h-32 bg-center bg-no-repeat aspect-square bg-cover rounded-lg border dark:border-slate-700"
                 />
-                <p className="text-[#0d141c] text-base font-medium leading-normal">
+                <p className="text-[#0d141c] dark:text-slate-200 text-base font-medium leading-normal">
                   {site.name}
                 </p>
               </Link>
             ))}
           </div>
 
-          <ScrollBar orientation="horizontal" />
+          <ScrollBar orientation="horizontal" className="dark:bg-slate-700" />
         </ScrollArea>
       </div>
     </div>

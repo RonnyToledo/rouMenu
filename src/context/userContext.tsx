@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect } from "react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import PageLoading from "@/components/GeneralComponents/loading";
 import { useAuth } from "./AppContext";
 import { supabase } from "@/lib/supabase";
@@ -68,7 +68,10 @@ export default function UserContextProvider({
   // Muestra toast de error cuando cambia
   useEffect(() => {
     if (error) {
-      toast.error(error);
+      sileo.error({
+        title: "Error",
+        description: error,
+      });
     }
   }, [error]);
 
@@ -82,7 +85,7 @@ export default function UserContextProvider({
     try {
       const { data, error: rpcError } = await supabase.rpc(
         "get_events_with_site",
-        { p_user_id: userId }
+        { p_user_id: userId },
       );
       if (rpcError) {
         throw new Error(rpcError.message || "Error al cargar eventos");

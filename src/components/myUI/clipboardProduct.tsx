@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { Button } from "../ui/button";
 import { RxClipboardCopy } from "react-icons/rx";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,10 @@ export default function ClipboardProduct({
 }) {
   const [busy, setBusy] = useState(false);
 
-  async function copyImageWithTextAsPng() {
+  async function copyImageWithTextAsPng(): Promise<{
+    title: string;
+    description: string;
+  }> {
     setBusy(true);
     let text = `${title}\n`;
     text += `Precio: $${Number(price).toFixed(2)} `;
@@ -49,7 +52,7 @@ export default function ClipboardProduct({
             canvas.getContext("2d")?.drawImage(img, 0, 0);
             canvas.toBlob(
               (b) => (b ? resolve(b) : reject(new Error("no PNG"))),
-              "image/png"
+              "image/png",
             );
           };
           img.onerror = () => reject(new Error("falló carga img"));
@@ -61,24 +64,49 @@ export default function ClipboardProduct({
           "text/plain": new Blob([text], { type: "text/plain" }),
         });
 
-        toast.success("Informacion Copiada");
+        return {
+          title: "Información Copiada",
+          description:
+            "La información del producto ha sido copiada al portapapeles.",
+        };
 
         await navigator.clipboard.write([item]);
       } else {
         const item = new ClipboardItem({
           "text/plain": new Blob([text], { type: "text/plain" }),
         });
-        toast("Informacion Copiada");
         await navigator.clipboard.write([item]);
+        return {
+          title: "Información Copiada",
+          description:
+            "La información del producto ha sido copiada al portapapeles.",
+        };
       }
     } catch (err) {
-      toast("Error copiando informacion");
       console.error("Error en copyImageWithTextAsPng:", err);
+      return {
+        title: "Error",
+        description: "Error copiando información",
+      };
     } finally {
       setBusy(false);
     }
   }
-
+  async function CopyBoard() {
+    sileo.promise(copyImageWithTextAsPng(), {
+      loading: { title: "Loading..." },
+      success: (data) => ({
+        title: data?.title || "Información Copiada",
+        description:
+          data?.description ||
+          "La información del producto ha sido copiada al portapapeles.",
+      }),
+      error: () => ({
+        title: "Error",
+        description: "Error copiando información",
+      }),
+    });
+  }
   return (
     <div>
       <Button
@@ -86,9 +114,9 @@ export default function ClipboardProduct({
         variant={"ghost"}
         className={cn(
           "text-(--text-gold) hover:underline flex items-center text-lg",
-          className
+          className,
         )}
-        onClick={copyImageWithTextAsPng}
+        onClick={CopyBoard}
         disabled={busy}
         aria-disabled={busy}
         aria-live="polite"

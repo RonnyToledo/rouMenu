@@ -7,7 +7,6 @@ export async function GET(
   { params }: { params: Promise<{ shop: string }> },
 ) {
   const { shop } = await params;
-  console.log("shop:", shop);
 
   // Extraer key desde header o Authorization Bearer
   const headerKey =
@@ -20,7 +19,6 @@ export async function GET(
         ? parts[1]
         : auth;
     })();
-  console.log(headerKey);
   if (!headerKey) {
     return NextResponse.json({ error: "Editor key required" }, { status: 401 });
   }

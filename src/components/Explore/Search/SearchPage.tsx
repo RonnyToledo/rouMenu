@@ -73,7 +73,7 @@ export default function BusquedaPage() {
   const searchParams = useSearchParams();
 
   async function fetchFuzzySearch(
-    query: string
+    query: string,
   ): Promise<SearchResults | null> {
     if (!query.trim()) {
       return null;
@@ -132,12 +132,15 @@ export default function BusquedaPage() {
   };
 
   const renderProductCard = (product: ProductResult) => (
-    <Card key={`product-${product.productId}`} className="w-full">
+    <Card
+      key={`product-${product.productId}`}
+      className="w-full dark:bg-slate-900 dark:border-slate-700"
+    >
       <Link
         href={`/t/${product.storeSitioWeb}/producto/${product.productId}`}
         target="_blank"
       >
-        <CardContent className="pt-0 flex  items-center w-full justify-between">
+        <CardContent className="pt-0 flex items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <Image
               width={100}
@@ -149,12 +152,12 @@ export default function BusquedaPage() {
 
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-lg font-semibold line-clamp-1">
+                <CardTitle className="text-lg font-semibold line-clamp-1 dark:text-slate-100">
                   {product.title}
                 </CardTitle>
-                <CardDescription className="mt-1">
+                <CardDescription className="mt-1 dark:text-slate-400">
                   {product.storeName && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground dark:text-slate-400">
                       en {product.storeName}
                     </span>
                   )}
@@ -163,7 +166,10 @@ export default function BusquedaPage() {
             </div>
           </div>
           <div className="flex items-center justify-center">
-            <Badge variant={product.stock ? "secondary" : "destructive"}>
+            <Badge
+              variant={product.stock ? "secondary" : "destructive"}
+              className="dark:bg-slate-700 dark:text-slate-200"
+            >
               {product.stock ? `$${product.price}` : "Agotado"}
             </Badge>
           </div>
@@ -173,12 +179,15 @@ export default function BusquedaPage() {
   );
 
   const renderCategoriaCard = (categoria: CategoriaResult) => (
-    <Card key={`categoria-${categoria.id}`} className="w-full">
+    <Card
+      key={`categoria-${categoria.id}`}
+      className="w-full dark:bg-slate-900 dark:border-slate-700"
+    >
       <Link
         href={`/t/${categoria.sitioweb}/category/${categoria.id}`}
         target="_blank"
       >
-        <CardContent className="pt-0 flex  items-center w-full justify-between">
+        <CardContent className="pt-0 flex items-center w-full justify-between">
           <div className="flex items-center gap-2">
             <Image
               width={100}
@@ -190,12 +199,12 @@ export default function BusquedaPage() {
 
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg font-semibold dark:text-slate-100">
                   {categoria.name}
                 </CardTitle>
-                <CardDescription className="mt-1">
+                <CardDescription className="mt-1 dark:text-slate-400">
                   {categoria.storeName && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground dark:text-slate-400">
                       Categoría en {categoria.storeName}
                     </span>
                   )}
@@ -209,9 +218,12 @@ export default function BusquedaPage() {
   );
 
   const renderSitioCard = (sitio: SitioResult) => (
-    <Card key={`sitio-${sitio.UUID}`} className="w-full">
+    <Card
+      key={`sitio-${sitio.UUID}`}
+      className="w-full dark:bg-slate-900 dark:border-slate-700"
+    >
       <Link href={`/t/${sitio.sitioweb}`} target="_blank">
-        <CardContent className="pt-0 flex  items-center w-full justify-between">
+        <CardContent className="pt-0 flex items-center w-full justify-between">
           <div className="flex items-center gap-2 w-full">
             <Image
               width={100}
@@ -223,12 +235,15 @@ export default function BusquedaPage() {
 
             <div className="flex items-start justify-between w-full">
               <div className="flex-1 w-full">
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg font-semibold dark:text-slate-100">
                   {sitio.name}
                 </CardTitle>
-                <CardDescription className="mt-1 flex flex-row  gap-1 line-clamp-1 w-full">
+                <CardDescription className="mt-1 flex flex-row gap-1 line-clamp-1 w-full dark:text-slate-400">
                   {sitio.tipo && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge
+                      variant="outline"
+                      className="text-xs dark:border-slate-600 dark:text-slate-300"
+                    >
                       {sitio.tipo}
                     </Badge>
                   )}
@@ -252,8 +267,8 @@ export default function BusquedaPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-4">
+    <div className="min-h-screen bg-background dark:bg-slate-950">
+      <div className="container dark:bg-slate-900 mx-auto px-4 py-4">
         {/* Barra de búsqueda */}
         <div className="max-w-2xl mx-auto mb-6">
           <div className="relative"></div>
@@ -262,36 +277,38 @@ export default function BusquedaPage() {
         {/* Indicador de carga */}
         {isLoading && (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-            <p className="mt-2 text-sm text-muted-foreground">Buscando...</p>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary dark:border-blue-500"></div>
+            <p className="mt-2 text-sm text-muted-foreground dark:text-slate-400">
+              Buscando...
+            </p>
           </div>
         )}
 
         {/* Tabs de resultados */}
         {results && !isLoading && (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex bg-white w-full max-w-md mx-auto mb-8 p-2">
+            <TabsList className="flex bg-white dark:bg-slate-900 w-full max-w-md mx-auto mb-8 p-2">
               <TabsTrigger
                 value="all"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
               >
                 Todo ({getAllResults().length})
               </TabsTrigger>
               <TabsTrigger
                 value="sitios"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
               >
                 Tiendas ({results.sitios.length})
               </TabsTrigger>
               <TabsTrigger
                 value="productos"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
               >
                 Productos ({results.productos.length})
               </TabsTrigger>
               <TabsTrigger
                 value="categorias"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 p-2"
+                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
               >
                 Categorías ({results.categorias.length})
               </TabsTrigger>
@@ -312,7 +329,7 @@ export default function BusquedaPage() {
               </div>
               {getAllResults().length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground dark:text-slate-400">
                     {`No se encontraron resultados para "${results.query}"`}
                   </p>
                 </div>
@@ -326,8 +343,8 @@ export default function BusquedaPage() {
               </div>
               {results.productos.length === 0 && (
                 <div className="text-center py-12">
-                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
+                  <Package className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
+                  <p className="text-muted-foreground dark:text-slate-400">
                     {`No se encontraron productos para "${results.query}"`}
                   </p>
                 </div>
@@ -341,8 +358,8 @@ export default function BusquedaPage() {
               </div>
               {results.categorias.length === 0 && (
                 <div className="text-center py-12">
-                  <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
+                  <Package className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
+                  <p className="text-muted-foreground dark:text-slate-400">
                     {`No se encontraron categorías para "${results.query}"`}
                   </p>
                 </div>
@@ -356,8 +373,8 @@ export default function BusquedaPage() {
               </div>
               {results.sitios.length === 0 && (
                 <div className="text-center py-12">
-                  <Store className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
+                  <Store className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
+                  <p className="text-muted-foreground dark:text-slate-400">
                     {`No se encontraron tiendas para "${results.query}"`}
                   </p>
                 </div>
@@ -369,11 +386,11 @@ export default function BusquedaPage() {
         {/* Estado vacío cuando no hay búsqueda */}
         {!searchTerm.trim() && !isLoading && (
           <div className="text-center py-12">
-            <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
+            <Search className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2 dark:text-slate-100">
               Busca lo que necesitas
             </h3>
-            <p className="text-muted-foreground mb-4">
+            <p className="text-muted-foreground dark:text-slate-400 mb-4">
               Encuentra productos, categorías y tiendas usando la barra de
               búsqueda
             </p>

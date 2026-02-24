@@ -13,7 +13,7 @@ import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
 import { AppState, initialState, Product } from "./InitialStatus";
 import SitioRealtime from "@/components/Catalogos/General/RealTime";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { loadCartFromIDB } from "@/lib/indexedDBCart";
@@ -48,30 +48,27 @@ interface MyProviderProps {
 }
 
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
-  // Crear estado global base
-  const storeArregaldo = storeSSD ?? initialState;
+  const storeArreglado = storeSSD ?? initialState;
 
-  // Buscar afiliado
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const afiliate = searchParams.get("afiliate");
 
-  // ✅ Usar useRef para rastrear si ya procesamos el afiliado
+  // Rastrear si ya procesamos el afiliado
   const afiliateProcessedRef = useRef(false);
 
-  // Inicializar el reducer con el afiliado guardado (si existe)
   const [store, dispatchStore] = useReducer(reducerStore, {
-    ...(storeArregaldo || initialState),
+    ...(storeArreglado || initialState),
     afiliate: getAfiliate(storeSSD.sitioweb || ""),
   });
-  console.log(store);
-  // ✅ Sincronizar con storeSSD cuando cambie
+
+  // Sincronizar con storeSSD cuando cambie (SSR → client hydration)
   useEffect(() => {
     dispatchStore({ type: "Add", payload: storeSSD });
   }, [storeSSD]);
 
-  // ✅ Procesar código de afiliado de la URL SOLO UNA VEZ
+  // Procesar código de afiliado de la URL SOLO UNA VEZ
   useEffect(() => {
     if (afiliate && !afiliateProcessedRef.current && storeSSD.sitioweb) {
       afiliateProcessedRef.current = true;
@@ -84,26 +81,33 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
       if (codeFound) {
         window.localStorage.setItem(cartKey, afiliate);
         dispatchStore({ type: "SetAfiliate", payload: afiliate });
-        toast("Codigo de afiliado aplicado con exito");
+        sileo.success({
+          title: "Código de afiliado aplicado con éxito",
+        });
         PostViewCode(codeFound.id);
       } else {
-        toast.error("Error con el codigo de afiliado");
+        sileo.error({
+          title: "Error",
+          description: "Error con el código de afiliado",
+        });
       }
     }
   }, [afiliate, storeSSD.sitioweb, storeSSD.codeDiscount]);
 
-  // ✅ Cargar carrito desde IndexedDB
+  // Cargar carrito desde IndexedDB
   useEffect(() => {
-    (async () => {
-      if (!store.sitioweb) return;
+    if (!store.sitioweb) return;
 
+    let cancelled = false;
+
+    (async () => {
       try {
-        const res = await loadCartFromIDB(store.sitioweb);
-        if (!res) return;
+        const res = await loadCartFromIDB(store.sitioweb || "");
+        if (!res || cancelled) return;
 
         const { products, purchaseUuid } = res;
 
-        if (products && products.length > 0) {
+        if (products?.length > 0) {
           dispatchStore({
             type: "HydrateCart",
             payload: products as Product[],
@@ -117,92 +121,101 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
         console.error("Error cargando carrito desde IDB:", err);
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [store.sitioweb]);
 
-  // ✅ Memoizar el contexto
+  // Memoizar el contexto para evitar re-renders innecesarios
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
 
-  // ✅ Aplicar color primario
+  // Aplicar color primario via CSS variable
   useEffect(() => {
-    document.documentElement.style.setProperty("--primary", store.color);
+    if (store.color) {
+      document.documentElement.style.setProperty("--primary", store.color);
+    }
   }, [store.color]);
+
+  const isSearchPage = pathname.includes("/search");
 
   return (
     <MyContext.Provider value={contextValue}>
       <SheetProvider>
-        {!pathname.includes("/search") ? <Header /> : null}
+        {!isSearchPage ? <Header /> : null}
         <SitioRealtime uuid={store.UUID || ""} />
-        <div
-          className={`${!pathname.includes("/search") ? "-translate-y-16" : ""}`}
-        >
-          {children}
-        </div>
+        <div className={!isSearchPage ? "-translate-y-16" : ""}>{children}</div>
         {store.compraUUID ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="icon"
-                className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
-              >
-                <Pencil />
-                <span className="sr-only">Edicion</span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta seguro que desea salir de la edicion de compras?. Los
-                  cambios efectuados se perderan.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    dispatchStore({
-                      type: "SetPurchaseUuid",
-                      payload: "",
-                    });
-                    dispatchStore({ type: "Clean" });
-                    router.push("/user");
-                  }}
-                >
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <EditPurchaseDialog dispatchStore={dispatchStore} router={router} />
         ) : null}
       </SheetProvider>
     </MyContext.Provider>
   );
 }
 
-// ✅ Función helper para obtener afiliado guardado
-function getAfiliate(shopName: string): string {
-  try {
-    if (typeof window === "undefined") return "";
+// Componente extraído para evitar re-renders del árbol principal
+function EditPurchaseDialog({
+  dispatchStore,
+  router,
+}: {
+  dispatchStore: Dispatch<AppAction>;
+  router: ReturnType<typeof useRouter>;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          size="icon"
+          className="fixed bottom-16 size-10 right-4 z-50 rounded-full"
+        >
+          <Pencil />
+          <span className="sr-only">Edicion</span>
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Edicion de Compras?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Esta seguro que desea salir de la edicion de compras?. Los cambios
+            efectuados se perderan.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              dispatchStore({ type: "SetPurchaseUuid", payload: "" });
+              dispatchStore({ type: "Clean" });
+              router.push("/user");
+            }}
+          >
+            Continue
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
-    const cartKey = `afiliate_${shopName}`;
-    return window.localStorage.getItem(cartKey) ?? "";
+// Helper para obtener afiliado guardado (solo client-side)
+function getAfiliate(shopName: string): string {
+  if (typeof window === "undefined" || !shopName) return "";
+  try {
+    return window.localStorage.getItem(`afiliate_${shopName}`) ?? "";
   } catch (error) {
     console.error("Error loading afiliate from localStorage:", error);
     return "";
   }
 }
 
-// ✅ Función para registrar vista del código
+// Registrar vista del código de afiliado
 async function PostViewCode(id: number) {
   try {
-    const { data, error } = await supabase.rpc("rpc_increment_visit_by_id", {
+    const { error } = await supabase.rpc("rpc_increment_visit_by_id", {
       _id: id,
     });
-
     if (error) {
       console.error("Error registrando vista de codigo de afiliado:", error);
-    } else {
-      console.log("Vista de codigo de afiliado registrada:", data);
     }
   } catch (error) {
     console.error("Error registrando vista de codigo de afiliado:", error);

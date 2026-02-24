@@ -75,7 +75,7 @@ export default function HomePage() {
   // Si quedaron remaining al final, los añadimos
   while (remIndex < remaining.length) {
     interleaved.push(
-      <PostCard key={`post-${remIndex++}`} filterIndex={remIndex++} />
+      <PostCard key={`post-${remIndex++}`} filterIndex={remIndex++} />,
     );
   }
 
@@ -84,14 +84,14 @@ export default function HomePage() {
     const already = interleaved.some(
       (node) =>
         React.isValidElement(node) &&
-        node.key === (comp as React.ReactElement).key
+        node.key === (comp as React.ReactElement).key,
     );
     if (!already) interleaved.push(comp);
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <main className="relative bg-background mb-6  py-2">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <main className="relative  mb-6 py-2 bg-linear-to-b from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 ">
         <ArcGalleryHero images={images} />
       </main>
 

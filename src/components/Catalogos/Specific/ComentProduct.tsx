@@ -50,7 +50,7 @@ export default function CommentsPage({ id }: { id: string }) {
     async (
       currentPage: number = 1,
       filter: string = "all",
-      UUID: string
+      UUID: string,
     ): Promise<void> => {
       setLoading(true);
       try {
@@ -83,7 +83,7 @@ export default function CommentsPage({ id }: { id: string }) {
         setLoading(false);
       }
     },
-    [pageSize, store]
+    [pageSize, store],
   );
 
   useEffect(() => {

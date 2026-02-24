@@ -15,7 +15,7 @@ export default function CatalogNotFound() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -46,7 +46,7 @@ export default function CatalogNotFound() {
           {/* Animated Icon */}
           <div className="relative mb-8 animate-in zoom-in-50 duration-700">
             <div className="w-32 h-32 mx-auto bg-white rounded-full shadow-lg flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-indigo-100 opacity-60" />
+              <div className="absolute inset-0 bg-linear-to-br from-blue-100 to-indigo-100 opacity-60" />
               <FolderX className="w-16 h-16 text-blue-500 relative z-10" />
 
               {/* Floating elements */}

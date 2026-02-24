@@ -15,3 +15,41 @@
 .dropdownClass {
   color: #364153 !important;
 }
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  .inputClass {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #475569 !important;
+  }
+  .ButtonClass {
+    background-color: #1e293b !important;
+    border-bottom: 1px solid #475569 !important;
+    border-top: 1px solid #475569 !important;
+    border-left: 1px solid #475569 !important;
+  }
+  .dropdownClass {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+    border: 1px solid #475569 !important;
+  }
+}
+
+/* Dark mode via class (for class-based dark mode toggle) */
+:global(.dark) .inputClass {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #475569 !important;
+}
+:global(.dark) .ButtonClass {
+  background-color: #1e293b !important;
+  border-bottom: 1px solid #475569 !important;
+  border-top: 1px solid #475569 !important;
+  border-left: 1px solid #475569 !important;
+}
+:global(.dark) .dropdownClass {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #475569 !important;
+}

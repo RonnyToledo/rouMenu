@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,10 +17,10 @@ export default function ExpandableText({
   const [shouldClamp, setShouldClamp] = useState(false);
   const textRef = useRef<HTMLParagraphElement | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (textRef.current) {
       const lineHeight = parseFloat(
-        getComputedStyle(textRef.current).lineHeight
+        getComputedStyle(textRef.current).lineHeight,
       );
       const maxHeight = lineHeight * lines; // 2 líneas
       const actualHeight = textRef.current.scrollHeight;
@@ -69,7 +69,7 @@ export default function ExpandableText({
           className={cn(
             `whitespace-pre-line text-slate-700`,
             !expanded && shouldClamp ? getLines(lines) : "",
-            className
+            className,
           )}
           aria-expanded={expanded}
         >
@@ -91,7 +91,7 @@ export default function ExpandableText({
               variant="link"
               className={cn(
                 "p-0 m-0 h-auto text-sm max-w-24 truncate",
-                className
+                className,
               )}
               onClick={() => setExpanded(!expanded)}
               aria-controls="descripcion"

@@ -18,7 +18,9 @@ export default function OpenClose({
   className?: string;
 }) {
   return (
-    <div className={cn("text-slate-700 text-[8px]", className)}>
+    <div
+      className={cn("text-slate-700 dark:text-slate-400 text-[8px]", className)}
+    >
       {open?.open ? (
         estadoCierre(newHorario) ? (
           <>

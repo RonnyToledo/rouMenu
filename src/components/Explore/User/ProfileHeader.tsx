@@ -21,14 +21,14 @@ export function ProfileHeader() {
               alt="Profile"
               width={128}
               height={128}
-              className="rounded-full object-cover border-4 border-slate-700"
+              className="rounded-full object-cover border-4 border-slate-700 dark:border-slate-600"
             />
           </div>
 
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
             {user?.user_metadata.full_name || user?.email || "Usuario"}
           </h1>
-          <p className="text-slate-700">{user?.email}</p>
+          <p className="text-slate-700 dark:text-slate-400">{user?.email}</p>
         </div>
       </div>
     </div>

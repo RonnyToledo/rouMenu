@@ -6,7 +6,7 @@ import {
   AgregadosInterface,
 } from "@/context/InitialStatus";
 import { smartRound } from "@/functions/precios";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 
 import { saveCartToIDB, clearCartFromIDB } from "@/lib/indexedDBCart"; // <-- import IDB utils
 
@@ -148,7 +148,7 @@ export function persistCartIDB(
 }
 
 export function reducerStore(state: AppState, action: AppAction): AppState {
-  console.log(action.type);
+  console.info(action.type);
   switch (action.type) {
     case "Add":
       return {
@@ -185,7 +185,8 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
           0,
         ) > 2
       ) {
-        toast("Error", {
+        sileo.error({
+          title: "Error",
           description: "Solo se permiten dos productos",
         });
         return state;

@@ -63,7 +63,7 @@ export default function PostPage({ post }: PostPageProps) {
     <div className="min-h-screen bg-background">
       <div className="h-16"></div>
 
-      <article className="container mx-auto px-4 py-2">
+      <article className="container dark:bg-slate-900 mx-auto px-4 py-2">
         {/* Featured Image */}
 
         <div className="max-w-3xl mx-auto mb-8">

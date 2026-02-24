@@ -61,9 +61,7 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   const step = (endAngle - startAngle) / (count - 1);
 
   return (
-    <section
-      className={`relative overflow-hidden bg-background flex flex-col ${className}`}
-    >
+    <section className={`relative overflow-hidden  flex flex-col ${className}`}>
       {/* Background ring container that controls geometry */}
       <div
         className="relative mx-auto"
@@ -99,7 +97,7 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
                 }}
               >
                 <div
-                  className="rounded-2xl shadow-xl overflow-hidden ring-1 ring-border bg-card transition-transform hover:scale-105 w-full h-full"
+                  className="rounded-2xl shadow-xl dark:shadow-slate-950/50 overflow-hidden ring-1 ring-border dark:ring-slate-700 bg-card dark:bg-slate-900 transition-transform hover:scale-105 w-full h-full"
                   style={{ transform: `rotate(${angle / 4}deg)` }}
                 >
                   <Image
@@ -123,16 +121,16 @@ const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
           className="text-center max-w-2xl px-6 animate-fade-in"
           style={{ animationDelay: "800ms", animationFillMode: "forwards" }}
         >
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-foreground dark:text-slate-100">
             Bienvenidos a RouMenu
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg text-muted-foreground dark:text-slate-400">
             Donde la creatividad se encuentra con la simplicidad
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button
               onClick={() => ScrollTo("main-general")}
-              className="w-full  py-3 bg-gradient-to-r from-slate-700 via-slate-800 to-slate-700 hover:from-slate-300 hover:via-slate-200 hover:to-slate-300 text-white hover:text-slate-800 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border"
+              className="w-full py-3 bg-linear-to-r from-slate-700 via-slate-800 to-slate-700 dark:from-slate-600 dark:via-slate-700 dark:to-slate-600 hover:from-slate-300 hover:via-slate-200 hover:to-slate-300 dark:hover:from-slate-500 dark:hover:via-slate-400 dark:hover:to-slate-500 text-white hover:text-slate-800 dark:hover:text-slate-100 px-8 transform hover:scale-105 transition-all duration-800 shadow-lg hover:shadow-xl hover:border dark:hover:border-slate-600"
             >
               Explorar
             </Button>

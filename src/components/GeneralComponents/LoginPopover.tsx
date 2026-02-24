@@ -52,7 +52,7 @@ export default function LoginPopover({
       popup = window.open(
         data.url,
         "Google Login",
-        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
       );
 
       if (!popup) {
@@ -121,11 +121,11 @@ export default function LoginPopover({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative animate-fadeIn">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-60">
+      <div className="bg-white dark:bg-slate-900 rounded-lg p-6 max-w-md w-full mx-4 relative animate-fadeIn">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+          className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
           disabled={loading1}
         >
           <svg
@@ -145,9 +145,9 @@ export default function LoginPopover({
         </button>
 
         {message && (
-          <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+          <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 dark:border-yellow-500 rounded">
             <svg
-              className="h-5 w-5 text-yellow-400"
+              className="h-5 w-5 text-yellow-400 dark:text-yellow-500"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -158,24 +158,26 @@ export default function LoginPopover({
                 clipRule="evenodd"
               />{" "}
             </svg>
-            <p className="text-sm text-yellow-700 font-medium">{message}</p>
+            <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">
+              {message}
+            </p>
           </div>
         )}
 
-        <h2 className="text-2xl font-bold mb-2 text-slate-800">
+        <h2 className="text-2xl font-bold mb-2 text-slate-800 dark:text-slate-100">
           Iniciar Sesión
         </h2>
-        <p className="text-slate-600 mb-6">
+        <p className="text-slate-600 dark:text-slate-400 mb-6">
           Inicia sesión para continuar con tu compra
         </p>
 
         <button
           onClick={handleGoogleLoginPopup}
           disabled={loading1}
-          className="w-full flex items-center justify-center gap-3 bg-white border-2 border-slate-300 rounded-lg px-6 py-3 text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 bg-white dark:bg-slate-700 border-2 border-slate-300 dark:border-slate-600 rounded-lg px-6 py-3 text-slate-700 dark:text-slate-200 font-medium hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-400 dark:hover:border-slate-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading1 ? (
-            <div className="w-5 h-5 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-slate-300 dark:border-slate-500 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin" />
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -202,7 +204,7 @@ export default function LoginPopover({
           )}
         </button>
 
-        <p className="mt-4 text-sm text-slate-500 text-center">
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 text-center">
           Al continuar, aceptas nuestros términos y condiciones
         </p>
       </div>

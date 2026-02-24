@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useContext, useCallback } from "react";
+import { useEffect, useState, useContext, useCallback, useMemo } from "react";
 import {
   Star,
   ChevronLeft,
@@ -18,17 +18,14 @@ import { ReviewCard } from "./ReviewCard";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 import { ReordenateData } from "@/functions/ReordenateDataReviews";
 
+const PAGE_SIZE = 10;
+
 const loadingStates = [
-  {
-    text: "Cargando comentarios",
-  },
-  {
-    text: "Seleccionando comentarios",
-  },
-  {
-    text: "Renderizando",
-  },
+  { text: "Cargando comentarios" },
+  { text: "Seleccionando comentarios" },
+  { text: "Renderizando" },
 ];
+
 interface UserRelation {
   id: string;
   name: string;
@@ -37,7 +34,7 @@ interface UserRelation {
   image: string | null;
   login: boolean;
 }
-// --- Tipos ---
+
 export interface Review {
   id?: string;
   UIStore: string;
@@ -50,52 +47,41 @@ export interface Review {
   reply: boolean;
   replies?: Review[];
   replies_coment?: Review[];
-  // añade aquí cualquier otro campo que venga de tu tabla comentTienda
 }
 
-type tabsType = "all" | "positive" | "negative";
+type TabsType = "all" | "positive" | "negative";
 
 export default function CommentsPage() {
   const { store } = useContext(MyContext);
-  const [filter, setFilter] = useState<tabsType>("all");
+  const [filter, setFilter] = useState<TabsType>("all");
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  const pageSize = 10;
-
   const fetchComments = useCallback(
-    async (
-      currentPage: number = 1,
-      filterParam: string = "all",
-      UUID: string
-    ): Promise<void> => {
+    async (currentPage: number, filterParam: string, UUID: string) => {
       setLoading(true);
       try {
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize - 1;
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE - 1;
 
         let query = supabase
           .from("comentTienda")
-          .select("* ,user(*),replies(*,user(*))", { count: "exact" })
+          .select("*, user(*), replies(*, user(*))", { count: "exact" })
           .eq("UIStore", UUID)
           .order("created_at", { ascending: false })
           .range(start, end);
 
-        if (filterParam === "positive") {
-          query = query.gte("star", 3);
-        } else if (filterParam === "negative") {
-          query = query.lt("star", 2);
-        }
+        if (filterParam === "positive") query = query.gte("star", 3);
+        else if (filterParam === "negative") query = query.lt("star", 2);
 
         const { data, count, error } = await query;
-
         if (error) throw error;
+
         if (data) {
           setReviews(ReordenateData(data, store));
-
-          setTotalPages(Math.ceil((count ?? 0) / pageSize));
+          setTotalPages(Math.ceil((count ?? 0) / PAGE_SIZE));
         }
       } catch (err) {
         console.error("Error al cargar comentarios:", err);
@@ -103,7 +89,7 @@ export default function CommentsPage() {
         setLoading(false);
       }
     },
-    [pageSize, store]
+    [store],
   );
 
   useEffect(() => {
@@ -112,44 +98,56 @@ export default function CommentsPage() {
     }
   }, [page, filter, store.UUID, fetchComments]);
 
+  const avgRating = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return reviews.reduce((sum, rev) => sum + rev.star, 0) / reviews.length;
+  }, [reviews]);
+
+  const handlePrevPage = useCallback(
+    () => setPage((p) => Math.max(p - 1, 1)),
+    [],
+  );
+  const handleNextPage = useCallback(
+    () => setPage((p) => Math.min(p + 1, totalPages)),
+    [totalPages],
+  );
+
   return (
-    <div className="min-h-screen bg-linear-to-b from-background to-muted/20">
-      <div className="h-16"></div>
+    <div className="min-h-screen bg-linear-to-b from-background to-muted/20 dark:from-slate-900 dark:to-slate-800">
+      <div className="h-16" />
 
       <div className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* Header */}
         <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight text-balance">
+          <h1 className="text-xl font-bold tracking-tight text-balance text-slate-900 dark:text-slate-100">
             Comentarios y Reseñas
           </h1>
-          <p className="text-muted-foreground text-pretty">
+          <p className="text-muted-foreground dark:text-slate-400 text-pretty">
             Lee lo que nuestros clientes tienen que decir
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Card>
+          <Card className="dark:bg-slate-900 dark:border-slate-700">
             <CardContent className="pt-2">
               <div className="flex flex-col items-center gap-2">
-                <MessageCircle className="size-4 text-muted-foreground" />
-                <p className="text-2xl font-bold">{reviews.length}</p>
-                <p className="text-xs text-muted-foreground text-center">
+                <MessageCircle className="size-4 text-muted-foreground dark:text-slate-400" />
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {reviews.length}
+                </p>
+                <p className="text-xs text-muted-foreground dark:text-slate-400 text-center">
                   Total
                 </p>
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="dark:bg-slate-900 dark:border-slate-700">
             <CardContent className="pt-2">
               <div className="flex flex-col items-center gap-2">
                 <Star className="size-5 fill-yellow-500 text-yellow-500" />
-                <p className="text-2xl font-bold">
-                  {(
-                    reviews.reduce((sum, rev) => rev.star + sum, 0) /
-                      reviews.length || 0
-                  ).toFixed(1)}
+                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                  {avgRating.toFixed(1)}
                 </p>
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-xs text-muted-foreground dark:text-slate-400 text-center">
                   Promedio
                 </p>
               </div>
@@ -158,25 +156,33 @@ export default function CommentsPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-card rounded-lg border shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-card dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
           <div className="flex items-center gap-2">
-            <Filter className="size-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filtrar por:</span>
+            <Filter className="size-4 text-muted-foreground dark:text-slate-400" />
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Filtrar por:
+            </span>
           </div>
-          <Tabs
-            value={filter}
-            onValueChange={(value) => setFilter(value as tabsType)}
-          >
-            <TabsList>
-              <TabsTrigger value="all" className="gap-1.5">
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as TabsType)}>
+            <TabsList className="dark:bg-slate-900">
+              <TabsTrigger
+                value="all"
+                className="dark:data-[state=active]:bg-slate-700 dark:text-slate-300"
+              >
                 Todos
               </TabsTrigger>
-              <TabsTrigger value="positive" className="gap-1.5">
+              <TabsTrigger
+                value="positive"
+                className="gap-1.5 dark:data-[state=active]:bg-slate-700 dark:text-slate-300"
+              >
                 <Star className="size-3 fill-yellow-500 text-yellow-500" />
                 Positivos
               </TabsTrigger>
-              <TabsTrigger value="negative" className="gap-1.5">
-                <Star className="size-3" />
+              <TabsTrigger
+                value="negative"
+                className="gap-1.5 dark:data-[state=active]:bg-slate-700 dark:text-slate-300"
+              >
+                <Star className="size-3 dark:text-slate-400" />
                 Negativos
               </TabsTrigger>
             </TabsList>
@@ -192,47 +198,51 @@ export default function CommentsPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="size-16 rounded-full bg-muted flex items-center justify-center mb-4">
-              <MessageCircle className="size-8 text-muted-foreground" />
+            <div className="size-16 rounded-full bg-muted dark:bg-slate-900 flex items-center justify-center mb-4">
+              <MessageCircle className="size-8 text-muted-foreground dark:text-slate-500" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No hay comentarios</h3>
-            <p className="text-sm text-muted-foreground text-center text-balance">
+            <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-slate-100">
+              No hay comentarios
+            </h3>
+            <p className="text-sm text-muted-foreground dark:text-slate-400 text-center text-balance">
               No se encontraron comentarios con los filtros seleccionados
             </p>
           </div>
         )}
 
         {/* Pagination */}
-        {totalPages > 1 ? (
-          <div className="flex items-center justify-between p-4 bg-card rounded-lg border shadow-sm">
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 bg-card dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
             <Button
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              onClick={handlePrevPage}
               disabled={page === 1 || loading}
               variant="outline"
               size="sm"
-              className="gap-2"
+              className="gap-2 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
             >
               <ChevronLeft className="size-4" />
               Anterior
             </Button>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">
-                Página {page} de {totalPages}
-              </Badge>
-            </div>
+            <Badge
+              variant="secondary"
+              className="dark:bg-slate-900 dark:text-slate-300"
+            >
+              Página {page} de {totalPages}
+            </Badge>
             <Button
-              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={handleNextPage}
               disabled={page === totalPages || loading}
               variant="outline"
               size="sm"
-              className="gap-2"
+              className="gap-2 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
             >
               Siguiente
               <ChevronRight className="size-4" />
             </Button>
           </div>
-        ) : null}
+        )}
       </div>
+
       <MultiStepLoader
         loadingStates={loadingStates}
         loading={loading}

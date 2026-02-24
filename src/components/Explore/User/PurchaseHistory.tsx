@@ -144,19 +144,19 @@ export function PurchaseHistory() {
     persistCartIDB(
       e.sitio_sitioweb || "",
       JSON.parse(e.event_desc || "{}").pedido,
-      e.uid_venta || ""
+      e.uid_venta || "",
     );
     router.push(`/t/${e.sitio_sitioweb}`);
   };
   return (
     <div>
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <div className="container dark:bg-slate-900 mx-auto px-4 py-6 max-w-2xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-serif font-light tracking-tight text-slate-800 mb-2 ">
+            <h2 className="text-3xl font-serif font-light tracking-tight text-slate-800 dark:text-slate-100 mb-2">
               Historial de Compras
             </h2>
-            <p className="text-slate-700">
+            <p className="text-slate-700 dark:text-slate-400">
               Revisa todas tus compras ({purchases.length} total)
             </p>
           </div>
@@ -168,7 +168,7 @@ export function PurchaseHistory() {
               variant={selectedFilter === filter ? "default" : "outline"}
               size="sm"
               onClick={() => handleFilterClick(filter)}
-              className="bg-transparent border-slate-800 text-slate-700 hover:bg-slate-900/70 hover:text-slate-300 rounded-full px-6 h-10"
+              className="bg-transparent border-slate-800 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-900/70 dark:hover:bg-slate-900 hover:text-slate-300 rounded-full px-6 h-10"
             >
               {filter === "all"
                 ? "Todos"
@@ -185,12 +185,12 @@ export function PurchaseHistory() {
                 purchase={purchase}
                 onView={() => router.push(`/user/order/${purchase.id}`)}
                 onEdit={() => EditarComprar(purchase.id)}
-                onDelete={() => console.log("Delete", purchase.id)}
+                onDelete={() => console.info("Delete", purchase.id)}
               />
             ))
           ) : (
-            <Card className="p-12 text-center">
-              <p className="text-muted-foreground">
+            <Card className="p-12 text-center dark:bg-slate-900 dark:border-slate-700">
+              <p className="text-muted-foreground dark:text-slate-400">
                 No se encontraron compras con este filtro
               </p>
             </Card>
@@ -219,20 +219,22 @@ function PurchaseCard({
   return (
     <div
       key={purchase.id}
-      className="bg-slate-200/50 backdrop-blur-sm border border-slate-500 rounded-2xl p-6"
+      className="bg-slate-200/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-500 dark:border-slate-600 rounded-2xl p-6"
     >
-      <div className="flex items-start justify-between gap-6 flex-col ">
+      <div className="flex items-start justify-between gap-6 flex-col">
         <div className="flex-1 w-full">
-          <h3 className="text-xl font-medium text-slate-800 mb-1">
+          <h3 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-1">
             {purchase.catalogName}
           </h3>
-          <div className="mb-3 flex items-start justify-between gap-2 ">
+          <div className="mb-3 flex items-start justify-between gap-2">
             {purchase.catalogType && (
               <Link
                 href={`/t/${purchase.catalogType}`}
-                className="text-sm text-slate-700 flex items-center justify-start gap-2 "
+                className="text-sm text-slate-700 dark:text-slate-400 flex items-center justify-start gap-2"
               >
-                <p className="text-sm text-slate-700">{purchase.catalogType}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-400">
+                  {purchase.catalogType}
+                </p>
                 <LinkRef className="size-4" />
               </Link>
             )}
@@ -241,19 +243,19 @@ function PurchaseCard({
             </Badge>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground dark:text-slate-400 mb-3">
             <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <Calendar className="h-4 w-4 shrink-0" />
               <span>{purchase.date}</span>
             </div>
             {purchase.location && (
               <div className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
+                <MapPin className="h-4 w-4 shrink-0" />
                 <span>{purchase.location}</span>
               </div>
             )}
             <div>
-              <span className="font-medium text-foreground">
+              <span className="font-medium text-foreground dark:text-slate-200">
                 {purchase.items}
               </span>{" "}
               articulos
@@ -263,7 +265,7 @@ function PurchaseCard({
           {(purchase.phone ||
             purchase.paymentMethod ||
             purchase.discountCode) && (
-            <div className="text-sm text-muted-foreground flex flex-wrap gap-4">
+            <div className="text-sm text-muted-foreground dark:text-slate-400 flex flex-wrap gap-4">
               {purchase.phone && (
                 <div>
                   <strong>Tel:</strong> {purchase.phone}
@@ -284,17 +286,17 @@ function PurchaseCard({
         </div>
 
         <div className="flex flex-col items-center gap-3 w-full">
-          <div className="text-center py-4 mb-4 border-t border-b border-slate-400 w-full">
-            <p className="text-3xl font-bold text-slate-700">
+          <div className="text-center py-4 mb-4 border-t border-b border-slate-400 dark:border-slate-600 w-full">
+            <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">
               {" "}
               {purchase.total}
             </p>
           </div>
-          <div className="flex gap-2  w-full flex-col">
+          <div className="flex gap-2 w-full flex-col">
             <Button
               variant="outline"
               size="sm"
-              className="w-full bg-slate-700 hover:bg-slate-300 text-white border-0 h-11 rounded-xl"
+              className="w-full bg-slate-700 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-white border-0 h-11 rounded-xl"
               onClick={onView}
             >
               <Eye className="h-4 w-4" />
@@ -305,7 +307,7 @@ function PurchaseCard({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full bg-slate-700 hover:bg-slate-300 text-white border-0 h-11 rounded-xl"
+                  className="w-full bg-slate-700 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-white border-0 h-11 rounded-xl"
                   onClick={onEdit}
                 >
                   <Pencil className="h-4 w-4" />
@@ -314,7 +316,7 @@ function PurchaseCard({
                 <Button
                   variant={"outline"}
                   size="sm"
-                  className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500 h-11 rounded-xl bg-transparent"
+                  className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500 dark:border-red-600/50 dark:text-red-400 dark:hover:bg-red-600/10 dark:hover:text-red-300 dark:hover:border-red-600 h-11 rounded-xl bg-transparent"
                   onClick={onDelete}
                 >
                   <Trash2 className="h-4 w-4" />
