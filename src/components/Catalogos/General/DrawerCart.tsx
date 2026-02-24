@@ -65,9 +65,11 @@ export default function DrawerCart() {
         ) || 0),
       0,
     );
-    setContentCart(value);
 
-    if (value === 0) setOpenDrawer(false);
+    queueMicrotask(() => {
+      setContentCart(value);
+      if (value === 0) setOpenDrawer(false);
+    });
   }, [store.products]);
 
   function RedirectLink(Id: string, categoria: string) {
@@ -113,10 +115,10 @@ export default function DrawerCart() {
     ) && (
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
         <DrawerTrigger asChild className="translate-y-16">
-          <div className="sticky bottom-0 bg-white border-t z-10   max-w-md mx-auto rounded-t-2xl ">
+          <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t dark:border-slate-800 z-10 max-w-md mx-auto rounded-t-2xl transition-colors duration-500">
             <Button
               variant={"ghost"}
-              className="flex items-center w-full justify-between py-2 px-4 h-auto"
+              className="flex items-center w-full justify-between py-2 px-4 h-auto text-slate-900 dark:text-slate-100"
             >
               <div className="flex items-center gap-3 flex-1">
                 <div className="relative">
@@ -126,16 +128,16 @@ export default function DrawerCart() {
                   </Badge>
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 transition-colors">
                     {getTotalItems()}{" "}
                     {getTotalItems() === 1 ? "producto" : "productos"}
                   </p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">
                     Total: ${getTotalFinal(store, store.products)}
                   </p>
                 </div>
               </div>
-              <div className="border border-slate-400 flex items-center p-1 rounded-lg">
+              <div className="border border-slate-400 dark:border-slate-600 flex items-center p-1 rounded-lg transition-colors">
                 <MdOutlineShoppingCart />
                 Ver Pedido
               </div>
@@ -143,7 +145,7 @@ export default function DrawerCart() {
           </div>
         </DrawerTrigger>
 
-        <DrawerContent className="max-h-[75vh] max-w-md mx-auto">
+        <DrawerContent className="max-h-[75vh] max-w-md mx-auto dark:bg-slate-900 dark:border-slate-800 transition-colors duration-500">
           <DrawerHeader className="py-2 px-4">
             <DrawerTitle>
               <Button
@@ -312,10 +314,10 @@ export function ListCard({
             </Badge>
           </div>
           <div className="flex flex-col items-start justify-center">
-            <p className="text-sm font-medium text-slate-900 truncate text-start w-[50vw]">
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate text-start w-[50vw] transition-colors">
               {title}
             </p>
-            <p className="text-xs text-slate-500 text-center">
+            <p className="text-xs text-slate-500 dark:text-slate-400 text-center transition-colors">
               ${price}
               {embalaje > 0 ? ` + ${embalaje} embalaje` : ""}
               {} {" - "}

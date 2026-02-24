@@ -18,26 +18,31 @@ export default function PreviewRatingGeneral({
 }) {
   const { user } = useAuth();
   const { store, dispatchStore } = useContext(MyContext);
-  const [rating, setRating] = useState<RatingInterface>({
+  const [rating, setRating] = useState<RatingInterface>(() => ({
     ...initialState,
     selectedRating: ratingSelect || 0,
-  });
+    nombre: user?.user_metadata.full_name || "",
+  }));
 
+  // Sync with ratingSelect prop only if it changes while modal is open
   useEffect(() => {
-    setRating((prev) => ({
-      ...prev,
-      selectedRating: ratingSelect || 0,
-    }));
-  }, [ratingSelect]);
-
-  useEffect(() => {
-    if (user?.user_metadata.full_name) {
+    if (ratingSelect !== undefined) {
       setRating((prev) => ({
         ...prev,
-        nombre: user?.user_metadata.full_name || "",
+        selectedRating: ratingSelect,
       }));
     }
-  }, [user?.user_metadata.full_name]);
+  }, [ratingSelect]);
+
+  // Sync with user only if not already set
+  useEffect(() => {
+    if (user?.user_metadata.full_name && !rating.nombre) {
+      setRating((prev) => ({
+        ...prev,
+        nombre: user.user_metadata.full_name,
+      }));
+    }
+  }, [user?.user_metadata.full_name, rating.nombre]);
 
   const handleSubmit = async () => {
     try {

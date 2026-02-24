@@ -18,18 +18,23 @@ export default function ExpandableText({
   const textRef = useRef<HTMLParagraphElement | null>(null);
 
   useLayoutEffect(() => {
-    if (textRef.current) {
-      const lineHeight = parseFloat(
-        getComputedStyle(textRef.current).lineHeight
-      );
-      const maxHeight = lineHeight * lines; // 2 líneas
-      const actualHeight = textRef.current.scrollHeight;
+    const element = textRef.current;
+    if (!element) return;
 
-      // Solo activar truncado si el texto ocupa más de 2 líneas
+    const resizeObserver = new ResizeObserver(() => {
+      const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+      const maxHeight = lineHeight * lines;
+      const actualHeight = element.scrollHeight;
+
       if (actualHeight > maxHeight) {
         setShouldClamp(true);
+      } else {
+        setShouldClamp(false);
       }
-    }
+    });
+
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
   }, [lines]);
   function getLines(line: number) {
     switch (line) {

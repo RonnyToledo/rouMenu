@@ -292,12 +292,12 @@ export default function Product({ id }: { id: string }) {
                         className={`w-4 h-4 ${
                           i < Math.floor(product.coment.promedio || 0)
                             ? "text-yellow-400 fill-yellow-400"
-                            : "text-slate-400"
+                            : "text-slate-400 dark:text-slate-600"
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-slate-700 dark:text-slate-300 transition-colors">
                     {product.coment.promedio} ({product.coment.total} reseñas)
                   </span>
                 </Link>
@@ -323,14 +323,14 @@ export default function Product({ id }: { id: string }) {
             {/* Price and Stock */}
             <div className="flex items-center justify-between gap-1">
               <div className="flex items-center gap-3">
-                <p className="text-3xl font-bold text-slate-800">
+                <p className="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">
                   ${product.price || 0}{" "}
                   {store.moneda.find((m) => m.id === product.default_moneda)
                     ?.nombre || ""}
                 </p>
                 {(product.oldPrice || 0) > (product.price || 0) && (
                   <>
-                    <p className="text-lg text-slate-600 line-through">
+                    <p className="text-lg text-slate-600 dark:text-slate-400 line-through transition-colors">
                       ${product.oldPrice || 0}
                     </p>
                     <Badge variant="destructive" className="animate-pulse">
@@ -376,11 +376,11 @@ export default function Product({ id }: { id: string }) {
 
           {/* Packaging */}
           {(product.embalaje || 0) > 0 && (
-            <Card className="p-4 bg-slate-200/50 border-slate-300">
+            <Card className="p-4 bg-slate-200/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 transition-colors">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-slate-800 mb-1">Embalaje</h3>
-                  <p className="text-sm text-slate-700">
+                  <h3 className="font-medium text-slate-800 dark:text-slate-200 mb-1">Embalaje</h3>
+                  <p className="text-sm text-slate-700 dark:text-slate-400">
                     ${product.embalaje.toFixed(2)}{" "}
                     {store.moneda.find((m) => m.id === product.default_moneda)
                       ?.nombre || ""}
@@ -397,8 +397,8 @@ export default function Product({ id }: { id: string }) {
           {(product.agregados || []).length > 0 && (
             <div className="space-y-1">
               <div>
-                <h3 className="font-medium text-slate-800">Extras</h3>
-                <p className="text-sm text-slate-600">
+                <h3 className="font-medium text-slate-800 dark:text-slate-200">Extras</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Agregados para su encargo
                 </p>
               </div>
@@ -406,14 +406,14 @@ export default function Product({ id }: { id: string }) {
               {product.agregados.map((extra) => (
                 <Card
                   key={extra.id}
-                  className="p-4 bg-slate-200/50 border-slate-300"
+                  className="p-4 bg-slate-200/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-slate-800">
+                      <div className="font-medium text-slate-800 dark:text-slate-200">
                         {extra.name}
                       </div>
-                      <div className="text-sm text-slate-700">
+                      <div className="text-sm text-slate-700 dark:text-slate-400">
                         ${extra.price.toFixed(2)}{" "}
                         {store.moneda.find(
                           (m) => m.id === product.default_moneda,
@@ -482,11 +482,11 @@ export default function Product({ id }: { id: string }) {
               size="icon"
               disabled={countAddCart === 0}
               onClick={() => setCountAddCart(countAddCart - 1)}
-              className="h-10 w-10 bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 rounded-full"
+              className="h-10 w-10 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-full transition-colors"
             >
               <Minus className="w-5 h-5" />
             </Button>
-            <span className="text-2xl font-semibold text-slate-800 w-16 text-center">
+            <span className="text-2xl font-semibold text-slate-800 dark:text-slate-100 w-16 text-center transition-colors">
               {countAddCart}
             </span>
             <Button
@@ -495,7 +495,7 @@ export default function Product({ id }: { id: string }) {
               onClick={() => {
                 setCountAddCart(countAddCart + 1);
               }}
-              className="h-10 w-10 bg-slate-200 hover:bg-slate-300 border-slate-300 text-slate-800 rounded-full"
+              className="h-10 w-10 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-full transition-colors"
             >
               <Plus className="w-5 h-5" />
             </Button>
@@ -561,16 +561,16 @@ export default function Product({ id }: { id: string }) {
 
           {/* Description */}
           {product.descripcion ? (
-            <div className="pt-1 border-t border-slate-300">
-              <h3 className="font-semibold text-slate-800 mb-2">Descripción</h3>
-              <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+            <div className="pt-1 border-t border-slate-300 dark:border-slate-700 transition-colors">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">Descripción</h3>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line transition-colors">
                 {product.descripcion}
               </p>
             </div>
           ) : null}
 
           {/* Ratings Summary */}
-          <div className="pt-6 border-t border-slate-300">
+          <div className="pt-6 border-t border-slate-300 dark:border-slate-700 transition-colors">
             <RatingSection
               specific={product.productId || id}
               sitioweb={store.sitioweb || ""}

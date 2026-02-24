@@ -1,7 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { MyContext } from "@/context/MyContext";
-import { Product } from "@/context/InitialStatus";
 import { Search, X, Clock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, {
@@ -65,16 +64,20 @@ export default function SearchPage() {
     [store.products],
   );
 
-  // Cargar búsquedas recientes desde localStorage
+  // Cargar búsquedas recientes desde localStorage (solo al montar o cambiar storageKey)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      const arr: string[] = raw ? JSON.parse(raw) : [];
-      setSuggestions(Array.isArray(arr) ? arr : []);
-    } catch (e) {
-      console.warn("No se pudo leer localStorage:", e);
-      setSuggestions([]);
-    }
+    const loadSuggestions = () => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        const arr: string[] = raw ? JSON.parse(raw) : [];
+        setSuggestions(Array.isArray(arr) ? arr : []);
+      } catch (e) {
+        console.warn("No se pudo leer localStorage:", e);
+        setSuggestions([]);
+      }
+    };
+
+    loadSuggestions();
   }, [storageKey]);
 
   // Función para guardar búsqueda (memoizada)

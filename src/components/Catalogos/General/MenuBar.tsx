@@ -28,7 +28,7 @@ export default function MenuBar({
 
   // Detectar cuando el componente está montado en el cliente
   useEffect(() => {
-    setIsMounted(true);
+    queueMicrotask(() => setIsMounted(true));
   }, []);
 
   // Manejo de overflow SOLO en el contenedor, NO en body
@@ -72,7 +72,7 @@ export default function MenuBar({
           <button
             key={`${rec.path}-${index}`}
             onClick={() => handleNavigate(rec.path)}
-            className={`fixed inset-0 bg-white transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 group ${
+            className={`fixed inset-0 bg-white dark:bg-slate-900 transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 group ${
               isMenuOpen ? stylesFromScreens[index] : "translate-x-0"
             }`}
             style={{
@@ -110,7 +110,7 @@ export default function MenuBar({
 
       {/* Pantalla principal - renderizado consistente */}
       <div
-        className={`fixed inset-0 bg-white min-h-dvh transition-all duration-500 ease-out ${
+        className={`fixed inset-0 bg-white dark:bg-slate-950 min-h-dvh transition-all duration-500 ease-out ${
           isMounted && isMenuOpen ? "translate-x-[300px] " : "translate-x-0"
         }`}
         style={{

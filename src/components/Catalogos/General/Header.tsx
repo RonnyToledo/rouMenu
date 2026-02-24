@@ -18,13 +18,13 @@ export default function Header() {
   return (
     <>
       <>
-        <header className="sticky top-0 z-50 bg-linear-to-b from-slate-50 to-transparent h-16 p-2 w-full">
-          <div className="flex items-center justify-between shadow-md rounded-3xl h-full py-1 px-2 gap-2 bg-white ">
+        <header className="sticky top-0 z-50 bg-linear-to-b from-slate-50 to-transparent dark:from-slate-900 dark:to-transparent h-16 p-2 w-full">
+          <div className="flex items-center justify-between shadow-md rounded-3xl h-full py-1 px-2 gap-2 bg-white dark:bg-slate-900 transition-colors duration-500">
             <Button
               variant="ghost"
               onClick={smartBack}
               size="icon"
-              className="w-fit text-slate-700"
+              className="w-fit text-slate-700 dark:text-slate-300"
             >
               <Image
                 alt={`${store?.name || "Rou-Menu"} Logo`}
@@ -121,12 +121,14 @@ const HeaderInfo = () => {
 
   return (
     <div>
-      <span className="font-cinzel text-[16px] text-slate-800 line-clamp-1 text-center">
+      <span className="font-cinzel text-[16px] text-slate-800 dark:text-slate-100 line-clamp-1 text-center transition-colors">
         {mainTitle}
       </span>
       <div className="flex items-center justify-center gap-2">
         {subtitle ? (
-          <span className="text-[10px]">{subtitle}</span>
+          <span className="text-[10px] text-slate-600 dark:text-slate-400">
+            {subtitle}
+          </span>
         ) : (
           <>
             <StoreState schedule={store.horario} />

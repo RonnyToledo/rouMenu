@@ -53,7 +53,7 @@ export default React.memo(function ProductGrid({
   const gridClasses = useMemo(
     () =>
       cn(
-        "grid rounded-md overflow-hidden shadow-md",
+        "grid rounded-md overflow-hidden shadow-md bg-white dark:bg-slate-900 transition-colors duration-500",
         horizontal ? "grid-cols-2" : span && grid ? "col-span-2" : "col-span-1",
       ),
     // las dependencias son exactamente las variables usadas arriba
@@ -68,7 +68,7 @@ export default React.memo(function ProductGrid({
   const titleClasses = useMemo(
     () =>
       cn(
-        "font-cinzel text-[var(--text-gold)] text-sm flex items-center w-full line-clamp-2 font-semibold",
+        "font-cinzel text-slate-800 dark:text-slate-100 text-sm flex items-center w-full line-clamp-2 font-semibold transition-colors",
       ),
     [],
   );
@@ -76,7 +76,7 @@ export default React.memo(function ProductGrid({
   const descriptionClasses = useMemo(
     () =>
       cn(
-        "text-[10px] text-[var(--text-muted)] mt-1 line-clamp-2 whitespace-pre-line",
+        "text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line transition-colors",
         product.span ? "h-4" : "h-8",
       ),
     [product.span],
@@ -259,11 +259,11 @@ const ProductPrice = React.memo(function ProductPrice({
 }: ProductPriceProps) {
   return (
     <>
-      <p className={`font-semibold  text-[8px] text-slate-800 `}>
+      <p className={`font-semibold text-[8px] text-slate-800 dark:text-slate-200 transition-colors`}>
         ${smartRound(price)} {currency}
       </p>
       {oldPrice ? (
-        <p className="font-semibold  text-[8px]  text-red-800 line-through">
+        <p className="font-semibold text-[8px] text-red-600 dark:text-red-400 line-through transition-colors">
           ${smartRound(oldPrice)} {currency}
         </p>
       ) : null}

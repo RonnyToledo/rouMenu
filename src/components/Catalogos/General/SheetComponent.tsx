@@ -243,17 +243,17 @@ function SheetComponent({
   }, [user, isMounted, loading]);
 
   useEffect(() => {
-    setIsMounted(true);
+    queueMicrotask(() => setIsMounted(true));
   }, []);
 
   return (
     <>
       <Sheet onOpenChange={onOpenChange} open={isOpen}>
-        <SheetContent className="bg-linear-to-br from-primary/5 to-primary/30 p-4">
+        <SheetContent className="bg-linear-to-br from-primary/5 to-primary/30 dark:from-slate-900 dark:to-slate-800 p-4 transition-colors duration-500">
           <SheetHeader>
             <SheetTitle>
               <Link href={"/user"} className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                <div className="w-10 h-10 bg-black/10 dark:bg-white/20 rounded-full flex items-center justify-center overflow-hidden transition-colors">
                   {isMounted && user?.user_metadata?.avatar_url ? (
                     <Image
                       width={40}
@@ -263,14 +263,14 @@ function SheetComponent({
                       alt="Avatar"
                     />
                   ) : (
-                    <User className="w-5 h-5 text-slate-800" />
+                    <User className="w-5 h-5 text-slate-800 dark:text-slate-200" />
                   )}
                 </div>
                 <div>
-                  <p className="text-slate-800 font-semibold text-sm">
+                  <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm transition-colors">
                     Hi, {displayName}
                   </p>
-                  <p className="text-slate-800/70 text-xs">
+                  <p className="text-slate-800/70 dark:text-slate-300/70 text-xs transition-colors">
                     {isMounted && user ? "Welcome back" : "Guest"}
                   </p>
                 </div>
@@ -319,8 +319,8 @@ function SheetComponent({
 
                 <ListSheet
                   name={"Cerrar Sesion"}
-                  icon={<User className="w-8 h-8 text-slate-800" />}
-                  icon2={<ChevronRight />}
+                  icon={<User className="w-8 h-8 text-slate-800 dark:text-slate-200" />}
+                  icon2={<ChevronRight className="dark:text-slate-200" />}
                   action={() => {
                     signOut();
                     closeSheet();
@@ -521,7 +521,7 @@ const ListSheet = React.memo(function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-700",
+          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-200",
           className,
         )}
       >

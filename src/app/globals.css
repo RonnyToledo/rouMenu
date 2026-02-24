@@ -4,19 +4,6 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background-light: rgb(243, 244, 246);
-  --background-medium: #ffffff;
-  /* Gris muy oscuro para textos principales */
-  --text-dark: #111827; /* gray-900 */
-
-  /* Gris medio-alto para acentos o títulos secundarios */
-  --text-gold: #374151; /* gray-700 */
-
-  /* Gris intermedio para textos menos destacados */
-  --text-muted: #6b7280; /* gray-500 */
-
-  /* Gris claro para bordes y separadores */
-  --border-gold: #d1d5db; /* gray-300 */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -93,8 +80,9 @@
 
 body {
   font-family: "IM Fell English", serif;
-  background-color: var(--background-dark);
-  color: var(--text-light);
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 .font-cinzel {
   font-family: "Cinzel", serif;
@@ -186,7 +174,7 @@ body {
   }
 
   .prose p {
-    @apply text-lg text-foreground/90 leading-relaxed mb-2;
+    @apply text-lg text-foreground/80 leading-relaxed mb-2;
   }
 
   .prose ul,

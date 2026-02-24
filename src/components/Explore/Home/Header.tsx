@@ -64,8 +64,13 @@ export default function Header({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (pathname !== "/buscar" && !search) return;
-    const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
-    router.replace(url);
+
+    const timeoutId = setTimeout(() => {
+      const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
+      router.replace(url);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [search, pathname, router]);
 
   return (
@@ -73,10 +78,10 @@ export default function Header({ children }: { children: ReactNode }) {
       {/* LoginPopover: se abrirá si no hay user y no se mostró antes */}
 
       {!pathname.includes("/t/") && (
-        <div className="sticky top-0 flex items-center bg-slate-100 p-2 gap-2 justify-between z-50 shadow-lg">
-          <div className="bg-white rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2">
+        <div className="sticky top-0 flex items-center bg-slate-100 dark:bg-slate-900 p-2 gap-2 justify-between z-50 shadow-lg transition-colors">
+          <div className="bg-white dark:bg-slate-800 rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2 transition-colors">
             <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-white text-slate-600 text-sm font-medium">
+              <AvatarFallback className="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium">
                 {"RouMenu".charAt(0).toUpperCase()}
               </AvatarFallback>
               <AvatarImage src={logoApp} alt={"RouMenu"} />
@@ -91,7 +96,7 @@ export default function Header({ children }: { children: ReactNode }) {
                   <div className="flex items-center w-full h-full font-normal text-[10px] text-slate-400 gap-0">
                     Buscar en
                   </div>
-                  <div className="flex items-center w-full h-full font-normal text-[14px] text-slate-600">
+                  <div className="flex items-center w-full h-full font-normal text-[14px] text-slate-600 dark:text-slate-300">
                     RouMenu
                   </div>
                 </div>
@@ -101,7 +106,7 @@ export default function Header({ children }: { children: ReactNode }) {
                 <Input
                   placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden  text-[#0d141c] focus:outline-0 focus:ring-0 border-none bg-white focus:border-none placeholder:text-slate-500 px-4 text-xs font-normal leading-normal line-clamp-1"
+                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden text-[#0d141c] dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-white dark:bg-slate-800 focus:border-none placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 text-xs font-normal leading-normal line-clamp-1 transition-colors"
                   value={search}
                 />
               </div>

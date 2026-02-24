@@ -104,7 +104,7 @@ export const MultiStepLoader = ({
 
   useEffect(() => {
     if (!loading) {
-      setCurrentState(0);
+      queueMicrotask(() => setCurrentState(0));
       return;
     }
     const timeout = setTimeout(() => {

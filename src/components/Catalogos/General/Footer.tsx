@@ -19,7 +19,7 @@ export function CatalogFooter() {
   const { store } = useContext(MyContext);
 
   return (
-    <footer className="bg-linear-to-br from-primary/60 to-primary/90 mt-auto">
+    <footer className="bg-linear-to-br from-primary/60 to-primary/90 dark:from-slate-900 dark:to-slate-800 mt-auto transition-colors duration-500">
       <div className="px-4 py-8 space-y-4">
         <Footer />
 
@@ -89,14 +89,14 @@ export function CatalogFooter() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-6 text-center text-xs text-slate-50">
+        <div className="mt-6 text-center text-xs text-slate-50 dark:text-slate-400">
           <p>
             © {new Date().getFullYear()} {store?.name}. Todos los derechos
             reservados.
           </p>
           <p className="mt-1">
             Diseñado por{" "}
-            <a className="text-(--text-gold) hover:underline" href="#">
+            <a className="text-white dark:text-primary hover:underline transition-colors" href="#">
               rou-dev
             </a>
           </p>

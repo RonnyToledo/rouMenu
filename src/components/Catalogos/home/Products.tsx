@@ -35,14 +35,15 @@ export default function Products() {
   }, [store?.categorias, store?.products]);
 
   const next_before_Category = useMemo(() => {
-    if (!sortedCategories) return {};
-    const sorted = [...sortedCategories].sort(
-      (a, b) => (a.order || 0) - (b.order || 0),
-    );
+    if (!sortedCategories || sortedCategories.length === 0) return {};
+
     const mapping: { [key: string]: { nextID: string; prevID: string } } = {};
-    sorted.forEach((cat, index) => {
-      const nextCat = sorted[(index + 1) % sorted.length];
-      const prevCat = sorted[(index - 1 + sorted.length) % sorted.length];
+    sortedCategories.forEach((cat, index) => {
+      const nextCat = sortedCategories[(index + 1) % sortedCategories.length];
+      const prevCat =
+        sortedCategories[
+          (index - 1 + sortedCategories.length) % sortedCategories.length
+        ];
       mapping[cat.id] = { nextID: nextCat.id, prevID: prevCat.id };
     });
 
@@ -52,7 +53,7 @@ export default function Products() {
   return (
     <div>
       <HeroNew />
-      <div className="bg-(--background-dark) mt-5">
+      <div className="mt-5 transition-colors">
         {sortedCategories.map((categoria) => (
           <CategoryItem
             key={categoria.id}
@@ -143,7 +144,7 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
       <div className="rounded-lg">
         <div className="pb-2">
           <Link
-            className="text-sm uppercase font-cinzel text-center text-slate-700 tracking-widest truncate flex items-center"
+            className="text-sm uppercase font-cinzel text-center text-slate-700 dark:text-slate-300 tracking-widest truncate flex items-center transition-colors"
             href={`/t/${store?.sitioweb}/category/${categoria.id}`}
           >
             {categoria.name}
@@ -173,7 +174,7 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
           )}
 
           <div className="flex items-center justify-between mt-3">
-            <p className="font-medium w-full text-10 text-slate-700">
+            <p className="font-medium w-full text-10 text-slate-700 dark:text-slate-400 transition-colors">
               {productsCount} Productos
             </p>
             <div className="relative h-9 w-full flex justify-end items-center">
@@ -264,25 +265,25 @@ function CategoryHeader({
 
   return (
     <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-between rounded-full shadow-md bg-white max-w-4/5 w-full">
+      <div className="flex items-center justify-between rounded-full shadow-md bg-white dark:bg-slate-800 max-w-4/5 w-full transition-colors duration-500">
         <Button
           onClick={() => ScrollTo(prevID)}
           variant={"ghost"}
-          className="p-2"
+          className="p-2 text-slate-700 dark:text-slate-300"
           size={"icon"}
         >
           <MdNavigateBefore />
         </Button>
         <Button
           variant={"ghost"}
-          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1"
+          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1 text-slate-800 dark:text-slate-200"
           onClick={() => highlightCategory(id)}
         >
           {name}
         </Button>
 
         <Button
-          className="p-2"
+          className="p-2 text-slate-700 dark:text-slate-300"
           onClick={() => ScrollTo(nextID)}
           variant={"ghost"}
           size={"icon"}
@@ -342,8 +343,8 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
 function UncategorizedHeader() {
   return (
     <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-center rounded-full shadow-md bg-white max-w-4/5 w-full py-2 px-4">
-        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700">
+      <div className="flex items-center justify-center rounded-full shadow-md bg-white dark:bg-slate-800 max-w-4/5 w-full py-2 px-4 transition-colors duration-500">
+        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700 dark:text-slate-200">
           Otros Productos
         </span>
       </div>
