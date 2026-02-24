@@ -12,6 +12,7 @@ import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import { buildSiteMetadata } from "@/lib/siteMeta";
 import { AppProvider, AppState } from "@/context/AppContext";
+import { findItemUrlByName } from "@/lib/items";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -99,34 +100,10 @@ async function modifyData(data: AppState): Promise<AppState> {
 
   const top_provinces_with_image = await Promise.all(
     data.top_provinces.map(async (prov) => {
-      const image = await fetchUrlByName(prov.provincia ?? "");
+      const image = await findItemUrlByName(prov.provincia ?? "");
       return { ...prov, image: image || logoApp }; // coincide con types.app.ts
     }),
   );
 
   return { ...data, top_provinces: top_provinces_with_image };
-}
-
-// 3) fetch con URL absoluta (usar env var NEXT_PUBLIC_APP_URL o fallback local)
-async function fetchUrlByName(name: string): Promise<string | null> {
-  if (!name) return null;
-
-  // Asegúrate de definir NEXT_PUBLIC_APP_URL en producción (ej. https://mi-dominio.com)
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const url = `${base}/api/images?name=${encodeURIComponent(name)}`;
-
-  try {
-    const res = await fetch(url, { cache: "no-store" }); // en server componentes ok
-    if (!res.ok) {
-      console.warn("fetchUrlByName: non-ok response", res.status);
-      return null;
-    }
-    // asumimos que la API devuelve directamente la URL como JSON (p. ej. "https://...")
-    const data = await res.json();
-    // si tu API devuelve { url: '...' } ajusta aquí
-    return typeof data === "string" ? data : (data?.url ?? null);
-  } catch (err) {
-    console.error("fetchUrlByName error:", err);
-    return null;
-  }
 }

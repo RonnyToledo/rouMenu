@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useMemo } from "react";
 import { Star } from "lucide-react";
 import { Product, StarDistribution } from "@/context/InitialStatus";
 import { MyContext } from "@/context/MyContext";
@@ -19,10 +19,15 @@ export default function RatingSection({
   sitioweb: string;
 }) {
   const { store, dispatchStore } = useContext(MyContext);
-  const [product, setproduct] = useState<Product>();
+
   const { user, requireAuth } = useAuth();
   const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
   const [rating, setRating] = useState<RatingInterface>(initialState);
+
+  const product = useMemo(
+    () => store.products.find((obj) => obj.productId == specific),
+    [store.products, specific],
+  );
 
   useEffect(() => {
     if (user?.user_metadata.full_name) {
@@ -50,10 +55,6 @@ export default function RatingSection({
 
     setReviewOpen(true);
   };
-
-  useEffect(() => {
-    setproduct(store.products.find((obj) => obj.productId == specific));
-  }, [store.products, specific]);
 
   const handleSubmit = async () => {
     if (!user?.id) return;

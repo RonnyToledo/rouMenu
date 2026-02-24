@@ -3,7 +3,6 @@ import React, {
   useCallback,
   useContext,
   useState,
-  useEffect,
   useMemo,
   memo,
 } from "react";
@@ -72,17 +71,13 @@ export const ButtonOfCart = memo(function ButtonOfCart({
   }, [dispatchStore, product, productCant]);
 
   const handleDecrement = useCallback(() => {
+    const newCant = productCant - 1;
     dispatchStore({
       type: "AddCart",
-      payload: JSON.stringify({ ...product, Cant: productCant - 1 }),
+      payload: JSON.stringify({ ...product, Cant: newCant }),
     });
-    if (isLastItem) setSlideOpen(false);
-  }, [dispatchStore, product, productCant, isLastItem]);
-
-  // Efecto optimizado
-  useEffect(() => {
-    if (productCant === 0) setSlideOpen(false);
-  }, [productCant]);
+    if (newCant <= 0) setSlideOpen(false);
+  }, [dispatchStore, product, productCant]);
 
   // Clases memoizadas
   const containerClasses = useMemo(

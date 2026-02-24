@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React from "react";
 
 export default function PageLoading({
   title = "Cargando página...",
@@ -9,19 +9,9 @@ export default function PageLoading({
   title: string;
   subtitle: string;
 }) {
-  const [fadeIn, setFadeIn] = useState(false);
-
-  useEffect(() => {
-    setFadeIn(true);
-  }, []);
-
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-4">
-      <div
-        className={`text-center space-y-6 transition-opacity duration-500 ${
-          fadeIn ? "opacity-100" : "opacity-0"
-        }`}
-      >
+      <div className="text-center space-y-6 animate-in fade-in duration-500">
         {/* Page loading animation */}
         <div className="flex justify-center">
           <div className="relative">

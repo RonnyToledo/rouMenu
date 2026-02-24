@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useLayoutEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +17,7 @@ export default function ExpandableText({
   const [shouldClamp, setShouldClamp] = useState(false);
   const textRef = useRef<HTMLParagraphElement | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (textRef.current) {
       const lineHeight = parseFloat(
         getComputedStyle(textRef.current).lineHeight
