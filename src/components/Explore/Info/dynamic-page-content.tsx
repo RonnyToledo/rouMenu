@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -42,50 +42,44 @@ interface DynamicPageContentProps {
 }
 
 export function DynamicPageContent({ allData }: DynamicPageContentProps) {
-  const [activeSection, setActiveSection] = useState("");
-  const [breadcrumb, setBreadcrumb] = useState<string[]>([]);
-  const [content, setContent] = useState<
-    ContectDataInterace | SubsectionsInterace | null
-  >();
-  const [prevNextState, setPrevNextState] = useState<{
-    index: number;
-    prev: FlatItem | null;
-    next: FlatItem | null;
-  }>(getPrevNext(flat, "introduccion"));
-
   const params = useParams();
   const { slug } = params;
 
   if (!slug) notFound();
 
-  // Search through sections and subsections
-  useEffect(() => {
-    for (const section of allData?.sections || ([] as ContectDataInterace[])) {
+  const { content, activeSection, prevNextState, breadcrumb } = useMemo(() => {
+    let contentResult: ContectDataInterace | SubsectionsInterace | null = null;
+    let activeSectionResult = "";
+    let breadcrumbResult: string[] = [];
+    let prevNextResult = getPrevNext(flat, "introduccion");
+
+    for (const section of allData?.sections || []) {
       if (section.slug === slug) {
-        setContent(section);
-        if (section.slug) {
-          setActiveSection(section?.slug || "");
-          setPrevNextState(getPrevNext(flat, section?.slug));
-        }
-        setBreadcrumb([section.title || ""]);
+        contentResult = section;
+        activeSectionResult = section.slug || "";
+        prevNextResult = getPrevNext(flat, section.slug || "");
+        breadcrumbResult = [section.title || ""];
+        break;
       }
 
       if (section.subsections) {
-        for (const subsection of section.subsections) {
-          if ((subsection?.slug || "") === slug) {
-            setContent(subsection);
-            if (!subsection.slug) {
-              notFound();
-            } else {
-              setActiveSection(subsection?.slug || "");
-              setPrevNextState(getPrevNext(flat, subsection?.slug));
-            }
-            setBreadcrumb([section.title || "", subsection.title || ""]);
-            break;
-          }
+        const foundSub = section.subsections.find((sub) => sub.slug === slug);
+        if (foundSub) {
+          contentResult = foundSub;
+          activeSectionResult = foundSub.slug || "";
+          prevNextResult = getPrevNext(flat, foundSub.slug || "");
+          breadcrumbResult = [section.title || "", foundSub.title || ""];
+          break;
         }
       }
     }
+
+    return {
+      content: contentResult,
+      activeSection: activeSectionResult,
+      breadcrumb: breadcrumbResult,
+      prevNextState: prevNextResult,
+    };
   }, [allData?.sections, slug]);
 
   const renderImage = (imageData: ImageInterface) => {
@@ -308,7 +302,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
       <StepByStepSheet
         data={allData}
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={() => {}}
       />
     </main>
   );

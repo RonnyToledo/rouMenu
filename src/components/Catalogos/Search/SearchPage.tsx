@@ -43,13 +43,14 @@ export default function SearchPage() {
   const { open } = useSheet();
   const { store } = useContext(MyContext);
 
-  const [search, setSearch] = useState<string>("");
-  const [listSearch, setListSearch] = useState<Product[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [focused, setFocused] = useState(false);
-
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [search, setSearch] = useState<string>(
+    () => searchParams.get("buscar") || "",
+  );
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Clave por tienda para almacenar búsquedas recientes
@@ -75,14 +76,6 @@ export default function SearchPage() {
       setSuggestions([]);
     }
   }, [storageKey]);
-
-  // Inicializar valor desde query string solo una vez
-  useEffect(() => {
-    const querySearch = searchParams.get("buscar") || "";
-    if (querySearch) {
-      setSearch(querySearch);
-    }
-  }, [searchParams]);
 
   // Función para guardar búsqueda (memoizada)
   const saveSearch = useCallback(
@@ -126,22 +119,21 @@ export default function SearchPage() {
     }
   }, [search, store.sitioweb, router, searchParams]);
 
-  // Filtrar productos (corregido)
-  useEffect(() => {
+  // Filtrar productos (memoizado)
+  const listSearch = useMemo(() => {
     const trimmedSearch = search.trim();
 
     if (trimmedSearch && trimmedSearch.length >= MIN_SEARCH_LENGTH) {
       const results = fuse.search(trimmedSearch);
-      const filteredResults = results.map((obj) => obj.item);
-      setListSearch(filteredResults);
+      return results.map((obj) => obj.item);
     } else {
       // Mostrar favoritos cuando no hay búsqueda, o primeros 5 productos si no hay favoritos
       const favoriteProducts = store.products.filter((obj) => obj.favorito);
 
       if (favoriteProducts.length > 0) {
-        setListSearch(favoriteProducts.slice(0, 5));
+        return favoriteProducts.slice(0, 5);
       } else {
-        setListSearch(store.products.slice(0, 5));
+        return store.products.slice(0, 5);
       }
     }
   }, [search, fuse, store.products]);
