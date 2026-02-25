@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { ExtraerCategorias } from "@/functions/extraerCategoriass";
 import { BsFileEarmarkPostFill } from "react-icons/bs";
 import { User, X } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import Link from "next/link";
 import { MdTravelExplore } from "react-icons/md";
@@ -50,14 +51,16 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
   // Detectar montaje del cliente
   useEffect(() => {
-    setIsMounted(true);
+    queueMicrotask(() => setIsMounted(true));
   }, []);
 
   const closeLogin = useCallback(() => setIsLoginOpen(false), []);
 
   // Reset view when sheet closes
   useEffect(() => {
-    if (!isMenuOpen) setShowState("home");
+    if (!isMenuOpen) {
+      queueMicrotask(() => setShowState("home"));
+    }
   }, [isMenuOpen]);
 
   const closeSheet = useCallback(() => setIsMenuOpen(false), [setIsMenuOpen]);
@@ -161,7 +164,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
   return (
     <div
-      className="absolute inset-0 bg-linear-to-r from-slate-600 to-slate-900 transition-opacity duration-500"
+      className="absolute inset-0 bg-linear-to-r from-slate-100 to-slate-300 dark:from-slate-800 dark:to-slate-950 transition-all duration-500"
       style={{
         opacity: isMenuOpen ? 1 : 0,
         pointerEvents: isMenuOpen ? "auto" : "none",
@@ -183,8 +186,11 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
         {/* Header del usuario */}
         <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+          </div>
           <Link href={"/user"} className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+            <div className="w-10 h-10 bg-black/10 dark:bg-white/20 rounded-full flex items-center justify-center overflow-hidden transition-colors">
               {isMounted && user?.user_metadata?.avatar_url ? (
                 <Image
                   width={40}
@@ -198,10 +204,10 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
               )}
             </div>
             <div>
-              <p className="text-white font-semibold text-sm">
+              <p className="text-slate-900 dark:text-white font-semibold text-sm transition-colors">
                 Hi, {displayName}
               </p>
-              <p className="text-white/70 text-xs">
+              <p className="text-slate-600 dark:text-white/70 text-xs transition-colors">
                 {isMounted && user ? "Welcome back" : "Guest"}
               </p>
             </div>
@@ -234,8 +240,8 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
           <Separator className="bg-white/20" />
           <ListSheet
             name={"Cerrar Sesion"}
-            icon={<User className="w-8 h-8 text-white" />}
-            icon2={<ChevronRight />}
+            icon={<User className="w-8 h-8 text-slate-800 dark:text-white" />}
+            icon2={<ChevronRight className="text-slate-800 dark:text-white" />}
             action={signOut}
           />
         </div>
@@ -381,7 +387,7 @@ const ListSheet = React.memo(function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-100",
+          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-800 dark:text-slate-100",
           className,
         )}
       >

@@ -76,7 +76,7 @@ const LoaderCore = ({
             </div>
             <span
               className={cn(
-                "text-black dark:text-slate-300 opacity-70",
+                "text-black dark:text-white",
                 value === index && "text-black dark:text-lime-500 opacity-100",
               )}
             >
@@ -104,7 +104,7 @@ export const MultiStepLoader = ({
 
   useEffect(() => {
     if (!loading) {
-      setCurrentState(0);
+      queueMicrotask(() => setCurrentState(0));
       return;
     }
     const timeout = setTimeout(() => {
@@ -138,7 +138,7 @@ export const MultiStepLoader = ({
             <LoaderCore value={currentState} loadingStates={loadingStates} />
           </div>
 
-          <div className="bg-linear-to-t inset-x-0 z-20 bottom-0 bg-white dark:bg-black h-full absolute [mask-image:radial-gradient(900px_at_center,transparent_30%,white)]" />
+          <div className="bg-linear-to-t inset-x-0 z-20 bottom-0 bg-white dark:bg-black h-full absolute mask-[radial-gradient(900px_at_center,transparent_30%,white)]" />
         </motion.div>
       )}
     </AnimatePresence>

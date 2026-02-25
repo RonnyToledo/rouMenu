@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useMemo } from "react";
 import { MyContext } from "@/context/MyContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,15 +28,15 @@ const prevRuta = [
 ];
 export default function Footer() {
   const { store } = useContext(MyContext);
-  const [ruta, setRuta] = useState(prevRuta);
   const pathname = usePathname();
-  useEffect(() => {
-    if (store?.sitioweb) {
-      const startRuta = `/t/${store?.sitioweb}`;
-      setRuta(
-        prevRuta.map((obj) => ({ ...obj, url: startRuta.concat(obj.url) })),
-      );
-    }
+
+  const ruta = useMemo(() => {
+    if (!store?.sitioweb) return prevRuta;
+    const startRuta = `/t/${store?.sitioweb}`;
+    return prevRuta.map((obj) => ({
+      ...obj,
+      url: startRuta.concat(obj.url),
+    }));
   }, [store?.sitioweb]);
 
   return (

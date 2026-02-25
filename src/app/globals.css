@@ -4,12 +4,6 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background-light: rgb(243, 244, 246);
-  --background-medium: #ffffff;
-  --text-dark: #111827;
-  --text-gold: #374151;
-  --text-muted: #6b7280;
-  --border-gold: #d1d5db;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -86,49 +80,77 @@
 
 body {
   font-family: "IM Fell English", serif;
-  background-color: var(--background-dark);
-  color: var(--text-light);
+  background-color: var(--background);
+  color: var(--foreground);
+  transition:
+    background-color 0.5s ease,
+    color 0.5s ease;
 }
 .font-cinzel {
   font-family: "Cinzel", serif;
 }
 
 .dark {
-  /* Custom CSS vars for dark mode */
-  --text-gold: #9ca3af; /* gray-400 */
-  --text-muted: #6b7280; /* gray-500 */
-  --border-gold: #374151; /* gray-700 */
-
   --background: oklch(0.145 0 0);
+
   --foreground: oklch(0.985 0 0);
+
   --card: oklch(0.205 0 0);
+
   --card-foreground: oklch(0.985 0 0);
+
   --popover: oklch(0.205 0 0);
+
   --popover-foreground: oklch(0.985 0 0);
+
   --primary: oklch(0.922 0 0);
+
   --primary-foreground: oklch(0.205 0 0);
+
   --secondary: oklch(0.269 0 0);
+
   --secondary-foreground: oklch(0.985 0 0);
+
   --muted: oklch(0.269 0 0);
+
   --muted-foreground: oklch(0.708 0 0);
+
   --accent: oklch(0.269 0 0);
+
   --accent-foreground: oklch(0.985 0 0);
+
   --destructive: oklch(0.704 0.191 22.216);
+
   --border: oklch(1 0 0 / 10%);
+
   --input: oklch(1 0 0 / 15%);
+
   --ring: oklch(0.556 0 0);
+
   --chart-1: oklch(0.488 0.243 264.376);
+
   --chart-2: oklch(0.696 0.17 162.48);
+
   --chart-3: oklch(0.769 0.188 70.08);
+
   --chart-4: oklch(0.627 0.265 303.9);
+
   --chart-5: oklch(0.645 0.246 16.439);
+
   --sidebar: oklch(0.205 0 0);
+
   --sidebar-foreground: oklch(0.985 0 0);
+
   --sidebar-primary: oklch(0.488 0.243 264.376);
+
   --sidebar-primary-foreground: oklch(0.985 0 0);
+
   --sidebar-accent: oklch(0.269 0 0);
+
   --sidebar-accent-foreground: oklch(0.985 0 0);
+
   --sidebar-border: oklch(1 0 0 / 10%);
+
   --sidebar-ring: oklch(0.556 0 0);
 }
 
@@ -140,52 +162,64 @@ body {
     @apply bg-background text-foreground;
   }
 
+  /* Estilos mejorados para títulos y contenido del blog */
   .prose h2 {
     @apply text-3xl font-bold text-foreground mt-12 mb-3 leading-tight;
   }
+
   .prose h3 {
     @apply text-2xl font-semibold text-foreground mt-10 mb-2 leading-snug;
   }
+
   .prose h4 {
     @apply text-xl font-semibold text-foreground mt-3 mb-1;
   }
+
   .prose p {
-    @apply text-lg text-foreground/90 leading-relaxed mb-2;
+    @apply text-lg text-foreground/80 leading-relaxed mb-2;
   }
+
   .prose ul,
   .prose ol {
     @apply my-3 space-y-1;
-    list-style: none !important;
-    padding-left: 0 !important;
+    list-style: none !important; /* Quita todos los puntos/números */
+    padding-left: 0 !important; /* Quita el padding izquierdo */
   }
+
   .prose li {
     @apply text-lg text-foreground/90 leading-relaxed;
-    list-style: none;
+    list-style: none; /* Quita los puntos */
     padding-left: 0 !important;
   }
+
   .prose strong {
     @apply font-semibold text-foreground;
   }
+
   .prose em {
     @apply italic text-foreground/80;
   }
+
   .prose blockquote {
     @apply border-l-4 border-primary pl-6 py-4 my-3 bg-muted/30 rounded-r-lg;
   }
+
   .prose blockquote p {
     @apply text-lg italic text-foreground/80 mb-0;
   }
+
   .prose hr {
     @apply my-3 border-border;
   }
+
   .prose code {
     @apply bg-muted px-2 py-1 rounded text-sm font-mono text-foreground;
   }
+
   .prose a {
     @apply text-primary underline underline-offset-4 hover:text-primary/80 transition-colors;
   }
 }
-
 @keyframes blink {
   0%,
   100% {

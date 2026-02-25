@@ -9,8 +9,7 @@ export async function readItemsData(): Promise<Item[]> {
   try {
     const raw = await fs.readFile(DATA_PATH, "utf8");
     return JSON.parse(raw) as Item[];
-  } catch (err) {
-    console.error("Error reading items data:", err);
+  } catch {
     // Silence error if file doesn't exist, as it's expected in some environments
     return [];
   }

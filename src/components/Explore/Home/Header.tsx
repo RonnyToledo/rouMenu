@@ -64,8 +64,13 @@ export default function Header({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (pathname !== "/buscar" && !search) return;
-    const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
-    router.replace(url);
+
+    const timeoutId = setTimeout(() => {
+      const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
+      router.replace(url);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
   }, [search, pathname, router]);
 
   return (
@@ -73,10 +78,10 @@ export default function Header({ children }: { children: ReactNode }) {
       {/* LoginPopover: se abrirá si no hay user y no se mostró antes */}
 
       {!pathname.includes("/t/") && (
-        <div className="sticky top-0 flex items-center bg-slate-100 dark:bg-slate-900 p-2 gap-2 justify-between z-50 shadow-lg dark:shadow-slate-950/50">
-          <div className="bg-white dark:bg-slate-900 rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2">
-            <Avatar className="size-9">
-              <AvatarFallback className="bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm font-medium">
+        <div className="sticky top-0 flex items-center bg-slate-100 dark:bg-slate-900 p-2 gap-2 justify-between z-50 shadow-lg transition-colors">
+          <div className="bg-white dark:bg-slate-800 rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2 transition-colors">
+            <Avatar className="w-10 h-10">
+              <AvatarFallback className="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium">
                 {"RouMenu".charAt(0).toUpperCase()}
               </AvatarFallback>
               <AvatarImage src={logoApp} alt={"RouMenu"} />
@@ -88,7 +93,7 @@ export default function Header({ children }: { children: ReactNode }) {
                 className="w-full flex items-center min-w-40 h-10"
               >
                 <div className="w-full flex flex-col text-left">
-                  <div className="flex items-center w-full h-full font-normal text-[10px] text-slate-400 dark:text-slate-500 gap-0">
+                  <div className="flex items-center w-full h-full font-normal text-[10px] text-slate-400 gap-0">
                     Buscar en
                   </div>
                   <div className="flex items-center w-full h-full font-normal text-[14px] text-slate-600 dark:text-slate-300">
@@ -101,7 +106,7 @@ export default function Header({ children }: { children: ReactNode }) {
                 <Input
                   placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden text-[#0d141c] dark:text-slate-200 focus:outline-0 focus:ring-0 border-none bg-white dark:bg-slate-700 focus:border-none placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 text-xs font-normal leading-normal line-clamp-1"
+                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden text-[#0d141c] dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-white dark:bg-slate-800 focus:border-none placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 text-xs font-normal leading-normal line-clamp-1 transition-colors"
                   value={search}
                 />
               </div>
@@ -112,16 +117,14 @@ export default function Header({ children }: { children: ReactNode }) {
               <Drawer open={open} onOpenChange={setOpen}>
                 <DrawerTrigger asChild>
                   <Button variant="ghost" className="p-0 m-0">
-                    <HiMiniBars3BottomRight className="size-6 text-slate-700 dark:text-slate-300" />
+                    <HiMiniBars3BottomRight className="size-6 text-slate-700 " />
                   </Button>
                 </DrawerTrigger>
-                <DrawerContent className="dark:bg-slate-900 dark:border-slate-700">
+                <DrawerContent>
                   <div className="mx-auto w-full max-w-sm p-2">
                     <DrawerHeader>
-                      <DrawerTitle className="dark:text-slate-100">
-                        rouMenu
-                      </DrawerTitle>
-                      <DrawerDescription className="dark:text-slate-400">
+                      <DrawerTitle>rouMenu</DrawerTitle>
+                      <DrawerDescription>
                         Explora y descubre catalogos con mayor facilidad
                       </DrawerDescription>
                     </DrawerHeader>
@@ -178,7 +181,7 @@ export function CardDrawerActive({
   return (
     <Link
       href={card.path}
-      className="bg-primary dark:bg-blue-600 text-primary-foreground dark:text-white p-4 rounded-xl shadow-sm hover:bg-primary/90 dark:hover:bg-blue-700 transition-colors"
+      className="bg-primary text-primary-foreground p-4 rounded-xl shadow-sm"
       onClick={onClick}
     >
       <card.icon className="w-6 h-6 mb-2" />
@@ -197,7 +200,7 @@ export function CardDrawer({
   return (
     <Link
       href={card.path}
-      className="bg-accent dark:bg-slate-900 text-accent-foreground dark:text-slate-200 p-4 rounded-xl shadow-sm hover:bg-accent/80 dark:hover:bg-slate-700 transition-colors"
+      className="bg-accent text-accent-foreground p-4 rounded-xl shadow-sm"
       onClick={onClick}
     >
       <card.icon className="w-6 h-6 mb-2" />

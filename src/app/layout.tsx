@@ -13,6 +13,7 @@ import Script from "next/script";
 import { buildSiteMetadata } from "@/lib/siteMeta";
 import { AppProvider, AppState } from "@/context/AppContext";
 import { findItemUrlByName } from "@/lib/items";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -77,18 +78,25 @@ export default async function RootLayout({
         `}
       </Script>
       <body className={inter.className}>
-        <div className="flex justify-center bg-linear-to-br from-slate-50 to-slate-300">
-          <div className="max-w-md w-full bg-white shadow-xl/30 min-h-dvh">
-            <AppProvider storeSSD={newData}>
-              <Header>
-                {children}
-                <Toaster richColors position="top-center" />
-              </Header>
-            </AppProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="flex justify-center bg-linear-to-br from-slate-50 to-slate-300 dark:from-slate-900 dark:to-slate-800 transition-colors duration-500">
+            <div className="max-w-md w-full bg-white dark:bg-slate-950 shadow-xl/30 min-h-dvh transition-colors duration-500">
+              <AppProvider storeSSD={newData}>
+                <Header>
+                  {children}
+                  <Toaster richColors position="top-center" />
+                </Header>
+              </AppProvider>
+            </div>
           </div>
-        </div>
-        <GoogleAnalytics gaId={GA_ID || ""} />
-        <Analytics />
+          <GoogleAnalytics gaId={GA_ID || ""} />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   );

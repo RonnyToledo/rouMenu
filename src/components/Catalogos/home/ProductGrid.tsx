@@ -28,6 +28,7 @@ export default React.memo(function ProductGrid({
   const { store } = useContext(MyContext);
   const router = useRouter();
 
+  // Memoizar valores calculados
   const isNew = useMemo(() => isNewProduct(product.creado), [product.creado]);
 
   const totalCartItems = useMemo(
@@ -42,6 +43,7 @@ export default React.memo(function ProductGrid({
     [store.moneda, product.default_moneda],
   );
 
+  // Extraer fuera del useMemo
   const edit = store?.edit;
   const horizontal = edit?.horizontal;
   const grid = edit?.grid;
@@ -51,9 +53,10 @@ export default React.memo(function ProductGrid({
   const gridClasses = useMemo(
     () =>
       cn(
-        "grid rounded-md overflow-hidden shadow-md",
+        "grid rounded-md overflow-hidden shadow-md bg-white dark:bg-slate-900 transition-colors duration-500",
         horizontal ? "grid-cols-2" : span && grid ? "col-span-2" : "col-span-1",
       ),
+    // las dependencias son exactamente las variables usadas arriba
     [horizontal, grid, span],
   );
 
@@ -65,7 +68,7 @@ export default React.memo(function ProductGrid({
   const titleClasses = useMemo(
     () =>
       cn(
-        "font-cinzel text-[var(--text-gold)] text-xs flex items-center w-full line-clamp-2 font-semibold",
+        "font-cinzel text-slate-800 dark:text-slate-100 text-sm flex items-center w-full line-clamp-2 font-semibold transition-colors",
       ),
     [],
   );
@@ -73,7 +76,7 @@ export default React.memo(function ProductGrid({
   const descriptionClasses = useMemo(
     () =>
       cn(
-        "text-[10px] text-[var(--text-muted)] dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line",
+        "text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line transition-colors",
         product.span ? "h-4" : "h-8",
       ),
     [product.span],
@@ -84,10 +87,12 @@ export default React.memo(function ProductGrid({
   }, [router, store.sitioweb, product.productId]);
 
   const sitioweb = store?.sitioweb ?? "";
+
   const productUrl = useMemo(
     () => `/t/${sitioweb}/producto/${product.productId}`,
     [sitioweb, product.productId],
   );
+
   const showAddToCartButton = useMemo(
     () => !product.venta || product.agregados.length > 0,
     [product.venta, product.agregados.length],
@@ -113,8 +118,9 @@ export default React.memo(function ProductGrid({
         promedioStar={product.coment.promedio || 0}
       />
 
-      <div className="p-1 flex flex-col justify-between">
+      <div className="p-1 flex flex-col justify-between ">
         <h4 className={cn(titleClasses)}>{product.title}</h4>
+
         {!store?.edit?.minimalista && (
           <p className={descriptionClasses}>{product.descripcion || "..."}</p>
         )}
@@ -156,6 +162,7 @@ export default React.memo(function ProductGrid({
               <div />
             )}
           </div>
+
           <div className="relative h-9 w-fit flex justify-end items-center">
             {showAddToCartButton ? (
               <AddToCartButton
@@ -173,6 +180,8 @@ export default React.memo(function ProductGrid({
     </motion.div>
   );
 });
+
+// Subcomponentes optimizados
 
 interface ProductImageProps {
   productId: string;
@@ -198,6 +207,7 @@ const ProductImage = React.memo(function ProductImage({
   promedioStar,
 }: ProductImageProps) {
   const { store, dispatchStore } = useContext(MyContext);
+
   const imageStyle = useMemo(
     () => ({ filter: isInStock ? "initial" : "grayscale(1)" }),
     [isInStock],
@@ -211,7 +221,7 @@ const ProductImage = React.memo(function ProductImage({
         placeholder="blur"
         blurDataURL={image}
         alt={title || `Producto ${index}`}
-        className={cn(imageClasses, span ? "aspect-video" : "")}
+        className={cn(imageClasses, span ? "aspect-video" : "aspect-auto")}
         src={image}
         style={imageStyle}
         onError={() => {
@@ -249,11 +259,13 @@ const ProductPrice = React.memo(function ProductPrice({
 }: ProductPriceProps) {
   return (
     <>
-      <p className="font-semibold text-[8px] text-slate-800 dark:text-slate-200">
+      <p
+        className={`font-semibold text-[8px] text-slate-800 dark:text-slate-200 transition-colors`}
+      >
         ${smartRound(price)} {currency}
       </p>
       {oldPrice ? (
-        <p className="font-semibold text-[8px] text-red-800 dark:text-red-400 line-through">
+        <p className="font-semibold text-[8px] text-red-600 dark:text-red-400 line-through transition-colors">
           ${smartRound(oldPrice)} {currency}
         </p>
       ) : null}
@@ -306,9 +318,11 @@ const CartActionButton = React.memo(function CartActionButton({
       </Button>
     );
   }
+
   return <ButtonOfCart product={product} />;
 });
 
+// Función auxiliar
 export function isNewProduct(date?: string): boolean {
   if (!date) return false;
   const createdAt = new Date(date);

@@ -22,7 +22,10 @@ export default function RatingSection({
 
   const { user, requireAuth } = useAuth();
   const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
-  const [rating, setRating] = useState<RatingInterface>(initialState);
+  const [rating, setRating] = useState<RatingInterface>(() => ({
+    ...initialState,
+    nombre: user?.user_metadata.full_name || "",
+  }));
 
   const product = useMemo(
     () => store.products.find((obj) => obj.productId == specific),
@@ -30,13 +33,15 @@ export default function RatingSection({
   );
 
   useEffect(() => {
-    if (user?.user_metadata.full_name) {
-      setRating((prev) => ({
-        ...prev,
-        nombre: user?.user_metadata.full_name || "",
-      }));
+    if (user?.user_metadata.full_name && !rating.nombre) {
+      queueMicrotask(() => {
+        setRating((prev) => ({
+          ...prev,
+          nombre: user.user_metadata.full_name,
+        }));
+      });
     }
-  }, [user?.user_metadata.full_name]);
+  }, [user?.user_metadata.full_name, rating.nombre]);
 
   const handleStarClick = async (rating: number) => {
     setRating((prev) => ({
