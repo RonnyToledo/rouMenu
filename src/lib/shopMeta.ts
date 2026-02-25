@@ -2,6 +2,7 @@
 import { Metadata } from "next";
 import { supabase } from "@/lib/supabase"; // ajusta la ruta si tu supabase está en otra parte
 import { logoApp } from "./image";
+import { cache } from "react";
 
 function trimToLength(s: string, max = 155) {
   if (!s) return "";
@@ -25,7 +26,7 @@ function looksLikeProperName(name?: string) {
  * @param pageName - nombre de la ruta/ seccción (p.ej. "Blog", "Productos")
  * @param opts - opcionales: siteName, forceProperName, imageFallback, maxTitleLength
  */
-export async function buildShopMetadata(
+export const buildShopMetadata = cache(async (
   shop: string,
   pageName?: string,
   opts?: {
@@ -34,7 +35,7 @@ export async function buildShopMetadata(
     imageFallback?: string;
     maxTitleLength?: number;
   }
-): Promise<Metadata> {
+): Promise<Metadata & { jsonLd?: unknown }> => {
   const siteName = opts?.siteName ?? "rouMenu";
   const maxTitleLength = opts?.maxTitleLength ?? 60;
   const fallbackImage = opts?.imageFallback ?? logoApp;
@@ -79,6 +80,15 @@ export async function buildShopMetadata(
 
     const canonical = `https://roumenu.vercel.app/t/${encodeURIComponent(shop)}`;
 
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Store",
+      name: name,
+      description: summary || description,
+      image: image,
+      url: canonical,
+    };
+
     const metadata: Metadata = {
       title,
       description,
@@ -111,12 +121,12 @@ export async function buildShopMetadata(
       },
     };
 
-    return metadata;
+    return { ...metadata, jsonLd };
   } catch (err) {
     console.error("buildShopMetadata error:", err);
     return {
       title: `${siteName} — Error`,
       description: "No se pudieron cargar los metadatos del sitio.",
-    };
+    } as Metadata & { jsonLd?: unknown };
   }
-}
+});

@@ -14,21 +14,24 @@ import { buildSiteMetadata } from "@/lib/siteMeta";
 import { AppProvider, AppState } from "@/context/AppContext";
 import { findItemUrlByName } from "@/lib/items";
 import { ThemeProvider } from "@/components/theme-provider";
+import JsonLd from "@/components/JsonLd";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const siteMetaOpts = {
+  pageTitle: "Home",
+  description: "rouMenu — Catálogos digitales para tu negocio.",
+  image: "/og/home.png",
+  url: "https://roumenu.vercel.app",
+  path: "/", // opcional
+  locale: "es_ES",
+  language: "es-ES",
+  twitterHandle: "@roumenu",
+};
+
 export async function generateMetadata(): Promise<Metadata> {
-  // Ejemplo para la home:
-  return await buildSiteMetadata({
-    pageTitle: "Home",
-    description: "rouMenu — Catálogos digitales para tu negocio.",
-    image: "/og/home.png",
-    url: "https://roumenu.vercel.app",
-    path: "/", // opcional
-    locale: "es_ES",
-    language: "es-ES",
-    twitterHandle: "@roumenu",
-  });
+  const meta = await buildSiteMetadata(siteMetaOpts);
+  return meta;
 }
 export default async function RootLayout({
   children,
@@ -54,9 +57,10 @@ export default async function RootLayout({
   // newData será AppState ya resuelto
   const newData = await modifyData(data);
   const GA_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALITYCS;
+  const { jsonLd } = await buildSiteMetadata(siteMetaOpts);
 
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <Head>
         <meta
           name="google-site-verification"
@@ -78,6 +82,7 @@ export default async function RootLayout({
         `}
       </Script>
       <body className={inter.className}>
+        <JsonLd data={jsonLd} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

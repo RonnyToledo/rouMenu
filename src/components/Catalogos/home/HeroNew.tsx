@@ -82,6 +82,7 @@ export default function HeroNew() {
           <div className="flex flex-col  gap-2">
             <div className="flex-1 gap-1">
               <div className="flex flex-col gap-1">
+                <h1 className="sr-only">{store?.name}</h1>
                 <Link
                   href={`/t/${store.sitioweb}/about/ratings`}
                   className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 transition-colors"

@@ -91,6 +91,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <h1 className="sr-only">rouMenu — Catálogos y Menús Digitales para Negocios</h1>
       <main className="relative bg-background mb-6  py-2">
         <ArcGalleryHero images={images} />
       </main>

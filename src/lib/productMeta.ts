@@ -1,6 +1,7 @@
 // lib/productMeta.ts
 import { Metadata } from "next";
 import { supabase } from "@/lib/supabase";
+import { cache } from "react";
 
 type BuildOpts = {
   siteName?: string;
@@ -23,11 +24,11 @@ function trimToLength(s = "", max = 155) {
  * - shop: sitioweb
  * - productId: productId en la tabla Products
  */
-export async function buildProductMetadata(
+export const buildProductMetadata = cache(async (
   shop: string,
   productId: string,
   opts?: BuildOpts
-): Promise<Metadata & { jsonLd?: unknown }> {
+): Promise<Metadata & { jsonLd?: unknown }> => {
   const siteName = opts?.siteName ?? "rouMenu";
   const canonicalBase = (
     opts?.canonicalBase ?? "https://roumenu.vercel.app"
@@ -198,6 +199,6 @@ export async function buildProductMetadata(
     return {
       title: `${siteName} — Error`,
       description: "Ocurrió un error al generar los metadatos del producto.",
-    } as Metadata;
+    } as Metadata & { jsonLd?: unknown };
   }
-}
+});

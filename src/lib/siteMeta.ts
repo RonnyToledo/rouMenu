@@ -1,5 +1,6 @@
 // lib/siteMeta.ts
 import { Metadata } from "next";
+import { cache } from "react";
 
 type SiteMetaOpts = {
   siteName?: string; // nombre de la marca (por defecto "rouMenu")
@@ -24,9 +25,9 @@ function trimToLength(s = "", max = 155) {
   return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-export async function buildSiteMetadata(
+export const buildSiteMetadata = cache(async (
   opts: SiteMetaOpts = {}
-): Promise<Metadata & { jsonLd?: unknown }> {
+): Promise<Metadata & { jsonLd?: unknown }> => {
   const siteName = opts.siteName ?? "rouMenu";
   const baseUrl = (opts.url ?? "https://roumenu.vercel.app").replace(/\/$/, "");
   const path = opts.path ? `/${opts.path.replace(/^\//, "")}` : "";
@@ -125,4 +126,4 @@ export async function buildSiteMetadata(
 
   // adjuntamos jsonLd como campo adicional para que el caller pueda inyectarlo donde prefiera
   return { ...(metadata as Metadata), jsonLd };
-}
+});
