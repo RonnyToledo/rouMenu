@@ -21,7 +21,6 @@ import HeroNew from "./HeroNew";
 export default function Products() {
   const { store } = useContext(MyContext);
 
-  // Memoizar categorías ordenadas
   const sortedCategories = useMemo(() => {
     if (!store?.categorias || !store?.products) return [];
     return ExtraerCategorias(store.categorias, store.products).sort(
@@ -36,7 +35,6 @@ export default function Products() {
 
   const next_before_Category = useMemo(() => {
     if (!sortedCategories || sortedCategories.length === 0) return {};
-
     const mapping: { [key: string]: { nextID: string; prevID: string } } = {};
     sortedCategories.forEach((cat, index) => {
       const nextCat = sortedCategories[(index + 1) % sortedCategories.length];
@@ -46,12 +44,11 @@ export default function Products() {
         ];
       mapping[cat.id] = { nextID: nextCat.id, prevID: prevCat.id };
     });
-
     return mapping;
   }, [sortedCategories]);
 
   return (
-    <div>
+    <div className="py-6 md:py-10">
       <HeroNew />
       <div className="mt-5 transition-colors">
         {sortedCategories.map((categoria) => (
@@ -64,7 +61,6 @@ export default function Products() {
           />
         ))}
 
-        {/* Sección de productos sin categoría */}
         {sortedsWithOutCategories.length > 0 && (
           <UncategorizedSection
             products={sortedsWithOutCategories}
@@ -75,6 +71,8 @@ export default function Products() {
     </div>
   );
 }
+
+/* ─── CategoryItem ──────────────────────────────────────────── */
 
 interface CategoryItemProps {
   categoria: Categoria;
@@ -91,7 +89,6 @@ const CategoryItem = React.memo(function CategoryItem({
 }: CategoryItemProps) {
   const router = useRouter();
 
-  // Memoizar productos filtrados
   const categoryProducts = useMemo(
     () =>
       store?.products?.filter((p: Product) => p.caja === categoria.id) || [],
@@ -124,6 +121,8 @@ const CategoryItem = React.memo(function CategoryItem({
   );
 });
 
+/* ─── SubCategoryCard ───────────────────────────────────────── */
+
 interface SubCategoryCardProps {
   categoria: Categoria;
   store: AppState;
@@ -140,60 +139,76 @@ const SubCategoryCard = React.memo(function SubCategoryCard({
   const categoryImage = categoria.image || store?.urlPoster || logoApp;
 
   return (
-    <div className="p-2 mb-2">
-      <div className="rounded-lg">
-        <div className="pb-2">
+    <div className="container mx-auto p-2 mb-8">
+      {/* Header estilo plantilla */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <span className="text-base">📦</span>
+        </div>
+        <div>
           <Link
-            className="text-sm uppercase font-cinzel text-center text-slate-700 dark:text-slate-300 tracking-widest truncate flex items-center transition-colors"
+            className="font-serif text-xl font-semibold text-foreground hover:text-primary transition-colors"
             href={`/t/${store?.sitioweb}/category/${categoria.id}`}
           >
             {categoria.name}
           </Link>
-        </div>
-
-        <Link
-          href={`/t/${store?.sitioweb}/category/${categoria.id}`}
-          className="flex items-center justify-center"
-        >
-          <Image
-            width={250}
-            height={250}
-            placeholder="blur"
-            blurDataURL={categoryImage}
-            alt={categoria.name || "Categoría"}
-            className="aspect-square object-cover rounded-lg"
-            src={categoryImage}
-          />
-        </Link>
-
-        <div className="p-2 flex flex-col justify-evenly">
           {!store?.edit?.minimalista && categoria.description && (
-            <p className="text-[10px] text-(--text-muted) mt-1 line-clamp-2 whitespace-pre-line">
+            <p className="text-sm text-muted-foreground">
               {categoria.description}
             </p>
           )}
+        </div>
+      </div>
 
-          <div className="flex items-center justify-between mt-3">
-            <p className="font-medium w-full text-10 text-slate-700 dark:text-slate-400 transition-colors">
-              {productsCount} Productos
-            </p>
-            <div className="relative h-9 w-full flex justify-end items-center">
-              <Button
-                size="icon"
-                type="button"
-                className="size-8 flex justify-center items-center rounded-full"
-                onClick={onNavigate}
-                aria-label={`Ver productos de ${categoria.name}`}
-              >
-                <FaArrowRight className="size-4" />
-              </Button>
+      {/* Tarjeta de subcategoría */}
+      <div className="group relative rounded-2xl overflow-hidden border border-border hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+        <Link
+          href={`/t/${store?.sitioweb}/category/${categoria.id}`}
+          className="block relative aspect-3/1 overflow-hidden"
+        >
+          <Image
+            width={600}
+            height={200}
+            placeholder="blur"
+            blurDataURL={categoryImage}
+            alt={categoria.name || "Categoría"}
+            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-105"
+            src={categoryImage}
+          />
+          <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/20 to-transparent" />
+          <div className="absolute inset-0 flex items-center px-6">
+            <div className="text-white">
+              <h3 className="font-serif text-2xl font-semibold">
+                {categoria.name}
+              </h3>
+              <p className="text-white/70 text-sm">{productsCount} productos</p>
             </div>
           </div>
+        </Link>
+        <div className="p-4 flex items-center justify-between">
+          {!store?.edit?.minimalista && categoria.description && (
+            <p className="text-sm text-muted-foreground line-clamp-1">
+              {categoria.description}
+            </p>
+          )}
+          <Button
+            size="sm"
+            variant="secondary"
+            type="button"
+            className="rounded-full ml-auto shrink-0"
+            onClick={onNavigate}
+            aria-label={`Ver productos de ${categoria.name}`}
+          >
+            Ver todos
+            <FaArrowRight className="ml-2 size-3" />
+          </Button>
         </div>
       </div>
     </div>
   );
 });
+
+/* ─── AnimatedCategorySection ───────────────────────────────── */
 
 interface AnimatedCategorySectionProps {
   categoria: Categoria;
@@ -213,42 +228,68 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   const { store } = useContext(MyContext);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Memoizar productos ordenados
   const sortedProducts = useMemo(
     () => [...products].sort((a, b) => (a.order || 0) - (b.order || 0)),
     [products],
   );
 
-  const gridClass = useMemo(
-    () =>
-      `grid grid-flow-row-dense gap-2 p-2 ${
-        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1 "
-      }`,
-    [store?.edit?.grid],
-  );
+  // El primer producto "favorito" (popular) se muestra como featured card
+  const featuredProduct = sortedProducts.find((p) => p.favorito);
+  const regularProducts = featuredProduct
+    ? sortedProducts.filter((p) => p.productId !== featuredProduct.productId)
+    : sortedProducts;
+
+  const grid = store?.edit?.grid;
+
+  // Con grid de 2 columnas base, la featured ocupa 2 col / 2 row
+  const gridClass = `grid grid-flow-row-dense gap-1 p-1 ${
+    grid
+      ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      : "grid-cols-1 md:grid-cols-2"
+  }`;
 
   return (
     <div ref={sectionRef} className="mb-12">
       <div id={categoria.id} />
+
+      {/* Category header – sticky */}
       <CategoryHeader
         id={categoria.id}
         name={categoria.name || ""}
+        description={
+          store?.edit?.minimalista ? undefined : categoria.description
+        }
         prevID={prevID}
         nextID={nextID}
       />
-      <div className={gridClass}>
-        {sortedProducts.map((product, i) => (
+
+      <div className={`container mx-auto px-1 ${gridClass}`}>
+        {/* Featured card — col-span-2 row-span-2 */}
+        {featuredProduct && (
+          <ProductGrid
+            product={featuredProduct}
+            key={featuredProduct.id}
+            banner={banner}
+            i={0}
+            featured
+          />
+        )}
+
+        {/* Regular cards */}
+        {regularProducts.map((product, i) => (
           <ProductGrid
             product={product}
             key={product.id || i}
             banner={banner}
-            i={i}
+            i={i + (featuredProduct ? 1 : 0)}
           />
         ))}
       </div>
     </div>
   );
 });
+
+/* ─── CategoryHeader ────────────────────────────────────────── */
 
 function CategoryHeader({
   id,
@@ -258,44 +299,53 @@ function CategoryHeader({
 }: {
   id: string;
   name: string;
+  description?: string;
   prevID: string;
   nextID: string;
 }) {
   const { highlightCategory } = useSheet();
 
   return (
-    <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-between rounded-full shadow-md bg-white dark:bg-slate-800 max-w-4/5 w-full transition-colors duration-500">
+    <div className="sticky top-16 z-10 bg-background/80 backdrop-blur-sm px-4 py-3 mb-4">
+      <div className="container flex items-center gap-3 w-full">
+        {/* Nav prev */}
         <Button
           onClick={() => ScrollTo(prevID)}
-          variant={"ghost"}
-          className="p-2 text-slate-700 dark:text-slate-300"
-          size={"icon"}
+          variant="ghost"
+          size="icon"
+          className="rounded-full h-9 w-9 shrink-0"
         >
-          <MdNavigateBefore />
-        </Button>
-        <Button
-          variant={"ghost"}
-          className="rounded-full truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest px-1 text-slate-800 dark:text-slate-200"
-          onClick={() => highlightCategory(id)}
-        >
-          {name}
+          <MdNavigateBefore className="text-lg" />
         </Button>
 
+        {/* Title block */}
+        <div className="flex justify-center min-w-0 w-full">
+          <Button
+            variant="ghost"
+            className="h-auto p-0 font-serif text-xl font-semibold text-foreground hover:text-primary
+              transition-colors uppercase  line-clamp-1 max-w-full text-center w-full"
+            onClick={() => highlightCategory(id)}
+          >
+            {name}
+          </Button>
+        </div>
+
+        {/* Nav next */}
         <Button
-          className="p-2 text-slate-700 dark:text-slate-300"
           onClick={() => ScrollTo(nextID)}
-          variant={"ghost"}
-          size={"icon"}
+          variant="ghost"
+          size="icon"
+          className="rounded-full h-9 w-9 shrink-0"
         >
-          <MdNavigateNext />
+          <MdNavigateNext className="text-lg" />
         </Button>
       </div>
     </div>
   );
 }
 
-// Nuevo componente para productos sin categoría
+/* ─── UncategorizedSection ──────────────────────────────────── */
+
 interface UncategorizedSectionProps {
   products: Product[];
   banner: string;
@@ -313,19 +363,34 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
     [products],
   );
 
-  const gridClass = useMemo(
-    () =>
-      `grid grid-flow-row-dense gap-2 p-2 ${
-        store?.edit?.grid ? "grid-cols-2" : "grid-cols-1"
-      }`,
-    [store?.edit?.grid],
-  );
+  const grid = store?.edit?.grid;
+  const gridClass = `grid grid-flow-row-dense gap-3 p-2 ${
+    grid
+      ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+      : "grid-cols-1 md:grid-cols-2"
+  }`;
 
   return (
     <div ref={sectionRef} className="mb-12">
       <div id="sin-categoria" />
-      <UncategorizedHeader />
-      <div className={gridClass}>
+
+      {/* Header */}
+      <div className="sticky top-16 z-10 bg-background/80 backdrop-blur-sm px-4 py-3 mb-4">
+        <div className="container mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <span className="text-base">🛍️</span>
+            </div>
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-foreground uppercase tracking-wide">
+                Otros productos
+              </h2>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={`container mx-auto px-4 ${gridClass}`}>
         {sortedProducts.map((product, i) => (
           <ProductGrid
             product={product}
@@ -338,16 +403,3 @@ const UncategorizedSection = React.memo(function UncategorizedSection({
     </div>
   );
 });
-
-// Header especial para productos sin categoría (sin funciones de categoría)
-function UncategorizedHeader() {
-  return (
-    <div className="sticky top-16 left-4 right-4 bg-transparent z-10 flex items-center justify-center">
-      <div className="flex items-center justify-center rounded-full shadow-md bg-white dark:bg-slate-800 max-w-4/5 w-full py-2 px-4 transition-colors duration-500">
-        <span className="truncate max-w-3/4 w-full line-clamp-1 uppercase font-cinzel tracking-widest text-center text-slate-700 dark:text-slate-200">
-          Otros Productos
-        </span>
-      </div>
-    </div>
-  );
-}

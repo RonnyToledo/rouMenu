@@ -78,12 +78,7 @@ export default async function RootLayout({
         `}
       </Script>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider defaultTheme="light">
           <div className="flex justify-center bg-linear-to-br from-slate-50 to-slate-300 dark:from-slate-900 dark:to-slate-800 transition-colors duration-500">
             <div className="max-w-md w-full bg-white dark:bg-slate-950 shadow-xl/30 min-h-dvh transition-colors duration-500">
               <AppProvider storeSSD={newData}>

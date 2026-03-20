@@ -1,6 +1,6 @@
 "use client";
 import React, { useContext, useMemo, useCallback } from "react";
-import { TbShoppingCartOff, TbShoppingCartPlus } from "react-icons/tb";
+import { TbShoppingCartOff } from "react-icons/tb";
 import { smartRound } from "@/functions/precios";
 import { motion } from "framer-motion";
 import { Product } from "@/context/InitialStatus";
@@ -12,30 +12,29 @@ import { Button } from "@/components/ui/button";
 import { ButtonOfCart } from "./ButtonOfCart";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { Star, Plus } from "lucide-react";
+import { ScrollTo } from "@/functions/ScrollTo";
+import { FaRegTrashCan } from "react-icons/fa6";
+import { TbShoppingCartMinus, TbShoppingCart } from "react-icons/tb";
 
 interface ProductGridInterface {
   product: Product;
   banner: string;
   i: number;
+  /** Si true, renderiza la tarjeta grande "featured" (ocupa col-span-2 row-span-2) */
+  featured?: boolean;
 }
 
 export default React.memo(function ProductGrid({
   product,
   banner,
   i,
+  featured = false,
 }: ProductGridInterface) {
   const { store } = useContext(MyContext);
   const router = useRouter();
 
-  // Memoizar valores calculados
   const isNew = useMemo(() => isNewProduct(product.creado), [product.creado]);
-
-  const totalCartItems = useMemo(
-    () =>
-      product.Cant + product.agregados.reduce((sum, obj) => sum + obj.cant, 0),
-    [product.Cant, product.agregados],
-  );
 
   const currentCurrency = useMemo(
     () =>
@@ -43,59 +42,63 @@ export default React.memo(function ProductGrid({
     [store.moneda, product.default_moneda],
   );
 
-  // Extraer fuera del useMemo
-  const edit = store?.edit;
-  const horizontal = edit?.horizontal;
-  const grid = edit?.grid;
-  const square = edit?.square;
-  const span = product?.span;
-
-  const gridClasses = useMemo(
-    () =>
-      cn(
-        "grid rounded-md overflow-hidden shadow-md bg-white dark:bg-slate-900 transition-colors duration-500",
-        horizontal ? "grid-cols-2" : span && grid ? "col-span-2" : "col-span-1",
-      ),
-    // las dependencias son exactamente las variables usadas arriba
-    [horizontal, grid, span],
-  );
-
-  const imageClasses = useMemo(
-    () => cn("object-cover w-full", square ? "aspect-square" : "w-full h-48"),
-    [square],
-  );
-
-  const titleClasses = useMemo(
-    () =>
-      cn(
-        "font-cinzel text-slate-800 dark:text-slate-100 text-sm flex items-center w-full line-clamp-2 font-semibold transition-colors",
-      ),
-    [],
-  );
-
-  const descriptionClasses = useMemo(
-    () =>
-      cn(
-        "text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line transition-colors",
-        product.span ? "h-4" : "h-8",
-      ),
-    [product.span],
-  );
-
   const handleNavigateToProduct = useCallback(() => {
     router.push(`/t/${store.sitioweb}/producto/${product.productId}`);
   }, [router, store.sitioweb, product.productId]);
 
-  const sitioweb = store?.sitioweb ?? "";
-
   const productUrl = useMemo(
-    () => `/t/${sitioweb}/producto/${product.productId}`,
-    [sitioweb, product.productId],
+    () => `/t/${store.sitioweb}/producto/${product.productId}`,
+    [store.sitioweb, product.productId],
   );
 
   const showAddToCartButton = useMemo(
     () => !product.venta || product.agregados.length > 0,
     [product.venta, product.agregados.length],
+  );
+
+  const isInStock = product.stock;
+
+  if (featured) {
+    return (
+      <motion.div
+        id={product.productId}
+        className="col-span-2 row-span-2"
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1, duration: 0.45 }}
+      >
+        <FeaturedProductCard
+          product={product}
+          productUrl={productUrl}
+          banner={banner}
+          isInStock={isInStock}
+          currentCurrency={currentCurrency}
+        />
+      </motion.div>
+    );
+  }
+
+  const horizontal = store?.edit?.horizontal;
+  const grid = store?.edit?.grid;
+  const square = store?.edit?.square;
+  const span = product?.span;
+
+  const gridClasses = cn(
+    "group relative bg-card rounded-2xl overflow-hidden border border-border",
+    "hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5",
+    horizontal
+      ? "grid grid-cols-2"
+      : span && grid
+        ? "col-span-2"
+        : "col-span-1",
+  );
+
+  const imageClasses = cn(
+    "object-cover w-full transition-transform duration-500 group-hover:scale-105",
+    square ? "aspect-square" : "aspect-[3/4]",
+
+    span ? "aspect-video" : "",
+    !isInStock ? "grayscale" : "",
   );
 
   return (
@@ -106,40 +109,69 @@ export default React.memo(function ProductGrid({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.2 + i * 0.05, duration: 0.4 }}
     >
-      <ProductImage
-        productId={product.productId}
-        productUrl={productUrl}
-        image={product.image || banner}
-        title={product.title}
-        index={i}
-        span={product.span || false}
-        isInStock={product.stock}
-        imageClasses={imageClasses}
-        promedioStar={product.coment.promedio || 0}
-      />
+      {/* Image */}
+      <Link href={productUrl} className="relative block overflow-hidden ">
+        <Image
+          width={400}
+          height={300}
+          placeholder="blur"
+          blurDataURL={product.image || banner}
+          alt={product.title || `Producto ${i}`}
+          className={imageClasses}
+          src={product.image || banner}
+        />
 
-      <div className="p-1 flex flex-col justify-between ">
-        <h4 className={cn(titleClasses)}>{product.title}</h4>
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Rating badge */}
+        {product.coment?.promedio ? (
+          <Badge className="absolute top-2 left-2 flex items-center gap-1 text-[11px] bg-black/40 backdrop-blur-sm text-white border-0">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            {product.coment.promedio}
+          </Badge>
+        ) : null}
+      </Link>
+
+      {/* Content */}
+      <div className="p-2 flex flex-col justify-between  gap-0.5">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+            {product.title}
+          </h4>
+          {product.coment?.promedio ? (
+            <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {product.coment.promedio}
+            </div>
+          ) : null}
+        </div>
 
         {!store?.edit?.minimalista && (
-          <p className={descriptionClasses}>{product.descripcion || "..."}</p>
+          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
+            {product.descripcion || "…"}
+          </p>
         )}
-        <div className="flex gap-0.5">
+
+        {/* Badges */}
+        <div className="flex gap-1 flex-wrap">
           {isNew && (
-            <Badge className="bg-red-700/80 text-[0.5rem] px-1.5">Nuevo</Badge>
+            <Badge className="bg-red-600/80 text-[10px] px-1.5 py-0">
+              Nuevo
+            </Badge>
           )}
           {product.favorito && (
-            <Badge className="bg-yellow-500/80 text-[0.5rem] px-1.5">
+            <Badge className="bg-amber-500/80 text-[10px] px-1.5 py-0">
               Popular
             </Badge>
           )}
-          {!product.stock && (
-            <Badge className="bg-violet-700/50 text-[0.5rem] px-1.5">
+          {!isInStock && (
+            <Badge className="bg-violet-700/50 text-[10px] px-1.5 py-0">
               Agotado
             </Badge>
           )}
           {product.oldPrice > product.price && (
-            <Badge className="bg-cyan-700/50 text-[0.5rem] px-1.5">
+            <Badge className="bg-cyan-700/50 text-[10px] px-1.5 py-0">
               -
               {Math.round(
                 ((product.oldPrice - product.price) / product.oldPrice) * 100,
@@ -148,30 +180,38 @@ export default React.memo(function ProductGrid({
             </Badge>
           )}
         </div>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center justify-start gap-1">
-            {product.venta ? (
-              <ProductPrice
-                price={product.price || 0}
-                currency={currentCurrency}
-                oldPrice={
-                  product.oldPrice > product.price ? product.oldPrice : 0
-                }
-              />
-            ) : (
-              <div />
-            )}
-          </div>
+
+        {/* Price + action */}
+        <div className="flex items-center justify-between h-fit">
+          {product.venta ? (
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-serif text-[10px]  font-semibold text-primary">
+                ${smartRound(product.price)} {currentCurrency}
+              </span>
+              {product.oldPrice > product.price && (
+                <span className="text-[10px] text-red-500 line-through">
+                  ${smartRound(product.oldPrice)}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div />
+          )}
 
           <div className="relative h-9 w-fit flex justify-end items-center">
             {showAddToCartButton ? (
-              <AddToCartButton
-                totalItems={totalCartItems}
-                onNavigate={handleNavigateToProduct}
-              />
+              <Button
+                size="sm"
+                type="button"
+                className="rounded-full text-xs size-8"
+                onClick={handleNavigateToProduct}
+                aria-label="Agregar al carrito"
+              >
+                <TbShoppingCart className="size-4" />
+              </Button>
             ) : (
               store?.carrito && (
-                <CartActionButton product={product} isInStock={product.stock} />
+                <CartActionButton product={product} isInStock={isInStock} />
               )
             )}
           </div>
@@ -181,119 +221,207 @@ export default React.memo(function ProductGrid({
   );
 });
 
-// Subcomponentes optimizados
+/* ─── Featured Card ─────────────────────────────────────────── */
 
-interface ProductImageProps {
-  productId: string;
+interface FeaturedCardProps {
+  product: Product;
   productUrl: string;
-  image: string;
-  title?: string;
-  index: number;
-  promedioStar: number;
+  banner: string;
   isInStock?: number;
-  span: boolean;
-  imageClasses: string;
+  currentCurrency: string;
 }
 
-const ProductImage = React.memo(function ProductImage({
-  productId,
+const FeaturedProductCard = React.memo(function FeaturedProductCard({
+  product,
   productUrl,
-  image,
-  title,
-  index,
+  banner,
   isInStock,
-  imageClasses,
-  span,
-  promedioStar,
-}: ProductImageProps) {
-  const { store, dispatchStore } = useContext(MyContext);
-
-  const imageStyle = useMemo(
-    () => ({ filter: isInStock ? "initial" : "grayscale(1)" }),
-    [isInStock],
-  );
-
+  currentCurrency,
+}: FeaturedCardProps) {
   return (
-    <Link href={productUrl} className="relative size-fit w-full">
+    <Link
+      href={productUrl}
+      className="group relative block rounded-3xl overflow-hidden border border-border
+        hover:border-primary/30 transition-all duration-300 h-full min-h-70 aspect-5/6"
+    >
+      {/* Background image */}
       <Image
-        width={250}
-        height={250}
+        width={800}
+        height={600}
         placeholder="blur"
-        blurDataURL={image}
-        alt={title || `Producto ${index}`}
-        className={cn(imageClasses, span ? "aspect-video" : "aspect-auto")}
-        src={image}
-        style={imageStyle}
-        onError={() => {
-          dispatchStore({
-            type: "Add",
-            payload: {
-              ...store,
-              products: store.products.map((prod) =>
-                productId == prod.productId ? { ...prod, image: "" } : prod,
-              ),
-            },
-          });
-        }}
+        blurDataURL={product.image || banner}
+        alt={product.title || "Producto destacado"}
+        className={cn(
+          "absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ",
+          !isInStock ? "grayscale" : "",
+        )}
+        src={product.image || banner}
       />
-      {promedioStar ? (
-        <Badge className="absolute top-2 left-2 flex items-center text-xs bg-primary/50">
-          {promedioStar}
-          <Star className="fill-slate-50" />
-        </Badge>
-      ) : null}
+
+      {/* Gradient */}
+      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
+
+      {/* Content */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 md:p-7 text-white">
+        {/* Top badges */}
+        <div className="flex items-center gap-2 mb-1">
+          <span className="px-3 py-1 rounded-full bg-amber-500/80 text-white text-[11px] font-medium">
+            Destacado
+          </span>
+          {product.coment?.promedio ? (
+            <div className="flex items-center gap-1 text-sm text-white/80">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              {product.coment.promedio}
+            </div>
+          ) : null}
+          {!isInStock && (
+            <span className="px-3 py-1 rounded-full bg-white/20 text-white text-[11px]">
+              Agotado
+            </span>
+          )}
+        </div>
+
+        <h3 className="font-serif text-2xl md:text-3xl font-semibold mb-1 leading-tight">
+          {product.title}
+        </h3>
+
+        <p className="text-white/70 text-sm mb-2 line-clamp-2">
+          {product.descripcion || ""}
+        </p>
+
+        <FeaturedFooter
+          product={product}
+          isInStock={isInStock}
+          currentCurrency={currentCurrency}
+        />
+      </div>
     </Link>
   );
 });
 
-interface ProductPriceProps {
-  price: number;
-  oldPrice: number;
-  currency: string;
+/* ─── Featured Footer ───────────────────────────────────────── */
+
+interface FeaturedFooterProps {
+  product: Product;
+  isInStock?: number;
+  currentCurrency: string;
 }
 
-const ProductPrice = React.memo(function ProductPrice({
-  price,
-  currency,
-  oldPrice,
-}: ProductPriceProps) {
+const FeaturedFooter = React.memo(function FeaturedFooter({
+  product,
+  isInStock,
+  currentCurrency,
+}: FeaturedFooterProps) {
+  const { store, dispatchStore } = useContext(MyContext);
+
+  const productCant = product.Cant || 0;
+  const productStock = product.stock || 0;
+
+  const isDisabled = store.stocks && productCant >= productStock;
+
+  const totalCartItems = useMemo(
+    () =>
+      productCant + product.agregados.reduce((sum, obj) => sum + obj.cant, 0),
+    [productCant, product.agregados],
+  );
+
+  const handleIncrement = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (isDisabled) return;
+      ScrollTo(product.productId, 120);
+      dispatchStore({
+        type: "AddCart",
+        payload: JSON.stringify({ ...product, Cant: productCant + 1 }),
+      });
+    },
+    [dispatchStore, product, productCant, isDisabled],
+  );
+
+  const handleDecrement = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      dispatchStore({
+        type: "AddCart",
+        payload: JSON.stringify({
+          ...product,
+          Cant: Math.max(0, productCant - 1),
+        }),
+      });
+    },
+    [dispatchStore, product, productCant],
+  );
+
   return (
-    <>
-      <p
-        className={`font-semibold text-[8px] text-slate-800 dark:text-slate-200 transition-colors`}
-      >
-        ${smartRound(price)} {currency}
-      </p>
-      {oldPrice ? (
-        <p className="font-semibold text-[8px] text-red-600 dark:text-red-400 line-through transition-colors">
-          ${smartRound(oldPrice)} {currency}
-        </p>
-      ) : null}
-    </>
+    <div className="flex items-center justify-between">
+      {/* Precio */}
+      <div className="flex items-baseline gap-2">
+        <span className="font-serif text-2xl font-bold text-white">
+          ${smartRound(product.price)} {currentCurrency}
+        </span>
+        {product.oldPrice > product.price && (
+          <span className="text-sm text-red-400 line-through">
+            ${smartRound(product.oldPrice)}
+          </span>
+        )}
+      </div>
+
+      {/* Botón expandido */}
+      {!isInStock ? (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/50 text-sm">
+          <TbShoppingCartOff className="size-4" />
+          Agotado
+        </div>
+      ) : (
+        <div className="flex items-center rounded-full overflow-hidden bg-white/15 border border-white/30 backdrop-blur-sm">
+          {totalCartItems > 0 && (
+            <div className="flex items-center justify-around">
+              <button
+                type="button"
+                onClick={handleDecrement}
+                className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium
+              hover:bg-white/15 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={
+                  totalCartItems === 1
+                    ? "Eliminar del carrito"
+                    : "Reducir cantidad"
+                }
+              >
+                {totalCartItems === 1 ? (
+                  <span className="inline-flex">
+                    <FaRegTrashCan className="size-4" />
+                  </span>
+                ) : (
+                  <span className="inline-flex">
+                    <TbShoppingCartMinus className="size-4" />
+                  </span>
+                )}
+              </button>
+
+              <span className="text-white text-sm font-medium px-1 min-w-5 text-center">
+                {totalCartItems}
+              </span>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleIncrement}
+            disabled={!!isDisabled}
+            className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium
+              hover:bg-white/15 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Agregar al carrito"
+          >
+            <Plus className="size-4" />
+            {totalCartItems == 0 ? "Agregar" : ""}
+          </button>
+        </div>
+      )}
+    </div>
   );
 });
 
-interface AddToCartButtonProps {
-  totalItems: number;
-  onNavigate: () => void;
-}
-
-const AddToCartButton = React.memo(function AddToCartButton({
-  totalItems,
-  onNavigate,
-}: AddToCartButtonProps) {
-  return (
-    <Button
-      size="icon"
-      type="button"
-      className="size-8 flex justify-center items-center rounded-full"
-      onClick={onNavigate}
-      aria-label="Agregar al carrito"
-    >
-      {totalItems > 0 ? totalItems : <TbShoppingCartPlus className="size-5" />}
-    </Button>
-  );
-});
+/* ─── Sub-components ─────────────────────────────────────────── */
 
 interface CartActionButtonProps {
   product: Product;
@@ -310,7 +438,7 @@ const CartActionButton = React.memo(function CartActionButton({
         size="icon"
         variant="ghost"
         type="button"
-        className="size-8 flex justify-center items-center rounded-full"
+        className="size-8 rounded-full"
         disabled
         aria-label="Producto agotado"
       >
@@ -318,11 +446,11 @@ const CartActionButton = React.memo(function CartActionButton({
       </Button>
     );
   }
-
   return <ButtonOfCart product={product} />;
 });
 
-// Función auxiliar
+/* ─── Helper ─────────────────────────────────────────────────── */
+
 export function isNewProduct(date?: string): boolean {
   if (!date) return false;
   const createdAt = new Date(date);
