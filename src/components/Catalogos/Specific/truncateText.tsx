@@ -1,230 +1,102 @@
 "use client";
 
-import React, { useState, useContext, useEffect, useMemo } from "react";
-import { Star } from "lucide-react";
-import { StarDistribution } from "@/context/InitialStatus";
-import { MyContext } from "@/context/MyContext";
+import { useState, useLayoutEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { useAuth } from "@/context/AppContext";
-import { Separator } from "@/components/ui/separator";
-import axios from "axios";
-import { toast } from "sonner";
-import { initialState, Rating, RatingInterface } from "../About/RatingModal";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
-export default function RatingSection({
-  specific,
+export default function ExpandableText({
+  text,
+  className,
+  lines = 5,
 }: {
-  specific: string;
-  sitioweb: string;
+  text: string;
+  className?: string;
+  lines?: number;
 }) {
-  const { store, dispatchStore } = useContext(MyContext);
-  const { user, requireAuth } = useAuth();
-  const [reviewOpen, setReviewOpen] = useState(false);
-  const [rating, setRating] = useState<RatingInterface>(() => ({
-    ...initialState,
-    nombre: user?.user_metadata.full_name || "",
-  }));
+  const [expanded, setExpanded] = useState(false);
+  const [shouldClamp, setShouldClamp] = useState(false);
+  const textRef = useRef<HTMLParagraphElement | null>(null);
 
-  const product = useMemo(
-    () => store.products.find((obj) => obj.productId == specific),
-    [store.products, specific],
-  );
+  useLayoutEffect(() => {
+    const element = textRef.current;
+    if (!element) return;
 
-  useEffect(() => {
-    if (user?.user_metadata.full_name && !rating.nombre) {
-      queueMicrotask(() => {
-        setRating((prev) => ({
-          ...prev,
-          nombre: user.user_metadata.full_name,
-        }));
-      });
-    }
-  }, [user?.user_metadata.full_name, rating.nombre]);
+    const resizeObserver = new ResizeObserver(() => {
+      const lineHeight = parseFloat(getComputedStyle(element).lineHeight);
+      const maxHeight = lineHeight * lines;
+      const actualHeight = element.scrollHeight;
+      setShouldClamp(actualHeight > maxHeight);
+    });
 
-  const handleStarClick = async (rating: number) => {
-    setRating((prev) => ({ ...prev, selectedRating: rating }));
-    const isAuthenticated = await requireAuth(
-      "Debes iniciar sesión para dejar una reseña",
-    );
-    if (!isAuthenticated) {
-      console.info("Usuario no autenticado, review cancelada");
-      return;
-    }
-    setReviewOpen(true);
-  };
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+  }, [lines]);
 
-  const handleSubmit = async () => {
-    if (!user?.id) return;
-    try {
-      const res = await axios.post(
-        `/api/tienda/${store}/product/${product?.productId || ""}/coment`,
-        {
-          comentario: {
-            cmt: rating.description,
-            star: rating.selectedRating,
-          },
-          uuid: user?.id,
-        },
-        { headers: { "Content-Type": "application/json" } },
-      );
-
-      if (res.status === 200 || res.status === 201) {
-        toast.success("Tarea Ejecutada", {
-          description: "Comentario realizado",
-        });
-        dispatchStore({
-          type: "AddComentProduct",
-          payload: { data: res?.data?.value, specific: specific },
-        });
-        setReviewOpen(false);
-      }
-    } catch (error) {
-      console.error("Error al enviar el comentario:", error);
-      toast("Error", { description: "No se pudo enviar el comentario." });
-    }
-  };
+  function getLines(line: number) {
+    const map: Record<number, string> = {
+      1: "line-clamp-1",
+      2: "line-clamp-2",
+      3: "line-clamp-3",
+      4: "line-clamp-4",
+      5: "line-clamp-5",
+      6: "line-clamp-6",
+    };
+    return map[line] ?? "line-clamp-5";
+  }
 
   return (
-    <>
-      {store.products
-        .filter((env) => env.productId === specific)
-        .map((obj, ind) => (
-          <div key={ind} className="max-w-xl mx-auto px-2 py-1">
-            <p className="text-sm text-muted-foreground mb-3 text-center leading-relaxed">
-              {obj.coment?.total == 0
-                ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
-                : "Las calificaciones y opiniones provienen de personas que compraron este producto."}
-            </p>
+    <div className="space-y-0">
+      <motion.div
+        layout
+        initial={false}
+        transition={{ duration: 0.33, ease: [0.22, 0.9, 0.23, 1] }}
+        className="overflow-hidden"
+      >
+        <motion.p
+          ref={textRef}
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className={cn(
+            "whitespace-pre-line text-sm text-muted-foreground leading-relaxed",
+            !expanded && shouldClamp ? getLines(lines) : "",
+            className,
+          )}
+          aria-expanded={expanded}
+        >
+          {text}
+        </motion.p>
+      </motion.div>
 
-            {product?.coment.promedio ? (
-              <>
-                <div className="grid grid-cols-2 items-center gap-3 mb-3">
-                  {/* Score grande */}
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-5xl font-bold text-foreground leading-none">
-                      {product.coment.promedio}
-                    </span>
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(product.coment.promedio || 0)
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {product.coment.total} reseñas
-                    </p>
-                  </div>
-
-                  <StarSpecifications datos={obj.coment.porEstrellas} />
-                </div>
-
-                {/* Link — mismo estilo Button ghost del header */}
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full text-xs px-3 h-8"
-                >
-                  <Link
-                    href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
-                    className="text-primary"
-                  >
-                    Ver todos los comentarios →
-                  </Link>
-                </Button>
-              </>
-            ) : null}
-
-            <Separator className="my-3" />
-
-            {/* Rating stars */}
-            <div className="pt-1 space-y-2">
-              <div className="text-center">
-                <h3 className="font-serif text-base font-semibold text-foreground">
-                  Califica este producto
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Comparte tu opinión con otros usuarios
-                </p>
-              </div>
-
-              {/* Stars — mismo patrón del ProductSpecific (rounded-full bg-secondary) */}
-              <div className="flex gap-2 justify-center">
-                {[1, 2, 3, 4, 5].map((starValue) => (
-                  <button
-                    key={starValue}
-                    onClick={() => handleStarClick(starValue)}
-                    className="w-10 h-10 rounded-full bg-secondary hover:bg-primary/10 flex items-center justify-center transition-colors group"
-                    aria-label={`Calificar con ${starValue} estrella${starValue > 1 ? "s" : ""}`}
-                  >
-                    <Star
-                      className={`w-5 h-5 transition-colors ${
-                        starValue <= rating.selectedRating
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-muted-foreground/40 group-hover:text-amber-400 group-hover:fill-amber-400"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Rating
-              rating={rating}
-              setRating={setRating}
-              isOpen={reviewOpen}
-              onClose={() => setReviewOpen(false)}
-              userName="Usuario"
-              user={user?.user_metadata.full_name}
-              handleSubmit={handleSubmit}
-              imageUser={user?.user_metadata.avatar_url}
-            />
-          </div>
-        ))}
-    </>
-  );
-}
-
-export function StarSpecifications({ datos }: { datos: StarDistribution }) {
-  const porEstrellas = datos || {
-    "5": 0,
-    "4": 0,
-    "3": 0,
-    "2": 0,
-    "1": 0,
-    "0": 0,
-  };
-
-  const totalVotos = Object.values(porEstrellas).reduce(
-    (sum, v) => (sum = (sum || 0) + (v || 0)),
-    0,
-  );
-
-  return (
-    <div className="flex-1 space-y-1">
-      {[5, 4, 3, 2, 1].map((item) => {
-        const votos =
-          porEstrellas[item.toString() as keyof typeof porEstrellas] || 0;
-        const porcentaje = totalVotos > 0 ? (votos * 100) / totalVotos : 0;
-        return (
-          <div key={item} className="flex items-center gap-2">
-            <span className="w-3 text-xs text-muted-foreground">{item}</span>
-            <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden border border-border">
-              <div
-                className="h-full bg-primary rounded-full transition-all duration-500"
-                style={{ width: `${porcentaje}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
+      {/* Botón — alineado con Button ghost/link del resto de la UI */}
+      <AnimatePresence initial={false}>
+        {shouldClamp && (
+          <motion.div
+            key="ver-mas-btn"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.18 }}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "p-0 h-auto text-xs font-medium text-primary hover:text-primary/80 hover:bg-transparent rounded-full",
+                className,
+              )}
+              onClick={() => setExpanded(!expanded)}
+              aria-controls="descripcion"
+              aria-expanded={expanded}
+            >
+              {expanded ? "Ver menos" : "Ver más"}
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
