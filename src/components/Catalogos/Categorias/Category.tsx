@@ -27,35 +27,32 @@ export default function Category({ categoria }: Props) {
         <Image
           width={250}
           height={250}
-          placeholder={"blur"}
+          placeholder="blur"
           blurDataURL={finCategory?.image || store?.urlPoster || logoApp}
-          alt={finCategory?.name || `Categoria`}
-          className={`${
-            store?.edit?.square ? "aspect-square" : "w-full h-72"
-          } object-cover rounded-b-3xl`}
+          alt={finCategory?.name || "Categoria"}
+          className={`${"w-full h-72"} object-cover rounded-b-3xl`}
           src={finCategory?.image || store?.urlPoster || logoApp}
         />
-        <div className="p-2 flex flex-col justify-evenly">
-          {!store?.edit?.minimalista && (
-            <p className="text-[10px] text-(--text-muted) dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-line">
-              {finCategory?.description}
+        <div className="px-4 py-2 flex flex-col gap-1">
+          {!store?.edit?.minimalista && finCategory?.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 whitespace-pre-line">
+              {finCategory.description}
             </p>
           )}
-          <div className="flex items-center justify-between px-2 gap-1">
-            <FaBookmark className="size-6 text-slate-700 dark:text-slate-400" />
-            <p className="font-medium w-full text-10 text-slate-700 dark:text-slate-300">
+          <div className="flex items-center gap-2">
+            <FaBookmark className="w-4 h-4 text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">
               {
                 store?.products.filter((obj) => obj.caja == finCategory?.id)
                   .length
               }{" "}
               Productos
             </p>
-            <div className="relative h-9 w-full flex justify-end items-center"></div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white dark:bg-slate-900 rounded-xl p-2">
+      <section className="bg-background rounded-xl p-2">
         <div className="grid grid-cols-2 gap-2 grid-flow-row-dense">
           {store?.products
             .filter((obj) => obj.caja == categoria)

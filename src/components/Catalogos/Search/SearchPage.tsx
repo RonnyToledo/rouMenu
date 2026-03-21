@@ -1,7 +1,7 @@
 "use client";
 import { Input } from "@/components/ui/input";
 import { MyContext } from "@/context/MyContext";
-import { Search, X, Clock } from "lucide-react";
+import { Search, X, Clock, Star, TrendingUp } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, {
   useContext,
@@ -14,7 +14,6 @@ import React, {
 import Fuse from "fuse.js";
 import { smartRound } from "@/functions/precios";
 import Link from "next/link";
-import { Star } from "lucide-react";
 import Image from "next/image";
 import { logoApp } from "@/lib/image";
 import { TbMenuDeep } from "react-icons/tb";
@@ -22,8 +21,9 @@ import { Button } from "@/components/ui/button";
 import { useSheet } from "../General/SheetComponent";
 import { useApp } from "@/context/AppContext";
 import { FaChevronLeft } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
-const options = {
+const fuseOptions = {
   includeScore: true,
   threshold: 0.4,
   location: 0,
@@ -41,7 +41,6 @@ export default function SearchPage() {
   const { smartBack } = useApp();
   const { open } = useSheet();
   const { store } = useContext(MyContext);
-
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -52,96 +51,70 @@ export default function SearchPage() {
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Clave por tienda para almacenar búsquedas recientes
   const storageKey = useMemo(
     () => `recent_searches_${store.sitioweb || "global"}`,
     [store.sitioweb],
   );
 
-  // Memoizar Fuse.js para evitar recrearlo en cada render
   const fuse = useMemo(
-    () => new Fuse(store.products, options),
+    () => new Fuse(store.products, fuseOptions),
     [store.products],
   );
 
-  // Cargar búsquedas recientes desde localStorage (solo al montar o cambiar storageKey)
   useEffect(() => {
-    const loadSuggestions = () => {
-      try {
-        const raw = localStorage.getItem(storageKey);
-        const arr: string[] = raw ? JSON.parse(raw) : [];
-        setSuggestions(Array.isArray(arr) ? arr : []);
-      } catch (e) {
-        console.warn("No se pudo leer localStorage:", e);
-        setSuggestions([]);
-      }
-    };
-
-    loadSuggestions();
+    try {
+      const raw = localStorage.getItem(storageKey);
+      const arr: string[] = raw ? JSON.parse(raw) : [];
+      setSuggestions(Array.isArray(arr) ? arr : []);
+    } catch {
+      setSuggestions([]);
+    }
   }, [storageKey]);
 
-  // Función para guardar búsqueda (memoizada)
   const saveSearch = useCallback(
     (term: string) => {
       const t = term?.trim();
       if (!t) return;
-
       try {
         const raw = localStorage.getItem(storageKey);
         let arr: string[] = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(arr)) arr = [];
-
-        // Eliminar duplicados (case-insensitive)
         arr = arr.filter((s) => s.toLowerCase() !== t.toLowerCase());
-        arr.unshift(t); // Más reciente al principio
-        if (arr.length > SUGGESTIONS_LIMIT) {
+        arr.unshift(t);
+        if (arr.length > SUGGESTIONS_LIMIT)
           arr = arr.slice(0, SUGGESTIONS_LIMIT);
-        }
-
         localStorage.setItem(storageKey, JSON.stringify(arr));
         setSuggestions(arr);
-      } catch (e) {
-        console.warn("Error guardando búsqueda:", e);
-      }
+      } catch {}
     },
     [storageKey],
   );
 
-  // Actualizar URL con debounce
   useEffect(() => {
     const currentQuery = searchParams.get("buscar") || "";
     if (search !== currentQuery) {
-      const timeoutId = setTimeout(() => {
+      const id = setTimeout(() => {
         router.push(
           `/t/${store.sitioweb}/search?buscar=${encodeURIComponent(search)}`,
           { scroll: false },
         );
       }, DEBOUNCE_DELAY);
-
-      return () => clearTimeout(timeoutId);
+      return () => clearTimeout(id);
     }
   }, [search, store.sitioweb, router, searchParams]);
 
-  // Filtrar productos (memoizado)
   const listSearch = useMemo(() => {
-    const trimmedSearch = search.trim();
-
-    if (trimmedSearch && trimmedSearch.length >= MIN_SEARCH_LENGTH) {
-      const results = fuse.search(trimmedSearch);
-      return results.map((obj) => obj.item);
-    } else {
-      // Mostrar favoritos cuando no hay búsqueda, o primeros 5 productos si no hay favoritos
-      const favoriteProducts = store.products.filter((obj) => obj.favorito);
-
-      if (favoriteProducts.length > 0) {
-        return favoriteProducts.slice(0, 5);
-      } else {
-        return store.products.slice(0, 5);
-      }
+    const trimmed = search.trim();
+    if (trimmed && trimmed.length >= MIN_SEARCH_LENGTH) {
+      return fuse.search(trimmed).map((r) => r.item);
     }
+    const favorites = store.products.filter((p) => p.favorito);
+    return (favorites.length > 0 ? favorites : store.products).slice(0, 6);
   }, [search, fuse, store.products]);
 
-  // Manejar Enter y Escape
+  const isShowingFavorites =
+    !search.trim() || search.trim().length < MIN_SEARCH_LENGTH;
+
   const handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -158,7 +131,6 @@ export default function SearchPage() {
     }
   };
 
-  // Cerrar sugerencias al hacer scroll
   useEffect(() => {
     const handleScroll = () => {
       if (focused) {
@@ -166,12 +138,10 @@ export default function SearchPage() {
         inputRef.current?.blur();
       }
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [focused]);
 
-  // Seleccionar sugerencia
   const handleSelectSuggestion = useCallback(
     (suggestion: string) => {
       setSearch(suggestion);
@@ -181,7 +151,6 @@ export default function SearchPage() {
     [saveSearch],
   );
 
-  // Eliminar sugerencia individual
   const handleRemoveSuggestion = useCallback(
     (suggestion: string, e: React.MouseEvent) => {
       e.stopPropagation();
@@ -189,176 +158,227 @@ export default function SearchPage() {
         const updated = suggestions.filter((s) => s !== suggestion);
         localStorage.setItem(storageKey, JSON.stringify(updated));
         setSuggestions(updated);
-      } catch (e) {
-        console.warn("Error eliminando sugerencia:", e);
-      }
+      } catch {}
     },
     [suggestions, storageKey],
   );
 
-  // Limpiar todas las sugerencias
   const handleClearSuggestions = useCallback(() => {
     try {
       localStorage.removeItem(storageKey);
       setSuggestions([]);
-    } catch (e) {
-      console.warn("Error limpiando sugerencias:", e);
-    }
+    } catch {}
   }, [storageKey]);
 
-  // Guardar búsqueda al hacer clic en un producto
   const handleProductClick = useCallback(() => {
     const t = search.trim();
-    if (t) {
-      saveSearch(t);
-    }
+    if (t) saveSearch(t);
   }, [search, saveSearch]);
 
   return (
-    <main className="scroll-smooth">
+    <main className="scroll-smooth bg-background min-h-screen">
       {/* Search Bar */}
-      <header className="sticky top-0 z-50 bg-linear-to-b from-slate-50 to-transparent h-16 p-2 w-full">
-        <div className="relative flex items-center justify-between shadow-lg rounded-full h-full p-1 gap-3 bg-white overflow-hidden">
+      <header className="sticky top-0 z-50 px-3 pt-3 pb-2 bg-background/90 backdrop-blur-lg border-b border-border">
+        <div className="relative flex items-center gap-2 h-11">
+          {/* Back */}
           <Button
             variant="ghost"
             onClick={smartBack}
-            size="sm"
-            className="w-fit text-slate-700 absolute left-2 z-10"
+            size="icon"
+            className="rounded-full w-9 h-9 shrink-0 border border-border"
           >
-            <FaChevronLeft className="size-6" />
+            <FaChevronLeft className="w-3.5 h-3.5 text-foreground" />
           </Button>
 
-          <Input
-            ref={inputRef}
-            placeholder="Buscar productos..."
-            autoFocus
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => {
-              setTimeout(() => setFocused(false), 150);
-            }}
-            onKeyDown={handleKeyDown}
-            className="w-full h-full border-none rounded-xl pl-12 pr-16 py-3 text-slate-900 placeholder:text-slate-600 focus:outline-none focus:ring-0 focus:ring-slate-400 focus:border-transparent transition-all"
-          />
+          {/* Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Input
+              ref={inputRef}
+              placeholder="Buscar productos..."
+              autoFocus
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setTimeout(() => setFocused(false), 150)}
+              onKeyDown={handleKeyDown}
+              className="w-full h-10 rounded-full pl-9 pr-10 text-sm border-border bg-secondary text-foreground placeholder:text-muted-foreground focus:ring-0 focus:bg-background transition-colors"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-muted-foreground/20 flex items-center justify-center hover:bg-muted-foreground/30 transition-colors"
+              >
+                <X className="w-3 h-3 text-muted-foreground" />
+              </button>
+            )}
+          </div>
 
+          {/* Menu */}
           <Button
-            className="p-2 absolute right-4 z-10"
             variant="ghost"
+            size="icon"
             onClick={open}
+            className="rounded-full w-9 h-9 shrink-0 border border-border"
           >
-            <TbMenuDeep className="size-6 text-slate-600 cursor-pointer" />
+            <TbMenuDeep className="w-4 h-4 text-foreground" />
           </Button>
         </div>
 
-        {/* Dropdown de Sugerencias */}
-        {focused && suggestions.length > 0 && (
-          <div className="absolute top-full left-2 right-2 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-200">
-              <span className="text-xs font-medium text-slate-500">
-                Búsquedas recientes
-              </span>
-              <button
-                onClick={handleClearSuggestions}
-                className="text-xs text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Limpiar todo
-              </button>
-            </div>
-            <div className="max-h-64 overflow-y-auto scroll-smooth">
-              {suggestions.map((sug, index) => (
-                <div
-                  key={index}
-                  onMouseDown={() => handleSelectSuggestion(sug)}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer group transition-colors"
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <Clock className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span className="text-sm text-slate-700 truncate">
-                      {sug}
-                    </span>
-                  </div>
-                  <button
-                    onClick={(e) => handleRemoveSuggestion(sug, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-200 rounded transition-all"
-                  >
-                    <X className="w-4 h-4 text-slate-500" />
-                  </button>
+        {/* Dropdown sugerencias */}
+        <AnimatePresence>
+          {focused && suggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18 }}
+              className="absolute left-3 right-3 top-full mt-1 bg-background border border-border rounded-2xl shadow-lg overflow-hidden z-50"
+            >
+              <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground font-medium">
+                    Recientes
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+                <button
+                  onClick={handleClearSuggestions}
+                  className="text-xs text-primary hover:opacity-75 transition-opacity"
+                >
+                  Limpiar
+                </button>
+              </div>
+              <div className="max-h-56 overflow-y-auto">
+                {suggestions.map((sug, i) => (
+                  <div
+                    key={i}
+                    onMouseDown={() => handleSelectSuggestion(sug)}
+                    className="flex items-center justify-between px-4 py-2.5 hover:bg-secondary cursor-pointer group transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      <Clock className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+                      <span className="text-sm text-foreground truncate">
+                        {sug}
+                      </span>
+                    </div>
+                    <button
+                      onClick={(e) => handleRemoveSuggestion(sug, e)}
+                      className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-full hover:bg-border flex items-center justify-center transition-all"
+                    >
+                      <X className="w-3 h-3 text-muted-foreground" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex gap-6">
-          {/* Products List */}
-          <div className="flex-1">
-            <div className="space-y-2">
-              {listSearch.map((product) => (
+      <div className="px-3 py-3">
+        {/* Encabezado de sección */}
+        {isShowingFavorites && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <TrendingUp className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-semibold text-foreground uppercase tracking-wide">
+              Destacados
+            </span>
+          </div>
+        )}
+
+        {/* Lista de productos */}
+        <AnimatePresence mode="popLayout">
+          <div className="space-y-2">
+            {listSearch.map((product, i) => (
+              <motion.div
+                key={product.productId}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.25 }}
+              >
                 <Link
-                  key={product.id}
                   href={`/t/${store.sitioweb}/producto/${product.productId}`}
                   onClick={handleProductClick}
-                  className="block p-3 transition-all group shadow-md rounded-lg hover:shadow-lg"
+                  className="flex gap-3 p-2.5 rounded-2xl border border-border bg-background hover:bg-secondary transition-colors group"
                 >
-                  <div className="flex gap-3">
-                    {/* Product Image */}
-                    <div className="w-20 h-20 shrink-0 bg-slate-300 rounded-lg overflow-hidden">
-                      <Image
-                        width={100}
-                        height={100}
-                        alt={product.title || `Producto ${product.id}`}
-                        src={product.image || store.urlPoster || logoApp}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                  {/* Imagen */}
+                  <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden border border-border bg-secondary">
+                    <Image
+                      width={100}
+                      height={100}
+                      alt={product.title || ""}
+                      src={product.image || store.urlPoster || logoApp}
+                      className={`w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 ${!product.stock ? "grayscale opacity-60" : ""}`}
+                    />
+                  </div>
 
-                    {/* Product Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-slate-900 font-semibold text-base mb-1 group-hover:text-slate-800 transition-colors line-clamp-2">
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
                         {product.title}
                       </h3>
-                      <p className="text-slate-600 text-xs mb-2 line-clamp-1">
-                        {product.descripcion || "Sin descripción"}
-                      </p>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-slate-700 font-bold text-base">
-                          ${smartRound(product.price || 0)}{" "}
+                      {product.descripcion && (
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                          {product.descripcion}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-sm font-bold text-foreground">
+                        ${smartRound(product.price || 0)}{" "}
+                        <span className="text-xs font-normal text-muted-foreground">
                           {store.moneda.find(
                             (m) => m.id === product.default_moneda,
                           )?.nombre || ""}
                         </span>
+                      </span>
+                      {product.coment.promedio > 0 && (
                         <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                          <span className="text-sm font-medium text-slate-700">
+                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <span className="text-xs text-muted-foreground">
                             {product.coment.promedio.toFixed(1)}
                           </span>
                         </div>
-                      </div>
+                      )}
                     </div>
                   </div>
-                </Link>
-              ))}
-            </div>
 
-            {listSearch.length === 0 && search.trim() && (
-              <div className="text-center py-12">
-                <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-slate-400" />
-                </div>
-                <h3 className="text-slate-800 font-semibold text-lg mb-2">
-                  No se encontraron productos
-                </h3>
-                <p className="text-slate-600 text-sm">
-                  Intenta con otros términos de búsqueda
-                </p>
-              </div>
-            )}
+                  {/* Indicador stock */}
+                  {!product.stock && (
+                    <div className="shrink-0 flex items-center self-center">
+                      <span className="text-[10px] font-medium text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
+                        Agotado
+                      </span>
+                    </div>
+                  )}
+                </Link>
+              </motion.div>
+            ))}
           </div>
-        </div>
+        </AnimatePresence>
+
+        {/* Estado vacío */}
+        {listSearch.length === 0 && search.trim() && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-16 px-4"
+          >
+            <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mb-4">
+              <Search className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-serif text-base font-semibold text-foreground mb-1">
+              Sin resultados
+            </h3>
+            <p className="text-sm text-muted-foreground text-center">
+              {`No encontramos "${search}". Intenta con otro término.`}
+            </p>
+          </motion.div>
+        )}
       </div>
     </main>
   );

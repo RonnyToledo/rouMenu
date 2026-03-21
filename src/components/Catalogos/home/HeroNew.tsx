@@ -2,13 +2,13 @@
 import React, { useContext, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, Truck, Store as StoreIcon } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
 import { useAuth } from "@/context/AppContext";
 import { useParams, useSearchParams } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import { logoApp } from "@/lib/image";
-import { Store, Truck } from "lucide-react";
+import { Current } from "@/context/InitialStatus";
 
 export default function HeroNew() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -16,8 +16,6 @@ export default function HeroNew() {
   const params = useParams();
   const { user } = useAuth();
   const effectRan = useRef(false);
-
-  console.log(user);
 
   const [loginState, setLoginState] = useState({
     showLogin: false,
@@ -29,12 +27,9 @@ export default function HeroNew() {
 
   useEffect(() => {
     if (effectRan.current) return;
-
-    // Verificar si debe mostrar el login
     const shouldShowLogin = searchParams.get("showLogin") === "true";
     const message = searchParams.get("message");
     const redirect = searchParams.get("redirectTo");
-
     if (shouldShowLogin && !user) {
       effectRan.current = true;
       queueMicrotask(() => {
@@ -44,8 +39,6 @@ export default function HeroNew() {
           redirectTo: redirect || `/t/${shopName}/carrito`,
         });
       });
-
-      // Limpiar los parámetros de la URL sin recargar
       const url = new URL(window.location.href);
       url.searchParams.delete("showLogin");
       url.searchParams.delete("message");
@@ -55,102 +48,104 @@ export default function HeroNew() {
   }, [searchParams, shopName, user]);
 
   return (
-    <div className=" space-y-3 bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
-      <div className="">
-        <div className="relative rounded-b-2xl overflow-hidden shadow-lg">
-          <Image
-            src={store?.banner || logoApp}
-            alt={store?.name || "Store"}
-            width={400}
-            height={500}
-            className="w-full aspect-square  object-cover"
-            onError={() => {
-              dispatchStore({
-                type: "Add",
-                payload: {
-                  ...store,
-                  banner: "",
-                },
-              });
-            }}
-          />
+    <div className="bg-background transition-colors duration-300">
+      {/* Banner */}
+      <div className="relative rounded-b-3xl overflow-hidden aspect-square">
+        <Image
+          src={store?.banner || logoApp}
+          alt={store?.name || "Store"}
+          width={400}
+          height={400}
+          className="w-full h-full object-cover"
+          onError={() => {
+            dispatchStore({ type: "Add", payload: { ...store, banner: "" } });
+          }}
+        />
+        {/* Overlay gradiente — nombre de la tienda sobre el banner */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/65 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-12 pointer-events-none">
+          <p className="text-white/60 text-[10px] font-medium tracking-widest uppercase mb-0.5">
+            {store.tipo}
+          </p>
+          <h1 className="font-serif text-2xl font-bold text-white leading-tight drop-shadow-sm">
+            {store.name}
+          </h1>
         </div>
       </div>
 
-      <div className="container mx-auto  px-6 -mt-12 relative z-10">
-        <div className="bg-primary/5 backdrop-blur-3xl border border-primary/20 rounded-2xl p-3">
-          <div className="flex flex-col  gap-2">
-            <div className="flex-1 gap-1">
-              <div className="flex flex-col gap-1">
-                <Link
-                  href={`/t/${store.sitioweb}/about/ratings`}
-                  className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 transition-colors"
-                >
-                  <Star className="w-4 h-4 fill-current text-slate-700 dark:text-slate-300" />
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    {store?.comentTienda.promedio.toFixed(1)}
-                  </span>
-                  <span>({store?.comentTienda.total} reseñas)</span>
-                  <span className="text-slate-700 dark:text-slate-500">•</span>
-                  <span>
-                    $ {store.moneda.find((m) => m.defecto)?.nombre || ""}
-                  </span>
-                </Link>
+      {/* Info card — flota sobre el banner */}
+      <div className="px-4 -mt-6 relative z-10 pb-3">
+        <div className="bg-background/85 backdrop-blur-xl border border-border rounded-2xl p-3 shadow-sm space-y-2.5">
+          {/* Rating + ubicación + moneda */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <Link
+              href={`/t/${store?.sitioweb}/about#ubicacion`}
+              className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              <span className="text-xs">
+                {store?.municipio}, {store?.Provincia}
+              </span>
+            </Link>
 
-                <Link
-                  href={`/t/${store?.sitioweb}/about#ubicacion`}
-                  className="flex items-center gap-2 text-slate-700 dark:text-slate-300 transition-colors"
-                >
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm">
-                    {store?.municipio}, {store?.Provincia}
-                  </span>
-                </Link>
-              </div>
-
-              <p className="text-slate-700 dark:text-slate-300 text-sm line-clamp-2 transition-colors">
-                {store?.parrrafo || "..."}
-              </p>
-            </div>
-
-            <div className="flex flex-row gap-1 ">
-              {store.domicilio && (
-                <div className="flex items-center gap-2 bg-primary/15 rounded-xl p-2 flex-1 transition-colors">
-                  <div className="p-2 bg-primary/15 rounded-lg">
-                    <Truck className="w-5 h-5 text-slate-700 dark:text-slate-200" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      Entrega
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                      Delivery
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {store.local && (
-                <div className="flex items-center gap-2 bg-primary/15 rounded-xl p-2 flex-1 transition-colors">
-                  <div className="p-2 bg-primary/15 rounded-lg">
-                    <Store className="w-5 h-5 text-slate-700 dark:text-slate-200" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      Entrega
-                    </p>
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                      Tienda
-                    </p>
-                  </div>
-                </div>
-              )}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {store.moneda.find((m: Current) => m.defecto)?.nombre || ""}
+              </span>
+              <Link
+                href={`/t/${store.sitioweb}/about/ratings`}
+                className="flex items-center gap-1 px-2 py-1 rounded-full bg-secondary border border-border hover:bg-muted transition-colors"
+              >
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <span className="text-xs font-semibold text-foreground">
+                  {store?.comentTienda.promedio.toFixed(1)}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  ({store?.comentTienda.total} reseñas)
+                </span>
+              </Link>
             </div>
           </div>
+
+          {/* Descripción */}
+          {store?.parrrafo && (
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+              {store.parrrafo}
+            </p>
+          )}
+
+          {/* Delivery badges */}
+          {(store.domicilio || store.local) && (
+            <div className="flex gap-2 flex-wrap">
+              {store.domicilio && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-primary/8 border border-primary/15">
+                  <Truck className="w-3.5 h-3.5 text-primary" />
+                  <div>
+                    <p className="text-xs font-medium text-foreground leading-none">
+                      Delivery
+                    </p>
+                    {(store.envios || []).length > 0 && (
+                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-none">
+                        {(store.envios || []).length} zona
+                        {(store.envios || []).length > 1 ? "s" : ""}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {store.local && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-primary/8 border border-primary/15">
+                  <StoreIcon className="w-3.5 h-3.5 text-primary" />
+                  <p className="text-xs font-medium text-foreground">
+                    Tienda local
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Popover de Login */}
       <LoginPopover
         isOpen={loginState.showLogin}
         onClose={() => setLoginState({ ...loginState, showLogin: false })}

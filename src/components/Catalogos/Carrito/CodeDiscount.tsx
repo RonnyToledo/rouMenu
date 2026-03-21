@@ -22,7 +22,6 @@ export default function CodeDiscount({ compra, setCompra }: Props) {
     const validCoupon = store.codeDiscount.find(
       (obj) => obj.code === couponCode,
     );
-
     if (!validCoupon) {
       sileo.error({
         title: "Cupón no válido",
@@ -30,7 +29,6 @@ export default function CodeDiscount({ compra, setCompra }: Props) {
       });
       return;
     }
-
     setCompra((prev) => ({
       ...prev,
       code: {
@@ -59,52 +57,51 @@ export default function CodeDiscount({ compra, setCompra }: Props) {
   );
 
   return (
-    <Card className="gap-2 py-4">
+    <Card className="gap-2 py-4 border-border shadow-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Tag className="w-5 h-5" />
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Tag className="w-4 h-4 text-muted-foreground" />
           Cupón de Descuento
         </CardTitle>
       </CardHeader>
       <CardContent>
         {!appliedCoupon ? (
-          <div className="rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2">
-            <div className="flex w-full flex-1 items-stretch rounded-2xl h-full overflow-hidden">
-              <Input
-                placeholder="¿Tienes algún cupón?"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                onKeyDown={handleKeyDown}
-                className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden text-[#0d141c] dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-white dark:bg-slate-900 focus:border-none placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 text-xs font-normal leading-normal"
-              />
-            </div>
+          <div className="flex items-center gap-2 rounded-full bg-secondary border border-border px-3 py-1">
+            <Input
+              placeholder="¿Tienes algún cupón?"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              onKeyDown={handleKeyDown}
+              className="flex-1 h-8 border-none bg-transparent text-xs text-foreground placeholder:text-muted-foreground focus:ring-0 focus:outline-none px-0"
+            />
             <Button
               onClick={applyCoupon}
               variant="ghost"
-              className="rounded-full"
+              size="sm"
+              className="rounded-full text-xs h-7 px-3 text-primary hover:bg-primary/10"
               disabled={!couponCode}
             >
               Aplicar
             </Button>
           </div>
         ) : (
-          <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+          <div className="flex items-center justify-between px-3 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
             <div className="flex items-center gap-2">
-              <Tag className="w-4 h-4 text-green-600 dark:text-green-400" />
-              <span className="font-medium text-green-800 dark:text-green-300">
+              <Tag className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="text-sm font-medium text-foreground">
                 {compra.code.name}
               </span>
-              <span className="text-sm text-green-600 dark:text-green-400">
+              <span className="text-xs text-emerald-600 dark:text-emerald-400">
                 (-{compra.code.discount}%)
               </span>
             </div>
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={removeCoupon}
-              className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200"
+              className="w-7 h-7 rounded-full hover:bg-red-500/10 text-muted-foreground hover:text-red-500 transition-colors"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
         )}

@@ -41,19 +41,14 @@ export default function ComparePage() {
 
   useEffect(() => {
     setIsLoading(true);
-    const leftInit = compareFromStore[0] || null;
-    const rightInit = compareFromStore[1] || compareFromStore[0] || null;
-    setLeft(leftInit || null);
-    setRight(rightInit || null);
+    setLeft(compareFromStore[0] || null);
+    setRight(compareFromStore[1] || compareFromStore[0] || null);
     setTimeout(() => setIsLoading(false), 350);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.products]);
 
   const handleToCart = (productToCart: Product) => {
-    dispatchStore({
-      type: "AddCart",
-      payload: JSON.stringify(productToCart),
-    });
+    dispatchStore({ type: "AddCart", payload: JSON.stringify(productToCart) });
     dispatchStore({ type: "balanceMode", payload: false });
   };
 
@@ -87,9 +82,8 @@ export default function ComparePage() {
     };
     const points = { left: 0, right: 0 };
     (Object.keys(winners) as Array<keyof typeof winners>).forEach((k) => {
-      const v = winners[k];
-      if (v === "left") points.left += 1;
-      else if (v === "right") points.right += 1;
+      if (winners[k] === "left") points.left += 1;
+      else if (winners[k] === "right") points.right += 1;
     });
     const global =
       points.left > points.right
@@ -104,12 +98,12 @@ export default function ComparePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-5xl mx-auto animate-pulse space-y-4">
-          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-64"></div>
-          <div className="grid grid-cols-1 gap-6">
-            <div className="bg-white dark:bg-slate-900 rounded-lg h-80" />
-            <div className="bg-white dark:bg-slate-900 rounded-lg h-80" />
+          <div className="h-6 bg-secondary rounded-full w-48" />
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-secondary rounded-2xl h-72" />
+            <div className="bg-secondary rounded-2xl h-72" />
           </div>
         </div>
       </div>
@@ -120,22 +114,21 @@ export default function ComparePage() {
     side: "left" | "right",
     field: keyof NonNullable<typeof result>["winners"],
   ) => {
-    if (!result) return "p-2 text-center";
+    if (!result) return "p-3 text-center";
     const winner = result.winners[field];
-    if (winner === "tie") return "p-2 text-center";
+    if (winner === "tie") return "p-3 text-center";
     return winner === side
-      ? "p-2 text-center ring-2 ring-green-300 dark:ring-green-700 bg-green-50 dark:bg-green-900/20 rounded-md transition-shadow"
-      : "p-2 text-center opacity-90";
+      ? "p-3 text-center ring-1 ring-primary/40 bg-primary/5 rounded-xl transition-shadow"
+      : "p-3 text-center opacity-75";
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-6 px-3">
-      <div className="h-16"></div>
-
+    <div className="min-h-screen bg-background py-4 px-3">
+      <div className="h-16" />
       <div className="max-w-5xl mx-auto">
-        <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm overflow-hidden dark:border dark:border-slate-700">
-          {/* Column selects */}
-          <div className="grid grid-cols-2 gap-2 border-b border-slate-200 dark:border-slate-700 p-4 items-center">
+        <div className="bg-secondary/50 border border-border rounded-2xl shadow-sm overflow-hidden">
+          {/* Selectores */}
+          <div className="grid grid-cols-2 gap-2 border-b border-border p-3">
             <PopoverComponent
               open1={open1}
               setOpen1={setOpen1}
@@ -162,391 +155,261 @@ export default function ComparePage() {
             />
           </div>
 
-          <div className="space-y-0">
-            {/* IMAGEN */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800 items-center">
-              <div className="p-4 text-center">
-                {left ? (
+          {/* Imágenes */}
+          <div className="grid grid-cols-2 border-b border-border">
+            {[left, right].map((prod, i) => (
+              <div
+                key={i}
+                className="p-4 flex justify-center border-r last:border-r-0 border-border"
+              >
+                {prod ? (
                   <Link
-                    href={`/t/${store.sitioweb}/producto/${left.productId}`}
+                    href={`/t/${store.sitioweb}/producto/${prod.productId}`}
                   >
                     <Image
                       width={160}
                       height={160}
-                      src={left.image || logoApp}
-                      alt={left.title}
-                      className="w-36 h-36 object-cover rounded-lg mx-auto"
+                      src={prod.image || logoApp}
+                      alt={prod.title}
+                      className="w-32 h-32 object-cover rounded-xl border border-border"
                     />
                   </Link>
                 ) : (
-                  <Skeleton className="w-36 h-36 dark:bg-slate-700" />
+                  <Skeleton className="w-32 h-32 rounded-xl" />
                 )}
               </div>
-              <div className="p-4 text-center">
-                {right ? (
-                  <Link
-                    href={`/t/${store.sitioweb}/producto/${right.productId}`}
-                  >
-                    <Image
-                      width={160}
-                      height={160}
-                      src={right.image || logoApp}
-                      alt={right.title}
-                      className="w-36 h-36 object-cover rounded-lg mx-auto"
-                    />
-                  </Link>
-                ) : (
-                  <Skeleton className="w-36 h-36 dark:bg-slate-700" />
-                )}
-              </div>
-            </div>
+            ))}
+          </div>
 
-            {/* PRECIO */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
-              <div className={cellClass("left", "price")}>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {left ? (
-                      `$${smartRound(left.price)}`
-                    ) : (
-                      <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                    )}
-                  </div>
-                  {(left?.oldPrice || 0) > (left?.price || 0) && (
-                    <div className="text-sm text-slate-500 dark:text-slate-400 line-through">
-                      ${smartRound(left?.oldPrice || 0)}
-                    </div>
+          {/* Precio */}
+          <div className="grid grid-cols-2 border-b border-border">
+            <div className={cellClass("left", "price")}>
+              {left ? (
+                <div className="space-y-0.5">
+                  <p className="text-xl font-bold text-foreground">
+                    ${smartRound(left.price)}
+                  </p>
+                  {(left.oldPrice || 0) > (left.price || 0) && (
+                    <p className="text-xs text-muted-foreground line-through">
+                      ${left.oldPrice}
+                    </p>
                   )}
                 </div>
-              </div>
-              <div className={cellClass("right", "price")}>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                    {right ? (
-                      `$${smartRound(right.price)}`
-                    ) : (
-                      <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                    )}
-                  </div>
-                  {(right?.oldPrice || 0) > (right?.price || 0) && (
-                    <div className="text-sm text-slate-500 dark:text-slate-400 line-through">
-                      ${smartRound(right?.oldPrice || 0)}
-                    </div>
+              ) : (
+                <Skeleton className="h-7 w-full rounded-xl" />
+              )}
+            </div>
+            <div className={cellClass("right", "price")}>
+              {right ? (
+                <div className="space-y-0.5">
+                  <p className="text-xl font-bold text-foreground">
+                    ${smartRound(right.price)}
+                  </p>
+                  {(right.oldPrice || 0) > (right.price || 0) && (
+                    <p className="text-xs text-muted-foreground line-through">
+                      ${right.oldPrice}
+                    </p>
                   )}
                 </div>
-              </div>
-            </div>
-
-            {/* RATING */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
-              <div className={cellClass("left", "rating")}>
-                <div className="flex items-center justify-center gap-2">
-                  {left ? (
-                    <>
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
-                        {left?.coment?.promedio ?? 0}
-                      </span>
-                    </>
-                  ) : (
-                    <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                  )}
-                </div>
-              </div>
-              <div className={cellClass("right", "rating")}>
-                <div className="flex items-center justify-center gap-2">
-                  {right ? (
-                    <>
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
-                        {right?.coment?.promedio ?? 0}
-                      </span>
-                    </>
-                  ) : (
-                    <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* CATEGORIA */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="p-3 text-center">
-                {left ? (
-                  <Badge
-                    variant="outline"
-                    className="dark:border-slate-600 dark:text-slate-300"
-                  >
-                    {store.categorias.find((cat) => cat.id == left.caja)?.name}
-                  </Badge>
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-              <div className="p-3 text-center">
-                {right ? (
-                  <Badge
-                    variant="outline"
-                    className="dark:border-slate-600 dark:text-slate-300"
-                  >
-                    {store.categorias.find((cat) => cat.id == right.caja)?.name}
-                  </Badge>
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-            </div>
-
-            {/* DISPONIBILIDAD */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
-              <div className={cellClass("left", "stock")}>
-                {left ? (
-                  <Badge variant={left.stock ? "default" : "secondary"}>
-                    {left.stock ? "En stock" : "Agotado"}
-                  </Badge>
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-              <div className={cellClass("right", "stock")}>
-                {right ? (
-                  <Badge variant={right.stock ? "default" : "secondary"}>
-                    {right.stock ? "En stock" : "Agotado"}
-                  </Badge>
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-            </div>
-
-            {/* DESCUENTO */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
-              <div className={cellClass("left", "discount")}>
-                {left ? (
-                  <div className="text-sm text-slate-700 dark:text-slate-300">
-                    {left.oldPrice > left.price ? (
-                      <span>
-                        {Math.round(
-                          ((left.oldPrice - left.price) / left.oldPrice) * 100,
-                        )}
-                        % off
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 dark:text-slate-500">
-                        Sin descuento
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-              <div className={cellClass("right", "discount")}>
-                {right ? (
-                  <div className="text-sm text-slate-700 dark:text-slate-300">
-                    {right.oldPrice > right.price ? (
-                      <span>
-                        {Math.round(
-                          ((right.oldPrice - right.price) / right.oldPrice) *
-                            100,
-                        )}
-                        % off
-                      </span>
-                    ) : (
-                      <span className="text-slate-400 dark:text-slate-500">
-                        Sin descuento
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-            </div>
-
-            {/* ACCIONES */}
-            <div className="grid grid-cols-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="p-4 text-center">
-                {left ? (
-                  left.Cant == 0 ? (
-                    <Button
-                      variant="outline"
-                      className="text-xs w-full dark:border-slate-600 dark:text-slate-300"
-                      disabled={!left.stock}
-                      onClick={() =>
-                        handleToCart({
-                          ...left,
-                          Cant: (left?.Cant || 0) + 1,
-                        } as Product)
-                      }
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      {left.stock ? "Agg Carrito" : "No disponible"}
-                    </Button>
-                  ) : (
-                    <div className="flex items-center justify-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="dark:border-slate-600 dark:text-slate-300"
-                        onClick={() =>
-                          handleToCart({
-                            ...left,
-                            Cant: (left?.Cant || 0) - 1,
-                          } as Product)
-                        }
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
-                        {left.Cant}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="dark:border-slate-600 dark:text-slate-300"
-                        onClick={() =>
-                          handleToCart({
-                            ...left,
-                            Cant: (left?.Cant || 0) + 1,
-                          } as Product)
-                        }
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )
-                ) : (
-                  <Skeleton className="w-full h-16 dark:bg-slate-700" />
-                )}
-              </div>
-              <div className="p-4 text-center">
-                {right ? (
-                  right.Cant == 0 ? (
-                    <Button
-                      variant="outline"
-                      className="text-xs w-full dark:border-slate-600 dark:text-slate-300"
-                      disabled={!right.stock}
-                      onClick={() =>
-                        handleToCart({
-                          ...right,
-                          Cant: (right?.Cant || 0) + 1,
-                        } as Product)
-                      }
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      {right.stock ? "Agg Carrito" : "No disponible"}
-                    </Button>
-                  ) : (
-                    <div className="flex items-center justify-center gap-3">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="dark:border-slate-600 dark:text-slate-300"
-                        onClick={() =>
-                          handleToCart({
-                            ...right,
-                            Cant: (right?.Cant || 0) - 1,
-                          } as Product)
-                        }
-                      >
-                        <Minus className="w-4 h-4" />
-                      </Button>
-                      <span className="font-medium text-slate-900 dark:text-slate-100">
-                        {right.Cant}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="dark:border-slate-600 dark:text-slate-300"
-                        onClick={() =>
-                          handleToCart({
-                            ...right,
-                            Cant: (right?.Cant || 0) + 1,
-                          } as Product)
-                        }
-                      >
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )
-                ) : (
-                  <Skeleton className="w-full h-16 dark:bg-slate-700" />
-                )}
-              </div>
-            </div>
-
-            {/* DESCRIPCION */}
-            <div className="grid grid-cols-2">
-              <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6">
-                {left ? (
-                  <ExpandableText text={left.descripcion || ""} />
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
-              <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6">
-                {right ? (
-                  <ExpandableText text={right.descripcion || ""} />
-                ) : (
-                  <Skeleton className="w-full h-7 dark:bg-slate-700" />
-                )}
-              </div>
+              ) : (
+                <Skeleton className="h-7 w-full rounded-xl" />
+              )}
             </div>
           </div>
 
+          {/* Rating */}
+          <div className="grid grid-cols-2 border-b border-border">
+            <div className={cellClass("left", "rating")}>
+              {left ? (
+                <div className="flex justify-center items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-medium text-foreground">
+                    {(left.coment?.promedio ?? 0).toFixed(1)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({left.coment?.total ?? 0})
+                  </span>
+                </div>
+              ) : (
+                <Skeleton className="h-5 w-full rounded-xl" />
+              )}
+            </div>
+            <div className={cellClass("right", "rating")}>
+              {right ? (
+                <div className="flex justify-center items-center gap-1">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-medium text-foreground">
+                    {(right.coment?.promedio ?? 0).toFixed(1)}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ({right.coment?.total ?? 0})
+                  </span>
+                </div>
+              ) : (
+                <Skeleton className="h-5 w-full rounded-xl" />
+              )}
+            </div>
+          </div>
+
+          {/* Stock */}
+          <div className="grid grid-cols-2 border-b border-border">
+            <div className={cellClass("left", "stock")}>
+              {left ? (
+                <div
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    left.stock
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                  }`}
+                >
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${left.stock ? "bg-emerald-400" : "bg-red-400"}`}
+                  />
+                  {left.stock ? "En stock" : "Agotado"}
+                </div>
+              ) : (
+                <Skeleton className="h-5 w-full rounded-xl" />
+              )}
+            </div>
+            <div className={cellClass("right", "stock")}>
+              {right ? (
+                <div
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                    right.stock
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                  }`}
+                >
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${right.stock ? "bg-emerald-400" : "bg-red-400"}`}
+                  />
+                  {right.stock ? "En stock" : "Agotado"}
+                </div>
+              ) : (
+                <Skeleton className="h-5 w-full rounded-xl" />
+              )}
+            </div>
+          </div>
+
+          {/* Add to cart */}
+          <div className="grid grid-cols-2 border-b border-border">
+            {[
+              { prod: left, side: "left" as const },
+              { prod: right, side: "right" as const },
+            ].map(({ prod, side }) => (
+              <div
+                key={side}
+                className="p-3 flex justify-center border-r last:border-r-0 border-border"
+              >
+                {prod ? (
+                  prod.Cant === 0 ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full text-xs w-full border-border gap-1.5"
+                      disabled={!prod.stock}
+                      onClick={() =>
+                        handleToCart({
+                          ...prod,
+                          Cant: (prod.Cant || 0) + 1,
+                        } as Product)
+                      }
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      {prod.stock ? "Agregar" : "No disponible"}
+                    </Button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-full border border-border"
+                        onClick={() =>
+                          handleToCart({
+                            ...prod,
+                            Cant: (prod.Cant || 0) - 1,
+                          } as Product)
+                        }
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <span className="text-sm font-semibold text-foreground w-5 text-center">
+                        {prod.Cant}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="w-7 h-7 rounded-full border border-border"
+                        onClick={() =>
+                          handleToCart({
+                            ...prod,
+                            Cant: (prod.Cant || 0) + 1,
+                          } as Product)
+                        }
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )
+                ) : (
+                  <Skeleton className="h-8 w-full rounded-xl" />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Descripción */}
+          <div className="grid grid-cols-2 border-b border-border">
+            <div className="p-3 border-r border-border text-xs text-muted-foreground">
+              {left ? (
+                <ExpandableText text={left.descripcion || ""} />
+              ) : (
+                <Skeleton className="h-7 w-full rounded-xl" />
+              )}
+            </div>
+            <div className="p-3 text-xs text-muted-foreground">
+              {right ? (
+                <ExpandableText text={right.descripcion || ""} />
+              ) : (
+                <Skeleton className="h-7 w-full rounded-xl" />
+              )}
+            </div>
+          </div>
+
+          {/* Características */}
           <div className="grid grid-cols-2">
-            <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6 flex w-full flex-wrap gap-2">
-              {left
-                ? left?.caracteristicas.map((obj, index) => (
-                    <Badge
-                      key={index}
-                      className="dark:bg-slate-700 dark:text-slate-200"
-                    >
-                      {obj}
-                    </Badge>
-                  ))
-                : Array.from({ length: 3 }).map((_, index) => (
-                    <Skeleton
-                      className="h-4 w-10 dark:bg-slate-700"
-                      key={index}
-                    />
-                  ))}
-            </div>
-            <div className="p-4 text-xs text-slate-700 dark:text-slate-400 line-clamp-6 flex w-full flex-wrap gap-2">
-              {right
-                ? right?.caracteristicas.map((obj, index) => (
-                    <Badge
-                      key={index}
-                      className="dark:bg-slate-700 dark:text-slate-200"
-                    >
-                      {obj}
-                    </Badge>
-                  ))
-                : Array.from({ length: 5 }).map((_, index) => (
-                    <Skeleton
-                      className="w-10 h-4 dark:bg-slate-700"
-                      key={index}
-                    />
-                  ))}
-            </div>
+            {[left, right].map((prod, i) => (
+              <div
+                key={i}
+                className={`p-3 flex flex-wrap gap-1.5 ${i === 0 ? "border-r border-border" : ""}`}
+              >
+                {prod
+                  ? prod.caracteristicas.map((obj, idx) => (
+                      <Badge
+                        key={idx}
+                        variant="secondary"
+                        className="rounded-full text-xs border border-border px-2"
+                      >
+                        {obj}
+                      </Badge>
+                    ))
+                  : Array.from({ length: 3 }).map((_, idx) => (
+                      <Skeleton key={idx} className="h-4 w-10 rounded-full" />
+                    ))}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col items-center justify-between gap-4">
-          <div className="text-sm text-slate-600 dark:text-slate-400">
-            {result ? (
-              result.global === "tie" ? (
-                <>Empate técnico — ambos tienen {result.points.left} puntos</>
-              ) : (
-                <>
-                  Puntos: {result.points.left} — {result.points.right}
-                </>
-              )
-            ) : (
-              <>Selecciona dos productos para comparar</>
-            )}
-          </div>
+        {/* Resultado */}
+        <div className="mt-3 text-center">
+          <p className="text-xs text-muted-foreground">
+            {result
+              ? result.global === "tie"
+                ? `Empate técnico — ambos tienen ${result.points.left} puntos`
+                : `Puntos: ${result.points.left} — ${result.points.right}`
+              : "Selecciona dos productos para comparar"}
+          </p>
         </div>
       </div>
     </div>
@@ -578,21 +441,23 @@ function PopoverComponent({
         <Button
           variant="outline"
           role="combobox"
-          className="w-full justify-between truncate dark:border-slate-600 dark:text-slate-300 dark:bg-slate-900"
+          className="w-full justify-between truncate text-xs rounded-xl border-border text-foreground bg-background"
         >
-          <ChevronsUpDown className="opacity-50" />
-          {idString ? title : "Select product..."}
+          <ChevronsUpDown className="w-3.5 h-3.5 opacity-50 shrink-0" />
+          <span className="truncate">
+            {idString ? title : "Seleccionar..."}
+          </span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-fit p-0 dark:bg-slate-900 dark:border-slate-700">
-        <Command className="dark:bg-slate-900">
+      <PopoverContent className="w-fit p-0 border-border bg-background">
+        <Command className="bg-background">
           <CommandInput
-            placeholder="Search product..."
-            className="h-9 w-full truncate dark:text-slate-200 dark:placeholder:text-slate-500"
+            placeholder="Buscar producto..."
+            className="h-9 text-sm text-foreground placeholder:text-muted-foreground"
           />
           <CommandList>
-            <CommandEmpty className="dark:text-slate-400">
-              No product found.
+            <CommandEmpty className="text-muted-foreground text-xs p-3">
+              No se encontró.
             </CommandEmpty>
             <CommandGroup>
               {array.map((p: Product) => (
@@ -603,12 +468,12 @@ function PopoverComponent({
                     replaceProduct(point, currentValue);
                     setOpen1(false);
                   }}
-                  className="dark:text-slate-200 dark:hover:bg-slate-700"
+                  className="text-sm text-foreground"
                 >
                   {p.title}
                   <Check
                     className={cn(
-                      "ml-auto",
+                      "ml-auto w-3.5 h-3.5",
                       idString === p.productId ? "opacity-100" : "opacity-0",
                     )}
                   />

@@ -113,76 +113,70 @@ export default function CommentsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-background to-muted/20 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <div className="h-16" />
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-xl font-bold tracking-tight text-balance text-slate-900 dark:text-slate-100">
+      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <div className="space-y-0.5">
+          <h1 className="font-serif text-xl font-bold text-foreground">
             Comentarios y Reseñas
           </h1>
-          <p className="text-muted-foreground dark:text-slate-400 text-pretty">
+          <p className="text-sm text-muted-foreground">
             Lee lo que nuestros clientes tienen que decir
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="dark:bg-slate-900 dark:border-slate-700">
-            <CardContent className="pt-2">
-              <div className="flex flex-col items-center gap-2">
-                <MessageCircle className="size-4 text-muted-foreground dark:text-slate-400" />
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="border-border shadow-sm">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex flex-col items-center gap-1.5">
+                <MessageCircle className="w-4 h-4 text-muted-foreground" />
+                <p className="text-2xl font-bold text-foreground">
                   {reviews.length}
                 </p>
-                <p className="text-xs text-muted-foreground dark:text-slate-400 text-center">
-                  Total
-                </p>
+                <p className="text-xs text-muted-foreground">Total</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="dark:bg-slate-900 dark:border-slate-700">
-            <CardContent className="pt-2">
-              <div className="flex flex-col items-center gap-2">
-                <Star className="size-5 fill-yellow-500 text-yellow-500" />
-                <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <Card className="border-border shadow-sm">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex flex-col items-center gap-1.5">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <p className="text-2xl font-bold text-foreground">
                   {avgRating.toFixed(1)}
                 </p>
-                <p className="text-xs text-muted-foreground dark:text-slate-400 text-center">
-                  Promedio
-                </p>
+                <p className="text-xs text-muted-foreground">Promedio</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-card dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-secondary/50 rounded-xl border border-border">
           <div className="flex items-center gap-2">
-            <Filter className="size-4 text-muted-foreground dark:text-slate-400" />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">
               Filtrar por:
             </span>
           </div>
           <Tabs value={filter} onValueChange={(v) => setFilter(v as TabsType)}>
-            <TabsList className="dark:bg-slate-900">
-              <TabsTrigger
-                value="all"
-                className="dark:data-[state=active]:bg-slate-700 dark:text-slate-300"
-              >
+            <TabsList className="rounded-full">
+              <TabsTrigger value="all" className="rounded-full text-xs">
                 Todos
               </TabsTrigger>
               <TabsTrigger
                 value="positive"
-                className="gap-1.5 dark:data-[state=active]:bg-slate-700 dark:text-slate-300"
+                className="rounded-full text-xs gap-1"
               >
-                <Star className="size-3 fill-yellow-500 text-yellow-500" />
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                 Positivos
               </TabsTrigger>
               <TabsTrigger
                 value="negative"
-                className="gap-1.5 dark:data-[state=active]:bg-slate-700 dark:text-slate-300"
+                className="rounded-full text-xs gap-1"
               >
-                <Star className="size-3 dark:text-slate-400" />
+                <Star className="w-3 h-3" />
                 Negativos
               </TabsTrigger>
             </TabsList>
@@ -191,20 +185,20 @@ export default function CommentsPage() {
 
         {/* Reviews List */}
         {reviews.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {reviews.map((review) => (
               <ReviewCard key={review.id} {...review} setReviews={setReviews} />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="size-16 rounded-full bg-muted dark:bg-slate-900 flex items-center justify-center mb-4">
-              <MessageCircle className="size-8 text-muted-foreground dark:text-slate-500" />
+            <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mb-4">
+              <MessageCircle className="w-6 h-6 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-slate-100">
+            <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
               No hay comentarios
             </h3>
-            <p className="text-sm text-muted-foreground dark:text-slate-400 text-center text-balance">
+            <p className="text-sm text-muted-foreground text-center max-w-xs">
               No se encontraron comentarios con los filtros seleccionados
             </p>
           </div>
@@ -212,32 +206,29 @@ export default function CommentsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 bg-card dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border">
             <Button
               onClick={handlePrevPage}
               disabled={page === 1 || loading}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="gap-2 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+              className="rounded-full gap-1.5 text-xs"
             >
-              <ChevronLeft className="size-4" />
+              <ChevronLeft className="w-4 h-4" />
               Anterior
             </Button>
-            <Badge
-              variant="secondary"
-              className="dark:bg-slate-900 dark:text-slate-300"
-            >
-              Página {page} de {totalPages}
+            <Badge variant="secondary" className="rounded-full text-xs px-3">
+              {page} / {totalPages}
             </Badge>
             <Button
               onClick={handleNextPage}
               disabled={page === totalPages || loading}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="gap-2 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900"
+              className="rounded-full gap-1.5 text-xs"
             >
               Siguiente
-              <ChevronRight className="size-4" />
+              <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         )}

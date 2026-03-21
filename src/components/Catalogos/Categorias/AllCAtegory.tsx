@@ -14,20 +14,20 @@ export default function AllCategoryShowcase() {
 
   return (
     <div>
-      <div className="h-16"></div>
+      <div className="h-16" />
 
-      <section className="bg-white dark:bg-slate-900 rounded-xl m-2 p-2">
-        <h1 className="bg-white dark:bg-slate-900 z-1 text-2xl text-center font-bold mb-2 line-clamp-2 p-2 text-slate-900 dark:text-slate-100">
+      <section className="bg-background rounded-xl m-2 p-2 space-y-3">
+        <h1 className="font-serif text-2xl font-bold text-center text-foreground px-2">
           Todas las categorías
         </h1>
-        <div className="grid gap-1 grid-flow-row-dense">
+        <div className="grid gap-2 grid-flow-row-dense">
           {ExtraerCategorias(
             store?.categorias || [],
             store?.products || [],
           ).map((obj: Categoria) => (
             <Link
               key={obj.id}
-              className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-900"
+              className="relative rounded-xl overflow-hidden border border-border bg-secondary/50 hover:bg-secondary transition-colors"
               href={`${pathname}/${obj.id}`}
             >
               <Image
@@ -37,22 +37,19 @@ export default function AllCategoryShowcase() {
                 height={300}
                 className="object-cover w-full aspect-video"
               />
-              <div>
-                <div className="flex flex-col justify-between items-start text-center p-3">
-                  <h1 className="text-base text-start font-bold mb-1 line-clamp-2 text-slate-900 dark:text-slate-100">
-                    {obj?.name}
-                  </h1>
-                  <p className="text-sm text-muted-foreground dark:text-slate-400 line-clamp-1">
-                    {
-                      store.products.filter((prod) => prod.caja === obj.id)
-                        .length
-                    }{" "}
-                    Productos
-                  </p>
-                </div>
-                <p className="text-xl max-w-lg line-clamp-3 text-slate-700 dark:text-slate-300">
-                  {obj?.description}
+              <div className="p-3">
+                <h2 className="text-sm font-semibold text-foreground mb-0.5 line-clamp-2">
+                  {obj?.name}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {store.products.filter((prod) => prod.caja === obj.id).length}{" "}
+                  Productos
                 </p>
+                {obj?.description && (
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {obj.description}
+                  </p>
+                )}
               </div>
             </Link>
           ))}

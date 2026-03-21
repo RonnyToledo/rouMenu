@@ -1,55 +1,21 @@
+/* PhoneInput — tokens del sistema de diseño */
 .inputClass {
-  background-color: white !important;
+  background-color: hsl(var(--background)) !important;
   width: 100% !important;
-  color: #1e2939 !important;
-  border: none !important;
-  border: 1px solid #e5e7eb !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.875rem !important;
 }
 .ButtonClass {
-  background-color: white !important;
-  border: none !important;
-  border-bottom: 1px solid #e5e7eb !important;
-  border-top: 1px solid #e5e7eb !important;
-  border-left: 1px solid #e5e7eb !important;
+  background-color: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-right: none !important;
+  border-radius: 0.5rem 0 0 0.5rem !important;
 }
 .dropdownClass {
-  color: #364153 !important;
-}
-
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  .inputClass {
-    background-color: #1e293b !important;
-    color: #e2e8f0 !important;
-    border: 1px solid #475569 !important;
-  }
-  .ButtonClass {
-    background-color: #1e293b !important;
-    border-bottom: 1px solid #475569 !important;
-    border-top: 1px solid #475569 !important;
-    border-left: 1px solid #475569 !important;
-  }
-  .dropdownClass {
-    background-color: #1e293b !important;
-    color: #cbd5e1 !important;
-    border: 1px solid #475569 !important;
-  }
-}
-
-/* Dark mode via class (for class-based dark mode toggle) */
-:global(.dark) .inputClass {
-  background-color: #1e293b !important;
-  color: #e2e8f0 !important;
-  border: 1px solid #475569 !important;
-}
-:global(.dark) .ButtonClass {
-  background-color: #1e293b !important;
-  border-bottom: 1px solid #475569 !important;
-  border-top: 1px solid #475569 !important;
-  border-left: 1px solid #475569 !important;
-}
-:global(.dark) .dropdownClass {
-  background-color: #1e293b !important;
-  color: #cbd5e1 !important;
-  border: 1px solid #475569 !important;
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
 }

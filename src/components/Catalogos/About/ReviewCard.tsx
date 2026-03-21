@@ -32,7 +32,6 @@ function formatDate(dateString: string): string {
   const diffInDays = Math.floor(
     (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24),
   );
-
   if (diffInDays === 0) return "Hoy";
   if (diffInDays === 1) return "Ayer";
   if (diffInDays < 7) return `Hace ${diffInDays} días`;
@@ -121,33 +120,36 @@ export const ReviewCard = memo(function ReviewCard({
 
   return (
     <Card
-      className={`transition-all hover:shadow-md gap-2 dark:bg-slate-900 dark:border-slate-700 dark:hover:border-slate-600 ${reply ? "py-3" : "py-4"}`}
+      className={`border-border shadow-sm transition-all hover:shadow-md gap-2 ${
+        reply ? "py-3" : "py-4"
+      }`}
     >
       <CardHeader className="pb-0">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <Avatar className="size-10">
+          <div className="flex items-center gap-2.5">
+            <Avatar className="w-9 h-9 border border-border">
               <AvatarImage src={avatarSrc} />
-              <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white">
+              <AvatarFallback className="bg-secondary text-foreground text-xs font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <p className="font-semibold text-sm leading-none text-slate-900 dark:text-slate-100">
+              <p className="text-sm font-semibold text-foreground leading-none">
                 {user.name}
               </p>
-              <p className="text-xs text-muted-foreground dark:text-slate-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {formattedDate}
               </p>
             </div>
           </div>
+          {/* Rating badge — rounded-full coherente con el sistema */}
           {!reply && star > 0 && (
             <Badge
               variant="secondary"
-              className="gap-1 dark:bg-slate-900 dark:text-slate-300"
+              className="rounded-full gap-1 border border-border text-xs px-2"
             >
-              <Star className="size-3 fill-yellow-500 text-yellow-500" />
-              <span>{star}</span>
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              <span className="text-foreground">{star}</span>
             </Badge>
           )}
         </div>
@@ -155,32 +157,30 @@ export const ReviewCard = memo(function ReviewCard({
 
       {cmt && (
         <CardContent className="pb-0">
-          <p className="text-sm text-muted-foreground dark:text-slate-400 leading-relaxed text-pretty">
-            {cmt}
-          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{cmt}</p>
         </CardContent>
       )}
 
       {!reply && (
-        <CardFooter className="flex flex-col">
-          <div className="pt-0 flex gap-2 pb-3">
+        <CardFooter className="flex flex-col pt-0">
+          <div className="flex gap-1 pb-2">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900"
+                  className="rounded-full gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8 px-3"
                 >
-                  <MessageCircle className="size-4" />
+                  <MessageCircle className="w-3.5 h-3.5" />
                   Responder
                 </Button>
               </DialogTrigger>
-              <DialogContent className="dark:bg-slate-900 dark:border-slate-700">
+              <DialogContent className="border-border bg-background">
                 <DialogHeader>
-                  <DialogTitle className="dark:text-slate-100">
+                  <DialogTitle className="text-foreground text-base">
                     Responder a {user.name}
                   </DialogTitle>
-                  <DialogDescription className="dark:text-slate-400">
+                  <DialogDescription className="text-muted-foreground text-sm">
                     Escribe tu respuesta al comentario de {user.name}
                   </DialogDescription>
                 </DialogHeader>
@@ -188,25 +188,25 @@ export const ReviewCard = memo(function ReviewCard({
                   placeholder="Escribe tu respuesta aquí..."
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  className="min-h-32 dark:bg-slate-900 dark:border-slate-600 dark:text-slate-200 dark:placeholder:text-slate-500"
+                  className="min-h-28 border-border bg-background text-foreground placeholder:text-muted-foreground resize-none text-sm"
                 />
                 <DialogFooter>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => setIsDialogOpen(false)}
-                    className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-900"
+                    className="rounded-full text-xs"
                   >
                     Cancelar
                   </Button>
                   <Button
                     onClick={handleSubmitReply}
                     disabled={!replyText.trim() || loadingReplies}
-                    className="gap-2"
+                    className="rounded-full gap-2 text-xs"
                   >
                     {loadingReplies ? (
-                      <Loader className="animate-spin size-4" />
+                      <Loader className="animate-spin w-3.5 h-3.5" />
                     ) : (
-                      <Send className="size-4" />
+                      <Send className="w-3.5 h-3.5" />
                     )}
                     Enviar
                   </Button>
@@ -219,7 +219,7 @@ export const ReviewCard = memo(function ReviewCard({
                 variant="ghost"
                 size="sm"
                 onClick={toggleReplies}
-                className="gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-900"
+                className="rounded-full gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8 px-3"
               >
                 {showReplies ? "Ocultar" : "Ver"} {replies.length}{" "}
                 {replies.length === 1 ? "respuesta" : "respuestas"}
@@ -228,7 +228,7 @@ export const ReviewCard = memo(function ReviewCard({
           </div>
 
           {showReplies && replies && replies.length > 0 && (
-            <div className="w-full space-y-1">
+            <div className="w-full space-y-1 pl-2 border-l border-border">
               {replies.map((r) => (
                 <ReviewCard
                   key={r.id ?? `${r.user_id}-${r.created_at}`}

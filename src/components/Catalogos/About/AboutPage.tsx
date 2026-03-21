@@ -58,65 +58,55 @@ export default function AboutPage() {
 
   return (
     <div>
-      <div className="min-h-screen bg-linear-to-br from-primary/5 to-primary/30 dark:from-slate-900 dark:to-slate-800">
+      <div className="min-h-screen bg-background transition-colors duration-300">
         <div className="h-16" />
-        <div className="container dark:bg-slate-900 mx-auto px-4 py-6 max-w-4xl pb-8">
+        <div className="container mx-auto px-4 py-6 max-w-4xl pb-8">
           {/* Profile Section */}
           <section className="mb-6">
             <div className="flex flex-col items-center mb-6">
-              <div className="relative mb-4">
-                <div className="w-40 h-40 rounded-full bg-linear-to-br from-primary/60 to-primary/70 overflow-hidden border-4 border-primary/20 dark:border-primary/10">
-                  <Image
-                    height={160}
-                    width={160}
-                    src={store.urlPoster || logoApp}
-                    alt={store.name || ""}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+              <div className="w-36 h-36 rounded-full overflow-hidden border-2 border-border mb-3">
+                <Image
+                  height={160}
+                  width={160}
+                  src={store.urlPoster || logoApp}
+                  alt={store.name || ""}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <p className="text-slate-700 dark:text-slate-400 text-sm">
-                Perfil público.
-              </p>
+              <p className="text-xs text-muted-foreground">Perfil público.</p>
             </div>
 
             <InfoCard
-              icon={
-                <Info className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-              }
+              icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
             >
-              <h2 className="text-slate-900 dark:text-slate-100 font-semibold text-lg mb-1">
+              <p className="text-sm font-semibold text-foreground">
                 {store.name}
-              </h2>
-              <p className="text-slate-700 dark:text-slate-400 text-sm">
+              </p>
+              <p className="text-xs text-muted-foreground">
                 Nombre de la tienda
               </p>
             </InfoCard>
 
             {store.history && (
               <InfoCard
-                icon={
-                  <Info className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-                }
+                icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
               >
-                <p className="text-slate-900 dark:text-slate-200 mb-1 line-clamp-3">
+                <p className="text-sm text-foreground mb-0.5 line-clamp-3">
                   {store.history}
                 </p>
-                <p className="text-slate-700 dark:text-slate-400 text-sm">
-                  Sobre nosotros
-                </p>
+                <p className="text-xs text-muted-foreground">Sobre nosotros</p>
               </InfoCard>
             )}
 
             {mapCenter && (
               <InfoCard
                 icon={
-                  <MapPin className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
+                  <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
                 }
               >
                 <div className="rounded-xl overflow-hidden mb-2">
                   <Map
-                    height={300}
+                    height={280}
                     defaultCenter={mapCenter}
                     mouseEvents={false}
                     touchEvents={false}
@@ -125,43 +115,35 @@ export default function AboutPage() {
                     <Marker width={50} anchor={mapCenter} />
                   </Map>
                 </div>
-                <div className="ml-4">
-                  <p className="text-(--text-muted) dark:text-slate-400">
-                    {store?.direccion},
-                  </p>
-                  <p className="text-sm text-(--text-muted) dark:text-slate-500">
-                    {store.municipio}, {store.Provincia}
-                  </p>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  {store?.direccion},
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {store.municipio}, {store.Provincia}
+                </p>
               </InfoCard>
             )}
 
             <InfoCard
-              icon={
-                <Clock className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-              }
+              icon={<Clock className="w-4 h-4 text-muted-foreground mt-0.5" />}
             >
-              <div className="space-y-2 mb-2">
+              <div className="space-y-2 mb-1">
                 <HorariosComponent
                   groupedHorarios={groupedHorarios}
                   horario={store.horario || []}
                 />
               </div>
-              <p className="text-slate-400 dark:text-slate-500 text-xs">
-                Horario comercial
-              </p>
+              <p className="text-xs text-muted-foreground">Horario comercial</p>
             </InfoCard>
 
             {store.email && (
               <InfoCard
-                icon={
-                  <Mail className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-                }
+                icon={<Mail className="w-4 h-4 text-muted-foreground mt-0.5" />}
               >
-                <div className="text-cyan-800 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors text-left">
+                <p className="text-sm text-primary hover:opacity-75 transition-opacity">
                   {store.email}
-                </div>
-                <p className="text-slate-700 dark:text-slate-400 text-sm">
+                </p>
+                <p className="text-xs text-muted-foreground">
                   Correo electrónico
                 </p>
               </InfoCard>
@@ -169,29 +151,21 @@ export default function AboutPage() {
 
             {store.tipo && (
               <InfoCard
-                icon={
-                  <Tag className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-                }
+                icon={<Tag className="w-4 h-4 text-muted-foreground mt-0.5" />}
               >
-                <p className="text-slate-900 dark:text-slate-100 mb-1">
-                  {store.tipo}
-                </p>
-                <p className="text-slate-700 dark:text-slate-400 text-sm">
-                  Categoría
-                </p>
+                <p className="text-sm text-foreground mb-0.5">{store.tipo}</p>
+                <p className="text-xs text-muted-foreground">Categoría</p>
               </InfoCard>
             )}
 
             <InfoCard
-              icon={
-                <Share2 className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-              }
+              icon={<Share2 className="w-4 h-4 text-muted-foreground mt-0.5" />}
             >
               <ShareButton
                 title={store.name}
                 text={store.parrrafo}
                 url={`https://roumenu.vercel.app/t/${store.sitioweb}`}
-                className="p-0 text-base dark:text-slate-300"
+                className="p-0 text-sm text-foreground"
               >
                 Compartir Perfil
               </ShareButton>
@@ -200,96 +174,96 @@ export default function AboutPage() {
 
           {/* Rating Section */}
           <section className="mb-6">
-            <div className="bg-slate-50 dark:bg-slate-900/60 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-6">
-              <h3 className="text-slate-900 dark:text-slate-100 font-semibold text-lg mb-4">
+            <div className="bg-secondary/50 border border-border rounded-2xl p-5 space-y-4">
+              <h3 className="font-serif text-base font-semibold text-foreground">
                 Califica este catálogo
               </h3>
-              <div className="flex flex-col items-center gap-4">
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map((starValue) => (
-                    <button
-                      key={starValue}
-                      onClick={() => handleStarClick(starValue)}
-                      onMouseEnter={() => setRatingHover(starValue)}
-                      onMouseLeave={() => setRatingHover(0)}
-                      className="transition-transform hover:scale-110"
-                      type="button"
-                    >
-                      <Star
-                        className={`w-10 h-10 transition-colors ${
-                          starValue <= activeStar
-                            ? "fill-yellow-500 text-yellow-500"
-                            : "text-primary/60 dark:text-slate-600"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
+              <div className="flex justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((starValue) => (
+                  <button
+                    key={starValue}
+                    onClick={() => handleStarClick(starValue)}
+                    onMouseEnter={() => setRatingHover(starValue)}
+                    onMouseLeave={() => setRatingHover(0)}
+                    className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:bg-primary/10 transition-colors group"
+                    type="button"
+                  >
+                    <Star
+                      className={`w-5 h-5 transition-colors ${
+                        starValue <= activeStar
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-muted-foreground/40 group-hover:text-amber-400"
+                      }`}
+                    />
+                  </button>
+                ))}
               </div>
             </div>
           </section>
 
           {/* Reviews Section */}
           <section className="mb-6">
-            <div className="bg-slate-50 dark:bg-slate-900/60 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-slate-900 dark:text-slate-100 font-semibold text-lg">
+            <div className="bg-secondary/50 border border-border rounded-2xl p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-serif text-base font-semibold text-foreground">
                   Reseñas
                 </h3>
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-                  <span className="text-slate-900 dark:text-slate-100 font-semibold">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-background border border-border">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-xs font-semibold text-foreground">
                     {store.comentTienda.promedio.toFixed(1)}
                   </span>
-                  <span className="text-slate-700 dark:text-slate-400 text-sm">
+                  <span className="text-xs text-muted-foreground">
                     ({store.comentTienda.total})
                   </span>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {store.comentTienda.data.map((review) => (
                   <div
                     key={review.id}
-                    className="border-b border-slate-300 dark:border-slate-700 last:border-0 pb-4 last:pb-0"
+                    className="border-b border-border last:border-0 pb-3 last:pb-0"
                   >
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between mb-1.5">
                       <div>
-                        <h4 className="text-slate-900 dark:text-slate-100 font-medium">
+                        <p className="text-sm font-medium text-foreground">
                           {review.user.name}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1">
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <Star
                                 key={star}
-                                className={`w-4 h-4 ${
+                                className={`w-3 h-3 ${
                                   star <= review.star
-                                    ? "fill-yellow-500 text-yellow-500"
-                                    : "text-slate-600 dark:text-slate-600"
+                                    ? "fill-amber-400 text-amber-400"
+                                    : "text-muted-foreground/30"
                                 }`}
                               />
                             ))}
                           </div>
-                          <span className="text-slate-700 dark:text-slate-400 text-xs">
+                          <span className="text-xs text-muted-foreground">
                             {format(review.created_at, "short")}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-400 text-sm mb-3 line-clamp-2">
-                      {review.cmt}
-                    </p>
+                    {review.cmt && (
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {review.cmt}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
 
               <Link
                 href={`/t/${store.sitioweb}/about/ratings`}
-                className="w-full mt-6 py-3 bg-primary/50 dark:bg-primary/30 hover:bg-primary/70 dark:hover:bg-primary/50 text-slate-100 font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full py-2.5 rounded-xl border border-border bg-background hover:bg-secondary transition-colors flex items-center justify-center gap-2 text-sm font-medium text-foreground"
               >
                 <span>Ver todas las reseñas</span>
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </section>
@@ -297,20 +271,20 @@ export default function AboutPage() {
           {/* Social Media */}
           {store.redes.length > 0 && (
             <section className="mb-6">
-              <h3 className="text-slate-900 dark:text-slate-100 font-semibold text-lg mb-3 px-1">
+              <h3 className="font-serif text-base font-semibold text-foreground mb-3 px-1">
                 Facebook e Instagram
               </h3>
-              <div className="bg-slate-50 dark:bg-slate-900/60 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4">
+              <div className="bg-secondary/50 border border-border rounded-2xl p-4">
                 <div className="flex flex-col gap-3">
                   {store.redes.map((red, idx) => (
                     <div className="flex items-center gap-3" key={idx}>
                       <IconSelect
                         iconName={red.tipo}
-                        className="w-5 h-5 text-slate-700 dark:text-slate-400"
+                        className="w-4 h-4 text-muted-foreground"
                       />
                       <Link
                         href={red.url}
-                        className="text-cyan-800 dark:text-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors"
+                        className="text-sm text-primary hover:opacity-75 transition-opacity"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -325,31 +299,25 @@ export default function AboutPage() {
 
           {/* Contact Info */}
           <section className="mb-6">
-            <h3 className="text-slate-900 dark:text-slate-100 font-semibold text-lg mb-3 px-1">
+            <h3 className="font-serif text-base font-semibold text-foreground mb-3 px-1">
               Info. y número de teléfono
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <InfoCard
-                icon={
-                  <Info className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
-                }
+                icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
               >
-                <p className="text-slate-900 dark:text-slate-200 mb-1 line-clamp-5">
+                <p className="text-sm text-foreground mb-0.5 line-clamp-5">
                   {store.parrrafo || "..."}
                 </p>
-                <p className="text-slate-700 dark:text-slate-400 text-sm">
-                  Información
-                </p>
+                <p className="text-xs text-muted-foreground">Información</p>
               </InfoCard>
               <InfoCard
                 icon={
-                  <Phone className="w-5 h-5 text-slate-700 dark:text-slate-400 mt-0.5" />
+                  <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
                 }
               >
-                <p className="text-slate-900 dark:text-slate-100 mb-1">
-                  +{store.cell}
-                </p>
-                <p className="text-slate-700 dark:text-slate-400 text-sm">
+                <p className="text-sm text-foreground mb-0.5">+{store.cell}</p>
+                <p className="text-xs text-muted-foreground">
                   Número de teléfono
                 </p>
               </InfoCard>
@@ -357,23 +325,23 @@ export default function AboutPage() {
           </section>
         </div>
 
-        <Separator className="dark:bg-slate-700" />
-        <footer className="p-4 border-t dark:border-slate-700">
+        <Separator className="bg-border" />
+        <footer className="p-4 border-t border-border">
           <Link
-            className="text-lg text-(--text-muted) dark:text-slate-400 flex flex-col justify-center items-center h-full"
+            className="text-sm text-muted-foreground flex flex-col justify-center items-center gap-2"
             href="https://rouadmin.vercel.app"
           >
             <Image
               src={logoAdmin}
               alt={store.name || ""}
-              width={300}
-              height={300}
-              className="rounded-full w-40 h-40 object-cover"
+              width={120}
+              height={120}
+              className="rounded-full w-24 h-24 object-cover opacity-80"
             />
             Ir al panel de administración
           </Link>
         </footer>
-        <Separator className="dark:bg-slate-700" />
+        <Separator className="bg-border" />
       </div>
 
       <PreviewRatingGeneral
@@ -385,7 +353,6 @@ export default function AboutPage() {
   );
 }
 
-// Componente reutilizable para tarjetas de info
 const InfoCard = memo(function InfoCard({
   icon,
   children,
@@ -394,7 +361,7 @@ const InfoCard = memo(function InfoCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-slate-50 dark:bg-slate-900/60 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 mb-3">
+    <div className="bg-secondary/50 border border-border rounded-xl p-3.5 mb-2">
       <div className="flex items-start gap-3">
         {icon}
         <div className="flex-1">{children}</div>
@@ -402,8 +369,6 @@ const InfoCard = memo(function InfoCard({
     </div>
   );
 });
-
-// --- Horarios ---
 
 interface HorarioGroup {
   dias: string[];
@@ -413,14 +378,12 @@ interface HorarioGroup {
 
 function agruparHorarios(horarios: ScheduleInterface[]): HorarioGroup[] {
   if (!horarios || horarios.length === 0) return [];
-
   const grouped: HorarioGroup[] = [];
   let currentGroup: HorarioGroup = {
     dias: [horarios[0].dia],
     apertura: horarios[0].apertura,
     cierre: horarios[0].cierre,
   };
-
   for (let i = 1; i < horarios.length; i++) {
     const hor = horarios[i];
     const prev = horarios[i - 1];
@@ -449,17 +412,14 @@ function formatearHorario(apertura: string, cierre: string): string {
   try {
     const aperturaDate = new Date(apertura);
     const cierreDate = new Date(cierre);
-
     const isAbierto24h =
       (aperturaDate.getHours() === 0 && cierreDate.getHours() === 0) ||
       aperturaDate.getDate() + 1 === cierreDate.getDate();
     if (isAbierto24h) return "Abierto 24 horas";
-
     const isCerrado =
       aperturaDate.getHours() === cierreDate.getHours() &&
       aperturaDate.getDate() === cierreDate.getDate();
     if (isCerrado) return "Cerrado";
-
     const aperturaStr = aperturaDate
       .toLocaleTimeString("es-ES", TIME_OPTIONS)
       .toLowerCase();
@@ -487,21 +447,20 @@ const HorariosComponent = memo(function HorariosComponent({
 }) {
   if (!horario || horario.length === 0) {
     return (
-      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-500">
-        <Clock className="w-4 h-4" />
-        <span className="text-sm">Horarios no disponibles</span>
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Clock className="w-3.5 h-3.5" />
+        <span className="text-xs">Horarios no disponibles</span>
       </div>
     );
   }
-
   return (
-    <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+    <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
       {groupedHorarios.map((group, index) => (
         <div key={index} className="flex justify-between items-center">
-          <span className="text-slate-800 dark:text-slate-200 text-sm">
+          <span className="text-sm text-foreground">
             {formatearDias(group.dias)}
           </span>
-          <span className="text-slate-700 dark:text-slate-400 text-sm">
+          <span className="text-xs text-muted-foreground">
             {formatearHorario(group.apertura, group.cierre)}
           </span>
         </div>

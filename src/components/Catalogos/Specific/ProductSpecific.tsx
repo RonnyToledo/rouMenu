@@ -37,28 +37,23 @@ export default function Product({ id }: { id: string }) {
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
 
-  // Memoizar el producto inicial para evitar recalcular en cada render
   const initialProduct = useMemo(() => {
     return store.products.find((obj) => obj.productId === id);
   }, [store.products, id]);
 
-  // Verificar si el producto existe
   useEffect(() => {
     if (!initialProduct) {
       notFound();
     }
   }, [initialProduct]);
 
-  // Calcular el conteo inicial basado en el producto
   const initialCount = useMemo(() => {
     if (!initialProduct) return 0;
-
     const totalAgregados =
       initialProduct.agregados?.reduce(
         (sum, agg) => sum + (agg.cant || 0),
         0,
       ) || 0;
-
     return totalAgregados > 0
       ? 0
       : (initialProduct.stock || 0) -
@@ -72,7 +67,6 @@ export default function Product({ id }: { id: string }) {
         : 0;
   }, [initialProduct]);
 
-  // Inicializar estados con valores calculados
   const [product, setProduct] = useState<ProductInterface | undefined>(
     initialProduct,
   );
@@ -83,17 +77,12 @@ export default function Product({ id }: { id: string }) {
   const handleToCart = (productToCart: ProductInterface) => {
     setIsAddingToCart(true);
     setTimeout(() => setIsAddingToCart(false), 800);
-    dispatchStore({
-      type: "AddCart",
-      payload: JSON.stringify(productToCart),
-    });
-
+    dispatchStore({ type: "AddCart", payload: JSON.stringify(productToCart) });
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
     router.push(`/t/${store.sitioweb}`);
   };
 
-  // Si recibimos la pagina fuera de la posicion de inicio ponerla en top 0
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -106,14 +95,8 @@ export default function Product({ id }: { id: string }) {
   const handleSwipeEnd = (e: React.TouchEvent<HTMLDivElement>): void => {
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-
-    // Solo swipes horizontales significativos
     if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0) {
-        navigateToProduct("previous");
-      } else {
-        navigateToProduct("next");
-      }
+      navigateToProduct(deltaX > 0 ? "previous" : "next");
     }
   };
 
@@ -124,13 +107,8 @@ export default function Product({ id }: { id: string }) {
         direction === "next"
           ? (currentIndex + 1) % store.products.length
           : (currentIndex - 1 + store.products.length) % store.products.length;
-
       const newProductId = store.products[newIndex].productId;
-
-      const path = `/t/${store.sitioweb || ""}/producto/${
-        newProductId || ""
-      }?direction=${direction}`;
-
+      const path = `/t/${store.sitioweb || ""}/producto/${newProductId || ""}?direction=${direction}`;
       if (path.includes("undefined")) {
         console.error("Path generado contiene valores no válidos:", path);
         return;
@@ -142,21 +120,13 @@ export default function Product({ id }: { id: string }) {
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent): void => {
-      if (event.key === "ArrowLeft") {
-        navigateToProduct("previous");
-      } else if (event.key === "ArrowRight") {
-        navigateToProduct("next");
-      }
+      if (event.key === "ArrowLeft") navigateToProduct("previous");
+      else if (event.key === "ArrowRight") navigateToProduct("next");
     };
-
     window.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [navigateToProduct]);
 
-  // Copiar informacion para repostear
   const links = useMemo(
     () => [
       { name: "Inicio", link: `/t/${store.sitioweb}` },
@@ -197,17 +167,12 @@ export default function Product({ id }: { id: string }) {
     ],
   );
 
-  // Si no hay producto, no renderizar nada (notFound se encargará)
-  if (!product) {
-    return null;
-  }
+  if (!product) return null;
 
   return (
     <main className="flex flex-col items-start min-h-dvh">
-      {/* Left Column - Images */}
-
+      {/* Image section */}
       <div className="flex flex-col gap-1 w-full">
-        {/* Main Image */}
         <AnimatePresence mode="wait">
           <motion.div
             key={product.image}
@@ -243,9 +208,9 @@ export default function Product({ id }: { id: string }) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Thumbnails */}
+        {/* Thumbnails — border-border en vez de hardcoded slate */}
         {(product.imagesecondary || []).length > 0 && (
-          <div className="grid grid-cols-3 gap-1 p-2">
+          <div className="grid grid-cols-3 gap-1.5 px-3 py-2">
             {(product.imagesecondary || []).map((image, index) => (
               <button
                 key={index}
@@ -258,7 +223,7 @@ export default function Product({ id }: { id: string }) {
                     ) as string[],
                   });
                 }}
-                className="aspect-square rounded-lg overflow-hidden bg-slate-200/50 hover:bg-slate-300/50 border-2 border-slate-300 hover:border-slate-400 transition-all"
+                className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary/50 opacity-75 hover:opacity-100 transition-all duration-200"
               >
                 <Image
                   width={150}
@@ -272,124 +237,131 @@ export default function Product({ id }: { id: string }) {
           </div>
         )}
       </div>
-      <div className="max-w-7xl mx-auto grid grid-cols-1 gap-1 px-4 py-1">
-        {/* Breadcrumb */}
+
+      <div className="max-w-7xl mx-auto grid grid-cols-1 gap-1 px-4 py-2">
         <BreadCrumpParent list={links} />
-        {/* Right Column - Product Info */}
-        <div className="space-y-2">
-          {/* Title and Actions */}
-          <div className="sapce-y-2">
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <Link
-                  href={`/t/${store.sitioweb}/producto/${product.productId}/coment`}
-                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                >
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(product.coment.promedio || 0)
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-slate-400 dark:text-slate-600"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-slate-700 dark:text-slate-300 transition-colors">
-                    {product.coment.promedio} ({product.coment.total} reseñas)
-                  </span>
-                </Link>
 
-                <div className="flex gap-2">
-                  <ClipboardProduct
-                    title={`${product.title || ""}`}
-                    descripcion={product.descripcion || ""}
-                    url={product.image}
-                    price={product.price || 0 || 0}
-                    oldPrice={product.oldPrice || 0}
-                    className="p-0 m-0"
+        <div className="space-y-3">
+          {/* Rating & Actions */}
+          <div className="flex items-center justify-between">
+            <Link
+              href={`/t/${store.sitioweb}/producto/${product.productId}/coment`}
+              className="flex items-center gap-1.5 hover:opacity-75 transition-opacity"
+            >
+              <div className="flex gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.floor(product.coment.promedio || 0)
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/30"
+                    }`}
                   />
-                  <ShareButton
-                    title={`${product.title || ""}`}
-                    text={product.descripcion}
-                    url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
-                  />
-                </div>
+                ))}
               </div>
-            </div>
+              <span className="text-xs text-muted-foreground">
+                {product.coment.promedio} ({product.coment.total} reseñas)
+              </span>
+            </Link>
 
-            {/* Price and Stock */}
-            <div className="flex items-center justify-between gap-1">
-              <div className="flex items-center gap-3">
-                <p className="text-3xl font-bold text-slate-800 dark:text-slate-100 transition-colors">
-                  ${product.price || 0}{" "}
+            {/* Share actions — mismo patrón Button ghost rounded-full del header */}
+            <div className="flex gap-1">
+              <ClipboardProduct
+                title={`${product.title || ""}`}
+                descripcion={product.descripcion || ""}
+                url={product.image}
+                price={product.price || 0}
+                oldPrice={product.oldPrice || 0}
+                className="p-0 m-0"
+              />
+              <ShareButton
+                title={`${product.title || ""}`}
+                text={product.descripcion}
+                url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
+              />
+            </div>
+          </div>
+
+          {/* Price & Stock */}
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-3xl font-bold text-foreground">
+                ${product.price || 0}{" "}
+                <span className="text-base font-medium text-muted-foreground">
                   {store.moneda.find((m) => m.id === product.default_moneda)
                     ?.nombre || ""}
-                </p>
-                {(product.oldPrice || 0) > (product.price || 0) && (
-                  <>
-                    <p className="text-lg text-slate-600 dark:text-slate-400 line-through transition-colors">
-                      ${product.oldPrice || 0}
-                    </p>
-                    <Badge variant="destructive" className="animate-pulse">
-                      {Math.round(
-                        (((product.oldPrice || 0) - (product.price || 0)) /
-                          (product.oldPrice || 0)) *
-                          100,
-                      )}
-                      % OFF
-                    </Badge>
-                  </>
-                )}
-              </div>
-
-              {product.stock ? (
-                <div className="flex items-center gap-2 text-emerald-400">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  <span className="text-sm font-medium">En stock</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-red-400">
-                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                  <span className="text-sm font-medium">Off Stock</span>
-                </div>
+                </span>
+              </p>
+              {(product.oldPrice || 0) > (product.price || 0) && (
+                <>
+                  <p className="text-base text-muted-foreground line-through">
+                    ${product.oldPrice || 0}
+                  </p>
+                  <Badge
+                    variant="destructive"
+                    className="animate-pulse rounded-full text-xs"
+                  >
+                    {Math.round(
+                      (((product.oldPrice || 0) - (product.price || 0)) /
+                        (product.oldPrice || 0)) *
+                        100,
+                    )}
+                    % OFF
+                  </Badge>
+                </>
               )}
             </div>
 
-            {/* Tags */}
-            {(tags || []).length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {(tags || []).map((tag, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="bg-slate-300 text-slate-800 border-slate-400 hover:bg-slate-400"
-                  >
-                    {tag}
-                  </Badge>
-                ))}
+            {/* Stock pill — coherente con ProductSpecific mock */}
+            {product.stock ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  En stock
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20">
+                <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                  Off Stock
+                </span>
               </div>
             )}
           </div>
 
+          {/* Tags */}
+          {(tags || []).length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {(tags || []).map((tag, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="rounded-full text-xs px-2.5 border border-border"
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+
           {/* Packaging */}
           {(product.embalaje || 0) > 0 && (
-            <Card className="p-4 bg-slate-200/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 transition-colors">
+            <Card className="px-4 py-3 border-border shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-slate-800 dark:text-slate-200 mb-1">
+                  <h3 className="text-sm font-medium text-foreground mb-0.5">
                     Embalaje
                   </h3>
-                  <p className="text-sm text-slate-700 dark:text-slate-400">
+                  <p className="text-xs text-muted-foreground">
                     ${product.embalaje.toFixed(2)}{" "}
                     {store.moneda.find((m) => m.id === product.default_moneda)
                       ?.nombre || ""}
                   </p>
                 </div>
-                <div className="bg-emerald-500 rounded-full p-2">
-                  <Check className="w-4 h-4 text-slate-800" />
+                <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-emerald-500" />
                 </div>
               </div>
             </Card>
@@ -397,12 +369,10 @@ export default function Product({ id }: { id: string }) {
 
           {/* Extras */}
           {(product.agregados || []).length > 0 && (
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div>
-                <h3 className="font-medium text-slate-800 dark:text-slate-200">
-                  Extras
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <h3 className="text-sm font-medium text-foreground">Extras</h3>
+                <p className="text-xs text-muted-foreground">
                   Agregados para su encargo
                 </p>
               </div>
@@ -410,25 +380,26 @@ export default function Product({ id }: { id: string }) {
               {product.agregados.map((extra) => (
                 <Card
                   key={extra.id}
-                  className="p-4 bg-slate-200/50 dark:bg-slate-800/50 border-slate-300 dark:border-slate-700 transition-colors"
+                  className="px-4 py-3 border-border shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium text-slate-800 dark:text-slate-200">
+                      <div className="text-sm font-medium text-foreground">
                         {extra.name}
                       </div>
-                      <div className="text-sm text-slate-700 dark:text-slate-400">
+                      <div className="text-xs text-muted-foreground">
                         ${extra.price.toFixed(2)}{" "}
                         {store.moneda.find(
                           (m) => m.id === product.default_moneda,
                         )?.nombre || ""}
                       </div>
                     </div>
+                    {/* Controles — rounded-full, ghost, border-border */}
                     <div className="flex items-center gap-2">
                       {extra.cant > 0 && (
                         <>
                           <Button
-                            variant="outline"
+                            variant="ghost"
                             size="icon"
                             onClick={() =>
                               setProduct({
@@ -440,20 +411,20 @@ export default function Product({ id }: { id: string }) {
                                 ),
                               })
                             }
-                            className="h-8 w-8 bg-slate-300 hover:bg-slate-400 border-slate-400 rounded-full"
+                            className="h-8 w-8 rounded-full border border-border"
                           >
-                            <Minus className="h-4 w-4 text-slate-800" />
+                            <Minus className="h-3.5 w-3.5" />
                           </Button>
                           <Badge
                             variant="outline"
-                            className="bg-slate-300 text-slate-800 border-slate-400 px-3"
+                            className="rounded-full px-2.5 text-xs border-border min-w-7 text-center"
                           >
                             {extra.cant}
                           </Badge>
                         </>
                       )}
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="icon"
                         onClick={() =>
                           setProduct({
@@ -465,48 +436,47 @@ export default function Product({ id }: { id: string }) {
                             ),
                           })
                         }
-                        className="h-8 w-8 bg-slate-300 hover:bg-slate-400 border-slate-400 rounded-full"
+                        className="h-8 w-8 rounded-full border border-border"
                       >
-                        <Plus className="h-4 w-4 text-slate-800" />
+                        <Plus className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
                 </Card>
               ))}
-              <p className="text-xs text-slate-600 text-center">
+
+              <p className="text-xs text-muted-foreground/70 text-center">
                 *El extra es el producto con el agregado incluido
               </p>
             </div>
           )}
 
-          {/* Quantity Selector */}
-          <div className="flex items-center justify-center gap-6 py-2">
+          {/* Quantity — misma estética bg-secondary rounded-full */}
+          <div className="flex items-center justify-center gap-4 py-1">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               disabled={countAddCart === 0}
               onClick={() => setCountAddCart(countAddCart - 1)}
-              className="h-10 w-10 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-full transition-colors"
+              className="h-10 w-10 rounded-full border border-border bg-secondary hover:bg-muted transition-colors"
             >
-              <Minus className="w-5 h-5" />
+              <Minus className="w-4 h-4" />
             </Button>
-            <span className="text-2xl font-semibold text-slate-800 dark:text-slate-100 w-16 text-center transition-colors">
+            <span className="text-2xl font-semibold text-foreground w-12 text-center">
               {countAddCart}
             </span>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              onClick={() => {
-                setCountAddCart(countAddCart + 1);
-              }}
-              className="h-10 w-10 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-800 dark:text-slate-200 rounded-full transition-colors"
+              onClick={() => setCountAddCart(countAddCart + 1)}
+              className="h-10 w-10 rounded-full border border-border bg-secondary hover:bg-muted transition-colors"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4" />
             </Button>
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
+          {/* Action Buttons — rounded-full h-12, active:scale */}
+          <div className="space-y-2">
             <Button
               disabled={
                 (product.stock || 0) - (product.Cant || 0) < countAddCart
@@ -517,30 +487,28 @@ export default function Product({ id }: { id: string }) {
                   Cant: (product.Cant || 0) + countAddCart || 0,
                 } as ProductInterface);
               }}
-              className={`w-full h-12 text-base font-medium rounded-3xl transition-all duration-300 ${
+              className={`w-full h-12 text-base font-semibold rounded-full transition-all duration-300 gap-2 active:scale-[0.98] ${
                 showSuccess
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "hover:scale-105"
+                  ? "bg-emerald-600 hover:bg-emerald-700"
+                  : "hover:opacity-90"
               } ${isAddingToCart ? "scale-95" : ""}`}
             >
               {isAddingToCart ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <>
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                   Agregando...
-                </div>
+                </>
               ) : showSuccess ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-green-600 rounded-full" />
-                  </div>
+                <>
+                  <Check className="w-4 h-4" />
                   ¡Agregado al carrito!
-                </div>
+                </>
               ) : (
-                <div className="flex items-center gap-2">
+                <>
                   <ShoppingCart className="w-4 h-4" />
-                  Agregar al carrito - $
+                  Agregar al carrito · $
                   {(
-                    ((product.price || 0 || 0) + (product.embalaje || 0)) *
+                    ((product.price || 0) + (product.embalaje || 0)) *
                       countAddCart +
                     (product.agregados.reduce(
                       (sum, agg) =>
@@ -550,13 +518,13 @@ export default function Product({ id }: { id: string }) {
                       0,
                     ) || 0)
                   ).toFixed(2)}
-                </div>
+                </>
               )}
             </Button>
 
             <Button
               variant="outline"
-              className="w-full h-12 rounded-3xl hover:scale-105 transition-transform duration-200 bg-transparent"
+              className="w-full h-12 rounded-full font-semibold transition-all duration-200 active:scale-[0.98]"
               onClick={() => router.push(`/t/${store.sitioweb}/carrito`)}
             >
               Comprar ahora
@@ -565,18 +533,18 @@ export default function Product({ id }: { id: string }) {
 
           {/* Description */}
           {product.descripcion ? (
-            <div className="pt-1 border-t border-slate-300 dark:border-slate-700 transition-colors">
-              <h3 className="font-semibold text-slate-800 dark:text-slate-200 mb-2">
+            <div className="pt-3 border-t border-border">
+              <h3 className="text-sm font-semibold text-foreground mb-1.5">
                 Descripción
               </h3>
-              <p className="text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line transition-colors">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                 {product.descripcion}
               </p>
             </div>
           ) : null}
 
-          {/* Ratings Summary */}
-          <div className="pt-6 border-t border-slate-300 dark:border-slate-700 transition-colors">
+          {/* Ratings */}
+          <div className="pt-4 border-t border-border">
             <RatingSection
               specific={product.productId || id}
               sitioweb={store.sitioweb || ""}
@@ -601,9 +569,12 @@ function BreadCrumpParent({ list }: { list: BreadcrumbInterface[] }) {
           <div key={`Bread-${index}`} className="flex items-center">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={item.link} className="max-w-28 line-clamp-1">
+                <Link
+                  href={item.link}
+                  className="max-w-28 line-clamp-1 text-xs"
+                >
                   {item.name === "Inicio" ? (
-                    <HomeIcon className="size-4" />
+                    <HomeIcon className="w-3.5 h-3.5" />
                   ) : (
                     item.name
                   )}

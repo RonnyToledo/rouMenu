@@ -42,40 +42,40 @@ export default function AboutMePage() {
   );
 
   return (
-    <div className="bg-background dark:bg-slate-950">
+    <div className="bg-background transition-colors duration-300">
       <div className="mx-auto p-4 space-y-4">
-        {/* Profile Section */}
-        <Card className="overflow-hidden p-0 dark:bg-slate-900 dark:border-slate-700">
+        {/* Profile card */}
+        <Card className="overflow-hidden p-0 border-border shadow-sm">
           <CardContent className="p-0">
-            <div className="bg-linear-to-br from-primary/10 to-accent/10 dark:from-primary/5 dark:to-accent/5 p-4 flex items-center justify-center">
+            <div className="bg-secondary/60 p-6 flex items-center justify-center">
               <Image
                 height={200}
                 width={200}
                 src={store.urlPoster || logoApp}
                 alt={store.name || ""}
-                className="w-44 h-44 rounded-full object-cover"
+                className="w-40 h-40 rounded-full object-cover border-2 border-border"
               />
             </div>
-            <div className="p-8 space-y-2">
+            <div className="p-6 space-y-3">
               {store.history && (
                 <>
-                  <h2 className="font-heading text-2xl font-bold text-card-foreground dark:text-slate-100">
+                  <h2 className="font-serif text-xl font-bold text-foreground">
                     Sobre Mí
                   </h2>
                   <ExpandableText text={store.history} lines={6} />
                 </>
               )}
 
-              <div className="grid grid-cols-1 gap-4 text-sm">
+              <div className="space-y-2 text-sm pt-1">
                 <div className="flex items-center gap-2">
-                  <MapPin className="size-6 text-slate-700 dark:text-slate-400" />
-                  <span className="text-slate-700 dark:text-slate-300">
+                  <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">
                     {store.Provincia}, {store.country}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Award className="size-6 text-slate-700 dark:text-slate-400" />
-                  <span className="text-slate-700 dark:text-slate-300">
+                  <Award className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">
                     +{stockCount} Productos
                   </span>
                 </div>
@@ -84,14 +84,12 @@ export default function AboutMePage() {
           </CardContent>
         </Card>
 
-        {/* Skills Section */}
+        {/* Skills */}
         {skills.length > 0 && (
-          <div className="bg-accent/5 dark:bg-slate-900/50 rounded-lg p-2">
-            <div className="grid grid-cols-2 gap-2">
-              {skills.map((skill) => (
-                <SkillCard key={skill.name} skill={skill} />
-              ))}
-            </div>
+          <div className="grid grid-cols-2 gap-2">
+            {skills.map((skill) => (
+              <SkillCard key={skill.name} skill={skill} />
+            ))}
           </div>
         )}
       </div>
@@ -101,13 +99,11 @@ export default function AboutMePage() {
 
 const SkillCard = memo(function SkillCard({ skill }: { skill: Skill }) {
   return (
-    <Card className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 py-2 dark:bg-slate-900 dark:border-slate-700 dark:hover:border-slate-600">
-      <CardContent className="p-2 text-center">
-        <skill.icon className="h-8 w-8 text-slate-700 dark:text-slate-400 mx-auto mb-4" />
-        <h3 className="font-heading font-semibold mb-2 text-slate-900 dark:text-slate-100">
-          {skill.name}
-        </h3>
-        <p className="text-sm text-muted-foreground dark:text-slate-400">
+    <Card className="border-border shadow-sm transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98]">
+      <CardContent className="p-4 text-center space-y-1.5">
+        <skill.icon className="w-7 h-7 text-muted-foreground mx-auto" />
+        <h3 className="font-semibold text-sm text-foreground">{skill.name}</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed">
           {skill.description}
         </p>
       </CardContent>

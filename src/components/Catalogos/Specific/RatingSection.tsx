@@ -19,9 +19,8 @@ export default function RatingSection({
   sitioweb: string;
 }) {
   const { store, dispatchStore } = useContext(MyContext);
-
   const { user, requireAuth } = useAuth();
-  const [reviewOpen, setReviewOpen] = useState(false); // controla modal de reseña
+  const [reviewOpen, setReviewOpen] = useState(false);
   const [rating, setRating] = useState<RatingInterface>(() => ({
     ...initialState,
     nombre: user?.user_metadata.full_name || "",
@@ -44,20 +43,14 @@ export default function RatingSection({
   }, [user?.user_metadata.full_name, rating.nombre]);
 
   const handleStarClick = async (rating: number) => {
-    setRating((prev) => ({
-      ...prev,
-      selectedRating: rating,
-    }));
-
+    setRating((prev) => ({ ...prev, selectedRating: rating }));
     const isAuthenticated = await requireAuth(
       "Debes iniciar sesión para dejar una reseña",
     );
-    // Si el usuario no se autenticó o canceló, detener el proceso
     if (!isAuthenticated) {
       console.info("Usuario no autenticado, review cancelada");
       return;
     }
-
     setReviewOpen(true);
   };
 
@@ -73,7 +66,7 @@ export default function RatingSection({
           },
           uuid: user?.id,
         },
-        { headers: { "Content-Type": "application/json" } }, // Cambia a application/json
+        { headers: { "Content-Type": "application/json" } },
       );
 
       if (res.status === 200 || res.status === 201) {
@@ -88,81 +81,94 @@ export default function RatingSection({
       }
     } catch (error) {
       console.error("Error al enviar el comentario:", error);
-      toast("Error", {
-        description: "No se pudo enviar el comentario.",
-      });
+      toast("Error", { description: "No se pudo enviar el comentario." });
     }
   };
+
   return (
     <>
       {store.products
         .filter((env) => env.productId === specific)
         .map((obj, ind) => (
-          <div key={ind} className="max-w-xl mx-auto p-2 ">
-            <p className="text-slate-500 mb-2 text-sm text-center">
+          <div key={ind} className="max-w-xl mx-auto px-2 py-1">
+            <p className="text-sm text-muted-foreground mb-3 text-center leading-relaxed">
               {obj.coment?.total == 0
                 ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
-                : "Las calificaciones y opiniones provienen de personas que compraron este producto con otros usuarios."}
+                : "Las calificaciones y opiniones provienen de personas que compraron este producto."}
             </p>
 
             {product?.coment.promedio ? (
               <>
-                <div className="grid grid-cols-2 items-center gap-2 mb-2">
-                  <div className="flex flex-col items-center">
-                    <div className="text-6xl font-bold text-slate-800 mb-2">
-                      {product?.coment.promedio}
-                    </div>
-                    <div className="flex items-center justify-center mb-1">
+                <div className="grid grid-cols-2 items-center gap-3 mb-3">
+                  {/* Score grande */}
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-5xl font-bold text-foreground leading-none">
+                      {product.coment.promedio}
+                    </span>
+                    <div className="flex gap-0.5">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.floor(product?.coment.promedio || 0)
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-slate-400"
+                          className={`w-4 h-4 ${
+                            i < Math.floor(product.coment.promedio || 0)
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-muted-foreground/30"
                           }`}
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-slate-600">
-                      {product?.coment.total} reseñas
+                    <p className="text-xs text-muted-foreground">
+                      {product.coment.total} reseñas
                     </p>
                   </div>
 
                   <StarSpecifications datos={obj.coment.porEstrellas} />
                 </div>
-                <div>
-                  <Button asChild variant="ghost">
-                    <Link
-                      href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
-                      className="text-blue-400 hover:text-blue-300 text-sm font-medium"
-                    >
-                      Todos los comentarios →
-                    </Link>
-                  </Button>
-                </div>
+
+                {/* Link — mismo estilo Button ghost del header */}
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full text-xs px-3 h-8"
+                >
+                  <Link
+                    href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
+                    className="text-primary"
+                  >
+                    Ver todos los comentarios →
+                  </Link>
+                </Button>
               </>
             ) : null}
-            <Separator />
-            <div className="pt-2">
-              <h3 className="text-lg mb-1 text-center text-slate-700 font-medium">
-                Califica este producto
-              </h3>
-              <p className="text-slate-400 mb-4 text-base text-center">
-                Comparte tu opinión con otros usuarios
-              </p>
+
+            <Separator className="my-3" />
+
+            {/* Rating stars */}
+            <div className="pt-1 space-y-2">
+              <div className="text-center">
+                <h3 className="font-serif text-base font-semibold text-foreground">
+                  Califica este producto
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Comparte tu opinión con otros usuarios
+                </p>
+              </div>
+
+              {/* Stars — mismo patrón del ProductSpecific (rounded-full bg-secondary) */}
               <div className="flex gap-2 justify-center">
                 {[1, 2, 3, 4, 5].map((starValue) => (
                   <button
                     key={starValue}
                     onClick={() => handleStarClick(starValue)}
-                    className="hover:scale-110 transition-transform"
+                    className="w-10 h-10 rounded-full bg-secondary hover:bg-primary/10 flex items-center justify-center transition-colors group"
+                    aria-label={`Calificar con ${starValue} estrella${starValue > 1 ? "s" : ""}`}
                   >
                     <Star
-                      className={`size-7 ${
+                      className={`w-5 h-5 transition-colors ${
                         starValue <= rating.selectedRating
-                          ? "fill-slate-600 text-slate-600"
-                          : "text-slate-400"
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-muted-foreground/40 group-hover:text-amber-400 group-hover:fill-amber-400"
                       }`}
                     />
                   </button>
@@ -178,15 +184,14 @@ export default function RatingSection({
               userName="Usuario"
               user={user?.user_metadata.full_name}
               handleSubmit={handleSubmit}
-              imageUser={
-                user?.user_metadata.avatar_url || user?.user_metadata.avatar_url
-              }
+              imageUser={user?.user_metadata.avatar_url}
             />
           </div>
         ))}
     </>
   );
 }
+
 export function StarSpecifications({ datos }: { datos: StarDistribution }) {
   const porEstrellas = datos || {
     "5": 0,
@@ -197,28 +202,24 @@ export function StarSpecifications({ datos }: { datos: StarDistribution }) {
     "0": 0,
   };
 
-  // 1️⃣ Calcula el total solo 1 vez
   const totalVotos = Object.values(porEstrellas).reduce(
     (sum, v) => (sum = (sum || 0) + (v || 0)),
     0,
   );
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 space-y-1">
       {[5, 4, 3, 2, 1].map((item) => {
         const votos =
           porEstrellas[item.toString() as keyof typeof porEstrellas] || 0;
-        // evita dividir por cero
         const porcentaje = totalVotos > 0 ? (votos * 100) / totalVotos : 0;
         return (
-          <div key={item} className="flex items-center gap-1">
-            <span className="w-3 text-slate-700">{item}</span>
-            <div className="flex-1 h-2 bg-slate-400 rounded-full overflow-hidden">
+          <div key={item} className="flex items-center gap-2">
+            <span className="w-3 text-xs text-muted-foreground">{item}</span>
+            <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden border border-border">
               <div
-                className="h-full bg-blue-400"
-                style={{
-                  width: `${porcentaje}%`,
-                }}
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${porcentaje}%` }}
               />
             </div>
           </div>

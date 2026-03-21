@@ -56,76 +56,77 @@ export default function Resumen({
   );
 
   return (
-    <Card className="p-2 gap-2 dark:bg-slate-900">
-      <CardHeader className="p-2 gap-0">
-        <CardTitle className="text-lg">Resumen del Pedido</CardTitle>
+    <Card className="border-border shadow-sm gap-2 py-4">
+      <CardHeader className="px-4 py-0">
+        <CardTitle className="font-serif text-base font-semibold text-foreground">
+          Resumen del Pedido
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 px-4">
-        <div className="space-y-2">
-          <div className="text-sm space-y-1">
-            <div className="flex justify-between text-slate-700 dark:text-slate-300">
-              <span>Subtotal ({totalItems} productos)</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
+      <CardContent className="space-y-3 px-4">
+        <div className="space-y-1.5 text-sm">
+          <div className="flex justify-between text-muted-foreground">
+            <span>Subtotal ({totalItems} productos)</span>
+            <span className="text-foreground">${subtotal.toFixed(2)}</span>
+          </div>
 
-            {compra.code.discount > 0 && (
-              <div className="flex justify-between text-green-600 dark:text-green-400">
-                <span>Descuento ({compra.code.discount}%)</span>
-                <span>-${discount.toFixed(2)}</span>
-              </div>
-            )}
-
-            <div className="flex justify-between text-slate-700 dark:text-slate-300">
-              <div className="flex items-center gap-1">
-                <Truck className="w-4 h-4" />
-                <span>Envío</span>
-              </div>
-              <span>
-                {compra.shipping === 0
-                  ? "GRATIS"
-                  : `$${smartRound(compra.shipping).toFixed(2)}`}
-              </span>
+          {compra.code.discount > 0 && (
+            <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+              <span>Descuento ({compra.code.discount}%)</span>
+              <span>-${discount.toFixed(2)}</span>
             </div>
+          )}
 
-            <div className="flex justify-between text-slate-700 dark:text-slate-300">
-              <div className="flex items-center gap-1">
-                <GrCurrency className="w-4 h-4" />
-                <span>Moneda</span>
-              </div>
-              <span>{compra.moneda}</span>
+          <div className="flex justify-between text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Truck className="w-3.5 h-3.5" />
+              <span>Envío</span>
             </div>
+            <span className="text-foreground">
+              {compra.shipping === 0
+                ? "GRATIS"
+                : `$${smartRound(compra.shipping).toFixed(2)}`}
+            </span>
+          </div>
+
+          <div className="flex justify-between text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <GrCurrency className="w-3.5 h-3.5" />
+              <span>Moneda</span>
+            </div>
+            <span className="text-foreground">{compra.moneda}</span>
           </div>
         </div>
 
-        <Separator />
+        <Separator className="bg-border" />
 
-        <div className="flex justify-between text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <div className="flex justify-between font-semibold text-foreground">
           <span>Total</span>
-          <span>${grandTotal.toFixed(2)}</span>
+          <span className="text-lg">${grandTotal.toFixed(2)}</span>
         </div>
 
+        {/* CTA — rounded-full h-12 coherente con el sistema */}
         <Button
-          className="w-full dark:text-slate-100"
+          className="w-full h-12 rounded-full font-semibold gap-2 active:scale-[0.98] transition-all duration-200"
           size="lg"
           onClick={handleOrderClick}
           disabled={downloading}
         >
           {downloading ? (
             <>
-              <Loader className="animate-spin h-8 w-8 text-white dark:text-slate-100" />
+              <Loader className="animate-spin w-4 h-4" />
               Preparando su pedido
             </>
           ) : (
             <>
-              <MdOutlineShoppingCart className="h-8 w-8 text-white" />
+              <MdOutlineShoppingCart className="w-5 h-5" />
               {store.compraUUID ? "Modificar compra" : "Proceder al Checkout"}
             </>
           )}
         </Button>
 
-        <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
+        <p className="text-[10px] text-muted-foreground text-center">
           Envío seguro y protegido
-        </div>
+        </p>
       </CardContent>
     </Card>
   );

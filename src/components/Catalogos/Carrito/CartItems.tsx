@@ -10,7 +10,6 @@ import { FaChevronUp, FaChevronDown, FaRegTrashCan } from "react-icons/fa6";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { Props } from "./CodeDiscount";
 
-// Variantes de animación definidas fuera del componente
 const trashVariants = {
   initial: { opacity: 0, scale: 0.8, rotate: -45 },
   animate: { opacity: 1, scale: 1, rotate: 0 },
@@ -114,41 +113,40 @@ const CartItemRow = memo(function CartItemRow({
   const isAtStockLimit = store.stocks && cantidad >= stockTop;
 
   return (
-    <div className="shadow-xs space-y-1">
-      <div className="flex items-center border-b border-b-slate-200 dark:border-b-slate-700 p-2">
+    <div className="space-y-1">
+      <div className="flex items-center border-b border-border p-2 gap-3">
         <Image
           width={100}
           height={100}
           alt={item.title || "Producto"}
-          className="w-16 h-16 object-cover rounded-lg border-2 border-(--border-gold)"
+          className="w-14 h-14 object-cover rounded-xl border border-border shrink-0"
           src={item.image || logoApp}
         />
-        <div className="ml-4 grow">
-          <h4 className="font-bold font-cinzel line-clamp-1 text-(--text-dark) dark:text-slate-100 text-lg">
+        <div className="grow min-w-0">
+          <h4 className="font-semibold text-sm text-foreground line-clamp-1">
             {item.title}
           </h4>
-          <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">
+          <p className="text-xs text-muted-foreground mt-0.5">
             ${price} {moneda}
           </p>
         </div>
-        <div className="flex flex-col items-center">
+
+        {/* Quantity controls — mismos rounded-full del sistema */}
+        <div className="flex flex-col items-center gap-0.5 shrink-0">
           <Button
             variant="ghost"
             size="icon"
             onClick={onIncrement}
             disabled={!!isAtStockLimit}
-            className="size-6 p-0 hover:bg-green-50 dark:hover:bg-green-900/30 hover:border-green-300 dark:hover:border-green-700 hover:scale-110 transition-all duration-200"
+            className="w-7 h-7 rounded-full border border-border hover:bg-secondary transition-colors"
           >
-            <FaChevronUp className="w-4 h-4" />
+            <FaChevronUp className="w-3 h-3" />
           </Button>
 
-          <div className="relative overflow-hidden size-6 flex items-center justify-center">
+          <div className="relative overflow-hidden w-6 flex items-center justify-center">
             <span
               key={`${item.id}-${cantidad}`}
-              className="font-bold text-lg text-center text-slate-800 dark:text-slate-200 animate-in slide-in-from-bottom-5 duration-500 ease-out"
-              style={{
-                animation: "slideInUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              }}
+              className="font-bold text-sm text-center text-foreground animate-in slide-in-from-bottom-2 duration-300"
             >
               {cantidad}
             </span>
@@ -159,7 +157,7 @@ const CartItemRow = memo(function CartItemRow({
             size="icon"
             disabled={cantidad === 0}
             onClick={onDecrement}
-            className="size-6 p-0 hover:bg-red-50 dark:hover:bg-red-900/30 hover:border-red-300 dark:hover:border-red-700 hover:scale-110 transition-all duration-200"
+            className="w-7 h-7 rounded-full border border-border hover:bg-secondary transition-colors"
           >
             <AnimatePresence mode="wait" initial={false}>
               {cantidad === 1 ? (
@@ -172,7 +170,7 @@ const CartItemRow = memo(function CartItemRow({
                   transition={iconTransition}
                   className="inline-flex"
                 >
-                  <FaRegTrashCan className="text-red-700 dark:text-red-400" />
+                  <FaRegTrashCan className="w-3 h-3 text-red-500" />
                 </motion.span>
               ) : (
                 <motion.span
@@ -184,17 +182,18 @@ const CartItemRow = memo(function CartItemRow({
                   transition={iconTransition}
                   className="inline-flex"
                 >
-                  <FaChevronDown className="w-4 h-4" />
+                  <FaChevronDown className="w-3 h-3" />
                 </motion.span>
               )}
             </AnimatePresence>
           </Button>
         </div>
       </div>
+
       {item.embalaje > 0 && (
-        <div className="text-slate-700 dark:text-slate-400 text-xs">
-          <p>Embalaje P/U: {item.embalaje}</p>
-        </div>
+        <p className="text-[10px] text-muted-foreground px-2">
+          Embalaje P/U: {item.embalaje}
+        </p>
       )}
     </div>
   );

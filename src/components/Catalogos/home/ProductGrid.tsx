@@ -95,7 +95,7 @@ export default React.memo(function ProductGrid({
 
   const imageClasses = cn(
     "object-cover w-full transition-transform duration-500 group-hover:scale-105",
-    square ? "aspect-square" : "aspect-[3/4]",
+    square ? "aspect-square" : "aspect-[4/5]",
 
     span ? "aspect-video" : "",
     !isInStock ? "grayscale" : "",
@@ -242,7 +242,7 @@ const FeaturedProductCard = React.memo(function FeaturedProductCard({
     <Link
       href={productUrl}
       className="group relative block rounded-3xl overflow-hidden border border-border
-        hover:border-primary/30 transition-all duration-300 h-full min-h-70 aspect-5/6"
+        hover:border-primary/30 transition-all duration-300 h-full min-h-70 aspect-square"
     >
       {/* Background image */}
       <Image

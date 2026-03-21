@@ -55,30 +55,36 @@ export const Rating: FC<RatingModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md dark:bg-slate-900 dark:border-slate-700">
+      <DialogContent className="max-w-md border-border bg-background">
         <DialogHeader>
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3">
-              <Avatar className="w-10 h-10">
-                <Image src={imageUser} alt={userName} width={40} height={40} />
-              </Avatar>
-              <div className="flex flex-col">
-                <DialogTitle className="text-base dark:text-slate-100">
-                  {userName}
-                </DialogTitle>
-                <p className="text-xs text-slate-400 dark:text-slate-500">
-                  Las opiniones son públicas.{" "}
-                  <span className="underline">Más información</span>
-                </p>
-              </div>
+          <div className="flex items-center gap-3">
+            <Avatar className="w-9 h-9 border border-border">
+              <Image
+                src={imageUser}
+                alt={userName}
+                width={36}
+                height={36}
+                className="object-cover"
+              />
+            </Avatar>
+            <div className="flex flex-col">
+              <DialogTitle className="text-sm font-semibold text-foreground">
+                {userName}
+              </DialogTitle>
+              <p className="text-xs text-muted-foreground">
+                Las opiniones son públicas.{" "}
+                <span className="underline cursor-pointer">
+                  Más información
+                </span>
+              </p>
             </div>
-            <div></div>
           </div>
         </DialogHeader>
-        <div className="space-y-1">
+
+        <div className="space-y-3">
           <Input
             placeholder="Nombre"
-            className="bg-transparent dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-sm dark:text-slate-200 dark:placeholder:text-slate-500"
+            className="border-border bg-background text-sm text-foreground placeholder:text-muted-foreground"
             readOnly={!!user}
             value={rating.nombre}
             onChange={(e) =>
@@ -86,19 +92,20 @@ export const Rating: FC<RatingModalProps> = ({
             }
           />
 
-          <div className="flex gap-1 my-2 justify-center items-center">
+          {/* Stars — mismo patrón rounded-full bg-secondary del sistema */}
+          <div className="flex gap-2 justify-center py-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 onClick={() => setRating({ ...rating, selectedRating: star })}
-                className="hover:scale-110 transition-transform"
+                className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center hover:bg-primary/10 transition-colors group"
                 type="button"
               >
                 <Star
-                  className={`w-8 h-8 ${
+                  className={`w-5 h-5 transition-colors ${
                     star <= rating.selectedRating
-                      ? "fill-blue-600 text-blue-600 dark:fill-blue-400 dark:text-blue-400"
-                      : "text-slate-400 dark:text-slate-600"
+                      ? "fill-amber-400 text-amber-400"
+                      : "text-muted-foreground/40 group-hover:text-amber-400"
                   }`}
                 />
               </button>
@@ -107,29 +114,28 @@ export const Rating: FC<RatingModalProps> = ({
 
           <Textarea
             placeholder="Describe tu experiencia (opcional)"
-            className="bg-transparent dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-xs dark:text-slate-200 dark:placeholder:text-slate-500"
+            className="border-border bg-background text-sm text-foreground placeholder:text-muted-foreground resize-none"
             value={rating.description}
             onChange={(e) =>
               setRating({ ...rating, description: e.currentTarget.value })
             }
             maxLength={500}
           />
-          <div className="text-right text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-right text-xs text-muted-foreground">
             {rating.description.length}/500
-          </div>
+          </p>
         </div>
+
         <DialogFooter className="flex flex-row items-center justify-end">
           <Button
             variant="ghost"
             size="icon"
-            className="text-blue-400 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            className="rounded-full w-9 h-9 text-primary hover:bg-primary/10"
             onClick={async () => {
               try {
                 setLoading(true);
                 await handleSubmit();
-                if (sendToWhatsapp) {
-                  sendToWhatsapp();
-                }
+                if (sendToWhatsapp) sendToWhatsapp();
                 onClose(false);
               } catch (error) {
                 console.error("Error submitting rating:", error);
@@ -140,9 +146,9 @@ export const Rating: FC<RatingModalProps> = ({
             disabled={loading}
           >
             {loading ? (
-              <Spinner className="size-8 animate-spin" />
+              <Spinner className="w-5 h-5 animate-spin" />
             ) : (
-              <IoIosSend className="size-8" />
+              <IoIosSend className="w-5 h-5" />
             )}
           </Button>
         </DialogFooter>
