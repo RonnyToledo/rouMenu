@@ -261,7 +261,6 @@ export default function CarritoPage() {
     if (!store.sitioweb) return;
 
     setDownloading(true);
-
     const uploadFlow = async () => {
       try {
         const data = await UploadPedido({

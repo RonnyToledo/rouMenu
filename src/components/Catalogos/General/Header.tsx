@@ -14,7 +14,6 @@ export default function Header() {
   const { user, smartBack } = useApp();
   const { open } = useSheet();
   const { store, dispatchStore } = useContext(MyContext);
-  console.log();
   return (
     <>
       <>

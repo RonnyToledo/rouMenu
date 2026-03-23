@@ -16,7 +16,6 @@ export default function HeroNew() {
   const params = useParams();
   const { user } = useAuth();
   const effectRan = useRef(false);
-
   const [loginState, setLoginState] = useState({
     showLogin: false,
     loginMessage: "",
