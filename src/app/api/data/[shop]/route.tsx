@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { AppState, EditInterface } from "@/context/InitialStatus";
+import { AppState, EditInterface } from "@/types/InitialStatus";
 
 export async function GET(
   request: NextRequest,

@@ -1,6 +1,6 @@
 "use client";
 import { MyContext } from "@/context/MyContext";
-import { Product } from "@/context/InitialStatus";
+import { Product } from "@/types/InitialStatus";
 import React, { useContext, useCallback, memo, useMemo } from "react";
 import Image from "next/image";
 import { smartRound } from "@/functions/precios";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { FaChevronUp, FaChevronDown, FaRegTrashCan } from "react-icons/fa6";
 import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { Props } from "./CodeDiscount";
+import { cartKey } from "@/reducer/reducerGeneral";
+import { buildCartTitle } from "@/lib/variantUtils";
 
 const trashVariants = {
   initial: { opacity: 0, scale: 0.8, rotate: -45 },
@@ -37,50 +39,62 @@ export default function CartItems({ compra }: Props) {
 
   return (
     <div id="cart-items" className="px-2 grid mb-4">
-      {compra.pedido.map((item) => (
-        <div key={item.id}>
-          {item.Cant > 0 && (
-            <CartItemRow
-              item={item}
-              cantidad={item.Cant}
-              price={smartRound(item.price || 0)}
-              onIncrement={() =>
-                handleToCart({ ...item, Cant: (item.Cant || 0) + 1 })
-              }
-              onDecrement={() =>
-                handleToCart({ ...item, Cant: (item.Cant || 0) - 1 })
-              }
-            />
-          )}
-          {item.agregados
-            .filter((agg) => agg.cant > 0)
-            .map((agg) => (
+      {compra.pedido.map((item) => {
+        // Título con atributos: "Cafe Capuchino · Rojo · M"
+        const displayTitle = buildCartTitle(
+          item.title || "",
+          item.selected_variant,
+        );
+
+        return (
+          <div key={cartKey(item)}>
+            {item.Cant > 0 && (
               <CartItemRow
-                key={`${item.id}-agg-${agg.id}`}
-                item={{ ...item, title: `${item.title}-${agg.name}` }}
-                cantidad={agg.cant}
-                price={smartRound(agg.price || 0)}
+                item={{ ...item, title: displayTitle }}
+                cantidad={item.Cant}
+                price={smartRound(item.price || 0)}
                 onIncrement={() =>
-                  handleToCart({
-                    ...item,
-                    agregados: item.agregados.map((obj) =>
-                      obj.id === agg.id ? { ...obj, cant: obj.cant + 1 } : obj,
-                    ),
-                  })
+                  handleToCart({ ...item, Cant: (item.Cant || 0) + 1 })
                 }
                 onDecrement={() =>
-                  handleToCart({
-                    ...item,
-                    agregados: item.agregados.map((obj) =>
-                      obj.id === agg.id ? { ...obj, cant: obj.cant - 1 } : obj,
-                    ),
-                  })
+                  handleToCart({ ...item, Cant: (item.Cant || 0) - 1 })
                 }
-                stockLimit={(item.stock || 0) - (item.Cant || 0)}
               />
-            ))}
-        </div>
-      ))}
+            )}
+            {item.agregados
+              .filter((agg) => agg.cant > 0)
+              .map((agg) => (
+                <CartItemRow
+                  key={`${cartKey(item)}-agg-${agg.id}`}
+                  item={{ ...item, title: `${displayTitle}-${agg.name}` }}
+                  cantidad={agg.cant}
+                  price={smartRound(agg.price || 0)}
+                  onIncrement={() =>
+                    handleToCart({
+                      ...item,
+                      agregados: item.agregados.map((obj) =>
+                        obj.id === agg.id
+                          ? { ...obj, cant: obj.cant + 1 }
+                          : obj,
+                      ),
+                    })
+                  }
+                  onDecrement={() =>
+                    handleToCart({
+                      ...item,
+                      agregados: item.agregados.map((obj) =>
+                        obj.id === agg.id
+                          ? { ...obj, cant: obj.cant - 1 }
+                          : obj,
+                      ),
+                    })
+                  }
+                  stockLimit={(item.stock || 0) - (item.Cant || 0)}
+                />
+              ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -112,6 +126,9 @@ const CartItemRow = memo(function CartItemRow({
   const stockTop = stockLimit !== undefined ? stockLimit : item.stock || 0;
   const isAtStockLimit = store.stocks && cantidad >= stockTop;
 
+  // Imagen: preferir la de la variante activa
+  const itemImage = item.selected_variant?.image || item.image || logoApp;
+
   return (
     <div className="space-y-1">
       <div className="flex items-center border-b border-border p-2 gap-3">
@@ -120,10 +137,10 @@ const CartItemRow = memo(function CartItemRow({
           height={100}
           alt={item.title || "Producto"}
           className="w-14 h-14 object-cover rounded-xl border border-border shrink-0"
-          src={item.image || logoApp}
+          src={itemImage || logoApp}
         />
         <div className="grow min-w-0">
-          <h4 className="font-semibold text-sm text-foreground line-clamp-1">
+          <h4 className="font-semibold text-sm text-foreground line-clamp-2">
             {item.title}
           </h4>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -131,7 +148,7 @@ const CartItemRow = memo(function CartItemRow({
           </p>
         </div>
 
-        {/* Quantity controls — mismos rounded-full del sistema */}
+        {/* Quantity controls */}
         <div className="flex flex-col items-center gap-0.5 shrink-0">
           <Button
             variant="ghost"
@@ -145,7 +162,7 @@ const CartItemRow = memo(function CartItemRow({
 
           <div className="relative overflow-hidden w-6 flex items-center justify-center">
             <span
-              key={`${item.id}-${cantidad}`}
+              key={`${cartKey(item)}-${cantidad}`}
               className="font-bold text-sm text-center text-foreground animate-in slide-in-from-bottom-2 duration-300"
             >
               {cantidad}

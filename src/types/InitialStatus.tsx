@@ -1,7 +1,26 @@
+export interface ProductVariant {
+  id: string;
+  label: string;
+  image?: string | null;
+  images?: string[];
+  price?: number | null;
+  oldPrice?: number | null;
+  stock?: number | null;
+  agotado?: boolean;
+  default?: boolean;
+  visible?: boolean;
+  orden?: number;
+  sku?: string | null;
+  attributes?: Record<string, string | number | boolean>;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Product {
   productId: string;
   title: string;
-  image?: string;
+  image?: string | null;
   creado: string;
   favorito?: boolean;
   descripcion?: string;
@@ -15,6 +34,7 @@ export interface Product {
   oldPrice: number;
   price: number;
   stock?: number;
+  agotado?: boolean;
   priceCompra: number;
   order: number;
   storeId?: string;
@@ -24,6 +44,16 @@ export interface Product {
   imagesecondary: string[];
   embalaje: number;
   venta: boolean;
+  /**
+   * true cuando el producto tiene variantes reales configuradas,
+   * false o ausente cuando solo tiene la variante default.
+   * (en el JSON del backend viene como boolean)
+   */
+  has_variants?: boolean;
+  /** Array de variantes del producto (viene del backend como "variants") */
+  variants?: ProductVariant[];
+  /** Variante actualmente seleccionada */
+  selected_variant?: ProductVariant;
   agregados: AgregadosInterface[];
 }
 
@@ -166,19 +196,20 @@ export interface AppState {
   limite: number;
   moneda: Current[];
   municipio?: string;
-  name?: string; // Nombre de la tienda
-  parrrafo?: string; // Nombre de la tienda
+  name?: string;
+  parrrafo?: string;
   products: Product[];
   reservas: boolean;
-  sitioweb?: string; // Nombre de la tienda
+  sitioweb?: string;
   tipo?: string;
-  ubicacion?: UbicacionInterface; // FIX: Changed 'any' to 'unknown'
+  ubicacion?: UbicacionInterface;
   urlPoster: string;
   edit: EditInterface;
   redes: RedesInterface[];
   contacto: ContactInterface[];
   stocks: boolean;
   productEnStock: string;
+  visitas: number;
 
   afiliate: string | null;
 }
@@ -267,4 +298,5 @@ export const initialState: AppState = {
   stocks: false,
   redes: [],
   contacto: [],
+  visitas: 0,
 };

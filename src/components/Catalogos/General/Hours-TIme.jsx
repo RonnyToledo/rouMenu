@@ -133,7 +133,8 @@ function useScheduleStatus(schedule) {
 }
 
 export function StoreState({ schedule = defaultSchedule }) {
-  const { current } = useScheduleStatus(schedule);
+  const { current } = useScheduleStatus(normalizeSchedule(schedule));
+
   return (
     <div className="flex items-center gap-1">
       <div
@@ -199,4 +200,42 @@ export default function ShopOpenStatus({ schedule = defaultSchedule }) {
       </div>
     </div>
   );
+}
+function normalizeSchedule(horario) {
+  const dayOffsets = {
+    Domingo: 0,
+    Lunes: 1,
+    Martes: 2,
+    Miercoles: 3,
+    Jueves: 4,
+    Viernes: 5,
+    Sabado: 6,
+  };
+  // Ancla: lunes de la semana actual a medianoche UTC
+  const anchor = new Date();
+  anchor.setUTCHours(0, 0, 0, 0);
+  anchor.setUTCDate(anchor.getUTCDate() - anchor.getUTCDay()); // domingo
+
+  return horario.map((entry) => {
+    const dayOffset = dayOffsets[entry.dia] ?? 0;
+    const aperturaH = Number(entry.apertura); // 0
+    const cierreH = Number(entry.cierre); // 24
+
+    const base = new Date(anchor);
+    base.setUTCDate(base.getUTCDate() + dayOffset);
+
+    const apertura = new Date(base);
+    apertura.setUTCHours(aperturaH, 0, 0, 0);
+
+    const cierre = new Date(base);
+    // "24" → medianoche del día siguiente
+    cierre.setUTCDate(cierre.getUTCDate() + Math.floor(cierreH / 24));
+    cierre.setUTCHours(cierreH % 24, 0, 0, 0);
+
+    return {
+      dia: entry.dia,
+      apertura: apertura.toISOString(),
+      cierre: cierre.toISOString(),
+    };
+  });
 }

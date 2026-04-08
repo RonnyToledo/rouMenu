@@ -5,9 +5,10 @@ import { TbShoppingCartPlus, TbShoppingCartMinus } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
 import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
-import { Product } from "@/context/InitialStatus";
+import { Product } from "@/types/InitialStatus";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { ScrollTo } from "@/functions/ScrollTo";
+import { cartKey } from "@/reducer/reducerGeneral";
 
 // Variantes de animación fuera del componente (se crean solo una vez)
 const slideVariants = {
@@ -43,8 +44,15 @@ export const ButtonOfCart = memo(function ButtonOfCart({
   const { store, dispatchStore } = useContext(MyContext);
   const [slideOpen, setSlideOpen] = useState(false);
 
-  const productCant = product.Cant || 0;
-  const productStock = product.stock || 0;
+  // Buscar la cantidad real de este producto+variante en el store
+  // usando cartKey para distinguir variantes del mismo producto
+  const productInStore = useMemo(() => {
+    const key = cartKey(product);
+    return store.products.find((p) => cartKey(p) === key);
+  }, [store.products, product]);
+
+  const productCant = productInStore?.Cant ?? product.Cant ?? 0;
+  const productStock = product.selected_variant?.stock ?? product.stock ?? 0;
 
   // Memoizar valores calculados
   const isDisabled = useMemo(

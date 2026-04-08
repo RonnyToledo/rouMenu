@@ -8,7 +8,7 @@ import {
   ExtraerProductosSinCategoria,
 } from "@/functions/extraerCategoriass";
 import { logoApp } from "@/lib/image";
-import { AppState, Categoria, Product } from "@/context/InitialStatus";
+import { AppState, Categoria, Product } from "@/types/InitialStatus";
 import { Button } from "@/components/ui/button";
 import { FaArrowRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
@@ -16,11 +16,22 @@ import ProductGrid from "./ProductGrid";
 import { useSheet } from "../General/SheetComponent";
 import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { ScrollTo } from "@/functions/ScrollTo";
-import HeroNew from "./HeroNew";
+import HeroNew from "./Hero/HeroNew";
+import StoreHero from "./Hero/StoreHero";
+import HeroPremium from "./Hero/Premium";
+
+function HeroSelector() {
+  const { store } = useContext(MyContext);
+  const visitas = store?.visitas ?? 0;
+
+  if (visitas >= 3000) return <HeroPremium />;
+  if (visitas >= 500) return <StoreHero />;
+  return <HeroNew />;
+}
 
 export default function Products() {
   const { store } = useContext(MyContext);
-
+  console.log(store);
   const sortedCategories = useMemo(() => {
     if (!store?.categorias || !store?.products) return [];
     return ExtraerCategorias(store.categorias, store.products).sort(
@@ -48,9 +59,9 @@ export default function Products() {
   }, [sortedCategories]);
 
   return (
-    <div className="py-6 md:py-10">
-      <HeroNew />
-      <div className="mt-5 transition-colors">
+    <div className="">
+      <HeroSelector />
+      <div className="mt-5 transition-colors" id="products">
         {sortedCategories.map((categoria) => (
           <CategoryItem
             key={categoria.id}
@@ -60,7 +71,23 @@ export default function Products() {
             prevID={next_before_Category[categoria.id]?.prevID || ""}
           />
         ))}
-
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {(store?.categorias || []).map((tag) => (
+            <Link
+              href={`#${tag.id}`}
+              key={tag.id}
+              className="text-xs px-3 py-1.5 rounded-full"
+              style={{
+                background: "rgba(245,240,232,0.06)",
+                border: "1px solid rgba(25,40,20,0.1)",
+                color: "rgba(10,15,20,0.6)",
+              }}
+            >
+              {tag.name}
+            </Link>
+          ))}
+        </div>
         {sortedsWithOutCategories.length > 0 && (
           <UncategorizedSection
             products={sortedsWithOutCategories}
@@ -234,7 +261,7 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
   );
 
   // El primer producto "favorito" (popular) se muestra como featured card
-  const featuredProduct = sortedProducts.find((p) => p.favorito);
+  const featuredProduct = sortedProducts.find((p) => p.favorito && p.stock);
   const regularProducts = featuredProduct
     ? sortedProducts.filter((p) => p.productId !== featuredProduct.productId)
     : sortedProducts;
@@ -243,9 +270,7 @@ const AnimatedCategorySection = React.memo(function AnimatedCategorySection({
 
   // Con grid de 2 columnas base, la featured ocupa 2 col / 2 row
   const gridClass = `grid grid-flow-row-dense gap-1 p-1 ${
-    grid
-      ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-      : "grid-cols-1 md:grid-cols-2"
+    grid ? "grid-cols-2 " : "grid-cols-1 "
   }`;
 
   return (

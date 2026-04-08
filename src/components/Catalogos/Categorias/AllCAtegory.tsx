@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useContext } from "react";
 import { MyContext } from "@/context/MyContext";
 import Link from "next/link";
-import { Categoria } from "@/context/InitialStatus";
+import { Categoria } from "@/types/InitialStatus";
 import { usePathname } from "next/navigation";
 import { logoApp } from "@/lib/image";
 import { ExtraerCategorias } from "@/functions/extraerCategoriass";

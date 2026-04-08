@@ -30,7 +30,6 @@ interface ProductResult {
   score: number;
   storeSitioWeb?: string;
 }
-
 interface CategoriaResult {
   type: "categoria";
   id: string;
@@ -42,7 +41,6 @@ interface CategoriaResult {
   score: number;
   sitioweb?: string;
 }
-
 interface SitioResult {
   type: "sitio";
   id: number;
@@ -57,7 +55,6 @@ interface SitioResult {
   direccion?: string;
   score: number;
 }
-
 interface SearchResults {
   query: string;
   productos: ProductResult[];
@@ -75,17 +72,13 @@ export default function BusquedaPage() {
   async function fetchFuzzySearch(
     query: string,
   ): Promise<SearchResults | null> {
-    if (!query.trim()) {
-      return null;
-    }
-
+    if (!query.trim()) return null;
     try {
       setIsLoading(true);
       const { data, error } = await supabase.rpc("rpc_fuzzy_search", {
         q: query.trim(),
         limit_per_type: 6,
       });
-
       if (error) {
         console.error("Error en búsqueda fuzzy:", error);
         return null;
@@ -99,31 +92,24 @@ export default function BusquedaPage() {
     }
   }
 
-  // Efecto para manejar cambios en searchParams
   useEffect(() => {
-    const searchQuery = searchParams.get("buscar") || "";
-    setSearchTerm(searchQuery);
+    setSearchTerm(searchParams.get("buscar") || "");
   }, [searchParams]);
 
-  // Efecto para realizar búsqueda con debounce
   useEffect(() => {
     if (!searchTerm.trim()) {
       setResults(null);
       return;
     }
-
-    const timeoutId = setTimeout(async () => {
-      const searchResults = await fetchFuzzySearch(searchTerm);
-      setResults(searchResults);
-    }, 300); // Debounce de 300ms
-
-    return () => clearTimeout(timeoutId);
+    const id = setTimeout(async () => {
+      const r = await fetchFuzzySearch(searchTerm);
+      setResults(r);
+    }, 300);
+    return () => clearTimeout(id);
   }, [searchTerm]);
 
-  // Función para obtener todos los resultados combinados
   const getAllResults = () => {
     if (!results) return [];
-
     return [
       ...results.productos,
       ...results.categorias,
@@ -132,271 +118,245 @@ export default function BusquedaPage() {
   };
 
   const renderProductCard = (product: ProductResult) => (
-    <Card
+    <Link
       key={`product-${product.productId}`}
-      className="w-full dark:bg-slate-900 dark:border-slate-700"
+      href={`/t/${product.storeSitioWeb}/producto/${product.productId}`}
+      target="_blank"
     >
-      <Link
-        href={`/t/${product.storeSitioWeb}/producto/${product.productId}`}
-        target="_blank"
-      >
-        <CardContent className="pt-0 flex items-center w-full justify-between">
-          <div className="flex items-center gap-2">
+      <Card className="border-border hover:bg-secondary/50 transition-colors">
+        <CardContent className="p-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <Image
-              width={100}
-              height={100}
+              width={56}
+              height={56}
               src={product.image || logoApp}
-              alt={product.title || "Objeto Titulo"}
-              className="size-16 object-cover rounded-full"
+              alt={product.title || ""}
+              className="w-14 h-14 object-cover rounded-xl border border-border shrink-0"
             />
-
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-lg font-semibold line-clamp-1 dark:text-slate-100">
-                  {product.title}
-                </CardTitle>
-                <CardDescription className="mt-1 dark:text-slate-400">
-                  {product.storeName && (
-                    <span className="text-sm text-muted-foreground dark:text-slate-400">
-                      en {product.storeName}
-                    </span>
-                  )}
+            <div>
+              <CardTitle className="text-sm font-semibold text-foreground line-clamp-1">
+                {product.title}
+              </CardTitle>
+              {product.storeName && (
+                <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                  en {product.storeName}
                 </CardDescription>
-              </div>
+              )}
             </div>
           </div>
-          <div className="flex items-center justify-center">
-            <Badge
-              variant={product.stock ? "secondary" : "destructive"}
-              className="dark:bg-slate-700 dark:text-slate-200"
-            >
-              {product.stock ? `$${product.price}` : "Agotado"}
-            </Badge>
-          </div>
+          <Badge
+            variant={product.stock ? "secondary" : "destructive"}
+            className={`rounded-full text-xs shrink-0 ${product.stock ? "border border-border" : ""}`}
+          >
+            {product.stock ? `$${product.price}` : "Agotado"}
+          </Badge>
         </CardContent>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 
   const renderCategoriaCard = (categoria: CategoriaResult) => (
-    <Card
+    <Link
       key={`categoria-${categoria.id}`}
-      className="w-full dark:bg-slate-900 dark:border-slate-700"
+      href={`/t/${categoria.sitioweb}/category/${categoria.id}`}
+      target="_blank"
     >
-      <Link
-        href={`/t/${categoria.sitioweb}/category/${categoria.id}`}
-        target="_blank"
-      >
-        <CardContent className="pt-0 flex items-center w-full justify-between">
-          <div className="flex items-center gap-2">
-            <Image
-              width={100}
-              height={100}
-              src={categoria.image || logoApp}
-              alt={categoria.name || "Objeto Titulo"}
-              className="size-16 object-cover rounded-full"
-            />
-
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className="text-lg font-semibold dark:text-slate-100">
-                  {categoria.name}
-                </CardTitle>
-                <CardDescription className="mt-1 dark:text-slate-400">
-                  {categoria.storeName && (
-                    <span className="text-sm text-muted-foreground dark:text-slate-400">
-                      Categoría en {categoria.storeName}
-                    </span>
-                  )}
-                </CardDescription>
-              </div>
-            </div>
+      <Card className="border-border hover:bg-secondary/50 transition-colors">
+        <CardContent className="p-3 flex items-center gap-3">
+          <Image
+            width={56}
+            height={56}
+            src={categoria.image || logoApp}
+            alt={categoria.name || ""}
+            className="w-14 h-14 object-cover rounded-xl border border-border shrink-0"
+          />
+          <div>
+            <CardTitle className="text-sm font-semibold text-foreground">
+              {categoria.name}
+            </CardTitle>
+            {categoria.storeName && (
+              <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                Categoría en {categoria.storeName}
+              </CardDescription>
+            )}
           </div>
         </CardContent>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 
   const renderSitioCard = (sitio: SitioResult) => (
-    <Card
+    <Link
       key={`sitio-${sitio.UUID}`}
-      className="w-full dark:bg-slate-900 dark:border-slate-700"
+      href={`/t/${sitio.sitioweb}`}
+      target="_blank"
     >
-      <Link href={`/t/${sitio.sitioweb}`} target="_blank">
-        <CardContent className="pt-0 flex items-center w-full justify-between">
-          <div className="flex items-center gap-2 w-full">
-            <Image
-              width={100}
-              height={100}
-              src={sitio.urlPoster || logoApp}
-              alt={sitio.name || "Objeto Titulo"}
-              className="size-16 object-cover rounded-full"
-            />
-
-            <div className="flex items-start justify-between w-full">
-              <div className="flex-1 w-full">
-                <CardTitle className="text-lg font-semibold dark:text-slate-100">
-                  {sitio.name}
-                </CardTitle>
-                <CardDescription className="mt-1 flex flex-row gap-1 line-clamp-1 w-full dark:text-slate-400">
-                  {sitio.tipo && (
-                    <Badge
-                      variant="outline"
-                      className="text-xs dark:border-slate-600 dark:text-slate-300"
-                    >
-                      {sitio.tipo}
-                    </Badge>
-                  )}
-                  {(sitio.Provincia || sitio.municipio) && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      <span className="text-sm">
-                        {[sitio.municipio, sitio.Provincia]
-                          .filter(Boolean)
-                          .join(", ")}
-                      </span>
-                    </div>
-                  )}
-                </CardDescription>
-              </div>
-            </div>
+      <Card className="border-border hover:bg-secondary/50 transition-colors">
+        <CardContent className="p-3 flex items-center gap-3">
+          <Image
+            width={56}
+            height={56}
+            src={sitio.urlPoster || logoApp}
+            alt={sitio.name || ""}
+            className="w-14 h-14 object-cover rounded-xl border border-border shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-sm font-semibold text-foreground">
+              {sitio.name}
+            </CardTitle>
+            <CardDescription className="flex items-center flex-wrap gap-1.5 mt-0.5">
+              {sitio.tipo && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] px-1.5 rounded-full border-border"
+                >
+                  {sitio.tipo}
+                </Badge>
+              )}
+              {(sitio.Provincia || sitio.municipio) && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="w-3 h-3" />
+                  <span>
+                    {[sitio.municipio, sitio.Provincia]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                </div>
+              )}
+            </CardDescription>
           </div>
         </CardContent>
-      </Link>
-    </Card>
+      </Card>
+    </Link>
   );
 
   return (
-    <div className="min-h-screen bg-background dark:bg-slate-950">
-      <div className="container dark:bg-slate-900 mx-auto px-4 py-4">
-        {/* Barra de búsqueda */}
-        <div className="max-w-2xl mx-auto mb-6">
-          <div className="relative"></div>
-        </div>
-
-        {/* Indicador de carga */}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-4">
+        {/* Loading */}
         {isLoading && (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-primary dark:border-blue-500"></div>
-            <p className="mt-2 text-sm text-muted-foreground dark:text-slate-400">
-              Buscando...
-            </p>
+            <div className="inline-block animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent" />
+            <p className="mt-2 text-xs text-muted-foreground">Buscando...</p>
           </div>
         )}
 
-        {/* Tabs de resultados */}
+        {/* Resultados */}
         {results && !isLoading && (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="flex bg-white dark:bg-slate-900 w-full max-w-md mx-auto mb-8 p-2">
-              <TabsTrigger
-                value="all"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
-              >
+            <TabsList className="flex w-full max-w-md mx-auto mb-6 rounded-full p-1">
+              <TabsTrigger value="all" className="rounded-full text-xs flex-1">
                 Todo ({getAllResults().length})
               </TabsTrigger>
               <TabsTrigger
                 value="sitios"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
+                className="rounded-full text-xs flex-1"
               >
                 Tiendas ({results.sitios.length})
               </TabsTrigger>
               <TabsTrigger
                 value="productos"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
+                className="rounded-full text-xs flex-1"
               >
                 Productos ({results.productos.length})
               </TabsTrigger>
               <TabsTrigger
                 value="categorias"
-                className="flex items-center text-xs data-[state=active]:bg-slate-200 dark:data-[state=active]:bg-slate-700 dark:text-slate-300 p-2"
+                className="rounded-full text-xs flex-1"
               >
-                Categorías ({results.categorias.length})
+                Cats. ({results.categorias.length})
               </TabsTrigger>
             </TabsList>
 
-            {/* Resultados - Todo */}
             <TabsContent value="all">
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 {getAllResults().map((item) => {
-                  if (item.type === "producto") {
+                  if (item.type === "producto")
                     return renderProductCard(item as ProductResult);
-                  } else if (item.type === "categoria") {
+                  if (item.type === "categoria")
                     return renderCategoriaCard(item as CategoriaResult);
-                  } else {
-                    return renderSitioCard(item as SitioResult);
-                  }
+                  return renderSitioCard(item as SitioResult);
                 })}
               </div>
               {getAllResults().length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground dark:text-slate-400">
-                    {`No se encontraron resultados para "${results.query}"`}
-                  </p>
-                </div>
+                <EmptyState
+                  message={`No se encontraron resultados para "${results.query}"`}
+                  icon={<Search className="w-8 h-8 text-muted-foreground" />}
+                />
               )}
             </TabsContent>
 
-            {/* Resultados de Productos */}
             <TabsContent value="productos">
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 {results.productos.map(renderProductCard)}
               </div>
               {results.productos.length === 0 && (
-                <div className="text-center py-12">
-                  <Package className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground dark:text-slate-400">
-                    {`No se encontraron productos para "${results.query}"`}
-                  </p>
-                </div>
+                <EmptyState
+                  message={`No se encontraron productos para "${results.query}"`}
+                  icon={<Package className="w-8 h-8 text-muted-foreground" />}
+                />
               )}
             </TabsContent>
 
-            {/* Resultados de Categorías */}
             <TabsContent value="categorias">
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 {results.categorias.map(renderCategoriaCard)}
               </div>
               {results.categorias.length === 0 && (
-                <div className="text-center py-12">
-                  <Package className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground dark:text-slate-400">
-                    {`No se encontraron categorías para "${results.query}"`}
-                  </p>
-                </div>
+                <EmptyState
+                  message={`No se encontraron categorías para "${results.query}"`}
+                  icon={<Package className="w-8 h-8 text-muted-foreground" />}
+                />
               )}
             </TabsContent>
 
-            {/* Resultados de Sitios */}
             <TabsContent value="sitios">
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 {results.sitios.map(renderSitioCard)}
               </div>
               {results.sitios.length === 0 && (
-                <div className="text-center py-12">
-                  <Store className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground dark:text-slate-400">
-                    {`No se encontraron tiendas para "${results.query}"`}
-                  </p>
-                </div>
+                <EmptyState
+                  message={`No se encontraron tiendas para "${results.query}"`}
+                  icon={<Store className="w-8 h-8 text-muted-foreground" />}
+                />
               )}
             </TabsContent>
           </Tabs>
         )}
 
-        {/* Estado vacío cuando no hay búsqueda */}
         {!searchTerm.trim() && !isLoading && (
-          <div className="text-center py-12">
-            <Search className="w-12 h-12 text-muted-foreground dark:text-slate-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2 dark:text-slate-100">
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mb-4">
+              <Search className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <h3 className="font-serif text-base font-semibold text-foreground mb-1">
               Busca lo que necesitas
             </h3>
-            <p className="text-muted-foreground dark:text-slate-400 mb-4">
-              Encuentra productos, categorías y tiendas usando la barra de
-              búsqueda
+            <p className="text-sm text-muted-foreground text-center">
+              Encuentra productos, categorías y tiendas
             </p>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function EmptyState({
+  message,
+  icon,
+}: {
+  message: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mb-3">
+        {icon}
+      </div>
+      <p className="text-sm text-muted-foreground text-center max-w-xs">
+        {message}
+      </p>
     </div>
   );
 }

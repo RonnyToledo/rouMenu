@@ -1,4 +1,4 @@
-import { ScheduleInterface } from "@/context/InitialStatus";
+import { ScheduleInterface } from "@/types/InitialStatus";
 
 export interface IsOpenStoreInteface {
   week: number;
@@ -183,7 +183,7 @@ export function isOpen24Hours(fechas: ScheduleInterface[]): boolean {
  * Obtiene el horario del día actual
  */
 export function getHorarioHoy(
-  fechas: ScheduleInterface[]
+  fechas: ScheduleInterface[],
 ): ScheduleInterface | null {
   const ahora = new Date();
   const dayOfWeek = ahora.getDay();

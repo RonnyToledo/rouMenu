@@ -4,28 +4,15 @@ import { MyContext } from "@/context/MyContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
+
 const prevRuta = [
-  {
-    url: "",
-    name: "Inicio",
-  },
-  {
-    url: "/about",
-    name: "Acerca de",
-  },
-  {
-    url: "/category",
-    name: "Categorias",
-  },
-  {
-    url: "/search",
-    name: "Buscar",
-  },
-  {
-    url: "/comparar",
-    name: "Comparar",
-  },
+  { url: "", name: "Inicio" },
+  { url: "/about", name: "Acerca de" },
+  { url: "/category", name: "Categorías" },
+  { url: "/search", name: "Buscar" },
+  { url: "/comparar", name: "Comparar" },
 ];
+
 export default function Footer() {
   const { store } = useContext(MyContext);
   const pathname = usePathname();
@@ -33,25 +20,22 @@ export default function Footer() {
   const ruta = useMemo(() => {
     if (!store?.sitioweb) return prevRuta;
     const startRuta = `/t/${store?.sitioweb}`;
-    return prevRuta.map((obj) => ({
-      ...obj,
-      url: startRuta.concat(obj.url),
-    }));
+    return prevRuta.map((obj) => ({ ...obj, url: startRuta.concat(obj.url) }));
   }, [store?.sitioweb]);
 
   return (
     <div>
       <div className="text-center">
-        <h3 className="text-2xl font-cinzel text-slate-50 tracking-wider uppercase">
+        <h3 className="font-serif text-xl text-white tracking-wider">
           {store?.name}
         </h3>
-        <p className="text-sm text-slate-100 mt-2 line-clamp-5">
+        <p className="text-xs text-white/80 mt-1.5 line-clamp-4 leading-relaxed">
           {store?.parrrafo || "..."}
         </p>
       </div>
-      {/*Rutas */}
-      <div className="flex flex-col items-start mt-4 space-y-2 ">
-        <div className="text-slate-50 uppercase text font-cinzel">
+
+      <div className="flex flex-col items-start mt-4 space-y-1.5">
+        <div className="text-white/70 text-[10px] uppercase tracking-widest font-semibold">
           Otras rutas
         </div>
         {ruta
@@ -60,14 +44,14 @@ export default function Footer() {
             <Link
               href={obj.url}
               key={index}
-              className="flex items-center gap-2 text-slate-100 text-base hover:text-slate-200 transition-all duration-500 hover:scale-105"
+              className="text-white/80 hover:text-white transition-colors text-xs"
             >
-              <div className="line-clamp-1 text-sm">{obj.name}</div>
+              {obj.name}
             </Link>
           ))}
       </div>
 
-      <Separator className="my-2" />
+      <Separator className="my-3 bg-white/20" />
     </div>
   );
 }

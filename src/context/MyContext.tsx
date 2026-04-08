@@ -1,6 +1,7 @@
 "use client";
 // MyContextProvider.tsx
 import React, {
+  useState,
   createContext,
   useReducer,
   ReactNode,
@@ -10,7 +11,7 @@ import React, {
   useRef,
 } from "react";
 import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
-import { AppState, initialState, Product } from "./InitialStatus";
+import { AppState, initialState, Product } from "../types/InitialStatus";
 import SitioRealtime from "@/components/Catalogos/General/RealTime";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sileo } from "sileo";
@@ -49,7 +50,7 @@ interface MyProviderProps {
 
 export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   const storeArreglado = storeSSD ?? initialState;
-
+  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -63,6 +64,10 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     afiliate: getAfiliate(storeSSD.sitioweb || ""),
   });
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Sincronizar con storeSSD cuando cambie (SSR → client hydration)
   useEffect(() => {
     dispatchStore({ type: "Add", payload: storeSSD });
@@ -70,29 +75,39 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
 
   // Procesar código de afiliado de la URL SOLO UNA VEZ
   useEffect(() => {
-    if (afiliate && !afiliateProcessedRef.current && storeSSD.sitioweb) {
-      afiliateProcessedRef.current = true;
+    if (!mounted) return;
+    if (!afiliate || afiliateProcessedRef.current || !storeSSD?.sitioweb)
+      return;
 
-      const cartKey = `afiliate_${storeSSD.sitioweb}`;
+    const timer = setTimeout(() => {
       const codeFound = storeSSD.codeDiscount.find(
         (code) => code.code === afiliate,
       );
 
-      if (codeFound) {
-        window.localStorage.setItem(cartKey, afiliate);
-        dispatchStore({ type: "SetAfiliate", payload: afiliate });
-        sileo.success({
-          title: "Código de afiliado aplicado con éxito",
-        });
-        PostViewCode(codeFound.id);
-      } else {
+      if (!codeFound) {
         sileo.error({
           title: "Error",
           description: "Error con el código de afiliado",
         });
+        return;
       }
-    }
-  }, [afiliate, storeSSD.sitioweb, storeSSD.codeDiscount]);
+
+      afiliateProcessedRef.current = true;
+
+      const cartKey = `afiliate_${storeSSD.sitioweb}`;
+      window.localStorage.setItem(cartKey, afiliate);
+
+      dispatchStore({ type: "SetAfiliate", payload: afiliate });
+
+      sileo.success({
+        title: "Código de afiliado aplicado con éxito",
+      });
+
+      PostViewCode(codeFound.id);
+    }, 2000); // ⏱️ 2 segundos
+
+    return () => clearTimeout(timer);
+  }, [mounted, afiliate, storeSSD?.sitioweb, storeSSD?.codeDiscount]);
 
   // Cargar carrito desde IndexedDB
   useEffect(() => {
@@ -138,7 +153,6 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
   }, [store.color]);
 
   const isSearchPage = pathname.includes("/search");
-
   return (
     <MyContext.Provider value={contextValue}>
       <SheetProvider>

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Star, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
-import { Product } from "@/context/InitialStatus";
+import { Product } from "@/types/InitialStatus";
 import Image from "next/image";
 import { smartRound } from "@/functions/precios";
 import { Minus, Plus } from "lucide-react";

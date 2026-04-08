@@ -14,61 +14,63 @@ export default function Header() {
   const { user, smartBack } = useApp();
   const { open } = useSheet();
   const { store, dispatchStore } = useContext(MyContext);
+
   return (
-    <>
-      <>
-        <header className="sticky top-0 z-50 bg-linear-to-b from-slate-50 to-transparent dark:from-slate-900 dark:to-transparent h-16 p-2 w-full">
-          <div className="flex items-center justify-between shadow-md rounded-3xl h-full py-1 px-2 gap-2 bg-white dark:bg-slate-900 transition-colors duration-500">
-            <Button
-              variant="ghost"
-              onClick={smartBack}
-              size="icon"
-              className="w-fit text-slate-700 dark:text-slate-300"
-            >
-              <Image
-                alt={`${store?.name || "Rou-Menu"} Logo`}
-                width={100}
-                height={100}
-                className="rounded-full size-8"
-                src={store?.urlPoster || logoApp}
-                onError={() => {
-                  dispatchStore({
-                    type: "Add",
-                    payload: {
-                      ...store,
-                      urlPoster: "",
-                    },
-                  });
-                }}
+    <header className="sticky top-0 z-50  backdrop-blur-lg h-16 p-2 w-full  transition-colors">
+      <div className="flex items-center justify-between rounded-full h-full py-1 px-3 gap-2 bg-background border border-border shadow-sm">
+        {/* Logo / back */}
+        <Button
+          variant="ghost"
+          onClick={smartBack}
+          size="icon"
+          className="rounded-full w-9 h-9 p-0 shrink-0"
+        >
+          <Image
+            alt={`${store?.name || "Rou-Menu"} Logo`}
+            width={36}
+            height={36}
+            className="rounded-full w-9 h-9 object-cover border border-border"
+            src={store?.urlPoster || logoApp}
+            onError={() => {
+              dispatchStore({
+                type: "Add",
+                payload: { ...store, urlPoster: "" },
+              });
+            }}
+          />
+        </Button>
+
+        <HeaderInfo />
+
+        {/* Avatar / menu */}
+        <Button
+          className="p-0 rounded-full w-9 h-9"
+          variant="ghost"
+          onClick={open}
+        >
+          {user ? (
+            <Avatar className="w-9 h-9 border border-border">
+              <AvatarImage
+                src={
+                  user.user_metadata.picture ||
+                  user.user_metadata.avatar_url ||
+                  logoUser
+                }
+                alt={user.user_metadata.full_name || ""}
               />
-            </Button>
-            <HeaderInfo />
-            <Button className={"p-2"} variant="ghost" onClick={open}>
-              {user ? (
-                <Avatar className="size-8">
-                  <AvatarImage
-                    src={
-                      user.user_metadata.picture ||
-                      user.user_metadata.avatar_url ||
-                      logoUser
-                    }
-                    alt={user.user_metadata.full_name || ""}
-                  />
-                  <AvatarFallback>
-                    {user.user_metadata.full_name.split(" ")[0]}
-                  </AvatarFallback>
-                </Avatar>
-              ) : (
-                <Avatar className="size-8">
-                  <AvatarImage src={logoUser} alt="@shadcn" />
-                  <AvatarFallback>U</AvatarFallback>
-                </Avatar>
-              )}
-            </Button>
-          </div>
-        </header>
-      </>
-    </>
+              <AvatarFallback className="text-xs">
+                {user.user_metadata.full_name?.split(" ")[0]}
+              </AvatarFallback>
+            </Avatar>
+          ) : (
+            <Avatar className="w-9 h-9 border border-border">
+              <AvatarImage src={logoUser} alt="@shadcn" />
+              <AvatarFallback className="text-xs">U</AvatarFallback>
+            </Avatar>
+          )}
+        </Button>
+      </div>
+    </header>
   );
 }
 
@@ -76,7 +78,7 @@ const HeaderInfo = () => {
   const params = useParams();
   const pathname = usePathname();
   const { store } = useContext(MyContext);
-  // Memoizar búsquedas costosas
+
   const currentProduct = useMemo(
     () => store.products.find((p) => p.productId === params?.id),
     [store.products, params?.id],
@@ -92,14 +94,10 @@ const HeaderInfo = () => {
 
   const isCommentPage = pathname.includes("/coment");
 
-  // Calcular título principal
   const mainTitle = useMemo(() => {
-    if (params?.id) {
+    if (params?.id)
       return isCommentPage ? "Comentarios" : currentProduct?.title;
-    }
-    if (params?.uid) {
-      return currentCategory?.name;
-    }
+    if (params?.uid) return currentCategory?.name;
     return store?.name || "Rou-Menu";
   }, [
     params?.id,
@@ -110,22 +108,19 @@ const HeaderInfo = () => {
     store?.name,
   ]);
 
-  // Calcular subtítulo
   let subtitle: string | undefined = "";
-  if (params?.id) {
+  if (params?.id)
     subtitle = isCommentPage ? currentProduct?.title : currentCategory?.name;
-  } else if (params?.uid) {
-    subtitle = store?.name || "Rou-Menu";
-  }
+  else if (params?.uid) subtitle = store?.name || "Rou-Menu";
 
   return (
-    <div>
-      <span className="font-cinzel text-[16px] text-slate-800 dark:text-slate-100 line-clamp-1 text-center transition-colors">
+    <div className="text-center flex-1 min-w-0">
+      <span className="text-sm font-semibold text-foreground line-clamp-1">
         {mainTitle}
       </span>
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center justify-center gap-1.5">
         {subtitle ? (
-          <span className="text-[10px] text-slate-600 dark:text-slate-400">
+          <span className="text-[10px] text-muted-foreground line-clamp-1">
             {subtitle}
           </span>
         ) : (

@@ -9,7 +9,7 @@ import { MapPin } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import style from "./style.module.css";
 import { smartRound } from "@/functions/precios";
-import { Sends } from "@/context/InitialStatus";
+import { Sends } from "@/types/InitialStatus";
 
 export type Props = {
   compra: CompraInterface;

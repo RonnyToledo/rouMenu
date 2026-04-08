@@ -51,7 +51,6 @@ export default function ServiciosPage() {
       stats: "95% satisfacción",
     },
   ];
-
   const features = [
     {
       icon: ShoppingCart,
@@ -90,7 +89,6 @@ export default function ServiciosPage() {
         "Optimización de velocidad para una experiencia de usuario excepcional.",
     },
   ];
-
   const process = [
     {
       step: "01",
@@ -119,40 +117,37 @@ export default function ServiciosPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background dark:bg-slate-950">
-      {/* Hero Section */}
-      <section className="bg-linear-to-br from-green-300/20 via-background to-green-300/20 dark:from-green-900/20 dark:via-slate-950 dark:to-green-900/20 border-b dark:border-slate-800">
-        <div className="container dark:bg-slate-900 mx-auto px-4 py-16">
-          <div className="text-center max-w-4xl mx-auto">
-            <Badge className="mb-4 bg-green-900/10 dark:bg-green-900/30 text-green-900 dark:text-green-400 border-primary/20 dark:border-green-700">
+    <div className="min-h-screen bg-background">
+      {/* Hero */}
+      <section className="bg-primary/5 border-b border-border">
+        <div className="container mx-auto px-4 py-14">
+          <div className="text-center max-w-3xl mx-auto">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 rounded-full">
               Servicios de E-commerce
             </Badge>
-            <h1 className="text-5xl font-bold text-foreground dark:text-slate-100 mb-6">
-              Transforma tu Negocio con una
-              <span className="text-green-900 dark:text-green-400">
-                {" "}
-                Tienda Online
-              </span>
+            <h1 className="font-serif text-4xl font-bold text-foreground mb-4">
+              Transforma tu Negocio con una{" "}
+              <span className="text-primary">Tienda Online</span>
             </h1>
-            <p className="text-xl text-muted-foreground dark:text-slate-400 mb-8 leading-relaxed">
+            <p className="text-muted-foreground mb-8 leading-relaxed">
               Descubre los beneficios de tener presencia digital y cómo una
               tienda online profesional puede revolucionar tu negocio y
               multiplicar tus ventas.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button
-                onClick={() => router.push(`https://wa.me/5352489105`)}
+                onClick={() => router.push("https://wa.me/5352489105")}
                 size="lg"
-                className="bg-green-900 hover:bg-green-800/90 dark:bg-green-700 dark:hover:bg-green-600"
+                className="rounded-full gap-2 active:scale-[0.98] transition-all"
               >
                 Solicitar Consulta Gratuita
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="h-4 w-4" />
               </Button>
               <Button
-                onClick={() => router.push(`/`)}
+                onClick={() => router.push("/")}
                 size="lg"
                 variant="outline"
-                className="dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-900"
+                className="rounded-full border-border active:scale-[0.98] transition-all"
               >
                 Ver Portfolio
               </Button>
@@ -161,41 +156,40 @@ export default function ServiciosPage() {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-16">
-        <div className="container dark:bg-slate-900 mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-4">
+      {/* Benefits */}
+      <section className="py-14">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-3">
               ¿Por qué necesitas una Tienda Online?
             </h2>
-            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Los beneficios de digitalizar tu negocio van más allá de las
               ventas online
             </p>
           </div>
-
-          <div className="grid gap-8">
+          <div className="grid gap-4">
             {benefits.map((benefit, index) => (
               <Card
                 key={index}
-                className="text-center hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700"
+                className="border-border hover:shadow-md transition-shadow"
               >
                 <CardHeader>
-                  <div className="mx-auto mb-4 p-3 bg-green-900/10 dark:bg-green-900/30 rounded-full w-fit">
-                    <benefit.icon className="h-8 w-8 text-green-900 dark:text-green-400" />
+                  <div className="mx-auto mb-3 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <benefit.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <CardTitle className="text-xl dark:text-slate-100">
+                  <CardTitle className="text-base text-center text-foreground">
                     {benefit.title}
                   </CardTitle>
                   <Badge
                     variant="secondary"
-                    className="mx-auto dark:bg-slate-700 dark:text-slate-200"
+                    className="mx-auto rounded-full text-xs border border-border"
                   >
                     {benefit.stats}
                   </Badge>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground dark:text-slate-400">
+                  <p className="text-sm text-muted-foreground text-center">
                     {benefit.description}
                   </p>
                 </CardContent>
@@ -205,36 +199,35 @@ export default function ServiciosPage() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-muted/30 dark:bg-slate-900/50">
-        <div className="container dark:bg-slate-900 mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-4">
+      {/* Features */}
+      <section className="py-14 bg-secondary/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-3">
               Características de Nuestras Tiendas Online
             </h2>
-            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Tecnología de vanguardia para maximizar tus resultados
             </p>
           </div>
-
-          <div className="grid gap-8">
+          <div className="grid gap-3">
             {features.map((feature, index) => (
               <Card
                 key={index}
-                className="hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700"
+                className="border-border hover:shadow-md transition-shadow"
               >
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-900/10 dark:bg-green-900/30 rounded-lg">
-                      <feature.icon className="h-6 w-6 text-green-900 dark:text-green-400" />
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                      <feature.icon className="h-4 w-4 text-primary" />
                     </div>
-                    <CardTitle className="text-lg dark:text-slate-100">
+                    <CardTitle className="text-sm text-foreground">
                       {feature.title}
                     </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground dark:text-slate-400">
+                  <p className="text-xs text-muted-foreground">
                     {feature.description}
                   </p>
                 </CardContent>
@@ -244,45 +237,39 @@ export default function ServiciosPage() {
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-16">
-        <div className="container dark:bg-slate-900 mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground dark:text-slate-100 mb-4">
+      {/* Process */}
+      <section className="py-14">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl font-bold text-foreground mb-3">
               Nuestro Proceso de Implementación
             </h2>
-            <p className="text-lg text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               Un enfoque estructurado para garantizar el éxito de tu proyecto
             </p>
           </div>
-
-          <div className="grid gap-8">
+          <div className="grid gap-3">
             {process.map((step, index) => (
               <button
                 key={index}
-                className="p-0 m-0"
+                className="p-0 m-0 text-left"
                 onClick={() => ScrollTo(`process_${index}`)}
                 id={`process_${index}`}
               >
-                <Card className="relative hover:shadow-lg transition-shadow dark:bg-slate-900 dark:border-slate-700">
+                <Card className="border-border hover:shadow-md transition-shadow">
                   <CardHeader>
-                    <div className="text-4xl font-bold text-green-900/20 dark:text-green-400/20 mb-2">
+                    <div className="text-3xl font-bold text-primary/20 mb-1">
                       {step.step}
                     </div>
-                    <CardTitle className="text-xl dark:text-slate-100">
+                    <CardTitle className="text-sm text-foreground">
                       {step.title}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground dark:text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       {step.description}
                     </p>
                   </CardContent>
-                  {index < process.length - 1 && (
-                    <div className="hidden absolute right-4 top-1/2 transform -translate-y-1/2">
-                      <ArrowRight className="h-6 w-6 text-green-900/30 dark:text-green-400/30" />
-                    </div>
-                  )}
                 </Card>
               </button>
             ))}
@@ -290,34 +277,33 @@ export default function ServiciosPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-green-900/5 dark:bg-green-900/10">
-        <div className="container dark:bg-slate-900 mx-auto px-4">
-          <Card className="bg-linear-to-r from-green-700 via-green-400 to-green-700 dark:from-green-800 dark:via-green-600 dark:to-green-800 text-green-900-foreground dark:bg-slate-900 dark:border-slate-700">
-            <CardContent className="py-16 text-center">
-              <h3 className="text-3xl font-bold mb-4 dark:text-slate-100">
+      {/* CTA */}
+      <section className="py-14 bg-primary/5">
+        <div className="container mx-auto px-4">
+          <Card className="border-primary/20 bg-primary/8">
+            <CardContent className="py-12 text-center space-y-4">
+              <h3 className="font-serif text-2xl font-bold text-foreground">
                 ¿Listo para Impulsar tu Negocio?
               </h3>
-              <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90 dark:text-slate-300">
+              <p className="text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
                 No esperes más. Cada día sin una tienda online es una
                 oportunidad perdida. Contacta con nosotros y descubre cómo
                 podemos transformar tu negocio.
               </p>
-              <div className="flex flex-col gap-4 justify-center">
+              <div className="flex flex-col gap-3 max-w-xs mx-auto">
                 <Button
                   size="lg"
-                  variant="secondary"
-                  className="bg-white text-green-900 hover:bg-white/90 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600"
-                  onClick={() => router.push(`https://wa.me/5352489105`)}
+                  className="rounded-full gap-2 active:scale-[0.98] transition-all"
+                  onClick={() => router.push("https://wa.me/5352489105")}
                 >
-                  <CheckCircle className="mr-2 h-4 w-4" />
+                  <CheckCircle className="h-4 w-4" />
                   Consulta Gratuita
                 </Button>
                 <Button
-                  onClick={() => router.push(`/t/moondust`)}
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 bg-transparent dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-900"
+                  className="rounded-full border-border active:scale-[0.98] transition-all"
+                  onClick={() => router.push("/t/moondust")}
                 >
                   Ver Casos de Éxito
                 </Button>

@@ -2,7 +2,7 @@
 // UTILITIES - Exportar a utils/purchaseParser.ts
 // ============================================
 
-import { AgregadosInterface } from "@/context/InitialStatus";
+import { AgregadosInterface } from "@/types/InitialStatus";
 
 interface ParsedEventDesc {
   items: number;
@@ -78,7 +78,7 @@ export function parseEventDesc(desc?: string | null): ParsedEventDesc {
             const aggQty = Number(agg.cant || 0) || 0;
             return sum + aggQty;
           },
-          0
+          0,
         );
         const qty =
           Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 0) || 0;

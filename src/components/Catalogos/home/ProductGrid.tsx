@@ -3,7 +3,7 @@ import React, { useContext, useMemo, useCallback } from "react";
 import { TbShoppingCartOff } from "react-icons/tb";
 import { smartRound } from "@/functions/precios";
 import { motion } from "framer-motion";
-import { Product } from "@/context/InitialStatus";
+import { Product } from "@/types/InitialStatus";
 import { cn } from "@/lib/utils";
 import { MyContext } from "@/context/MyContext";
 import Link from "next/link";
@@ -115,10 +115,12 @@ export default React.memo(function ProductGrid({
           width={400}
           height={300}
           placeholder="blur"
-          blurDataURL={product.image || banner}
-          alt={product.title || `Producto ${i}`}
+          blurDataURL={product.selected_variant?.image || banner}
+          alt={
+            product.selected_variant?.label || product.title || `Producto ${i}`
+          }
           className={imageClasses}
-          src={product.image || banner}
+          src={product.selected_variant?.image || product.image || banner}
         />
 
         {/* Gradient overlay on hover */}
@@ -137,48 +139,47 @@ export default React.memo(function ProductGrid({
       <div className="p-2 flex flex-col justify-between  gap-0.5">
         <div className="flex items-start justify-between gap-2">
           <h4 className="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">
-            {product.title}
+            {product.selected_variant?.label || product.title}
           </h4>
-          {product.coment?.promedio ? (
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              {product.coment.promedio}
-            </div>
-          ) : null}
         </div>
 
-        {!store?.edit?.minimalista && (
+        {!store?.edit?.minimalista ? (
           <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
             {product.descripcion || "…"}
           </p>
-        )}
+        ) : null}
 
         {/* Badges */}
         <div className="flex gap-1 flex-wrap">
-          {isNew && (
+          {isNew ? (
             <Badge className="bg-red-600/80 text-[10px] px-1.5 py-0">
               Nuevo
             </Badge>
-          )}
-          {product.favorito && (
+          ) : null}
+          {product.favorito ? (
             <Badge className="bg-amber-500/80 text-[10px] px-1.5 py-0">
               Popular
             </Badge>
-          )}
-          {!isInStock && (
+          ) : null}
+          {!isInStock ? (
             <Badge className="bg-violet-700/50 text-[10px] px-1.5 py-0">
               Agotado
             </Badge>
-          )}
-          {product.oldPrice > product.price && (
+          ) : null}
+          {product.selected_variant?.oldPrice &&
+          product.selected_variant.oldPrice >
+            (product.selected_variant.price || product.price) ? (
             <Badge className="bg-cyan-700/50 text-[10px] px-1.5 py-0">
               -
               {Math.round(
-                ((product.oldPrice - product.price) / product.oldPrice) * 100,
+                ((product.selected_variant.oldPrice -
+                  (product.selected_variant.price || product.price)) /
+                  product.selected_variant.oldPrice) *
+                  100,
               )}
               % Off
             </Badge>
-          )}
+          ) : null}
         </div>
 
         {/* Price + action */}
@@ -186,13 +187,16 @@ export default React.memo(function ProductGrid({
           {product.venta ? (
             <div className="flex items-baseline gap-1.5">
               <span className="font-serif text-[10px]  font-semibold text-primary">
-                ${smartRound(product.price)} {currentCurrency}
+                ${smartRound(product.selected_variant?.price || product.price)}{" "}
+                {currentCurrency}
               </span>
-              {product.oldPrice > product.price && (
+              {product.selected_variant?.oldPrice &&
+              product.selected_variant.oldPrice >
+                (product.selected_variant.price || product.price) ? (
                 <span className="text-[10px] text-red-500 line-through">
-                  ${smartRound(product.oldPrice)}
+                  ${smartRound(product.selected_variant.oldPrice)}
                 </span>
-              )}
+              ) : null}
             </div>
           ) : (
             <div />
@@ -242,20 +246,24 @@ const FeaturedProductCard = React.memo(function FeaturedProductCard({
     <Link
       href={productUrl}
       className="group relative block rounded-3xl overflow-hidden border border-border
-        hover:border-primary/30 transition-all duration-300 h-full min-h-70 aspect-square"
+        hover:border-primary/30 transition-all duration-300 h-full aspect-14/9"
     >
       {/* Background image */}
       <Image
         width={800}
         height={600}
         placeholder="blur"
-        blurDataURL={product.image || banner}
-        alt={product.title || "Producto destacado"}
+        blurDataURL={product.selected_variant?.image || banner}
+        alt={
+          product.selected_variant?.label ||
+          product.title ||
+          "Producto destacado"
+        }
         className={cn(
           "absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ",
           !isInStock ? "grayscale" : "",
         )}
-        src={product.image || banner}
+        src={product.selected_variant?.image || product.image || banner}
       />
 
       {/* Gradient */}
@@ -282,7 +290,7 @@ const FeaturedProductCard = React.memo(function FeaturedProductCard({
         </div>
 
         <h3 className="font-serif text-2xl md:text-3xl font-semibold mb-1 leading-tight">
-          {product.title}
+          {product.selected_variant?.label || product.title}
         </h3>
 
         <p className="text-white/70 text-sm mb-2 line-clamp-2">
@@ -315,7 +323,7 @@ const FeaturedFooter = React.memo(function FeaturedFooter({
   const { store, dispatchStore } = useContext(MyContext);
 
   const productCant = product.Cant || 0;
-  const productStock = product.stock || 0;
+  const productStock = product.selected_variant?.stock || product.stock || 0;
 
   const isDisabled = store.stocks && productCant >= productStock;
 
@@ -357,13 +365,16 @@ const FeaturedFooter = React.memo(function FeaturedFooter({
       {/* Precio */}
       <div className="flex items-baseline gap-2">
         <span className="font-serif text-2xl font-bold text-white">
-          ${smartRound(product.price)} {currentCurrency}
+          ${smartRound(product.selected_variant?.price || product.price)}{" "}
+          {currentCurrency}
         </span>
-        {product.oldPrice > product.price && (
+        {product.selected_variant?.oldPrice &&
+        product.selected_variant.oldPrice >
+          (product.selected_variant.price || product.price) ? (
           <span className="text-sm text-red-400 line-through">
             ${smartRound(product.oldPrice)}
           </span>
-        )}
+        ) : null}
       </div>
 
       {/* Botón expandido */}

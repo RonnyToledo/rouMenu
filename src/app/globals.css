@@ -77,7 +77,9 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
-
+html {
+  scroll-behavior: smooth !important;
+}
 body {
   font-family: "IM Fell English", serif;
   background-color: var(--background);

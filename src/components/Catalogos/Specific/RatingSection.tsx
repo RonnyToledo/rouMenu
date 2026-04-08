@@ -2,7 +2,7 @@
 
 import React, { useState, useContext, useEffect, useMemo } from "react";
 import { Star } from "lucide-react";
-import { StarDistribution } from "@/context/InitialStatus";
+import { StarDistribution } from "@/types/InitialStatus";
 import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -87,107 +87,105 @@ export default function RatingSection({
 
   return (
     <>
-      {store.products
-        .filter((env) => env.productId === specific)
-        .map((obj, ind) => (
-          <div key={ind} className="max-w-xl mx-auto px-2 py-1">
-            <p className="text-sm text-muted-foreground mb-3 text-center leading-relaxed">
-              {obj.coment?.total == 0
-                ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
-                : "Las calificaciones y opiniones provienen de personas que compraron este producto."}
-            </p>
+      {product && (
+        <div className="max-w-xl mx-auto px-2 py-1">
+          <p className="text-sm text-muted-foreground mb-3 text-center leading-relaxed">
+            {product.coment?.total == 0
+              ? "Sé el primero en dejar una reseña para recomendar a próximos usuarios"
+              : "Las calificaciones y opiniones provienen de personas que compraron este producto."}
+          </p>
 
-            {product?.coment.promedio ? (
-              <>
-                <div className="grid grid-cols-2 items-center gap-3 mb-3">
-                  {/* Score grande */}
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-5xl font-bold text-foreground leading-none">
-                      {product.coment.promedio}
-                    </span>
-                    <div className="flex gap-0.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < Math.floor(product.coment.promedio || 0)
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground/30"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {product.coment.total} reseñas
-                    </p>
+          {product?.coment.promedio ? (
+            <>
+              <div className="grid grid-cols-2 items-center gap-3 mb-3">
+                {/* Score grande */}
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-5xl font-bold text-foreground leading-none">
+                    {product.coment.promedio}
+                  </span>
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(product.coment.promedio || 0)
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
                   </div>
-
-                  <StarSpecifications datos={obj.coment.porEstrellas} />
+                  <p className="text-xs text-muted-foreground">
+                    {product.coment.total} reseñas
+                  </p>
                 </div>
 
-                {/* Link — mismo estilo Button ghost del header */}
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full text-xs px-3 h-8"
+                <StarSpecifications datos={product.coment.porEstrellas} />
+              </div>
+
+              {/* Link — mismo estilo Button ghost del header */}
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="rounded-full text-xs px-3 h-8"
+              >
+                <Link
+                  href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
+                  className="text-primary"
                 >
-                  <Link
-                    href={`/t/${store.sitioweb}/producto/${product?.productId}/coment`}
-                    className="text-primary"
-                  >
-                    Ver todos los comentarios →
-                  </Link>
-                </Button>
-              </>
-            ) : null}
+                  Ver todos los comentarios →
+                </Link>
+              </Button>
+            </>
+          ) : null}
 
-            <Separator className="my-3" />
+          <Separator className="my-3" />
 
-            {/* Rating stars */}
-            <div className="pt-1 space-y-2">
-              <div className="text-center">
-                <h3 className="font-serif text-base font-semibold text-foreground">
-                  Califica este producto
-                </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Comparte tu opinión con otros usuarios
-                </p>
-              </div>
-
-              {/* Stars — mismo patrón del ProductSpecific (rounded-full bg-secondary) */}
-              <div className="flex gap-2 justify-center">
-                {[1, 2, 3, 4, 5].map((starValue) => (
-                  <button
-                    key={starValue}
-                    onClick={() => handleStarClick(starValue)}
-                    className="w-10 h-10 rounded-full bg-secondary hover:bg-primary/10 flex items-center justify-center transition-colors group"
-                    aria-label={`Calificar con ${starValue} estrella${starValue > 1 ? "s" : ""}`}
-                  >
-                    <Star
-                      className={`w-5 h-5 transition-colors ${
-                        starValue <= rating.selectedRating
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-muted-foreground/40 group-hover:text-amber-400 group-hover:fill-amber-400"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
+          {/* Rating stars */}
+          <div className="pt-1 space-y-2">
+            <div className="text-center">
+              <h3 className="font-serif text-base font-semibold text-foreground">
+                Califica este producto
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Comparte tu opinión con otros usuarios
+              </p>
             </div>
 
-            <Rating
-              rating={rating}
-              setRating={setRating}
-              isOpen={reviewOpen}
-              onClose={() => setReviewOpen(false)}
-              userName="Usuario"
-              user={user?.user_metadata.full_name}
-              handleSubmit={handleSubmit}
-              imageUser={user?.user_metadata.avatar_url}
-            />
+            {/* Stars — mismo patrón del ProductSpecific (rounded-full bg-secondary) */}
+            <div className="flex gap-2 justify-center">
+              {[1, 2, 3, 4, 5].map((starValue) => (
+                <button
+                  key={starValue}
+                  onClick={() => handleStarClick(starValue)}
+                  className="w-10 h-10 rounded-full bg-secondary hover:bg-primary/10 flex items-center justify-center transition-colors group"
+                  aria-label={`Calificar con ${starValue} estrella${starValue > 1 ? "s" : ""}`}
+                >
+                  <Star
+                    className={`w-5 h-5 transition-colors ${
+                      starValue <= rating.selectedRating
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/40 group-hover:text-amber-400 group-hover:fill-amber-400"
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
-        ))}
+
+          <Rating
+            rating={rating}
+            setRating={setRating}
+            isOpen={reviewOpen}
+            onClose={() => setReviewOpen(false)}
+            userName="Usuario"
+            user={user?.user_metadata.full_name}
+            handleSubmit={handleSubmit}
+            imageUser={user?.user_metadata.avatar_url}
+          />
+        </div>
+      )}
     </>
   );
 }

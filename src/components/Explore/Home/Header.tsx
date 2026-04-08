@@ -15,7 +15,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { HiMiniBars3BottomRight } from "react-icons/hi2";
 import { logoApp } from "@/lib/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ExplorationFooter } from "./Footer";
 import { Input } from "@/components/ui/input";
 import { useApp } from "@/context/AppContext";
 import { FaHome, FaInfo } from "react-icons/fa";
@@ -23,16 +22,11 @@ import { RiCustomerServiceFill } from "react-icons/ri";
 import { MdBook, MdContactPage } from "react-icons/md";
 
 export const cardsinfo = [
-  {
-    path: "/",
-    name: "Inicio",
-    descripcion: "Ir a Inicio",
-    icon: FaHome,
-  },
+  { path: "/", name: "Inicio", descripcion: "Ir a Inicio", icon: FaHome },
   {
     path: "/info",
     name: "Info",
-    descripcion: " Conoce mas acerca de RouMenu",
+    descripcion: "Conoce más acerca de RouMenu",
     icon: FaInfo,
   },
   {
@@ -50,7 +44,7 @@ export const cardsinfo = [
   {
     path: "/contact",
     name: "Contacto",
-    descripcion: "Contactenos ante dudas o nuevas ideas",
+    descripcion: "Contáctenos ante dudas o nuevas ideas",
     icon: MdContactPage,
   },
 ];
@@ -64,76 +58,70 @@ export default function Header({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (pathname !== "/buscar" && !search) return;
-
-    const timeoutId = setTimeout(() => {
+    const id = setTimeout(() => {
       const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
       router.replace(url);
     }, 300);
-
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(id);
   }, [search, pathname, router]);
 
   return (
     <div id="header-home">
-      {/* LoginPopover: se abrirá si no hay user y no se mostró antes */}
-
       {!pathname.includes("/t/") && (
-        <div className="sticky top-0 flex items-center bg-slate-100 dark:bg-slate-900 p-2 gap-2 justify-between z-50 shadow-lg transition-colors">
-          <div className="bg-white dark:bg-slate-800 rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2 transition-colors">
-            <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium">
-                {"RouMenu".charAt(0).toUpperCase()}
+        <div className="sticky top-0 flex items-center bg-background/90 backdrop-blur-lg border-b border-border p-2 gap-2 justify-between z-50 transition-colors">
+          <div className=" rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2 border border-border">
+            <Avatar className="w-9 h-9 shrink-0">
+              <AvatarFallback className=" text-muted-foreground text-xs font-medium">
+                {"RouMenu".charAt(0)}
               </AvatarFallback>
-              <AvatarImage src={logoApp} alt={"RouMenu"} />
+              <AvatarImage src={logoApp} alt="RouMenu" />
             </Avatar>
 
             {pathname !== "/buscar" ? (
               <Link
-                href={"/buscar"}
-                className="w-full flex items-center min-w-40 h-10"
+                href="/buscar"
+                className="w-full flex items-center min-w-40 h-9"
               >
-                <div className="w-full flex flex-col text-left">
-                  <div className="flex items-center w-full h-full font-normal text-[10px] text-slate-400 gap-0">
-                    Buscar en
-                  </div>
-                  <div className="flex items-center w-full h-full font-normal text-[14px] text-slate-600 dark:text-slate-300">
-                    RouMenu
-                  </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px]  leading-none">Buscar en</span>
+                  <span className="text-sm  leading-none mt-0.5">RouMenu</span>
                 </div>
               </Link>
             ) : (
-              <div className="flex w-full flex-1 items-stretch rounded-2xl h-full overflow-hidden">
-                <Input
-                  placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="form-input h-full flex w-full min-w-0 flex-1 resize-none overflow-hidden text-[#0d141c] dark:text-slate-100 focus:outline-0 focus:ring-0 border-none bg-white dark:bg-slate-800 focus:border-none placeholder:text-slate-500 dark:placeholder:text-slate-400 px-4 text-xs font-normal leading-normal line-clamp-1 transition-colors"
-                  value={search}
-                />
-              </div>
+              <Input
+                placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
+                onChange={(e) => setSearch(e.target.value)}
+                value={search}
+                className="flex-1 h-9 border-none bg-transparent text-sm placeholder:text-muted-foreground focus:ring-0 focus:outline-none px-2"
+              />
             )}
+
             {["/info", "/blog", "/contact", "/services", "/"].some((r) =>
               pathname.startsWith(r),
             ) ? (
               <Drawer open={open} onOpenChange={setOpen}>
                 <DrawerTrigger asChild>
-                  <Button variant="ghost" className="p-0 m-0">
-                    <HiMiniBars3BottomRight className="size-6 text-slate-700 " />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full w-8 h-8 shrink-0"
+                  >
+                    <HiMiniBars3BottomRight className="w-5 h-5 " />
                   </Button>
                 </DrawerTrigger>
                 <DrawerContent>
-                  <div className="mx-auto w-full max-w-sm p-2">
+                  <div className="mx-auto w-full max-w-sm p-4">
                     <DrawerHeader>
-                      <DrawerTitle>rouMenu</DrawerTitle>
-                      <DrawerDescription>
-                        Explora y descubre catalogos con mayor facilidad
+                      <DrawerTitle className="font-serif">rouMenu</DrawerTitle>
+                      <DrawerDescription className="text-muted-foreground text-sm">
+                        Explora y descubre catálogos con mayor facilidad
                       </DrawerDescription>
                     </DrawerHeader>
-
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
                       {cardsinfo
                         .filter((obj) => obj.path !== "/info")
                         .map((card, index) =>
-                          card.path == pathname ? (
+                          card.path === pathname ? (
                             <CardDrawerActive
                               key={`Active_${index}`}
                               card={card}
@@ -141,7 +129,7 @@ export default function Header({ children }: { children: ReactNode }) {
                             />
                           ) : (
                             <CardDrawer
-                              key={`No_acive_${index}`}
+                              key={`No_active_${index}`}
                               card={card}
                               onClick={() => setOpen(false)}
                             />
@@ -158,9 +146,6 @@ export default function Header({ children }: { children: ReactNode }) {
         </div>
       )}
       {children}
-      {!pathname.includes("/t/") &&
-        !pathname.includes("/buscar") &&
-        !pathname.includes("/user") && <ExplorationFooter />}
     </div>
   );
 }
@@ -171,6 +156,7 @@ interface CardDrawerInterface {
   path: string;
   icon: IconType;
 }
+
 export function CardDrawerActive({
   card,
   onClick,
@@ -179,17 +165,14 @@ export function CardDrawerActive({
   onClick: () => void;
 }) {
   return (
-    <Link
-      href={card.path}
-      className="bg-primary text-primary-foreground p-4 rounded-xl shadow-sm"
-      onClick={onClick}
-    >
-      <card.icon className="w-6 h-6 mb-2" />
-      <h3 className="font-semibold text-sm">{card.name}</h3>
-      <p className="text-xs opacity-90 mt-1">{card.descripcion}</p>
+    <Link href={card.path} className=" p-3.5 rounded-xl" onClick={onClick}>
+      <card.icon className="w-5 h-5 mb-2" />
+      <h3 className="font-semibold text-xs">{card.name}</h3>
+      <p className="text-[10px] opacity-90 mt-0.5">{card.descripcion}</p>
     </Link>
   );
 }
+
 export function CardDrawer({
   card,
   onClick,
@@ -200,12 +183,12 @@ export function CardDrawer({
   return (
     <Link
       href={card.path}
-      className="bg-accent text-accent-foreground p-4 rounded-xl shadow-sm"
+      className=" border border-border  p-3.5 rounded-xl hover:bg-muted transition-colors"
       onClick={onClick}
     >
-      <card.icon className="w-6 h-6 mb-2" />
-      <h3 className="font-semibold text-sm">{card.name}</h3>
-      <p className="text-xs opacity-90 mt-1">{card.descripcion}</p>
+      <card.icon className="w-5 h-5 mb-2 " />
+      <h3 className="font-semibold text-xs ">{card.name}</h3>
+      <p className="text-[10px]  mt-0.5">{card.descripcion}</p>
     </Link>
   );
 }

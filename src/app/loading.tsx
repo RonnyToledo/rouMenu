@@ -2,30 +2,13 @@ import React from "react";
 import { MultiStepLoader } from "@/components/ui/multi-step-loader";
 
 const loadingStates = [
-  {
-    text: "Cargando datos",
-  },
-  {
-    text: "Buscando tienda",
-  },
-  {
-    text: "Revisando Porductos",
-  },
-  {
-    text: "Cargando comentarios",
-  },
-  {
-    text: "Recibiendo datos",
-  },
-  {
-    text: "Preprarando pagina para el usuario",
-  },
-  {
-    text: "Casi terminamos",
-  },
-  {
-    text: "Welcome",
-  },
+  { text: "Cargando datos" },
+  { text: "Buscando tienda" },
+  { text: "Revisando productos" },
+  { text: "Cargando comentarios" },
+  { text: "Recibiendo datos" },
+  { text: "Preparando página para el usuario" },
+  { text: "Casi terminamos" },
 ];
 
 export default function CatalogLoading() {

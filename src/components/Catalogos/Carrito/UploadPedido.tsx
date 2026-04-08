@@ -2,11 +2,6 @@
 import { supabase } from "@/lib/supabase";
 import type { UploadCompraInterface } from "./CarritoPage";
 
-// ─── Tipos del payload mínimo que se guarda en DB ─────────────────────────────
-// Solo los campos que el negocio necesita leer luego.
-// NO guarda: descripcion del producto, imagesecondary, caracteristicas,
-// creado, modified, storeId, visitas, favorito, comparar, coment...
-
 interface PedidoItemMinimo {
   id: number;
   productId: string;
@@ -19,6 +14,19 @@ interface PedidoItemMinimo {
   stock: number;
   default_moneda: number;
   caja: string;
+  /**
+   * Datos de la variante seleccionada (solo si no es la default).
+   * Incluye attributes para que el negocio pueda leer
+   * qué combinación pidió el cliente: { color: "Rojo", talla: "M" }
+   */
+  selected_variant?: {
+    id: string;
+    label: string;
+    price?: number | null;
+    oldPrice?: number | null;
+    stock?: number | null;
+    attributes?: Record<string, string | number | boolean>;
+  };
   agregados: AgregadoMinimo[];
 }
 
@@ -29,35 +37,63 @@ interface AgregadoMinimo {
   cant: number;
 }
 
-// Extrae solo los campos necesarios de cada producto del carrito
+// Claves internas que no aportan info al negocio
+const INTERNAL_ATTR_KEYS = new Set(["tipo", "es_default"]);
+
 function minimizarPedido(
   pedido: UploadCompraInterface["desc"]["pedido"],
 ): PedidoItemMinimo[] {
-  return pedido.map((p) => ({
-    id: p.id,
-    productId: p.productId,
-    title: p.title,
-    image: p.image || "",
-    price: p.price ?? 0,
-    embalaje: p.embalaje ?? 0,
-    priceCompra: p.priceCompra ?? 0,
-    Cant: p.Cant ?? 0,
-    stock: p.stock ?? 0,
-    default_moneda: p.default_moneda,
-    caja: p.caja || "",
-    agregados: (p.agregados ?? [])
-      .filter((a) => a.cant > 0)
-      .map((a) => ({
-        id: a.id,
-        name: a.name,
-        price: a.price ?? 0,
-        cant: a.cant,
-      })),
-  }));
+  return pedido.map((p) => {
+    const variant = p.selected_variant;
+
+    // Solo incluir variante si no es la default
+    const variantMinimo =
+      variant && !variant.default
+        ? {
+            id: variant.id,
+            label: variant.label,
+            price: variant.price,
+            oldPrice: variant.oldPrice,
+            stock: variant.stock,
+            // Filtrar claves internas de attributes antes de guardar
+            ...(variant.attributes
+              ? {
+                  attributes: Object.fromEntries(
+                    Object.entries(variant.attributes).filter(
+                      ([k]) => !INTERNAL_ATTR_KEYS.has(k),
+                    ),
+                  ),
+                }
+              : {}),
+          }
+        : undefined;
+
+    return {
+      id: p.id,
+      productId: p.productId,
+      title: p.title,
+      image: p.image || "",
+      price: p.price ?? 0,
+      embalaje: p.embalaje ?? 0,
+      priceCompra: p.priceCompra ?? 0,
+      Cant: p.Cant ?? 0,
+      stock: p.stock ?? 0,
+      default_moneda: p.default_moneda,
+      caja: p.caja || "",
+      ...(variantMinimo ? { selected_variant: variantMinimo } : {}),
+      agregados: (p.agregados ?? [])
+        .filter((a) => a.cant > 0)
+        .map((a) => ({
+          id: a.id,
+          name: a.name,
+          price: a.price ?? 0,
+          cant: a.cant,
+        })),
+    };
+  });
 }
 
 export async function UploadPedido(dato: UploadCompraInterface) {
-  // Construir el desc con el pedido minimizado
   const descMinimo = {
     pago: dato.desc.pago,
     lugar: dato.desc.lugar,
@@ -72,14 +108,13 @@ export async function UploadPedido(dato: UploadCompraInterface) {
       name: dato.desc.code.name,
       discount: dato.desc.code.discount,
     },
-    // Solo los campos mínimos de cada producto
     pedido: minimizarPedido(dato.desc.pedido),
   };
 
   const params = {
     p_uid: dato.UUID_Shop,
     p_events: dato.events,
-    p_desc: descMinimo, // objeto JS → Supabase lo convierte a JSONB
+    p_desc: descMinimo,
     p_uid_venta: dato.uid,
     p_nombre: dato.nombre,
     p_phonenumber: Number(dato.phonenumber) || 0,
@@ -90,6 +125,6 @@ export async function UploadPedido(dato: UploadCompraInterface) {
 
   const { data, error } = await supabase.rpc("create_order_event", params);
   if (error) throw new Error(error.message);
-
+  console.log(data);
   return data as { event_id: number; uid_venta: string };
 }

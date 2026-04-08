@@ -2,7 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sileo";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Head from "next/head";
 import Header from "@/components/Explore/Home/Header";
@@ -11,9 +11,10 @@ import { logoApp } from "@/lib/image";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
 import { buildSiteMetadata } from "@/lib/siteMeta";
-import { AppProvider, AppState } from "@/context/AppContext";
+import { AppProvider } from "@/context/AppContext";
 import { findItemUrlByName } from "@/lib/items";
 import { ThemeProvider } from "@/components/theme-provider";
+import { HomeContentData } from "@/types/HomeContentInterface";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,9 +37,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const { data, error } = await createClient().rpc("get_home_content", {
-    limit_sites: 4,
-    limit_products: 6,
-    cat_limit: 4,
+    limit_catalogs: 50,
   });
 
   if (error) {
@@ -84,7 +83,7 @@ export default async function RootLayout({
               <AppProvider storeSSD={newData}>
                 <Header>
                   {children}
-                  <Toaster richColors position="top-center" />
+                  <Toaster position="top-center" />
                 </Header>
               </AppProvider>
             </div>
@@ -97,8 +96,8 @@ export default async function RootLayout({
   );
 }
 
-// 1) renombrado y tipado correcto: devuelve Promise<AppState>
-async function modifyData(data: AppState): Promise<AppState> {
+// 1) renombrado y tipado correcto: devuelve Promise<HomeContentData>
+async function modifyData(data: HomeContentData): Promise<HomeContentData> {
   if (!data?.top_provinces || !Array.isArray(data.top_provinces)) return data;
 
   const top_provinces_with_image = await Promise.all(

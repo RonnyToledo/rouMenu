@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo, useContext, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Eye, Pencil, Trash2 } from "lucide-react";
@@ -57,28 +56,22 @@ const STATUS_CONFIG: Record<
   completed: {
     label: "Completado",
     className:
-      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
   },
-
   shipped: {
     label: "Enviado",
-    className:
-      "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+    className: "bg-primary/10 text-primary border border-primary/20",
   },
 };
 
 const FILTERS = ["all", "completed", "shipped"] as const;
 
 function inferPurchaseStatus(event: EventRow): PurchaseStatus {
-  if (event.visto === true) {
-    return "completed";
-  }
-  return "shipped";
+  return event.visto === true ? "completed" : "shipped";
 }
 
 function eventToPurchase(event: EventRow): Purchase {
   const parsed = parseEventDesc(event.event_desc);
-
   const date = event.created_at
     ? new Date(event.created_at).toLocaleDateString(undefined, {
         day: "2-digit",
@@ -86,25 +79,18 @@ function eventToPurchase(event: EventRow): Purchase {
         year: "numeric",
       })
     : "-";
-
   const catalogName =
     event.sitio_name ?? event.nombre_event ?? event.events_text ?? "Evento";
   const catalogType = event.sitio_sitioweb ?? "";
   const location =
     parsed.address ?? event.sitio_sitioweb ?? event.descripcion ?? "";
-
   const status = inferPurchaseStatus(event);
-  const formattedTotal = formatCurrency(parsed.total, parsed.currency);
-  const detailUrl = event.uid_venta
-    ? `/checkout/${event.uid_venta}`
-    : `/events/${event.event_id}`;
-
   return {
     id: String(event.event_id),
     catalogName,
     catalogType,
     items: parsed.items,
-    total: formattedTotal,
+    total: formatCurrency(parsed.total, parsed.currency),
     rawTotalValue: parsed.total,
     currency: parsed.currency,
     date,
@@ -114,7 +100,9 @@ function eventToPurchase(event: EventRow): Purchase {
     paymentMethod: parsed.paymentMethod,
     discountCode: parsed.discountCode,
     rawEvent: event,
-    detailUrl,
+    detailUrl: event.uid_venta
+      ? `/checkout/${event.uid_venta}`
+      : `/events/${event.event_id}`,
   };
 }
 
@@ -125,18 +113,12 @@ export function PurchaseHistory() {
 
   const { purchases, filteredPurchases } = useMemo(() => {
     const allPurchases = (events ?? []).map(eventToPurchase);
-
     const filtered =
       selectedFilter === "all"
         ? allPurchases
         : allPurchases.filter((p) => p.status === selectedFilter);
-
     return { purchases: allPurchases, filteredPurchases: filtered };
   }, [events, selectedFilter]);
-
-  const handleFilterClick = (filter: (typeof FILTERS)[number]) => {
-    setSelectedFilter?.(filter);
-  };
 
   const EditarComprar = (idCompra: string) => {
     const e = events.find((e) => e.event_id === Number(idCompra));
@@ -148,54 +130,55 @@ export function PurchaseHistory() {
     );
     router.push(`/t/${e.sitio_sitioweb}`);
   };
+
   return (
-    <div>
-      <div className="container dark:bg-slate-900 mx-auto px-4 py-6 max-w-2xl">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-serif font-light tracking-tight text-slate-800 dark:text-slate-100 mb-2">
-              Historial de Compras
-            </h2>
-            <p className="text-slate-700 dark:text-slate-400">
-              Revisa todas tus compras ({purchases.length} total)
+    <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <div className="mb-6">
+        <h2 className="font-serif text-2xl font-bold text-foreground mb-1">
+          Historial de Compras
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          Revisa todas tus compras ({purchases.length} total)
+        </p>
+      </div>
+
+      {/* Filtros — rounded-full coherente con el sistema */}
+      <div className="flex gap-2 flex-wrap mb-5">
+        {FILTERS.map((filter) => (
+          <Button
+            key={filter}
+            variant={selectedFilter === filter ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedFilter(filter)}
+            className={`rounded-full px-4 h-8 text-xs ${
+              selectedFilter === filter ? "" : "border-border text-foreground"
+            }`}
+          >
+            {filter === "all"
+              ? "Todos"
+              : (STATUS_CONFIG[filter as PurchaseStatus]?.label ?? filter)}
+          </Button>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        {filteredPurchases.length > 0 ? (
+          filteredPurchases.map((purchase) => (
+            <PurchaseCard
+              key={purchase.id}
+              purchase={purchase}
+              onView={() => router.push(`/user/order/${purchase.id}`)}
+              onEdit={() => EditarComprar(purchase.id)}
+              onDelete={() => console.info("Delete", purchase.id)}
+            />
+          ))
+        ) : (
+          <div className="py-12 text-center rounded-2xl border border-border bg-secondary/30">
+            <p className="text-sm text-muted-foreground">
+              No se encontraron compras con este filtro
             </p>
           </div>
-        </div>
-        <div className="mb-6 flex gap-2 flex-wrap">
-          {FILTERS.map((filter) => (
-            <Button
-              key={filter}
-              variant={selectedFilter === filter ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleFilterClick(filter)}
-              className="bg-transparent border-slate-800 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-900/70 dark:hover:bg-slate-900 hover:text-slate-300 rounded-full px-6 h-10"
-            >
-              {filter === "all"
-                ? "Todos"
-                : (STATUS_CONFIG[filter as PurchaseStatus]?.label ?? filter)}
-            </Button>
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          {filteredPurchases.length > 0 ? (
-            filteredPurchases.map((purchase) => (
-              <PurchaseCard
-                key={purchase.id}
-                purchase={purchase}
-                onView={() => router.push(`/user/order/${purchase.id}`)}
-                onEdit={() => EditarComprar(purchase.id)}
-                onDelete={() => console.info("Delete", purchase.id)}
-              />
-            ))
-          ) : (
-            <Card className="p-12 text-center dark:bg-slate-900 dark:border-slate-700">
-              <p className="text-muted-foreground dark:text-slate-400">
-                No se encontraron compras con este filtro
-              </p>
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   );
@@ -217,115 +200,108 @@ function PurchaseCard({
   const status = STATUS_CONFIG[purchase.status];
 
   return (
-    <div
-      key={purchase.id}
-      className="bg-slate-200/50 dark:bg-slate-900/50 backdrop-blur-sm border border-slate-500 dark:border-slate-600 rounded-2xl p-6"
-    >
-      <div className="flex items-start justify-between gap-6 flex-col">
-        <div className="flex-1 w-full">
-          <h3 className="text-xl font-medium text-slate-800 dark:text-slate-100 mb-1">
+    <div className="bg-secondary/40 border border-border rounded-2xl p-4 space-y-3">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-semibold text-foreground line-clamp-1">
             {purchase.catalogName}
           </h3>
-          <div className="mb-3 flex items-start justify-between gap-2">
-            {purchase.catalogType && (
-              <Link
-                href={`/t/${purchase.catalogType}`}
-                className="text-sm text-slate-700 dark:text-slate-400 flex items-center justify-start gap-2"
-              >
-                <p className="text-sm text-slate-700 dark:text-slate-400">
-                  {purchase.catalogType}
-                </p>
-                <LinkRef className="size-4" />
-              </Link>
-            )}
-            <Badge variant="secondary" className={status.className}>
-              {status.label}
-            </Badge>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground dark:text-slate-400 mb-3">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-4 w-4 shrink-0" />
-              <span>{purchase.date}</span>
-            </div>
-            {purchase.location && (
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-4 w-4 shrink-0" />
-                <span>{purchase.location}</span>
-              </div>
-            )}
-            <div>
-              <span className="font-medium text-foreground dark:text-slate-200">
-                {purchase.items}
-              </span>{" "}
-              articulos
-            </div>
-          </div>
-
-          {(purchase.phone ||
-            purchase.paymentMethod ||
-            purchase.discountCode) && (
-            <div className="text-sm text-muted-foreground dark:text-slate-400 flex flex-wrap gap-4">
-              {purchase.phone && (
-                <div>
-                  <strong>Tel:</strong> {purchase.phone}
-                </div>
-              )}
-              {purchase.paymentMethod && (
-                <div>
-                  <strong>Pago:</strong> {purchase.paymentMethod}
-                </div>
-              )}
-              {purchase.discountCode && (
-                <div>
-                  <strong>Cupón:</strong> {purchase.discountCode}
-                </div>
-              )}
-            </div>
+          {purchase.catalogType && (
+            <Link
+              href={`/t/${purchase.catalogType}`}
+              className="inline-flex items-center gap-1 text-xs text-primary hover:opacity-75 transition-opacity mt-0.5"
+            >
+              {purchase.catalogType}
+              <LinkRef className="w-3 h-3" />
+            </Link>
           )}
         </div>
+        <Badge
+          variant="secondary"
+          className={`shrink-0 rounded-full text-xs px-2 ${status.className}`}
+        >
+          {status.label}
+        </Badge>
+      </div>
 
-        <div className="flex flex-col items-center gap-3 w-full">
-          <div className="text-center py-4 mb-4 border-t border-b border-slate-400 dark:border-slate-600 w-full">
-            <p className="text-3xl font-bold text-slate-700 dark:text-slate-300">
-              {" "}
-              {purchase.total}
-            </p>
+      {/* Meta */}
+      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <Calendar className="w-3 h-3" />
+          <span>{purchase.date}</span>
+        </div>
+        {purchase.location && (
+          <div className="flex items-center gap-1">
+            <MapPin className="w-3 h-3" />
+            <span>{purchase.location}</span>
           </div>
-          <div className="flex gap-2 w-full flex-col">
+        )}
+        <span>
+          <span className="font-medium text-foreground">{purchase.items}</span>{" "}
+          artículos
+        </span>
+      </div>
+
+      {(purchase.phone || purchase.paymentMethod || purchase.discountCode) && (
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          {purchase.phone && (
+            <span>
+              <strong className="text-foreground">Tel:</strong> {purchase.phone}
+            </span>
+          )}
+          {purchase.paymentMethod && (
+            <span>
+              <strong className="text-foreground">Pago:</strong>{" "}
+              {purchase.paymentMethod}
+            </span>
+          )}
+          {purchase.discountCode && (
+            <span>
+              <strong className="text-foreground">Cupón:</strong>{" "}
+              {purchase.discountCode}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Total */}
+      <div className="text-center py-3 border-t border-b border-border">
+        <p className="text-2xl font-bold text-foreground">{purchase.total}</p>
+      </div>
+
+      {/* Acciones — rounded-full del sistema */}
+      <div className="flex flex-col gap-2">
+        <Button
+          size="sm"
+          className="w-full h-10 rounded-full font-medium gap-2 active:scale-[0.98] transition-all"
+          onClick={onView}
+        >
+          <Eye className="w-3.5 h-3.5" />
+          Ver
+        </Button>
+        {purchase.status === "shipped" && (
+          <>
             <Button
               variant="outline"
               size="sm"
-              className="w-full bg-slate-700 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-white border-0 h-11 rounded-xl"
-              onClick={onView}
+              className="w-full h-10 rounded-full border-border font-medium gap-2 active:scale-[0.98] transition-all"
+              onClick={onEdit}
             >
-              <Eye className="h-4 w-4" />
-              Ver
+              <Pencil className="w-3.5 h-3.5" />
+              Editar
             </Button>
-            {purchase.status === "shipped" ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full bg-slate-700 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 text-white border-0 h-11 rounded-xl"
-                  onClick={onEdit}
-                >
-                  <Pencil className="h-4 w-4" />
-                  Editar
-                </Button>
-                <Button
-                  variant={"outline"}
-                  size="sm"
-                  className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500 dark:border-red-600/50 dark:text-red-400 dark:hover:bg-red-600/10 dark:hover:text-red-300 dark:hover:border-red-600 h-11 rounded-xl bg-transparent"
-                  onClick={onDelete}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Eliminar
-                </Button>
-              </>
-            ) : null}
-          </div>
-        </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full h-10 rounded-full border-red-500/40 text-red-500 hover:bg-red-500/10 hover:border-red-500 bg-transparent font-medium gap-2 active:scale-[0.98] transition-all"
+              onClick={onDelete}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Eliminar
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

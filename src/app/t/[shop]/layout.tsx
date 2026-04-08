@@ -1,6 +1,6 @@
 import React from "react";
 import MyProvider from "@/context/MyContext";
-import { AppState } from "@/context/InitialStatus";
+import { AppState } from "@/types/InitialStatus";
 import { supabase } from "@/lib/supabase";
 import { notFound } from "next/navigation";
 import Unavailable from "@/components/Catalogos/General/Unavailable";

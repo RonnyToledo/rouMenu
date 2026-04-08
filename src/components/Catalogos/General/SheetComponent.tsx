@@ -30,7 +30,7 @@ import { MdTravelExplore } from "react-icons/md";
 import { useRouter, usePathname } from "next/navigation";
 import PreviewRatingGeneral from "./PreviewRatingGeneral";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Categoria, Current } from "@/context/InitialStatus";
+import { Categoria, Current } from "@/types/InitialStatus";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,6 @@ import { ScrollTo } from "@/functions/ScrollTo";
 
 type SheetView = "home" | "categories" | "coins";
 
-// Context para controlar el Sheet
 interface SheetContextType {
   open: () => void;
   close: () => void;
@@ -50,16 +49,13 @@ interface SheetContextType {
 
 const SheetContext = createContext<SheetContextType | undefined>(undefined);
 
-// Hook personalizado para usar el contexto
 export function useSheet() {
   const context = useContext(SheetContext);
-  if (!context) {
+  if (!context)
     throw new Error("useSheet debe ser usado dentro de SheetProvider");
-  }
   return context;
 }
 
-// Provider Component
 export function SheetProvider({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showState, setShowState] = useState<SheetView>("home");
@@ -74,16 +70,10 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
     setShowState(view);
     setIsMenuOpen(true);
   }, []);
-
   const highlightCategory = useCallback((categoryId: string) => {
-    // Abrir el sheet en la vista de categorías
     setShowState("categories");
     setIsMenuOpen(true);
-
-    // Esperar un poco para que el sheet se abra y renderice
-    setTimeout(() => {
-      setHighlightCategoryId(categoryId);
-    }, 300);
+    setTimeout(() => setHighlightCategoryId(categoryId), 300);
   }, []);
 
   const value = useMemo(
@@ -113,7 +103,6 @@ export function SheetProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Componente Sheet actualizado para recibir props del Provider
 interface SheetComponentProps {
   className?: string;
   isOpen: boolean;
@@ -133,27 +122,21 @@ function SheetComponent({
   onHighlightComplete,
 }: SheetComponentProps) {
   const { store, dispatchStore } = useContext(MyContext);
-  const { user, loading, signOut, requireAuth } = useAuth();
+  const { user, loading, signOut, requireAuth, openLoginPopover } = useAuth();
   const router = useRouter();
-
   const [isMounted, setIsMounted] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
 
-  // Reset view when sheet closes
   useEffect(() => {
     if (!isOpen) setShowState("home");
   }, [isOpen, setShowState]);
-
   const closeSheet = useCallback(() => onOpenChange(false), [onOpenChange]);
 
   const handleReviewAction = useCallback(async () => {
-    // Verificar autenticación antes de enviar la review
     const isAuthenticated = await requireAuth(
       "Debes iniciar sesión para dejar una reseña",
     );
-    // Si el usuario no se autenticó o canceló, detener el proceso
     if (!isAuthenticated) {
-      console.info("Usuario no autenticado, review cancelada");
       closeSheet();
       return;
     }
@@ -179,7 +162,6 @@ function SheetComponent({
           closeSheet();
         },
       },
-
       {
         name: "Sobre Nosotros",
         icon: <IoStorefrontOutline />,
@@ -189,7 +171,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Ver Categorias",
+        name: "Ver Categorías",
         icon: <MdCategory />,
         action: () => setShowState("categories"),
       },
@@ -207,7 +189,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Comparar produtos",
+        name: "Comparar productos",
         icon: <FaBalanceScale />,
         action: () => {
           router.push(`/t/${store.sitioweb}/comparar`);
@@ -223,7 +205,7 @@ function SheetComponent({
         },
       },
       {
-        name: "Explorar mas Catalogos",
+        name: "Explorar más catálogos",
         icon: <MdTravelExplore />,
         action: () => {
           router.push(`/`);
@@ -236,10 +218,7 @@ function SheetComponent({
 
   const displayName = useMemo(() => {
     if (!isMounted || loading) return "Cargando...";
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name.split(" ")[0];
-    }
-    return "Guest";
+    return user?.user_metadata?.full_name?.split(" ")[0] || "Guest";
   }, [user, isMounted, loading]);
 
   useEffect(() => {
@@ -249,51 +228,52 @@ function SheetComponent({
   return (
     <>
       <Sheet onOpenChange={onOpenChange} open={isOpen}>
-        <SheetContent className="bg-linear-to-br from-primary/5 to-primary/30 dark:from-slate-900 dark:to-slate-800 p-4 transition-colors duration-500">
+        <SheetContent className="bg-secondary/95 backdrop-blur-xl border-border p-4 transition-colors duration-300">
           <SheetHeader>
             <SheetTitle>
-              <Link href={"/user"} className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-black/10 dark:bg-white/20 rounded-full flex items-center justify-center overflow-hidden transition-colors">
+              <Link href="/user" className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-background border border-border rounded-full flex items-center justify-center overflow-hidden">
                   {isMounted && user?.user_metadata?.avatar_url ? (
                     <Image
-                      width={40}
-                      height={40}
+                      width={36}
+                      height={36}
                       src={user.user_metadata.avatar_url}
                       className="w-full h-full object-cover"
                       alt="Avatar"
                     />
                   ) : (
-                    <User className="w-5 h-5 text-slate-800 dark:text-slate-200" />
+                    <User className="w-4 h-4 text-muted-foreground" />
                   )}
                 </div>
                 <div>
-                  <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm transition-colors">
+                  <p className="text-sm font-semibold text-foreground">
                     Hi, {displayName}
                   </p>
-                  <p className="text-slate-800/70 dark:text-slate-300/70 text-xs transition-colors">
+                  <p className="text-[10px] text-muted-foreground">
                     {isMounted && user ? "Welcome back" : "Guest"}
                   </p>
                 </div>
               </Link>
             </SheetTitle>
-            <SheetDescription></SheetDescription>
+            <SheetDescription />
           </SheetHeader>
 
-          <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-3">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden space-y-2 mt-2">
+            {/* Búsqueda rápida */}
             <Button
-              variant={"outline"}
+              variant="outline"
               onClick={() => {
                 router.push(`/t/${store.sitioweb}/search`);
                 closeSheet();
               }}
-              className="justify-start rounded-full h-fit p-2 w-full"
+              className="justify-start rounded-full h-9 w-full border-border text-xs gap-2 text-muted-foreground"
             >
-              <IoSearch />
-              <span className=" text-slate-500">Busqueda avanzada</span>
+              <IoSearch className="w-3.5 h-3.5" />
+              Búsqueda avanzada
             </Button>
+
             <div className="min-h-fit">
               {showState === "home" && <HomeView items={homeItems} />}
-
               {showState === "categories" && (
                 <CategoriesView
                   onBack={() => setShowState("home")}
@@ -302,7 +282,6 @@ function SheetComponent({
                   onHighlightComplete={onHighlightComplete}
                 />
               )}
-
               {showState === "coins" && (
                 <CoinsView
                   coins={store?.moneda || []}
@@ -312,25 +291,55 @@ function SheetComponent({
               )}
             </div>
           </div>
-          {user ? (
-            <>
-              <div className="space-y-2">
-                <Separator className="bg-slate-200/20" />
 
-                <ListSheet
-                  name={"Cerrar Sesion"}
-                  icon={
-                    <User className="w-8 h-8 text-slate-800 dark:text-slate-200" />
-                  }
-                  icon2={<ChevronRight className="dark:text-slate-200" />}
-                  action={() => {
-                    signOut();
-                    closeSheet();
-                  }}
-                />
-              </div>
-            </>
-          ) : null}
+          {user ? (
+            <div className="space-y-1">
+              <Separator className="bg-border" />
+              <ListSheet
+                name="Cerrar Sesión"
+                icon={<User className="w-4 h-4 text-muted-foreground" />}
+                icon2={
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                }
+                action={() => {
+                  signOut();
+                  closeSheet();
+                }}
+              />
+            </div>
+          ) : (
+            <div className="p-3 flex items-center justify-center">
+              <Button
+                variant="link"
+                className="p-0 h-auto flex-col"
+                onClick={() => {
+                  closeSheet();
+                  openLoginPopover();
+                }}
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  {" "}
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />{" "}
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />{" "}
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />{" "}
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />{" "}
+                </svg>
+                Acceder con Google
+              </Button>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
       <PreviewRatingGeneral
@@ -341,12 +350,11 @@ function SheetComponent({
   );
 }
 
-// Subcomponents
-interface HomeViewProps {
+function HomeView({
+  items,
+}: {
   items: Array<{ name: string; icon: React.ReactNode; action: () => void }>;
-}
-
-function HomeView({ items }: HomeViewProps) {
+}) {
   return (
     <>
       {items.map((item) => (
@@ -354,7 +362,7 @@ function HomeView({ items }: HomeViewProps) {
           key={item.name}
           name={item.name}
           icon={item.icon}
-          icon2={<ChevronRight />}
+          icon2={<ChevronRight className="w-4 h-4" />}
           action={item.action}
         />
       ))}
@@ -362,19 +370,17 @@ function HomeView({ items }: HomeViewProps) {
   );
 }
 
-interface CategoriesViewProps {
-  onBack: () => void;
-  onClose: () => void;
-  highlightCategoryId: string | null;
-  onHighlightComplete: () => void;
-}
-
 function CategoriesView({
   onBack,
   onClose,
   highlightCategoryId,
   onHighlightComplete,
-}: CategoriesViewProps) {
+}: {
+  onBack: () => void;
+  onClose: () => void;
+  highlightCategoryId: string | null;
+  onHighlightComplete: () => void;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { store } = useContext(MyContext);
@@ -382,27 +388,16 @@ function CategoriesView({
     null,
   );
 
-  // Efecto para manejar el highlight cuando cambia el ID
   useEffect(() => {
     if (highlightCategoryId !== null) {
-      // Hacer scroll a la categoría
-      const categoryElement = document.getElementById(
-        `category-${highlightCategoryId}`,
-      );
-      if (categoryElement) {
-        categoryElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-
-      // Iniciar el pestañeo
+      const el = document.getElementById(`category-${highlightCategoryId}`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
       setBlinkingCategoryId(highlightCategoryId);
-
-      // Detener el pestañeo después de 1 segundo
-      const timeout = setTimeout(() => {
+      const t = setTimeout(() => {
         setBlinkingCategoryId(null);
         onHighlightComplete();
       }, 1000);
-
-      return () => clearTimeout(timeout);
+      return () => clearTimeout(t);
     }
   }, [highlightCategoryId, onHighlightComplete]);
 
@@ -412,16 +407,13 @@ function CategoriesView({
         router.push(`/t/${store?.sitioweb}/category/${category.id}`);
         onClose();
       } else {
-        const targetUrl = `/t/${store?.sitioweb}`;
-        const targetId = category.id;
-
-        if (pathname === targetUrl) {
-          ScrollTo(targetId);
+        if (pathname === `/t/${store?.sitioweb}`) {
+          ScrollTo(category.id);
           onClose();
         } else {
-          router.push(targetUrl);
+          router.push(`/t/${store?.sitioweb}`);
           onClose();
-          setTimeout(() => ScrollTo(targetId), 100);
+          setTimeout(() => ScrollTo(category.id), 100);
         }
       }
     },
@@ -429,62 +421,60 @@ function CategoriesView({
   );
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden py-1">
       <ListSheet
         name="Atrás"
-        icon2={<ChevronLeft />}
+        icon2={<ChevronLeft className="w-4 h-4" />}
         action={onBack}
-        className="font-bold"
+        className="font-semibold"
       />
-      <Separator className="bg-slate-200/20" />
-
+      <Separator className="bg-border my-1" />
       <ListSheet
         name="Todas"
-        icon2={<ChevronRight />}
+        icon2={<ChevronRight className="w-4 h-4" />}
         action={() => {
           router.push(`/t/${store?.sitioweb}/category`);
           onClose();
         }}
-        className="font-bold"
+        className="font-semibold"
       />
-      <Separator className="bg-slate-200/20" />
-
+      <Separator className="bg-border my-1" />
       {ExtraerCategorias(store?.categorias, store.products).map(
         (category: Categoria) => (
-          <React.Fragment key={category.id}>
-            <ListSheet
-              id={`category-${category.id}`}
-              name={category.name || ""}
-              icon2={<ChevronRight />}
-              action={() => handleCategoryClick(category)}
-              className={
-                blinkingCategoryId === category.id ? "animate-blink" : ""
-              }
-            />
-          </React.Fragment>
+          <ListSheet
+            key={category.id}
+            id={`category-${category.id}`}
+            name={category.name || ""}
+            icon2={<ChevronRight className="w-4 h-4" />}
+            action={() => handleCategoryClick(category)}
+            className={
+              blinkingCategoryId === category.id ? "animate-blink" : ""
+            }
+          />
         ),
       )}
     </div>
   );
 }
 
-interface CoinsViewProps {
+function CoinsView({
+  coins,
+  onBack,
+  onSelectCoin,
+}: {
   coins: Current[];
   onBack: () => void;
   onSelectCoin: (id: number) => void;
-}
-
-function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
+}) {
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
+    <div className="flex-1 overflow-y-auto overflow-x-hidden py-1">
       <ListSheet
         name="Atrás"
-        icon2={<ChevronLeft />}
+        icon2={<ChevronLeft className="w-4 h-4" />}
         action={onBack}
-        className="font-bold"
+        className="font-semibold"
       />
-      <Separator className="bg-slate-200/20" />
-
+      <Separator className="bg-border my-1" />
       {coins.map((coin) => (
         <ListSheet
           key={coin.id}
@@ -497,16 +487,6 @@ function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
   );
 }
 
-interface ListSheetProps {
-  name: string;
-  icon?: React.ReactNode;
-  icon2?: React.ReactNode;
-  action?: () => void;
-  className?: string;
-  final?: boolean;
-  id?: string;
-}
-
 const ListSheet = React.memo(function ListSheet({
   name,
   icon,
@@ -515,7 +495,15 @@ const ListSheet = React.memo(function ListSheet({
   className,
   final = false,
   id,
-}: ListSheetProps) {
+}: {
+  name: string;
+  icon?: React.ReactNode;
+  icon2?: React.ReactNode;
+  action?: () => void;
+  className?: string;
+  final?: boolean;
+  id?: string;
+}) {
   return (
     <>
       <Button
@@ -523,17 +511,26 @@ const ListSheet = React.memo(function ListSheet({
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-200",
+          "w-full flex items-center justify-between gap-2 px-2 py-2 rounded-xl hover:bg-background transition-colors text-foreground text-sm h-auto",
           className,
         )}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {icon && <span className="shrink-0">{icon}</span>}
-          <span className="truncate">{name}</span>
+          {icon && (
+            <span className="shrink-0 text-muted-foreground">{icon}</span>
+          )}
+          <span className="truncate">{ReturnCurrentName(name)}</span>
         </div>
-        {icon2 && <span className="shrink-0">{icon2}</span>}
+        {icon2 && (
+          <span className="shrink-0 text-muted-foreground">{icon2}</span>
+        )}
       </Button>
-      {final && <Separator className="bg-slate-200/20" />}
+      {final && <Separator className="bg-border" />}
     </>
   );
 });
+function ReturnCurrentName(name: string): string {
+  if (name === "ECU") return "EURO";
+  if (name === "USDT_TRC20") return "USDT";
+  return name;
+}

@@ -1,7 +1,3 @@
-// ============================================
-// PROFILE PAGE - Mejorado
-// ============================================
-
 "use client";
 
 import React, { useContext, useEffect, useCallback } from "react";
@@ -19,11 +15,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
 
-  // Redirect si no está autenticado
   useEffect(() => {
-    if (!loading && !user) {
-      router.back();
-    }
+    if (!loading && !user) router.back();
   }, [loading, user, router]);
 
   const handleSignOut = useCallback(async () => {
@@ -36,34 +29,29 @@ export default function ProfilePage() {
   }, [signOut, router]);
 
   return (
-    <div className="container dark:bg-slate-900 mx-auto px-4 py-8 max-w-2xl">
-      <div className="flex-1 mx-auto max-w-7xl px-4 py-8 sm:px-6 w-full">
-        <ProfileHeader />
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <ProfileHeader />
+      <ProfileStats total={events.length} />
 
-        <div className="">
-          <ProfileStats total={events.length} />
-        </div>
-      </div>
-
-      {/* Purchase History Section */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">
+      {/* Historial */}
+      <div className="mb-4">
+        <h2 className="font-serif text-lg font-semibold text-foreground mb-3">
           Historial de Compras
         </h2>
         <Link href="/user/compra">
-          <Button className="w-full bg-slate-700 hover:bg-slate-600 dark:bg-slate-600 dark:hover:bg-slate-500 text-white border-0 h-12 text-base rounded-xl">
+          <Button className="w-full h-12 rounded-full font-semibold active:scale-[0.98] transition-all">
             Ver Historial Completo
           </Button>
         </Link>
       </div>
 
-      {/* Logout Button */}
+      {/* Logout */}
       <Button
         variant="outline"
-        onClick={() => handleSignOut()}
-        className="w-full border-2 border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500 dark:border-red-600/50 dark:text-red-400 dark:hover:bg-red-600/10 dark:hover:text-red-300 dark:hover:border-red-600 h-12 text-base rounded-xl bg-transparent"
+        onClick={handleSignOut}
+        className="w-full h-12 rounded-full border-red-500/40 text-red-500 hover:bg-red-500/10 hover:border-red-500 bg-transparent font-semibold active:scale-[0.98] transition-all gap-2"
       >
-        <LogOut className="w-5 h-5 mr-2" />
+        <LogOut className="w-4 h-4" />
         Cerrar Sesión
       </Button>
     </div>

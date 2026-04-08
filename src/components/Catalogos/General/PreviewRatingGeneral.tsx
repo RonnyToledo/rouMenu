@@ -20,51 +20,35 @@ export default function PreviewRatingGeneral({
   const { store, dispatchStore } = useContext(MyContext);
   const [rating, setRating] = useState<RatingInterface>(() => ({
     ...initialState,
-    selectedRating: ratingSelect || 0,
+    selectedRating: ratingSelect || 5,
     nombre: user?.user_metadata.full_name || "",
   }));
 
-  // Sync with ratingSelect prop only if it changes while modal is open
   useEffect(() => {
     if (ratingSelect !== undefined) {
-      setRating((prev) => ({
-        ...prev,
-        selectedRating: ratingSelect,
-      }));
+      setRating((prev) => ({ ...prev, selectedRating: ratingSelect }));
     }
   }, [ratingSelect]);
 
-  // Sync with user only if not already set
   useEffect(() => {
     if (user?.user_metadata.full_name && !rating.nombre) {
-      setRating((prev) => ({
-        ...prev,
-        nombre: user.user_metadata.full_name,
-      }));
+      setRating((prev) => ({ ...prev, nombre: user.user_metadata.full_name }));
     }
   }, [user?.user_metadata.full_name, rating.nombre]);
 
   const handleSubmit = async () => {
     try {
-      if (!user?.id) {
-        throw new Error("No existe el usuario");
-      }
-      if (!rating.nombre) {
-        throw new Error("No existe el campo de nombre");
-      }
+      if (!user?.id) throw new Error("No existe el usuario");
+      if (!rating.nombre) throw new Error("No existe el campo de nombre");
+
       const res = await axios.post(
         `/api/tienda/${store}/coment`,
         {
-          comentario: {
-            cmt: rating.description,
-            star: rating.selectedRating,
-          },
+          comentario: { cmt: rating.description, star: rating.selectedRating },
           uid: store.UUID,
           uuid: user?.id,
         },
-        {
-          headers: { "Content-Type": "application/json" },
-        }, // Cambia a application/json
+        { headers: { "Content-Type": "application/json" } },
       );
 
       if (res.status === 200 || res.status === 201) {
@@ -72,23 +56,16 @@ export default function PreviewRatingGeneral({
         toast.success("Tarea Ejecutada", {
           description: "Comentario realizado",
         });
-        dispatchStore({
-          type: "AddComent",
-          payload: { star: res.data.star },
-        });
+        dispatchStore({ type: "AddComent", payload: { star: res.data.star } });
       }
     } catch (error) {
       console.error("Error al enviar el comentario:", error);
-      toast("Error", {
-        description: "No se pudo enviar el comentario.",
-      });
+      toast("Error", { description: "No se pudo enviar el comentario." });
     }
   };
+
   const closeReview = useCallback(() => onClose(), [onClose]);
-
-  const userAvatar = user?.user_metadata.avatar_url || logoUser;
-  const userName = user?.user_metadata.full_name || "user";
-
+  console.log(user);
   return (
     <Rating
       rating={rating}
@@ -96,8 +73,8 @@ export default function PreviewRatingGeneral({
       isOpen={reviewOpen}
       onClose={closeReview}
       userName="Usuario"
-      user={userName}
-      imageUser={userAvatar}
+      user={user ? user?.user_metadata.full_name : null}
+      imageUser={user?.user_metadata.avatar_url || logoUser}
       handleSubmit={handleSubmit}
     />
   );

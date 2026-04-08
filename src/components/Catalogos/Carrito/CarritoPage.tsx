@@ -9,7 +9,7 @@ import React, {
   memo,
 } from "react";
 import { MyContext } from "@/context/MyContext";
-import { Product } from "@/context/InitialStatus";
+import { Product } from "@/types/InitialStatus";
 import { sileo } from "sileo";
 import "react-phone-input-2/lib/style.css";
 import { isValidPhoneNumber } from "libphonenumber-js";
@@ -196,31 +196,66 @@ export default function CarritoPage() {
   }, [compra.pedido.length, store.sitioweb, router]);
 
   const sendToWhatsapp = useCallback(
-    async (id: number) => {
-      let mensaje = `Hola, Quiero modificar este pedido:\n- Metodo de envio: ${compra.lugar}\nA nombre de:${compra.people}\n`;
-      mensaje += `- ID de Venta: ${id}\n`;
-      if (compra.direccion) mensaje += `- Direccion: ${compra.direccion}\n`;
+    async (id: number, uid?: string) => {
+      const moneda = store.moneda.find((m) => m.defecto)?.nombre || "";
+      const discountTotal =
+        smartRound(compra.total) * (1 - compra.code.discount / 100);
+
+      let mensaje = `🛒 *SOLICITUD DE ${store.compraUUID ? "MODIFICACIÓN" : "NUEVO"} DE PEDIDO*\n`;
+      mensaje += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+      mensaje += `📋 *Información del Pedido*\n`;
+      mensaje += `• ID de Venta: *#${id}*\n`;
+      mensaje += `• Cliente: ${compra.people}\n`;
+      mensaje += `• Método de envío: ${compra.lugar}\n`;
+      if (compra.direccion) mensaje += `• Dirección: ${compra.direccion}\n`;
       if (compra.descripcion)
-        mensaje += `- Aclaración: ${compra.descripcion}\n`;
-      mensaje += `\n- Productos:\n`;
+        mensaje += `• Aclaración: ${compra.descripcion}\n`;
+
+      mensaje += `\n📦 *Productos*\n`;
+      mensaje += `──────────────────────\n`;
+
       compra.pedido.forEach((producto, index) => {
         if (producto.Cant > 0) {
-          mensaje += `   ${index + 1}. ${producto.title} x${producto.Cant}: ${(producto.Cant * producto.price).toFixed(2)} - ${producto.embalaje > 0 ? `Embalaje:${producto.embalaje}` : ""}\n`;
+          const subtotal = (producto.Cant * producto.price).toFixed(2);
+          const embalaje =
+            producto.embalaje > 0 ? ` _(Embalaje: ${producto.embalaje})_` : "";
+          mensaje += `${index + 1}. ${producto.title}\n`;
+          mensaje += `   Cantidad: x${producto.Cant} — Subtotal: ${subtotal} ${moneda}${embalaje}\n`;
         }
+
         producto.agregados
           .filter((o) => o.cant > 0)
           .forEach((obj) => {
-            mensaje += `   ${index + 1}. ${producto.title}-${obj.name} x${obj.cant}: ${(obj.cant * obj.price).toFixed(2)} - ${producto.embalaje > 0 ? `Embalaje:${producto.embalaje}` : ""}\n`;
+            const subtotal = (obj.cant * obj.price).toFixed(2);
+            const embalaje =
+              producto.embalaje > 0
+                ? ` _(Embalaje: ${producto.embalaje})_`
+                : "";
+            mensaje += `   ↳ ${producto.title} — ${obj.name}\n`;
+            mensaje += `     Cantidad: x${obj.cant} — Subtotal: ${subtotal} ${moneda}${embalaje}\n`;
           });
       });
-      const discountTotal =
-        smartRound(compra.total) * (1 - compra.code.discount / 100);
-      mensaje += `- Total de la orden: ${discountTotal} ${store.moneda.find((m) => m.defecto)?.nombre || ""}\n`;
+
+      mensaje += `──────────────────────\n`;
+      mensaje += `\n💰 *Resumen de Pago*\n`;
+      mensaje += `• Total de la orden: *${discountTotal} ${moneda}*\n`;
       if (compra.lugar !== "Local")
-        mensaje += `- Domicilio: $${compra.shipping}\n`;
-      mensaje += `- Moneda: $${compra.moneda}\n`;
-      if (compra.code.name)
-        mensaje += `- Codigo de ${store.afiliate ? "Afiliado" : "Descuento"}: ${compra.code.name}\n`;
+        mensaje += `• Costo de domicilio: $${compra.shipping}\n`;
+      mensaje += `• Moneda: ${compra.moneda}\n`;
+      if (compra.code.name) {
+        mensaje += `• Código de ${store.afiliate ? "Afiliado" : "Descuento"}: *${compra.code.name}*\n`;
+      }
+      mensaje += `• Numero de telefono: *${compra.phonenumber}*\n`;
+
+      if (uid) {
+        mensaje += `\n🔗 *Enlace del pedido:*\n`;
+        mensaje += `https://rouadmin.vercel.app/orders/${uid}\n`;
+      }
+
+      mensaje += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+      mensaje += `_Gracias por confiar en nosotros._ 🙏`;
+
       SavedInformationCart(
         store.sitioweb || "",
         compra.people,
@@ -279,7 +314,7 @@ export default function CarritoPage() {
           `${store.sitioweb}-userRating`,
         );
         if (saved !== null) {
-          await sendToWhatsapp(data.event_id);
+          await sendToWhatsapp(data.event_id, store.compraUUID ?? newUID ?? "");
           if (store.compraUUID) router.push("/user");
           else router.back();
         } else {
@@ -362,7 +397,7 @@ export default function CarritoPage() {
           reviewOpen={showRatingModal}
           onClose={() => {
             setShowRatingModal(false);
-            sendToWhatsapp(iDCompra);
+            sendToWhatsapp(iDCompra, store.compraUUID ?? newUID ?? "");
           }}
         />
       </div>

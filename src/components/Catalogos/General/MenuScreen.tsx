@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import PreviewRatingGeneral from "./PreviewRatingGeneral";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
-import { AppState, Categoria, Current } from "@/context/InitialStatus";
+import { AppState, Categoria, Current } from "@/types/InitialStatus";
 import { cn } from "@/lib/utils";
 import "@github/relative-time-element";
 import { MdCategory, MdCurrencyExchange, MdRateReview } from "react-icons/md";
@@ -42,25 +42,18 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-
-  // Estado para detectar montaje del cliente
   const [isMounted, setIsMounted] = useState(false);
   const [showState, setShowState] = useState<SheetView>("home");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-  // Detectar montaje del cliente
   useEffect(() => {
     queueMicrotask(() => setIsMounted(true));
   }, []);
-
   const closeLogin = useCallback(() => setIsLoginOpen(false), []);
 
-  // Reset view when sheet closes
   useEffect(() => {
-    if (!isMenuOpen) {
-      queueMicrotask(() => setShowState("home"));
-    }
+    if (!isMenuOpen) queueMicrotask(() => setShowState("home"));
   }, [isMenuOpen]);
 
   const closeSheet = useCallback(() => setIsMenuOpen(false), [setIsMenuOpen]);
@@ -83,7 +76,6 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
     [closeSheet, dispatchStore],
   );
 
-  // Home menu items
   const homeItems = useMemo(
     () => [
       {
@@ -126,7 +118,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
         action: handleReviewAction,
       },
       {
-        name: "Comparar produtos",
+        name: "Comparar productos",
         icon: <FaBalanceScale />,
         action: () => {
           router.push(`/t/${store.sitioweb}/comparar`);
@@ -153,18 +145,14 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
     [store.sitioweb, router, closeSheet, handleReviewAction],
   );
 
-  // Nombre de usuario para display
   const displayName = useMemo(() => {
     if (!isMounted || loading) return "Cargando...";
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name.split(" ")[0];
-    }
-    return "Guest";
+    return user?.user_metadata?.full_name?.split(" ")[0] || "Guest";
   }, [user, isMounted, loading]);
 
   return (
     <div
-      className="absolute inset-0 bg-linear-to-r from-slate-100 to-slate-300 dark:from-slate-800 dark:to-slate-950 transition-all duration-500"
+      className="absolute inset-0 bg-secondary/90 backdrop-blur-xl transition-all duration-300"
       style={{
         opacity: isMenuOpen ? 1 : 0,
         pointerEvents: isMenuOpen ? "auto" : "none",
@@ -175,49 +163,48 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
         onClose={closeLogin}
         redirectTo={pathname}
       />
-      <div className="h-full flex flex-col p-6 pt-14 max-w-60">
+
+      <div className="h-full flex flex-col p-5 pt-14 max-w-64">
+        {/* Close button */}
         <button
           onClick={() => setIsMenuOpen(false)}
-          className="w-8 h-8 flex items-center justify-center text-white/80 hover:text-white mb-4 transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-muted-foreground hover:text-foreground mb-4 transition-colors rounded-full hover:bg-secondary"
           aria-label="Cerrar menú"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
-        {/* Header del usuario */}
+        {/* User header */}
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-          </div>
-          <Link href={"/user"} className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-black/10 dark:bg-white/20 rounded-full flex items-center justify-center overflow-hidden transition-colors">
+          <ThemeToggle />
+          <Link href="/user" className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-background border border-border rounded-full flex items-center justify-center overflow-hidden">
               {isMounted && user?.user_metadata?.avatar_url ? (
                 <Image
-                  width={40}
-                  height={40}
+                  width={36}
+                  height={36}
                   src={user.user_metadata.avatar_url}
                   className="w-full h-full object-cover"
                   alt="Avatar"
                 />
               ) : (
-                <User className="w-5 h-5 text-white" />
+                <User className="w-4 h-4 text-muted-foreground" />
               )}
             </div>
             <div>
-              <p className="text-slate-900 dark:text-white font-semibold text-sm transition-colors">
+              <p className="text-sm font-semibold text-foreground">
                 Hi, {displayName}
               </p>
-              <p className="text-slate-600 dark:text-white/70 text-xs transition-colors">
+              <p className="text-[10px] text-muted-foreground">
                 {isMounted && user ? "Welcome back" : "Guest"}
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Contenido principal */}
+        {/* Nav items */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {showState === "home" && <HomeView items={homeItems} />}
-
           {showState === "categories" && (
             <CategoriesView
               store={store}
@@ -225,7 +212,6 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
               onClose={closeSheet}
             />
           )}
-
           {showState === "coins" && (
             <CoinsView
               coins={store?.moneda || []}
@@ -235,13 +221,13 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
           )}
         </div>
 
-        {/* Footer con perfil */}
-        <div className="space-y-2">
-          <Separator className="bg-white/20" />
+        {/* Footer */}
+        <div className="space-y-1">
+          <Separator className="bg-border" />
           <ListSheet
-            name={"Cerrar Sesion"}
-            icon={<User className="w-8 h-8 text-slate-800 dark:text-white" />}
-            icon2={<ChevronRight className="text-slate-800 dark:text-white" />}
+            name="Cerrar Sesión"
+            icon={<User className="w-4 h-4 text-muted-foreground" />}
+            icon2={<ChevronRight className="w-4 h-4 text-muted-foreground" />}
             action={signOut}
           />
         </div>
@@ -257,12 +243,11 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
 export default MenuScreen;
 
-// Subcomponents
-interface HomeViewProps {
+function HomeView({
+  items,
+}: {
   items: Array<{ name: string; icon: React.ReactNode; action: () => void }>;
-}
-
-function HomeView({ items }: HomeViewProps) {
+}) {
   return (
     <>
       {items.map((item) => (
@@ -270,7 +255,7 @@ function HomeView({ items }: HomeViewProps) {
           key={item.name}
           name={item.name}
           icon={item.icon}
-          icon2={<ChevronRight />}
+          icon2={<ChevronRight className="w-4 h-4" />}
           action={item.action}
         />
       ))}
@@ -278,13 +263,15 @@ function HomeView({ items }: HomeViewProps) {
   );
 }
 
-interface CategoriesViewProps {
+function CategoriesView({
+  store,
+  onBack,
+  onClose,
+}: {
   store: AppState;
   onBack: () => void;
   onClose: () => void;
-}
-
-function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
+}) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -294,16 +281,13 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
         router.push(`/t/${store?.sitioweb}/category/${category.id}`);
         onClose();
       } else {
-        const targetUrl = `/t/${store?.sitioweb}`;
-        const targetId = category.id;
-
-        if (pathname === targetUrl) {
-          ScrollTo(targetId);
+        if (pathname === `/t/${store?.sitioweb}`) {
+          ScrollTo(category.id);
           onClose();
         } else {
-          router.push(targetUrl);
+          router.push(`/t/${store?.sitioweb}`);
           onClose();
-          setTimeout(() => ScrollTo(targetId), 100);
+          setTimeout(() => ScrollTo(category.id), 100);
         }
       }
     },
@@ -311,47 +295,53 @@ function CategoriesView({ store, onBack, onClose }: CategoriesViewProps) {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
-      <ListSheet name="Atrás" icon2={<ChevronLeft />} action={onBack} />
-      <Separator className="bg-white/20" />
-
+    <div className="flex-1 overflow-y-auto overflow-x-hidden py-1">
+      <ListSheet
+        name="Atrás"
+        icon2={<ChevronLeft className="w-4 h-4" />}
+        action={onBack}
+      />
+      <Separator className="bg-border my-1" />
       <ListSheet
         name="Todas"
-        icon2={<ChevronRight />}
+        icon2={<ChevronRight className="w-4 h-4" />}
         action={() => {
           router.push(`/t/${store?.sitioweb}/category`);
           onClose();
         }}
       />
-      <Separator className="bg-white/20" />
-
+      <Separator className="bg-border my-1" />
       {ExtraerCategorias(store?.categorias, store.products).map(
         (category: Categoria) => (
-          <React.Fragment key={category.id}>
-            <ListSheet
-              name={category.name || ""}
-              icon2={<ChevronRight />}
-              action={() => handleCategoryClick(category)}
-            />
-          </React.Fragment>
+          <ListSheet
+            key={category.id}
+            name={category.name || ""}
+            icon2={<ChevronRight className="w-4 h-4" />}
+            action={() => handleCategoryClick(category)}
+          />
         ),
       )}
     </div>
   );
 }
 
-interface CoinsViewProps {
+function CoinsView({
+  coins,
+  onBack,
+  onSelectCoin,
+}: {
   coins: Current[];
   onBack: () => void;
   onSelectCoin: (id: number) => void;
-}
-
-function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
+}) {
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-1">
-      <ListSheet name="Atrás" icon2={<ChevronLeft />} action={onBack} />
-      <Separator className="bg-white/20" />
-
+    <div className="flex-1 overflow-y-auto overflow-x-hidden py-1">
+      <ListSheet
+        name="Atrás"
+        icon2={<ChevronLeft className="w-4 h-4" />}
+        action={onBack}
+      />
+      <Separator className="bg-border my-1" />
       {coins.map((coin) => (
         <ListSheet
           key={coin.id}
@@ -364,15 +354,6 @@ function CoinsView({ coins, onBack, onSelectCoin }: CoinsViewProps) {
   );
 }
 
-interface ListSheetProps {
-  name: string;
-  icon?: React.ReactNode;
-  icon2?: React.ReactNode;
-  action?: () => void;
-  className?: string;
-  final?: boolean;
-}
-
 const ListSheet = React.memo(function ListSheet({
   name,
   icon,
@@ -380,24 +361,38 @@ const ListSheet = React.memo(function ListSheet({
   action,
   className,
   final = false,
-}: ListSheetProps) {
+  id,
+}: {
+  name: string;
+  icon?: React.ReactNode;
+  icon2?: React.ReactNode;
+  action?: () => void;
+  className?: string;
+  final?: boolean;
+  id?: string;
+}) {
   return (
     <>
       <Button
+        id={id}
         onClick={action}
         variant="ghost"
         className={cn(
-          "w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors text-slate-800 dark:text-slate-100",
+          "w-full flex items-center justify-between gap-2 px-2 py-2 rounded-xl hover:bg-background transition-colors text-foreground text-sm h-auto",
           className,
         )}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {icon && <span className="shrink-0">{icon}</span>}
+          {icon && (
+            <span className="shrink-0 text-muted-foreground">{icon}</span>
+          )}
           <span className="truncate">{name}</span>
         </div>
-        {icon2 && <span className="shrink-0">{icon2}</span>}
+        {icon2 && (
+          <span className="shrink-0 text-muted-foreground">{icon2}</span>
+        )}
       </Button>
-      {final && <Separator className="bg-white/20" />}
+      {final && <Separator className="bg-border" />}
     </>
   );
 });

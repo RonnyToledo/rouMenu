@@ -1,4 +1,4 @@
-import { AppState, Current, Product } from "@/context/InitialStatus";
+import { AppState, Current, Product } from "@/types/InitialStatus";
 
 /**
  * Devuelve el total final (number) convertido a la moneda defecto del store.
@@ -19,13 +19,13 @@ export function getTotalFinal(store: AppState, products: Product[]) {
       acc[m.id] = m;
       return acc;
     },
-    {}
+    {},
   );
 
   const convertAndRound = (
     amount: number,
     valorSrc: number,
-    valorDst: number
+    valorDst: number,
   ) => {
     const a = Number(amount ?? 0);
     if (!isFinite(a)) return 0;
@@ -50,7 +50,7 @@ export function getTotalFinal(store: AppState, products: Product[]) {
     const embalajeConv = convertAndRound(
       p.embalaje ?? 0,
       valorOrigen,
-      valorTarget
+      valorTarget,
     );
 
     // total por el producto (precio + embalaje) * cantidad
@@ -63,7 +63,7 @@ export function getTotalFinal(store: AppState, products: Product[]) {
       const aggPriceConv = convertAndRound(
         agg.price ?? 0,
         valorOrigen,
-        valorTarget
+        valorTarget,
       );
       // si no quieres sumar embalaje dentro del agregado, quita + embalajeConv
       return sum + (aggPriceConv + embalajeConv) * aggQty;

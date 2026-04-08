@@ -8,7 +8,7 @@ import { logoAdmin } from "@/lib/image";
 import { Map, Marker } from "pigeon-maps";
 import Link from "next/link";
 import { Star, ChevronRight, Clock } from "lucide-react";
-import { ScheduleInterface } from "@/context/InitialStatus";
+import { ScheduleInterface } from "@/types/InitialStatus";
 import { Separator } from "@/components/ui/separator";
 import { format } from "@formkit/tempo";
 import PreviewRatingGeneral from "../General/PreviewRatingGeneral";

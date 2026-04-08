@@ -1,4 +1,4 @@
-// MenuBar.tsx - Versión con useRouter
+// MenuBar.tsx
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -20,59 +20,45 @@ export default function MenuBar({
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
-  // Memoizar las rutas para evitar cálculos innecesarios
   const routes = useMemo(
     () => getReversedUniqueRoutes(record, pathname).slice(0, 2),
     [record, pathname],
   );
 
-  // Detectar cuando el componente está montado en el cliente
   useEffect(() => {
     queueMicrotask(() => setIsMounted(true));
   }, []);
 
-  // Manejo de overflow SOLO en el contenedor, NO en body
   useEffect(() => {
     if (!isMounted) return;
-
     const root = document.getElementById("menu-bar-root");
-    if (root) {
-      if (isMenuOpen) {
-        root.style.overflow = "hidden";
-      } else {
-        root.style.overflow = "";
-      }
-    }
+    if (root) root.style.overflow = isMenuOpen ? "hidden" : "";
   }, [isMenuOpen, isMounted]);
 
   const stylesFromScreens = [
-    `translate-x-[240px]  scale-85`,
-    `translate-x-[190px]  scale-75`,
+    `translate-x-[240px] scale-85`,
+    `translate-x-[190px] scale-75`,
   ];
 
-  // Handler para navegación
   const handleNavigate = (path: string) => {
-    setIsMenuOpen(false); // Cerrar el menú primero
-    setTimeout(() => {
-      router.push(path); // Navegar después de la animación
-    }, 300); // Tiempo de la animación de cierre
+    setIsMenuOpen(false);
+    setTimeout(() => router.push(path), 300);
   };
 
   return (
     <div id="menu-bar-root" className="relative min-h-dvh">
-      {/* Menú lateral - renderizado consistente servidor/cliente */}
       <div className="fixed inset-0 z-10 pointer-events-none">
         <MenuScreen isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
       </div>
 
-      {/* Ventanas escalonadas - clickeables para navegar */}
+      {/* Ventanas escalonadas */}
       {isMounted &&
         routes.length > 0 &&
         routes.map((rec, index) => (
           <button
             key={`${rec.path}-${index}`}
             onClick={() => handleNavigate(rec.path)}
-            className={`fixed inset-0 bg-white dark:bg-slate-900 transition-all duration-500 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 group ${
+            className={`fixed inset-0 bg-background transition-all duration-500 ease-out focus:outline-none group ${
               isMenuOpen ? stylesFromScreens[index] : "translate-x-0"
             }`}
             style={{
@@ -80,7 +66,7 @@ export default function MenuBar({
               zIndex: 29 - index,
               borderRadius: isMenuOpen ? "1.5rem" : "0",
               boxShadow: isMenuOpen
-                ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+                ? "0 25px 50px -12px rgba(0,0,0,0.25)"
                 : "none",
               overflow: isMenuOpen ? "hidden" : "visible",
               transition: "all 500ms ease-out",
@@ -88,7 +74,6 @@ export default function MenuBar({
             }}
             aria-label={`Navegar a ${rec.path}`}
           >
-            {/* Preview del contenido con iframe */}
             <iframe
               src={rec.path}
               width="100%"
@@ -98,21 +83,17 @@ export default function MenuBar({
               loading="lazy"
               tabIndex={-1}
             />
-
-            {/* Overlay interactivo */}
             <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors flex items-center justify-center">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 text-white px-4 py-2 rounded-lg text-sm">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-foreground/80 text-background px-4 py-2 rounded-xl text-xs">
                 Click para abrir
               </div>
             </div>
           </button>
         ))}
 
-      {/* Pantalla principal - renderizado consistente */}
+      {/* Pantalla principal */}
       <div
-        className={`fixed inset-0 bg-white dark:bg-slate-950 min-h-dvh transition-all duration-500 ease-out ${
-          isMounted && isMenuOpen ? "translate-x-75 " : "translate-x-0"
-        }`}
+        className="fixed inset-0 bg-background min-h-dvh transition-all duration-500 ease-out"
         style={{
           zIndex: 30,
           transform: isMounted && isMenuOpen ? "scale(0.95)" : "scale(1)",
@@ -120,27 +101,23 @@ export default function MenuBar({
           borderRadius: isMounted && isMenuOpen ? "1.5rem" : "0",
           boxShadow:
             isMounted && isMenuOpen
-              ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+              ? "0 25px 50px -12px rgba(0,0,0,0.25)"
               : "none",
           willChange: isMounted && isMenuOpen ? "transform" : "auto",
           overflow: isMounted && isMenuOpen ? "hidden" : "visible",
         }}
       >
         <div
-          className={`relative h-full ${
-            isMounted && isMenuOpen ? "overflow-y-hidden" : "overflow-y-scroll"
-          }`}
+          className={`relative h-full ${isMounted && isMenuOpen ? "overflow-y-hidden" : "overflow-y-scroll"}`}
         >
           {isMounted && isMenuOpen ? (
             <button
               className="absolute w-full h-full z-31"
               onClick={() => setIsMenuOpen(false)}
-            ></button>
+            />
           ) : null}
           <div
-            style={{
-              pointerEvents: isMounted && isMenuOpen ? "none" : "auto",
-            }}
+            style={{ pointerEvents: isMounted && isMenuOpen ? "none" : "auto" }}
           >
             {children}
           </div>

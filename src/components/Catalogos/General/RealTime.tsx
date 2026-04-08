@@ -11,7 +11,6 @@ import { ScrollTo } from "@/functions/ScrollTo";
 interface Props {
   uuid: string;
 }
-
 const TOAST_DEBOUNCE_MS = 3000;
 
 export default function SitioRealtime({ uuid }: Props) {
@@ -21,15 +20,12 @@ export default function SitioRealtime({ uuid }: Props) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const channelRefProducts = useRef<RealtimeChannel | null>(null);
   const lastToastAtRef = useRef<number>(0);
-
-  // Mantener refs estables para evitar re-suscripciones por closure stale
   const sitiowebRef = useRef(store.sitioweb);
   const pathnameRef = useRef(pathname);
 
   useEffect(() => {
     sitiowebRef.current = store.sitioweb;
   }, [store.sitioweb]);
-
   useEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
@@ -38,7 +34,6 @@ export default function SitioRealtime({ uuid }: Props) {
     (productId: string, category: string) => {
       const currentPathname = pathnameRef.current;
       const sitioweb = sitiowebRef.current;
-
       if (
         currentPathname === `/t/${sitioweb}` ||
         currentPathname === `/t/${sitioweb}/category/${category}`
@@ -53,7 +48,6 @@ export default function SitioRealtime({ uuid }: Props) {
 
   useEffect(() => {
     if (!uuid) return;
-
     const canToast = () => {
       const now = Date.now();
       if (now - lastToastAtRef.current > TOAST_DEBOUNCE_MS) {
@@ -63,9 +57,8 @@ export default function SitioRealtime({ uuid }: Props) {
       return false;
     };
 
-    // Canal: cambios en Sitios
     try {
-      const channel = supabase
+      channelRef.current = supabase
         .channel(`sitios:${uuid}`)
         .on(
           "postgres_changes",
@@ -80,22 +73,18 @@ export default function SitioRealtime({ uuid }: Props) {
               router.refresh();
               sileo.info({
                 title: "Página Actualizada",
-                description:
-                  "La página ha sido actualizada. Se están aplicando los cambios.",
+                description: "La página ha sido actualizada.",
               });
             }
           },
         )
         .subscribe();
-
-      channelRef.current = channel;
     } catch (err) {
       console.error("Error suscribiendo a Sitios:", err);
     }
 
-    // Canal: nuevos productos
     try {
-      const channelP = supabase
+      channelRefProducts.current = supabase
         .channel(`products:${uuid}`)
         .on(
           "postgres_changes",
@@ -106,17 +95,13 @@ export default function SitioRealtime({ uuid }: Props) {
             filter: `storeId=eq.${uuid}`,
           },
           (payload) => {
-            if (payload.eventType !== "INSERT") return;
-            if (!canToast()) return;
-
+            if (payload.eventType !== "INSERT" || !canToast()) return;
             router.refresh();
-
             const newRow = (payload.new ?? {}) as {
               title?: string;
               productId?: string;
               caja?: string;
             };
-
             sileo.info({
               title: "Nueva Disponibilidad",
               description: newRow.title ?? "",
@@ -132,8 +117,6 @@ export default function SitioRealtime({ uuid }: Props) {
           },
         )
         .subscribe();
-
-      channelRefProducts.current = channelP;
     } catch (err) {
       console.error("Error suscribiendo a Products:", err);
     }
@@ -154,5 +137,5 @@ export default function SitioRealtime({ uuid }: Props) {
     };
   }, [uuid, router, NewProduct]);
 
-  return null; // Componente invisible
+  return null;
 }

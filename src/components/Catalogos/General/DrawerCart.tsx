@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MyContext } from "@/context/MyContext";
 import { smartRound } from "@/functions/precios";
-import { Categoria, Product } from "@/context/InitialStatus";
+import { Categoria, Product } from "@/types/InitialStatus";
 import {
   MdOutlineShoppingCart,
   MdOutlineShoppingCartCheckout,
@@ -27,6 +27,8 @@ import { Trash2 } from "lucide-react";
 import { getTotalFinal } from "@/functions/getTotalPedido";
 import { toast } from "sonner";
 import { ScrollTo } from "@/functions/ScrollTo";
+import { cartKey } from "@/reducer/reducerGeneral";
+import { buildCartTitle } from "@/lib/variantUtils";
 
 export default function DrawerCart() {
   const { store, dispatchStore } = useContext(MyContext);
@@ -38,21 +40,17 @@ export default function DrawerCart() {
   const pathname = usePathname();
 
   const handleToCart = (productToCart: Product) => {
-    dispatchStore({
-      type: "AddCart",
-      payload: JSON.stringify(productToCart),
-    });
+    dispatchStore({ type: "AddCart", payload: JSON.stringify(productToCart) });
   };
 
-  const getTotalItems = () => {
-    return store.products.reduce(
+  const getTotalItems = () =>
+    store.products.reduce(
       (total, item) =>
         total +
         item.Cant +
         (item?.agregados.reduce((sum, agg) => (sum = sum + agg.cant), 0) || 0),
       0,
     );
-  };
 
   useEffect(() => {
     const value = store.products.reduce(
@@ -65,7 +63,6 @@ export default function DrawerCart() {
         ) || 0),
       0,
     );
-
     queueMicrotask(() => {
       setContentCart(value);
       if (value === 0) setOpenDrawer(false);
@@ -74,24 +71,15 @@ export default function DrawerCart() {
 
   function RedirectLink(Id: string, categoria: string) {
     if (DetectCategoria(categoria, store.categorias)) {
-      //IR a categoria especifica
-      if (pathname.includes("/category/")) {
-        // Si estamos en la pagina de categorias
-        ScrollTo(Id, 70);
-      } else {
-        router.push(`/t/${store.sitioweb}/category/${categoria}#${Id}`);
-      }
+      if (pathname.includes("/category/")) ScrollTo(Id, 70);
+      else router.push(`/t/${store.sitioweb}/category/${categoria}#${Id}`);
     } else {
-      // IR a home"
-      if (!pathname.includes("/category/")) {
-        // Si estamos en la pagina de home
-        ScrollTo(Id, 70);
-      } else {
-        router.push(`/t/${store.sitioweb}#${Id}`);
-      }
+      if (!pathname.includes("/category/")) ScrollTo(Id, 70);
+      else router.push(`/t/${store.sitioweb}#${Id}`);
     }
     setOpenDrawer(false);
   }
+
   const GoToCart = async () => {
     if (contentCart >= store.limite) {
       setIsAddingToCart(true);
@@ -103,7 +91,7 @@ export default function DrawerCart() {
       router.push(`/t/${store.sitioweb}/carrito`);
       setOpenDrawer(false);
     } else
-      toast.info(`Esta tienda tiene un minimo de compra de ${store.limite}`);
+      toast.info(`Esta tienda tiene un mínimo de compra de ${store.limite}`);
   };
 
   return (
@@ -115,101 +103,104 @@ export default function DrawerCart() {
     ) && (
       <Drawer open={openDrawer} onOpenChange={setOpenDrawer}>
         <DrawerTrigger asChild className="translate-y-16">
-          <div className="sticky bottom-0 bg-white dark:bg-slate-900 border-t dark:border-slate-800 z-10 max-w-md mx-auto rounded-t-2xl transition-colors duration-500">
+          <div className="sticky bottom-0 bg-background/90 backdrop-blur-sm border-t border-border z-10 max-w-md mx-auto rounded-t-2xl transition-colors">
             <Button
-              variant={"ghost"}
-              className="flex items-center w-full justify-between py-2 px-4 h-auto text-slate-900 dark:text-slate-100"
+              variant="ghost"
+              className="flex items-center w-full justify-between py-2.5 px-4 h-auto text-foreground"
             >
               <div className="flex items-center gap-3 flex-1">
                 <div className="relative">
-                  <Shop />{" "}
+                  <Shop />
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {getTotalItems()}
                   </Badge>
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100 transition-colors">
+                  <p className="text-sm font-medium text-foreground">
                     {getTotalItems()}{" "}
                     {getTotalItems() === 1 ? "producto" : "productos"}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 transition-colors">
+                  <p className="text-xs text-muted-foreground">
                     Total: ${getTotalFinal(store, store.products)}
                   </p>
                 </div>
               </div>
-              <div className="border border-slate-400 dark:border-slate-600 flex items-center p-1 rounded-lg transition-colors">
-                <MdOutlineShoppingCart />
+              <div className="border border-border flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium text-foreground">
+                <MdOutlineShoppingCart className="w-4 h-4" />
                 Ver Pedido
               </div>
             </Button>
           </div>
         </DrawerTrigger>
 
-        <DrawerContent className="max-h-[75vh] max-w-md mx-auto dark:bg-slate-900 dark:border-slate-800 transition-colors duration-500">
+        <DrawerContent className="max-h-[75vh] max-w-md mx-auto border-border bg-background">
           <DrawerHeader className="py-2 px-4">
             <DrawerTitle>
-              <Button
-                variant={"ghost"}
-                className="flex items-center w-full justify-between p-0 h-auto"
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="relative">
-                    <Shop />{" "}
-                    <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center text-center p-0 text-xs">
-                      {getTotalItems()}
-                    </Badge>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-slate-900">
-                      {getTotalItems()}{" "}
-                      {getTotalItems() === 1 ? "producto" : "productos"}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Total: ${getTotalFinal(store, store.products)}
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Shop />
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center text-center p-0 text-xs">
+                    {getTotalItems()}
+                  </Badge>
                 </div>
-                <div></div>
-              </Button>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-foreground">
+                    {getTotalItems()}{" "}
+                    {getTotalItems() === 1 ? "producto" : "productos"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Total: ${getTotalFinal(store, store.products)}
+                  </p>
+                </div>
+              </div>
             </DrawerTitle>
-            <DrawerDescription></DrawerDescription>
+            <DrawerDescription />
           </DrawerHeader>
 
           <div className="max-h-80 overflow-y-auto">
             <ScrollArea className="max-h-52">
               {store.products.map((item) => (
-                <div key={item.id}>
+                <div key={cartKey(item)}>
                   {item.Cant !== 0 && (
                     <ListCard
                       productId={item.productId || ""}
                       caja={item.caja || ""}
                       default_moneda={item.default_moneda}
                       RedirectLink={RedirectLink}
-                      title={item.title || "Producto"}
-                      image={item.image || store.urlPoster || logoApp}
+                      // buildCartTitle construye "Cafe Capuchino · Rojo · M" desde attributes
+                      title={buildCartTitle(
+                        item.title || "Producto",
+                        item.selected_variant,
+                      )}
+                      image={
+                        item.selected_variant?.image ||
+                        item.image ||
+                        store.urlPoster ||
+                        logoApp
+                      }
                       cantidad={item.Cant}
                       embalaje={item.embalaje}
                       price={smartRound(item.price || 0)}
-                      handleToCart={() =>
-                        handleToCart({
-                          ...item,
-                          Cant: 0,
-                        })
-                      }
+                      handleToCart={() => handleToCart({ ...item, Cant: 0 })}
                     />
                   )}
                   {item.agregados.map(
                     (agg, index) =>
                       agg.cant !== 0 && (
                         <ListCard
+                          key={`${cartKey(item)}-agg-${index}`}
                           productId={item.productId || ""}
                           caja={item.caja || ""}
-                          key={index}
                           default_moneda={item.default_moneda}
                           embalaje={item.embalaje}
                           RedirectLink={RedirectLink}
-                          title={`${item.title}-${agg.name}` || "Producto"}
-                          image={item.image || store.urlPoster || logoApp}
+                          title={`${buildCartTitle(item.title || "Producto", item.selected_variant)}-${agg.name}`}
+                          image={
+                            item.selected_variant?.image ||
+                            item.image ||
+                            store.urlPoster ||
+                            logoApp
+                          }
                           cantidad={agg.cant}
                           price={smartRound(agg.price || 0)}
                           handleToCart={() =>
@@ -230,36 +221,36 @@ export default function DrawerCart() {
 
           <DrawerFooter>
             <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold">Total:</span>
-              <span className="font-bold text-lg">
+              <span className="text-sm font-semibold text-foreground">
+                Total:
+              </span>
+              <span className="font-bold text-lg text-foreground">
                 ${getTotalFinal(store, store.products)}
               </span>
             </div>
             <Button
-              onClick={() => GoToCart()}
-              className={`w-full h-12 text-base font-medium rounded-3xl transition-all duration-300 ${
-                showSuccess
-                  ? "bg-green-600 hover:bg-green-700"
-                  : "hover:scale-105"
+              onClick={GoToCart}
+              className={`w-full h-12 font-semibold rounded-full transition-all duration-300 gap-2 active:scale-[0.98] ${
+                showSuccess ? "bg-emerald-600 hover:bg-emerald-700" : ""
               } ${isAddingToCart ? "scale-95" : ""}`}
             >
               {isAddingToCart ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Agregando porductos...
-                </div>
+                <>
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                  Agregando productos...
+                </>
               ) : showSuccess ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-green-600 rounded-full" />
+                <>
+                  <div className="w-4 h-4 bg-primary-foreground rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-emerald-600 rounded-full" />
                   </div>
                   Carrito listo
-                </div>
+                </>
               ) : (
-                <div className="flex items-center gap-2">
+                <>
                   Proceder al Checkout
-                  <MdOutlineShoppingCartCheckout />
-                </div>
+                  <MdOutlineShoppingCartCheckout className="w-4 h-4" />
+                </>
               )}
             </Button>
           </DrawerFooter>
@@ -268,6 +259,7 @@ export default function DrawerCart() {
     )
   );
 }
+
 interface ListCardInterface {
   RedirectLink: (id: string, caja: string) => void;
   productId: string;
@@ -280,6 +272,7 @@ interface ListCardInterface {
   cantidad: number;
   handleToCart: () => void;
 }
+
 export function ListCard({
   RedirectLink,
   productId,
@@ -294,59 +287,56 @@ export function ListCard({
 }: ListCardInterface) {
   const { store } = useContext(MyContext);
   return (
-    <div className="shadow-sm">
-      <div className="flex justify-between items-center px-3 py-2 ">
+    <div className="border-b border-border last:border-0">
+      <div className="flex justify-between items-center px-3 py-2 gap-2">
         <Button
-          variant={"ghost"}
+          variant="ghost"
           onClick={() => RedirectLink(productId, caja || "")}
-          className="h-10 p-0 justify-between  animate-in slide-in-from-bottom-2 duration-300"
+          className="h-auto p-0 justify-start gap-3 flex-1 min-w-0 animate-in slide-in-from-bottom-2 duration-300"
         >
-          <div className="relative">
+          <div className="relative shrink-0">
             <Image
               src={image}
               alt={title}
-              className="size-10 object-cover rounded"
-              width={150}
-              height={150}
+              className="w-10 h-10 object-cover rounded-xl border border-border"
+              width={40}
+              height={40}
             />
-            <Badge className="absolute -bottom-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+            <Badge className="absolute -bottom-1.5 -right-1.5 h-4 w-4 flex items-center justify-center p-0 text-[10px]">
               {cantidad}
             </Badge>
           </div>
-          <div className="flex flex-col items-start justify-center">
-            <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate text-start w-[50vw] transition-colors">
+          <div className="flex flex-col items-start min-w-0">
+            <p className="text-xs font-medium text-foreground truncate w-[45vw] text-start">
               {title}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 text-center transition-colors">
+            <p className="text-[10px] text-muted-foreground">
               ${price}
-              {embalaje > 0 ? ` + ${embalaje} embalaje` : ""}
-              {} {" - "}
+              {embalaje > 0 ? ` + ${embalaje} emb.` : ""} {" · "}
               {store.moneda.find((m) => m.id == default_moneda)?.nombre || ""}
             </p>
           </div>
         </Button>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium  text-center">{cantidad}</span>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleToCart}
-            className="h-8 w-8 p-0"
-          >
-            <Trash2 className="w-3 h-3 text-red-700" />
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={handleToCart}
+          className="h-8 w-8 p-0 rounded-full hover:bg-red-500/10 shrink-0"
+        >
+          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+        </Button>
       </div>
     </div>
   );
 }
+
 export function DetectCategoria(
   categoria: string,
   allCAtegorias: Categoria[],
 ): boolean {
   return allCAtegorias.find((cat) => cat.id === categoria)?.subtienda || false;
 }
+
 function Shop() {
   return (
     <svg
@@ -355,7 +345,7 @@ function Shop() {
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       stroke="currentColor"
-      className="size-6"
+      className="w-6 h-6"
     >
       <path
         strokeLinecap="round"

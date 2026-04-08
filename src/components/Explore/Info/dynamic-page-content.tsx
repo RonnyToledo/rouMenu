@@ -32,11 +32,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const flat = flattenSections(
   (adminCatalogData as unknown as DataInterface)?.sections || [],
-  {
-    basePath: "/info",
-    includeNoSlug: false,
-  },
+  { basePath: "/info", includeNoSlug: false },
 );
+
 interface DynamicPageContentProps {
   allData: DataInterface;
 }
@@ -44,7 +42,6 @@ interface DynamicPageContentProps {
 export function DynamicPageContent({ allData }: DynamicPageContentProps) {
   const params = useParams();
   const { slug } = params;
-
   if (!slug) notFound();
 
   const { content, activeSection, prevNextState, breadcrumb } = useMemo(() => {
@@ -61,7 +58,6 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         breadcrumbResult = [section.title || ""];
         break;
       }
-
       if (section.subsections) {
         const foundSub = section.subsections.find((sub) => sub.slug === slug);
         if (foundSub) {
@@ -73,7 +69,6 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         }
       }
     }
-
     return {
       content: contentResult,
       activeSection: activeSectionResult,
@@ -84,18 +79,17 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
 
   const renderImage = (imageData: ImageInterface) => {
     if (!imageData) return null;
-
     return (
-      <div className="my-6">
+      <div className="my-5">
         <Image
           width={500}
           height={500}
-          src={imageData.url || `/placeholder.svg`}
+          src={imageData.url || "/placeholder.svg"}
           alt={imageData.alt || "Content image"}
-          className="rounded-lg border shadow-sm max-w-full h-auto w-full aspect-video object-cover object-center"
+          className="rounded-xl border border-border max-w-full h-auto w-full aspect-video object-cover"
         />
         {imageData.caption && (
-          <p className="text-sm text-muted-foreground mt-2 text-center italic">
+          <p className="text-xs text-muted-foreground mt-1.5 text-center italic">
             {imageData.caption}
           </p>
         )}
@@ -103,102 +97,107 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
     );
   };
 
-  const renderContentSection = (section: SectionsInterace) => {
-    return (
-      <div key={section.id} className="mb-8">
-        {section.title && (
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            {section.icon && (
-              <span className="text-primary">{section.icon}</span>
-            )}
-            {section.title}
-          </h3>
-        )}
-
-        {section.description && (
-          <p className="text-muted-foreground mb-4">{section.description}</p>
-        )}
-
-        {section.image && renderImage(section.image)}
-
-        {section.items && (
-          <div className="space-y-3">
-            {section.items.map((item, index) => (
-              <div key={index} className="flex items-start gap-2">
-                <span className="w-2 h-2 bg-primary rounded-full mt-2 shrink-0"></span>
-                <div>
-                  {item.title && <strong>{item.title}:</strong>}{" "}
+  const renderContentSection = (section: SectionsInterace) => (
+    <div key={section.id} className="mb-7">
+      {section.title && (
+        <h3 className="font-serif text-lg font-semibold mb-3 flex items-center gap-2 text-foreground">
+          {section.icon && <span className="text-primary">{section.icon}</span>}
+          {section.title}
+        </h3>
+      )}
+      {section.description && (
+        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+          {section.description}
+        </p>
+      )}
+      {section.image && renderImage(section.image)}
+      {section.items && (
+        <div className="space-y-2">
+          {section.items.map((item, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 shrink-0" />
+              <div className="text-sm text-foreground">
+                {item.title && (
+                  <strong className="text-foreground">{item.title}: </strong>
+                )}
+                <span className="text-muted-foreground">
                   {item.description}
-                </div>
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-
-        {section.cards && (
-          <div className="grid gap-6 mt-6">
-            {section.cards.map((card, index) => (
-              <Card key={index} className={card.className || ""}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    {card.icon && <span>{card.icon}</span>}
-                    {card.title}
-                  </CardTitle>
-                  {card.description && (
-                    <CardDescription>{card.description}</CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  {card.image && renderImage(card.image)}
-                  {card.content && (
-                    <p className="text-sm text-muted-foreground">
-                      {card.content}
-                    </p>
-                  )}
-                  {card.items && (
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      {card.items.map((item: string, idx: number) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {section.alert && (
-          <Alert className={`mt-6 ${section.alert.className || ""}`}>
-            {section.alert.icon && (
-              <span className="h-4 w-4">{section.alert.icon}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {section.cards && (
+        <div className="grid gap-4 mt-4">
+          {section.cards.map((card, index) => (
+            <Card
+              key={index}
+              className={`border-border ${card.className || ""}`}
+            >
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm text-foreground">
+                  {card.icon && <span>{card.icon}</span>}
+                  {card.title}
+                </CardTitle>
+                {card.description && (
+                  <CardDescription className="text-xs">
+                    {card.description}
+                  </CardDescription>
+                )}
+              </CardHeader>
+              <CardContent>
+                {card.image && renderImage(card.image)}
+                {card.content && (
+                  <p className="text-xs text-muted-foreground">
+                    {card.content}
+                  </p>
+                )}
+                {card.items && (
+                  <ul className="space-y-1 text-xs text-muted-foreground">
+                    {card.items.map((item: string, idx: number) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {section.alert && (
+        <Alert
+          className={`mt-4 border-border ${section.alert.className || ""}`}
+        >
+          {section.alert.icon && (
+            <span className="h-4 w-4">{section.alert.icon}</span>
+          )}
+          <AlertDescription className="text-sm">
+            {section.alert.title && (
+              <strong className="text-foreground">{section.alert.title}</strong>
             )}
-            <AlertDescription>
-              {section.alert.title && <strong>{section.alert.title}</strong>}
+            <span className="text-muted-foreground">
               {section.alert.description}
-            </AlertDescription>
-          </Alert>
-        )}
-      </div>
-    );
-  };
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  );
 
   return (
-    <main className="flex-1 p-6 ">
+    <main className="flex-1 p-4 sm:p-6">
       <div className="max-w-4xl mx-auto">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link href="/" className="hover:text-primary ">
-            <Home className="h-4 w-4" />
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-5">
+          <Link href="/" className="hover:text-foreground transition-colors">
+            <Home className="h-3.5 w-3.5" />
           </Link>
           {breadcrumb.map((crumb, index) => (
-            <div key={index} className="flex items-center gap-2 basis-2/5 ">
-              <ChevronRight className="h-4 w-4" />
+            <div key={index} className="flex items-center gap-1.5 min-w-0">
+              <ChevronRight className="h-3 w-3 shrink-0" />
               <span
-                className={
-                  index === breadcrumb.length - 1
-                    ? "text-foreground font-medium line-clamp-1"
-                    : "hover:text-primary line-clamp-1"
-                }
+                className={`line-clamp-1 ${index === breadcrumb.length - 1 ? "text-foreground font-medium" : "hover:text-foreground"}`}
               >
                 {crumb}
               </span>
@@ -206,23 +205,25 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
           ))}
         </nav>
 
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            {content?.icon && <span className="text-2xl">{content?.icon}</span>}
-            <h1 className="text-3xl font-bold">{content?.title}</h1>
+        <div className="mb-7">
+          <div className="flex items-center gap-2.5 mb-2">
+            {content?.icon && <span className="text-xl">{content?.icon}</span>}
+            <h1 className="font-serif text-2xl font-bold text-foreground">
+              {content?.title}
+            </h1>
           </div>
           {content?.description && (
-            <p className="text-lg text-muted-foreground">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               {content?.description}
             </p>
           )}
           {content?.badges && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-3 flex-wrap">
               {content?.badges.map((badge, index) => (
                 <Badge
                   key={index}
                   variant={badge?.variant || "secondary"}
-                  className={badge.className}
+                  className={`rounded-full text-xs ${badge.className || ""}`}
                 >
                   {badge.icon && <span className="mr-1">{badge.icon}</span>}
                   {badge.text}
@@ -233,55 +234,53 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
         </div>
 
         {content?.heroImage && renderImage(content?.heroImage)}
-
         {content?.sections && content?.sections.map(renderContentSection)}
 
         {content?.links && (
-          <div className="mt-12">
-            <h3 className="text-xl font-semibold mb-6">Enlaces Importantes</h3>
-            <div className="grid gap-6">
-              {(content?.links || ([] as LinkInterace[])).map(
-                (link, index: number) => (
-                  <Card
-                    key={index}
-                    className="hover:shadow-md transition-shadow"
-                  >
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        {link.icon && (
-                          <span className="text-primary">{link.icon}</span>
-                        )}
-                        {link.title}
-                      </CardTitle>
-                      <CardDescription>{link.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        className={
-                          link.variant === "outline"
-                            ? "w-full bg-transparent"
-                            : "w-full"
-                        }
-                        variant={link?.variant || "default"}
-                        asChild
+          <div className="mt-10">
+            <h3 className="font-serif text-lg font-semibold mb-4 text-foreground">
+              Enlaces Importantes
+            </h3>
+            <div className="grid gap-4">
+              {(content?.links || ([] as LinkInterace[])).map((link, index) => (
+                <Card
+                  key={index}
+                  className="border-border hover:shadow-sm transition-shadow"
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm text-foreground">
+                      {link.icon && (
+                        <span className="text-primary">{link.icon}</span>
+                      )}
+                      {link.title}
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      {link.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className={`w-full rounded-full active:scale-[0.98] transition-all ${link.variant === "outline" ? "bg-transparent" : ""}`}
+                      variant={link?.variant || "default"}
+                      asChild
+                    >
+                      <a
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <a
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {link.buttonText}
-                        </a>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ),
-              )}
+                        {link.buttonText}
+                      </a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         )}
       </div>
-      <div className="flex flex-col p-2 gap-2">
+
+      <div className="flex flex-col p-2 gap-2 max-w-4xl mx-auto mt-6">
         {prevNextState.prev && (
           <ButtonPrevNext
             title="Anterior"
@@ -307,6 +306,7 @@ export function DynamicPageContent({ allData }: DynamicPageContentProps) {
     </main>
   );
 }
+
 function ButtonPrevNext({
   prevNextState,
   title,
@@ -319,25 +319,25 @@ function ButtonPrevNext({
   align?: boolean;
 }) {
   const router = useRouter();
-
   return (
     <Button
-      className={`h-auto ${align ? "justify-start text-start mr-8 " : "justify-end text-end ml-8 "}`}
-      variant={"outline"}
+      className={`h-auto rounded-xl border-border ${align ? "justify-start text-start mr-8" : "justify-end text-end ml-8"}`}
+      variant="outline"
       onClick={() => router.push(link)}
     >
       <div
-        className={`flex ${align ? "flex-row-reverse" : "flex-row"} items-center`}
+        className={`flex ${align ? "flex-row-reverse" : "flex-row"} items-center gap-2`}
       >
         <div>
-          <h4 className="text-sm text-slate-600">{title}</h4>
-          <h2 className="text-lg text-slate-900">{prevNextState?.title}</h2>
+          <p className="text-xs text-muted-foreground">{title}</p>
+          <p className="text-sm font-medium text-foreground">
+            {prevNextState?.title}
+          </p>
         </div>
-
         {align ? (
-          <ChevronLeft className="size-8 text-slate-700" />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
         ) : (
-          <ChevronRight className="size-8 text-slate-700" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
         )}
       </div>
     </Button>

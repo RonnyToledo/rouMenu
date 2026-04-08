@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import Image from "next/image";
 import { MyContext } from "@/context/MyContext";
-import { Product as ProductInterface } from "@/context/InitialStatus";
+import { Product as ProductInterface } from "@/types/InitialStatus";
 import { logoApp } from "@/lib/image";
 import { Button } from "@/components/ui/button";
 import RatingSection from "./RatingSection";
@@ -30,6 +30,14 @@ import ClipboardProduct from "@/components/myUI/clipboardProduct";
 import { Card } from "@/components/ui/card";
 import { isNewProduct } from "../home/ProductGrid";
 import { HomeIcon } from "lucide-react";
+import {
+  groupVariantsByAttribute,
+  findVariantByAttributes,
+  isAttributeValueAvailable,
+  buildCartTitle,
+  capitalize,
+  getVisibleAttributes,
+} from "@/lib/variantUtils";
 
 export default function Product({ id }: { id: string }) {
   const { store, dispatchStore } = useContext(MyContext);
@@ -37,15 +45,56 @@ export default function Product({ id }: { id: string }) {
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
 
-  const initialProduct = useMemo(() => {
-    return store.products.find((obj) => obj.productId === id);
-  }, [store.products, id]);
+  // Solo productos base para navegación swipe/teclado
+  const baseProducts = useMemo(
+    () =>
+      store.products.filter(
+        (p) => !p.selected_variant || p.selected_variant.default === true,
+      ),
+    [store.products],
+  );
+
+  const initialProduct = useMemo(
+    () => store.products.find((obj) => obj.productId === id),
+    [store.products, id],
+  );
 
   useEffect(() => {
-    if (!initialProduct) {
-      notFound();
-    }
+    if (!initialProduct) notFound();
   }, [initialProduct]);
+
+  // Variantes visibles del producto
+  const visibleVariants = useMemo(() => {
+    if (!initialProduct?.variants) return [];
+    return initialProduct.variants.filter((v) => v.visible !== false);
+  }, [initialProduct]);
+
+  // Hay variantes reales si hay más de una variante visible
+  const hasRealVariants = visibleVariants.length > 1;
+
+  // Atributos agrupados: { "color": ["Rojo","Azul"], "talla": ["M","L"] }
+  const groupedAttributes = useMemo(
+    () => groupVariantsByAttribute(visibleVariants),
+    [visibleVariants],
+  );
+
+  // Estado de selección por atributo: { "color": "Rojo", "talla": "M" }
+  const [attrSelection, setAttrSelection] = useState<
+    Record<string, string | number | boolean>
+  >(() => {
+    const defaultVariant =
+      visibleVariants.find((v) => v.default) ?? visibleVariants[0];
+    return defaultVariant ? getVisibleAttributes(defaultVariant) : {};
+  });
+
+  // Variante activa según la selección de atributos
+  const activeVariant = useMemo(
+    () =>
+      hasRealVariants
+        ? findVariantByAttributes(visibleVariants, attrSelection)
+        : (visibleVariants.find((v) => v.default) ?? visibleVariants[0]),
+    [hasRealVariants, visibleVariants, attrSelection],
+  );
 
   const initialCount = useMemo(() => {
     if (!initialProduct) return 0;
@@ -54,25 +103,47 @@ export default function Product({ id }: { id: string }) {
         (sum, agg) => sum + (agg.cant || 0),
         0,
       ) || 0;
-    return totalAgregados > 0
-      ? 0
-      : (initialProduct.stock || 0) -
-            (initialProduct.Cant || 0) -
-            (initialProduct.agregados?.reduce(
-              (sum, agg) => sum + agg.cant,
-              0,
-            ) || 0) >
-          1
-        ? 1
-        : 0;
-  }, [initialProduct]);
+    if (totalAgregados > 0) return 0;
+    const effectiveStock = activeVariant?.stock ?? initialProduct.stock ?? 0;
+    const effectiveCant = initialProduct.Cant || 0;
+    return effectiveStock - effectiveCant > 1 ? 1 : 0;
+  }, [initialProduct, activeVariant]);
 
-  const [product, setProduct] = useState<ProductInterface | undefined>(
-    initialProduct,
-  );
   const [countAddCart, setCountAddCart] = useState<number>(initialCount);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [displayedImage, setDisplayedImage] = useState<string | undefined>(
+    initialProduct?.image || logoApp,
+  );
+
+  // Derive product from initialProduct and activeVariant
+  const product = useMemo(() => {
+    if (!initialProduct || !activeVariant) return initialProduct;
+    const images = activeVariant.images?.length
+      ? activeVariant.images
+      : initialProduct.imagesecondary;
+    return {
+      ...initialProduct,
+      price: activeVariant.price ?? initialProduct.price,
+      oldPrice: activeVariant.oldPrice ?? initialProduct.oldPrice,
+      stock: activeVariant.stock ?? initialProduct.stock,
+      image: (displayedImage || activeVariant.image) ?? initialProduct.image,
+      imagesecondary: images,
+      selected_variant: activeVariant,
+    };
+  }, [initialProduct, activeVariant, displayedImage]);
+
+  // Reset count when activeVariant changes using key prop or conditional logic
+  useEffect(() => {
+    setCountAddCart(0);
+  }, [activeVariant?.id]);
+
+  const handleAttrChange = useCallback(
+    (key: string, value: string | number | boolean) => {
+      setAttrSelection((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
 
   const handleToCart = (productToCart: ProductInterface) => {
     setIsAddingToCart(true);
@@ -102,20 +173,18 @@ export default function Product({ id }: { id: string }) {
 
   const navigateToProduct = useCallback(
     (direction: string) => {
-      const currentIndex = store.products.findIndex((p) => p.productId === id);
+      const currentIndex = baseProducts.findIndex((p) => p.productId === id);
       const newIndex =
         direction === "next"
-          ? (currentIndex + 1) % store.products.length
-          : (currentIndex - 1 + store.products.length) % store.products.length;
-      const newProductId = store.products[newIndex].productId;
-      const path = `/t/${store.sitioweb || ""}/producto/${newProductId || ""}?direction=${direction}`;
-      if (path.includes("undefined")) {
-        console.error("Path generado contiene valores no válidos:", path);
-        return;
-      }
+          ? (currentIndex + 1) % baseProducts.length
+          : (currentIndex - 1 + baseProducts.length) % baseProducts.length;
+      const newProductId = baseProducts[newIndex]?.productId;
+      if (!newProductId) return;
+      const path = `/t/${store.sitioweb || ""}/producto/${newProductId}?direction=${direction}`;
+      if (path.includes("undefined")) return;
       router.push(path);
     },
-    [id, router, store.products, store.sitioweb],
+    [id, router, baseProducts, store.sitioweb],
   );
 
   useEffect(() => {
@@ -169,6 +238,12 @@ export default function Product({ id }: { id: string }) {
 
   if (!product) return null;
 
+  const effectivePrice = activeVariant?.price ?? product.price ?? 0;
+  const effectiveOldPrice = activeVariant?.oldPrice ?? product.oldPrice ?? 0;
+  const effectiveStock = activeVariant?.stock ?? product.stock ?? 0;
+  const availableStock = effectiveStock - (product.Cant || 0);
+  const cartTitle = buildCartTitle(product.title || "", activeVariant);
+
   return (
     <main className="flex flex-col items-start min-h-dvh">
       {/* Image section */}
@@ -185,12 +260,12 @@ export default function Product({ id }: { id: string }) {
             onTouchEnd={handleSwipeEnd}
           >
             <Image
-              width={600}
-              height={600}
+              width={800}
+              height={800}
               alt={product.title || "Producto"}
               className="w-full h-full object-cover rounded-b-4xl"
               src={product.image || store.urlPoster || logoApp}
-              style={{ filter: product.stock ? "initial" : "grayscale(1)" }}
+              style={{ filter: effectiveStock ? "initial" : "grayscale(1)" }}
               onError={() => {
                 dispatchStore({
                   type: "Add",
@@ -208,20 +283,13 @@ export default function Product({ id }: { id: string }) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Thumbnails — border-border en vez de hardcoded slate */}
         {(product.imagesecondary || []).length > 0 && (
           <div className="grid grid-cols-3 gap-1.5 px-3 py-2">
             {(product.imagesecondary || []).map((image, index) => (
               <button
                 key={index}
                 onClick={() => {
-                  setProduct({
-                    ...product,
-                    image,
-                    imagesecondary: product.imagesecondary.map((obj) =>
-                      obj === image ? product.image : obj,
-                    ) as string[],
-                  });
+                  setDisplayedImage(image);
                 }}
                 className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary/50 opacity-75 hover:opacity-100 transition-all duration-200"
               >
@@ -264,19 +332,17 @@ export default function Product({ id }: { id: string }) {
                 {product.coment.promedio} ({product.coment.total} reseñas)
               </span>
             </Link>
-
-            {/* Share actions — mismo patrón Button ghost rounded-full del header */}
             <div className="flex gap-1">
               <ClipboardProduct
-                title={`${product.title || ""}`}
+                title={cartTitle}
                 descripcion={product.descripcion || ""}
-                url={product.image}
-                price={product.price || 0}
-                oldPrice={product.oldPrice || 0}
+                url={product.image || logoApp}
+                price={effectivePrice}
+                oldPrice={effectiveOldPrice}
                 className="p-0 m-0"
               />
               <ShareButton
-                title={`${product.title || ""}`}
+                title={cartTitle}
                 text={product.descripcion}
                 url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
               />
@@ -287,24 +353,24 @@ export default function Product({ id }: { id: string }) {
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-3xl font-bold text-foreground">
-                ${product.price || 0}{" "}
+                ${effectivePrice}{" "}
                 <span className="text-base font-medium text-muted-foreground">
                   {store.moneda.find((m) => m.id === product.default_moneda)
                     ?.nombre || ""}
                 </span>
               </p>
-              {(product.oldPrice || 0) > (product.price || 0) && (
+              {effectiveOldPrice > effectivePrice && (
                 <>
                   <p className="text-base text-muted-foreground line-through">
-                    ${product.oldPrice || 0}
+                    ${effectiveOldPrice}
                   </p>
                   <Badge
                     variant="destructive"
                     className="animate-pulse rounded-full text-xs"
                   >
                     {Math.round(
-                      (((product.oldPrice || 0) - (product.price || 0)) /
-                        (product.oldPrice || 0)) *
+                      ((effectiveOldPrice - effectivePrice) /
+                        effectiveOldPrice) *
                         100,
                     )}
                     % OFF
@@ -312,9 +378,7 @@ export default function Product({ id }: { id: string }) {
                 </>
               )}
             </div>
-
-            {/* Stock pill — coherente con ProductSpecific mock */}
-            {product.stock ? (
+            {effectiveStock ? (
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
                 <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -343,6 +407,69 @@ export default function Product({ id }: { id: string }) {
                   {tag}
                 </Badge>
               ))}
+            </div>
+          )}
+
+          {/* ── Selector de variantes por grupos de atributos ───────────── */}
+          {hasRealVariants && Object.keys(groupedAttributes).length > 0 && (
+            <div className="space-y-3 pt-1">
+              {Object.entries(groupedAttributes).map(([attrKey, values]) => (
+                <div key={attrKey} className="space-y-1.5">
+                  {/* Cabecera: "Color · Rojo" */}
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="text-sm font-medium text-foreground">
+                      {capitalize(attrKey)}
+                    </h3>
+                    {attrSelection[attrKey] !== undefined && (
+                      <span className="text-xs text-muted-foreground">
+                        · {String(attrSelection[attrKey])}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Pills de valores */}
+                  <div className="flex flex-wrap gap-2">
+                    {values.map((val) => {
+                      const isSelected =
+                        String(attrSelection[attrKey]) === String(val);
+                      const isAvailable = isAttributeValueAvailable(
+                        visibleVariants,
+                        attrSelection,
+                        attrKey,
+                        val,
+                      );
+                      return (
+                        <button
+                          key={String(val)}
+                          onClick={() => handleAttrChange(attrKey, val)}
+                          disabled={!isAvailable}
+                          className={[
+                            "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200",
+                            isSelected
+                              ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                              : "border-border bg-secondary text-foreground hover:border-primary/50",
+                            !isAvailable
+                              ? "opacity-35 cursor-not-allowed line-through"
+                              : "",
+                          ].join(" ")}
+                        >
+                          {String(val)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Aviso de precio ajustado */}
+              {activeVariant &&
+                !activeVariant.default &&
+                activeVariant.price != null &&
+                activeVariant.price !== initialProduct?.price && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Precio ajustado según la variante seleccionada
+                  </p>
+                )}
             </div>
           )}
 
@@ -376,7 +503,6 @@ export default function Product({ id }: { id: string }) {
                   Agregados para su encargo
                 </p>
               </div>
-
               {product.agregados.map((extra) => (
                 <Card
                   key={extra.id}
@@ -394,23 +520,33 @@ export default function Product({ id }: { id: string }) {
                         )?.nombre || ""}
                       </div>
                     </div>
-                    {/* Controles — rounded-full, ghost, border-border */}
                     <div className="flex items-center gap-2">
                       {extra.cant > 0 && (
                         <>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() =>
-                              setProduct({
+                            onClick={() => {
+                              const updatedProduct = {
                                 ...product,
                                 agregados: product.agregados.map((obj) =>
                                   obj.id === extra.id
                                     ? { ...obj, cant: obj.cant - 1 }
                                     : obj,
                                 ),
-                              })
-                            }
+                              };
+                              dispatchStore({
+                                type: "Add",
+                                payload: {
+                                  ...store,
+                                  products: store.products.map((prod) =>
+                                    prod.productId === product.productId
+                                      ? updatedProduct
+                                      : prod,
+                                  ),
+                                },
+                              });
+                            }}
                             className="h-8 w-8 rounded-full border border-border"
                           >
                             <Minus className="h-3.5 w-3.5" />
@@ -426,16 +562,27 @@ export default function Product({ id }: { id: string }) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() =>
-                          setProduct({
+                        onClick={() => {
+                          const updatedProduct = {
                             ...product,
                             agregados: product.agregados.map((obj) =>
                               obj.id === extra.id
                                 ? { ...obj, cant: obj.cant + 1 }
                                 : obj,
                             ),
-                          })
-                        }
+                          };
+                          dispatchStore({
+                            type: "Add",
+                            payload: {
+                              ...store,
+                              products: store.products.map((prod) =>
+                                prod.productId === product.productId
+                                  ? updatedProduct
+                                  : prod,
+                              ),
+                            },
+                          });
+                        }}
                         className="h-8 w-8 rounded-full border border-border"
                       >
                         <Plus className="h-3.5 w-3.5" />
@@ -444,14 +591,13 @@ export default function Product({ id }: { id: string }) {
                   </div>
                 </Card>
               ))}
-
               <p className="text-xs text-muted-foreground/70 text-center">
                 *El extra es el producto con el agregado incluido
               </p>
             </div>
           )}
 
-          {/* Quantity — misma estética bg-secondary rounded-full */}
+          {/* Quantity */}
           <div className="flex items-center justify-center gap-4 py-1">
             <Button
               variant="ghost"
@@ -468,6 +614,7 @@ export default function Product({ id }: { id: string }) {
             <Button
               variant="ghost"
               size="icon"
+              disabled={store.stocks && countAddCart >= availableStock}
               onClick={() => setCountAddCart(countAddCart + 1)}
               className="h-10 w-10 rounded-full border border-border bg-secondary hover:bg-muted transition-colors"
             >
@@ -475,17 +622,20 @@ export default function Product({ id }: { id: string }) {
             </Button>
           </div>
 
-          {/* Action Buttons — rounded-full h-12, active:scale */}
+          {/* Action Buttons */}
           <div className="space-y-2">
             <Button
-              disabled={
-                (product.stock || 0) - (product.Cant || 0) < countAddCart
-              }
+              disabled={availableStock < countAddCart || countAddCart === 0}
               onClick={() => {
                 handleToCart({
                   ...product,
-                  Cant: (product.Cant || 0) + countAddCart || 0,
-                } as ProductInterface);
+                  price: effectivePrice,
+                  oldPrice: effectiveOldPrice,
+                  stock: effectiveStock,
+                  image: activeVariant?.image ?? product.image,
+                  selected_variant: activeVariant ?? product.selected_variant,
+                  Cant: (product.Cant || 0) + countAddCart,
+                });
               }}
               className={`w-full h-12 text-base font-semibold rounded-full transition-all duration-300 gap-2 active:scale-[0.98] ${
                 showSuccess
@@ -508,8 +658,7 @@ export default function Product({ id }: { id: string }) {
                   <ShoppingCart className="w-4 h-4" />
                   Agregar al carrito · $
                   {(
-                    ((product.price || 0) + (product.embalaje || 0)) *
-                      countAddCart +
+                    (effectivePrice + (product.embalaje || 0)) * countAddCart +
                     (product.agregados.reduce(
                       (sum, agg) =>
                         (sum =
@@ -521,7 +670,6 @@ export default function Product({ id }: { id: string }) {
                 </>
               )}
             </Button>
-
             <Button
               variant="outline"
               className="w-full h-12 rounded-full font-semibold transition-all duration-200 active:scale-[0.98]"

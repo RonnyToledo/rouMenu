@@ -1,24 +1,29 @@
 // src/lib/indexedDBCart.ts
-// Utilidades para IndexedDB (sin `any`) — normaliza las cantidades de agregados
+// Utilidades para IndexedDB — soporta variantes de producto
+
+import { ProductVariant } from "@/types/InitialStatus";
 
 export type SavedAgregado = {
   id: string;
-  cant: number; // cantidad del agregado (AHORA obligatoria y normalizada)
+  cant: number;
   price?: number;
   name?: string;
 };
 
 export type SavedProduct = {
   productId: string;
-  Cant?: number; // cantidad del producto
+  Cant?: number;
   agregados?: SavedAgregado[];
+  /** ID de la variante seleccionada (solo si no es la default) */
+  variantId?: string;
+  /** Objeto completo de la variante (para restaurar precio, stock, imagen, etc.) */
+  selected_variant?: ProductVariant;
 };
 
-// Ahora permitimos opcionalmente guardar una "purchaseUuid" junto a la entrada
 export type IDBCartEntry = {
-  key: string; // ej: cart_mitienda
-  value: SavedProduct[]; // guardamos el array normalizado
-  purchaseUuid?: string; // clave UUID de la compra (opcional)
+  key: string;
+  value: SavedProduct[];
+  purchaseUuid?: string;
 };
 
 const DB_NAME = "roudev_cart_db";
@@ -41,28 +46,16 @@ function openDB(): Promise<IDBDatabase> {
       }
     };
 
-    req.onsuccess = () => {
-      resolve(req.result);
-    };
-
-    req.onerror = () => {
-      reject(req.error);
-    };
-
-    req.onblocked = () => {
-      console.warn("IndexedDB open blocked");
-    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+    req.onblocked = () => console.warn("IndexedDB open blocked");
   });
 }
 
-/**
- * Normaliza un SavedProduct asegurando que cada agregado tenga 'cant' (number).
- */
 function normalizeSavedProduct(p: SavedProduct): SavedProduct {
   const agregadosNormalized =
     p.agregados?.map((a) => ({
       id: String(a.id),
-      // Forzamos a número; si no viene, ponemos 0
       cant: Number(a?.cant ?? 0),
       price: a?.price,
       name: a?.name,
@@ -72,29 +65,28 @@ function normalizeSavedProduct(p: SavedProduct): SavedProduct {
     productId: String(p.productId),
     Cant: p.Cant !== undefined ? Number(p.Cant) : undefined,
     agregados: agregadosNormalized,
+    // Preservar datos de variante tal como están (ya son serializables)
+    ...(p.variantId ? { variantId: p.variantId } : {}),
+    ...(p.selected_variant ? { selected_variant: p.selected_variant } : {}),
   };
 }
 
 /**
- * Guarda un array de SavedProduct bajo la key `cart_<shopKey>`,
- * normalizando las cantidades de agregados.
- *
- * Ahora acepta un parámetro opcional `purchaseUuid` que, si se proporciona,
- * se guardará en la entrada junto con los productos.
+ * Guarda el carrito en IndexedDB bajo la key `cart_<shopKey>`.
+ * Incluye información de variantes si existen.
  */
 export async function saveCartToIDB(
   shopKey: string,
   cartData: SavedProduct[],
-  purchaseUuid?: string
+  purchaseUuid?: string,
 ): Promise<void> {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, "readwrite");
     const store = tx.objectStore(STORE_NAME);
 
-    // Normalizamos cada producto antes de persistir
     const normalized: SavedProduct[] = (cartData ?? []).map((p) =>
-      normalizeSavedProduct(p)
+      normalizeSavedProduct(p),
     );
 
     const entry: IDBCartEntry = {
@@ -114,12 +106,10 @@ export async function saveCartToIDB(
 
 /**
  * Devuelve la entrada guardada o null si no existe.
- * Al cargar también normalizamos para garantizar que agregados tengan 'cant' numérico.
- *
- * RETURN: { products: SavedProduct[], purchaseUuid?: string } | null
+ * Normaliza los datos al devolver para garantizar coherencia.
  */
 export async function loadCartFromIDB(
-  shopKey: string
+  shopKey: string,
 ): Promise<{ products: SavedProduct[]; purchaseUuid?: string } | null> {
   try {
     const db = await openDB();
@@ -131,7 +121,6 @@ export async function loadCartFromIDB(
     db.close();
 
     if (!value?.value) return null;
-    // Normalizamos al devolver
     const normalized = value.value.map((p) => normalizeSavedProduct(p));
     return { products: normalized, purchaseUuid: value.purchaseUuid };
   } catch (err) {
@@ -141,11 +130,10 @@ export async function loadCartFromIDB(
 }
 
 /**
- * Función de compatibilidad que devuelve solo el array de productos (como antes).
- * Útil si tienes código existente que espera SavedProduct[] | null.
+ * Compatibilidad: devuelve solo el array de productos (SavedProduct[] | null).
  */
 export async function loadCartProductsFromIDB(
-  shopKey: string
+  shopKey: string,
 ): Promise<SavedProduct[] | null> {
   const entry = await loadCartFromIDB(shopKey);
   return entry?.products ?? null;
@@ -165,7 +153,8 @@ export async function clearCartFromIDB(shopKey: string): Promise<void> {
   }
 }
 
-/* Helpers */
+/* ─── Helpers ──────────────────────────────────────────────────────────── */
+
 function txComplete(tx: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
@@ -174,9 +163,6 @@ function txComplete(tx: IDBTransaction): Promise<void> {
   });
 }
 
-/**
- * Convierte un IDBRequest a Promise tipada.
- */
 function reqToPromise<T>(req: IDBRequest): Promise<T> {
   return new Promise((resolve, reject) => {
     req.onsuccess = () => resolve(req.result as T);

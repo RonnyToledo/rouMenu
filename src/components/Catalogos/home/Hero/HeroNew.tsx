@@ -8,10 +8,11 @@ import { useAuth } from "@/context/AppContext";
 import { useParams, useSearchParams } from "next/navigation";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
 import { logoApp } from "@/lib/image";
-import { Current } from "@/context/InitialStatus";
+import { Current } from "@/types/InitialStatus";
 
 export default function HeroNew() {
   const { store, dispatchStore } = useContext(MyContext);
+  console.log("🚀 ~ file: HeroNew.tsx:17 ~ HeroNew ~ store:", store);
   const searchParams = useSearchParams();
   const params = useParams();
   const { user } = useAuth();
@@ -53,8 +54,8 @@ export default function HeroNew() {
         <Image
           src={store?.banner || logoApp}
           alt={store?.name || "Store"}
-          width={400}
-          height={400}
+          width={600}
+          height={600}
           className="w-full h-full object-cover"
           onError={() => {
             dispatchStore({ type: "Add", payload: { ...store, banner: "" } });

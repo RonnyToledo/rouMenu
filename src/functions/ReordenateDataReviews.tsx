@@ -1,5 +1,5 @@
 import { Review } from "@/components/Catalogos/About/CommentPage";
-import { AppState } from "@/context/InitialStatus";
+import { AppState } from "@/types/InitialStatus";
 
 export function ReordenateData(data: Review[], store: AppState) {
   return data.map((obj) => ({
