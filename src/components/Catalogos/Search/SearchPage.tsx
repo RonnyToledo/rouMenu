@@ -37,6 +37,16 @@ const SUGGESTIONS_LIMIT = 10;
 const MIN_SEARCH_LENGTH = 2;
 const DEBOUNCE_DELAY = 300;
 
+function readSuggestions(storageKey: string): string[] {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    const arr: string[] = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+
 export default function SearchPage() {
   const { smartBack } = useApp();
   const { open } = useSheet();
@@ -62,13 +72,9 @@ export default function SearchPage() {
   );
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(storageKey);
-      const arr: string[] = raw ? JSON.parse(raw) : [];
-      setSuggestions(Array.isArray(arr) ? arr : []);
-    } catch {
-      setSuggestions([]);
-    }
+    queueMicrotask(() => {
+      setSuggestions(readSuggestions(storageKey));
+    });
   }, [storageKey]);
 
   const saveSearch = useCallback(
@@ -76,9 +82,7 @@ export default function SearchPage() {
       const t = term?.trim();
       if (!t) return;
       try {
-        const raw = localStorage.getItem(storageKey);
-        let arr: string[] = raw ? JSON.parse(raw) : [];
-        if (!Array.isArray(arr)) arr = [];
+        let arr = readSuggestions(storageKey);
         arr = arr.filter((s) => s.toLowerCase() !== t.toLowerCase());
         arr.unshift(t);
         if (arr.length > SUGGESTIONS_LIMIT)
@@ -94,7 +98,7 @@ export default function SearchPage() {
     const currentQuery = searchParams.get("buscar") || "";
     if (search !== currentQuery) {
       const id = setTimeout(() => {
-        router.push(
+        router.replace(
           `/t/${store.sitioweb}/search?buscar=${encodeURIComponent(search)}`,
           { scroll: false },
         );
@@ -310,8 +314,12 @@ export default function SearchPage() {
                       width={100}
                       height={100}
                       alt={product.title || ""}
-                      src={product.image || store.urlPoster || logoApp}
-                      className={`w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 ${!product.stock ? "grayscale opacity-60" : ""}`}
+                      src={
+                        product.selected_variant?.image ||
+                        store.urlPoster ||
+                        logoApp
+                      }
+                      className={`w-full h-full object-cover transition-transform group-hover:scale-105 duration-300 ${!product.selected_variant?.stock ? "grayscale opacity-60" : ""}`}
                     />
                   </div>
 
@@ -329,7 +337,7 @@ export default function SearchPage() {
                     </div>
                     <div className="flex items-center justify-between mt-1">
                       <span className="text-sm font-bold text-foreground">
-                        ${smartRound(product.price || 0)}{" "}
+                        ${smartRound(product.selected_variant?.price || 0)}{" "}
                         <span className="text-xs font-normal text-muted-foreground">
                           {store.moneda.find(
                             (m) => m.id === product.default_moneda,
@@ -348,7 +356,7 @@ export default function SearchPage() {
                   </div>
 
                   {/* Indicador stock */}
-                  {!product.stock && (
+                  {!product.selected_variant?.stock && (
                     <div className="shrink-0 flex items-center self-center">
                       <span className="text-[10px] font-medium text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
                         Agotado

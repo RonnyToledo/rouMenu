@@ -10,6 +10,7 @@ import { persistCartIDB } from "@/reducer/reducerGeneral";
 import { userContext } from "@/context/userContext";
 import { Link as LinkRef } from "lucide-react";
 import Link from "next/link";
+import { Product } from "@/types/InitialStatus";
 
 type EventRow = {
   event_id: number;
@@ -30,7 +31,21 @@ type EventRow = {
 
 type PurchaseStatus = "completed" | "shipped";
 type FilterType = "all" | "completed" | "shipped";
-
+interface RawPedidoItem {
+  id?: number | string;
+  productId?: string;
+  Cant?: number;
+  selected_variant?: {
+    id?: string;
+    default?: boolean;
+    Cant?: number;
+    price?: number;
+    stock?: number;
+    image?: string;
+    label?: string;
+    attributes?: Record<string, unknown>;
+  };
+}
 interface Purchase {
   id: string;
   catalogName: string;
@@ -123,11 +138,44 @@ export function PurchaseHistory() {
   const EditarComprar = (idCompra: string) => {
     const e = events.find((e) => e.event_id === Number(idCompra));
     if (!e) return;
+
+    const parsed = JSON.parse(e.event_desc || "{}");
+    const pedido: RawPedidoItem[] = parsed.pedido ?? [];
+
+    // Convertir items del pedido al formato que mergeCartDataWithProducts entiende
+    const cartProducts = pedido
+      .filter((item) => {
+        const qty = Number(item.Cant ?? item.selected_variant?.Cant ?? 0) || 0;
+        return qty > 0;
+      })
+      .map((item) => {
+        const qty = Number(item.Cant ?? item.selected_variant?.Cant ?? 0) || 0;
+        const hasNonDefaultVariant =
+          item.selected_variant && !item.selected_variant.default;
+
+        return {
+          productId: item.productId ?? String(item.id),
+          selected_variant: hasNonDefaultVariant
+            ? {
+                // Marcar explícitamente como no-default para que cartKey funcione
+                ...item.selected_variant,
+                default: false,
+                Cant: qty,
+              }
+            : {
+                // Variante default: solo necesita Cant
+                Cant: qty,
+                default: true,
+              },
+        };
+      });
+
     persistCartIDB(
       e.sitio_sitioweb || "",
-      JSON.parse(e.event_desc || "{}").pedido,
+      cartProducts as Product[],
       e.uid_venta || "",
     );
+
     router.push(`/t/${e.sitio_sitioweb}`);
   };
 

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Categoria } from "@/types/InitialStatus";
 import { usePathname } from "next/navigation";
 import { logoApp } from "@/lib/image";
-import { ExtraerCategorias } from "@/functions/extraerCategoriass";
+import { getCategoriesWithProducts } from "@/lib/catalog/categorySelectors";
 
 export default function AllCategoryShowcase() {
   const { store } = useContext(MyContext);
@@ -21,7 +21,7 @@ export default function AllCategoryShowcase() {
           Todas las categorías
         </h1>
         <div className="grid gap-2 grid-flow-row-dense">
-          {ExtraerCategorias(
+          {getCategoriesWithProducts(
             store?.categorias || [],
             store?.products || [],
           ).map((obj: Categoria) => (

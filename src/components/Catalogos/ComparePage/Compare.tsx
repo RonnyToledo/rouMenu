@@ -65,7 +65,12 @@ export default function ComparePage() {
   function computeWinners(a: Product | null, b: Product | null) {
     if (!a || !b) return null;
     const winners = {
-      price: a.price < b.price ? "left" : a.price > b.price ? "right" : "tie",
+      price:
+        (a.selected_variant?.price || 0) < (b.selected_variant?.price || 0)
+          ? "left"
+          : (a.selected_variant?.price || 0) > (b.selected_variant?.price || 0)
+            ? "right"
+            : "tie",
       rating:
         (a.coment?.promedio ?? 0) > (b.coment?.promedio ?? 0)
           ? "left"
@@ -73,10 +78,24 @@ export default function ComparePage() {
             ? "right"
             : "tie",
       stock:
-        a.stock && !b.stock ? "left" : !a.stock && b.stock ? "right" : "tie",
+        a.selected_variant?.stock && !b.selected_variant?.stock
+          ? "left"
+          : !a.selected_variant?.stock && b.selected_variant?.stock
+            ? "right"
+            : "tie",
       discount: (() => {
-        const da = a.oldPrice > 0 ? (a.oldPrice - a.price) / a.oldPrice : 0;
-        const db = b.oldPrice > 0 ? (b.oldPrice - b.price) / b.oldPrice : 0;
+        const da =
+          (a.selected_variant?.oldPrice || 0) > 0
+            ? ((a.selected_variant?.oldPrice || 0) -
+                (a.selected_variant?.price || 0)) /
+              (a.selected_variant?.oldPrice || 0)
+            : 0;
+        const db =
+          (b.selected_variant?.oldPrice || 0) > 0
+            ? ((b.selected_variant?.oldPrice || 0) -
+                (b.selected_variant?.price || 0)) /
+              (b.selected_variant?.oldPrice || 0)
+            : 0;
         return da > db ? "left" : da < db ? "right" : "tie";
       })(),
     };
@@ -169,7 +188,7 @@ export default function ComparePage() {
                     <Image
                       width={160}
                       height={160}
-                      src={prod.image || logoApp}
+                      src={prod.selected_variant?.image || logoApp}
                       alt={prod.title}
                       className="w-32 h-32 object-cover rounded-xl border border-border"
                     />
@@ -187,11 +206,12 @@ export default function ComparePage() {
               {left ? (
                 <div className="space-y-0.5">
                   <p className="text-xl font-bold text-foreground">
-                    ${smartRound(left.price)}
+                    ${smartRound(left.selected_variant?.price || 0)}
                   </p>
-                  {(left.oldPrice || 0) > (left.price || 0) && (
+                  {(left.selected_variant?.oldPrice || 0) >
+                    (left.selected_variant?.price || 0) && (
                     <p className="text-xs text-muted-foreground line-through">
-                      ${left.oldPrice}
+                      ${left.selected_variant?.oldPrice}
                     </p>
                   )}
                 </div>
@@ -203,11 +223,12 @@ export default function ComparePage() {
               {right ? (
                 <div className="space-y-0.5">
                   <p className="text-xl font-bold text-foreground">
-                    ${smartRound(right.price)}
+                    ${smartRound(right.selected_variant?.price || 0)}
                   </p>
-                  {(right.oldPrice || 0) > (right.price || 0) && (
+                  {(right.selected_variant?.oldPrice || 0) >
+                    (right.selected_variant?.price || 0) && (
                     <p className="text-xs text-muted-foreground line-through">
-                      ${right.oldPrice}
+                      ${right.selected_variant?.oldPrice}
                     </p>
                   )}
                 </div>
@@ -257,15 +278,15 @@ export default function ComparePage() {
               {left ? (
                 <div
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                    left.stock
+                    left.selected_variant?.stock
                       ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                       : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
                   }`}
                 >
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${left.stock ? "bg-emerald-400" : "bg-red-400"}`}
+                    className={`w-1.5 h-1.5 rounded-full ${left.selected_variant?.stock ? "bg-emerald-400" : "bg-red-400"}`}
                   />
-                  {left.stock ? "En stock" : "Agotado"}
+                  {left.selected_variant?.stock ? "En stock" : "Agotado"}
                 </div>
               ) : (
                 <Skeleton className="h-5 w-full rounded-xl" />
@@ -275,15 +296,15 @@ export default function ComparePage() {
               {right ? (
                 <div
                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                    right.stock
+                    right.selected_variant?.stock
                       ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                       : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
                   }`}
                 >
                   <div
-                    className={`w-1.5 h-1.5 rounded-full ${right.stock ? "bg-emerald-400" : "bg-red-400"}`}
+                    className={`w-1.5 h-1.5 rounded-full ${right.selected_variant?.stock ? "bg-emerald-400" : "bg-red-400"}`}
                   />
-                  {right.stock ? "En stock" : "Agotado"}
+                  {right.selected_variant?.stock ? "En stock" : "Agotado"}
                 </div>
               ) : (
                 <Skeleton className="h-5 w-full rounded-xl" />
@@ -302,21 +323,23 @@ export default function ComparePage() {
                 className="p-3 flex justify-center border-r last:border-r-0 border-border"
               >
                 {prod ? (
-                  prod.Cant === 0 ? (
+                  prod.selected_variant?.Cant === 0 ? (
                     <Button
                       variant="outline"
                       size="sm"
                       className="rounded-full text-xs w-full border-border gap-1.5"
-                      disabled={!prod.stock}
+                      disabled={!prod.selected_variant?.stock}
                       onClick={() =>
                         handleToCart({
                           ...prod,
-                          Cant: (prod.Cant || 0) + 1,
+                          Cant: (prod.selected_variant?.Cant || 0) + 1,
                         } as Product)
                       }
                     >
                       <ShoppingCart className="w-3.5 h-3.5" />
-                      {prod.stock ? "Agregar" : "No disponible"}
+                      {prod.selected_variant?.stock
+                        ? "Agregar"
+                        : "No disponible"}
                     </Button>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -327,14 +350,14 @@ export default function ComparePage() {
                         onClick={() =>
                           handleToCart({
                             ...prod,
-                            Cant: (prod.Cant || 0) - 1,
+                            Cant: (prod.selected_variant?.Cant || 0) - 1,
                           } as Product)
                         }
                       >
                         <Minus className="w-3 h-3" />
                       </Button>
                       <span className="text-sm font-semibold text-foreground w-5 text-center">
-                        {prod.Cant}
+                        {prod.selected_variant?.Cant}
                       </span>
                       <Button
                         variant="ghost"
@@ -343,7 +366,7 @@ export default function ComparePage() {
                         onClick={() =>
                           handleToCart({
                             ...prod,
-                            Cant: (prod.Cant || 0) + 1,
+                            Cant: (prod.selected_variant?.Cant || 0) + 1,
                           } as Product)
                         }
                       >

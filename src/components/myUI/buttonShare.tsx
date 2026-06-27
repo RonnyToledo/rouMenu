@@ -110,8 +110,8 @@ export default function ShareButton({
         type="button"
         variant={"ghost"}
         className={cn(
-          "text-(--text-gold) hover:underline flex items-center text-lg",
-          className
+          "text-product bg-radial from-product/20 to-transparent hover:underline flex items-center text-lg p-2! rounded-full",
+          className,
         )}
         onClick={handleShare}
         disabled={busy}

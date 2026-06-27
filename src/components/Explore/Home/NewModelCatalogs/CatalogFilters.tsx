@@ -22,15 +22,15 @@ export default function CatalogFilters({
 }: CatalogFiltersProps) {
   return (
     <div className="flex flex-col gap-4">
-      {/* Search */}
+      {/* ── Search ── */}
       <div className="relative">
         <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
           <svg
-            width="16"
-            height="16"
+            width="15"
+            height="15"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(90,55,20,0.32)"
+            stroke="rgba(255,248,240,0.25)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -39,24 +39,36 @@ export default function CatalogFilters({
             <path d="m21 21-4.35-4.35" />
           </svg>
         </div>
+
         <input
           type="text"
-          placeholder="Buscar catálogos, tipos, provincias..."
+          placeholder="Buscar catálogos, tipos, provincias…"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-11 pr-10 py-3.5 rounded-xl text-sm outline-none transition-all duration-200"
+          className="w-full pl-11 pr-10 py-3.5 rounded-xl text-sm outline-none transition-all duration-200 placeholder:text-[rgba(255,248,240,0.22)]"
           style={{
-            background: "rgba(90,55,20,0.04)",
-            border: "1.5px solid rgba(90,55,20,0.1)",
-            color: "#1A1208",
-            fontSize: "14px",
+            background: "rgba(255,248,240,0.04)",
+            border: "1px solid rgba(255,248,240,0.09)",
+            color: "#FFF8F0",
+            fontSize: 14,
           }}
+          onFocus={(e) =>
+            (e.currentTarget.style.borderColor = "rgba(200,75,49,0.4)")
+          }
+          onBlur={(e) =>
+            (e.currentTarget.style.borderColor = "rgba(255,248,240,0.09)")
+          }
         />
+
         {searchQuery && (
           <button
             onClick={() => onSearchChange("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors hover:text-[#C84B31]"
-            style={{ color: "rgba(90,55,20,0.3)" }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 transition-colors"
+            style={{ color: "rgba(255,248,240,0.25)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#C84B31")}
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.color = "rgba(255,248,240,0.25)")
+            }
           >
             <svg
               width="14"
@@ -75,22 +87,22 @@ export default function CatalogFilters({
         )}
       </div>
 
-      {/* Type pills */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+      {/* ── Type pills ── */}
+      <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
         {/* Todos */}
         <button
           onClick={() => onTypeChange("all")}
           className="shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200"
           style={{
             background:
-              activeType === "all" ? "#C84B31" : "rgba(90,55,20,0.05)",
+              activeType === "all" ? "#C84B31" : "rgba(255,248,240,0.05)",
             border:
               activeType === "all"
-                ? "1.5px solid #C84B31"
-                : "1.5px solid rgba(90,55,20,0.1)",
-            color: activeType === "all" ? "#FFF8F0" : "rgba(90,55,20,0.55)",
+                ? "1px solid #C84B31"
+                : "1px solid rgba(255,248,240,0.09)",
+            color: activeType === "all" ? "#FFF8F0" : "rgba(255,248,240,0.4)",
             boxShadow:
-              activeType === "all" ? "0 4px 14px rgba(200,75,49,0.22)" : "none",
+              activeType === "all" ? "0 4px 14px rgba(200,75,49,0.28)" : "none",
           }}
         >
           Todos{totalCount ? ` (${totalCount})` : ""}
@@ -103,15 +115,16 @@ export default function CatalogFilters({
             className="shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200"
             style={{
               background:
-                activeType === t.tipo ? "#C84B31" : "rgba(90,55,20,0.05)",
+                activeType === t.tipo ? "#C84B31" : "rgba(255,248,240,0.05)",
               border:
                 activeType === t.tipo
-                  ? "1.5px solid #C84B31"
-                  : "1.5px solid rgba(90,55,20,0.1)",
-              color: activeType === t.tipo ? "#FFF8F0" : "rgba(90,55,20,0.55)",
+                  ? "1px solid #C84B31"
+                  : "1px solid rgba(255,248,240,0.09)",
+              color:
+                activeType === t.tipo ? "#FFF8F0" : "rgba(255,248,240,0.4)",
               boxShadow:
                 activeType === t.tipo
-                  ? "0 4px 14px rgba(200,75,49,0.22)"
+                  ? "0 4px 14px rgba(200,75,49,0.28)"
                   : "none",
             }}
           >
@@ -121,8 +134,8 @@ export default function CatalogFilters({
               style={{
                 color:
                   activeType === t.tipo
-                    ? "rgba(255,248,240,0.7)"
-                    : "rgba(90,55,20,0.3)",
+                    ? "rgba(255,248,240,0.6)"
+                    : "rgba(255,248,240,0.2)",
               }}
             >
               {t.count}

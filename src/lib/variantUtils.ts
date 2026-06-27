@@ -7,13 +7,34 @@ import { ProductVariant } from "@/types/InitialStatus";
 const INTERNAL_KEYS = new Set(["tipo", "es_default"]);
 
 /**
+ * Normaliza un valor de atributo a string comparable.
+ * Soporta color como objeto {hex, name} o string directo.
+ */
+export function normalizeAttrValue(val: unknown): string {
+  if (val === null || val === undefined) return "";
+  if (typeof val === "object" && "name" in (val as object)) {
+    return String((val as { name: string }).name);
+  }
+  return String(val);
+}
+
+/**
+ * Extrae el hex de un valor de atributo color.
+ * Soporta {hex, name} o string directo.
+ */
+export function extractColorHex(val: unknown): string {
+  if (typeof val === "object" && val !== null && "hex" in val) {
+    return String((val as { hex: string }).hex);
+  }
+  return String(val ?? "");
+}
+
+/**
  * Devuelve los atributos visibles de una variante (filtrando claves internas).
- * Ejemplo: { "color": "Rojo", "talla": "M", "tipo": "default", "es_default": true }
- *       => { "color": "Rojo", "talla": "M" }
  */
 export function getVisibleAttributes(
   variant: ProductVariant,
-): Record<string, string | number | boolean> {
+): Record<string, unknown> {
   if (!variant.attributes) return {};
   return Object.fromEntries(
     Object.entries(variant.attributes).filter(([k]) => !INTERNAL_KEYS.has(k)),
@@ -23,7 +44,6 @@ export function getVisibleAttributes(
 /**
  * Devuelve las claves de atributos únicos presentes en un conjunto de variantes,
  * en el orden en que aparecen por primera vez.
- * Ejemplo: variantes con color+talla y variante con solo color → ["color", "talla"]
  */
 export function getAttributeKeys(variants: ProductVariant[]): string[] {
   const keys: string[] = [];
@@ -41,22 +61,22 @@ export function getAttributeKeys(variants: ProductVariant[]): string[] {
 
 /**
  * Agrupa las variantes por atributo.
- * Devuelve un mapa: { "color": ["Rojo", "Azul"], "talla": ["M", "L", "XL"] }
- * Los valores son únicos y en orden de aparición.
+ * Devuelve un mapa: { "color": [{hex, name},...], "talla": ["M","L","XL"] }
+ * Los valores son únicos (comparados por normalizeAttrValue) y en orden de aparición.
  */
 export function groupVariantsByAttribute(
   variants: ProductVariant[],
-): Record<string, (string | number | boolean)[]> {
-  const result: Record<string, (string | number | boolean)[]> = {};
+): Record<string, unknown[]> {
+  const result: Record<string, unknown[]> = {};
   const keys = getAttributeKeys(variants);
 
   for (const key of keys) {
-    const values: (string | number | boolean)[] = [];
+    const values: unknown[] = [];
     const seen = new Set<string>();
     for (const v of variants) {
       const attrs = getVisibleAttributes(v);
       if (attrs[key] !== undefined) {
-        const strVal = String(attrs[key]);
+        const strVal = normalizeAttrValue(attrs[key]);
         if (!seen.has(strVal)) {
           seen.add(strVal);
           values.push(attrs[key]);
@@ -69,50 +89,56 @@ export function groupVariantsByAttribute(
 }
 
 /**
- * Dado un conjunto de variantes y una selección parcial de atributos,
- * encuentra la variante que más coincide con esa selección.
- * Si no hay coincidencia exacta, devuelve la primera disponible.
+ * Dado un conjunto de variantes y una selección de atributos,
+ * encuentra la variante que coincide exactamente.
+ * Si no hay coincidencia exacta, devuelve la que más atributos coincide.
  */
 export function findVariantByAttributes(
   variants: ProductVariant[],
-  selection: Record<string, string | number | boolean>,
+  selection: Record<string, unknown>,
 ): ProductVariant | undefined {
-  // Buscar coincidencia exacta en todos los atributos seleccionados
+  // Coincidencia exacta: todos los atributos visibles de la selección coinciden
   const exact = variants.find((v) => {
     const attrs = getVisibleAttributes(v);
     return Object.entries(selection).every(
-      ([k, val]) => String(attrs[k]) === String(val),
+      ([k, val]) => normalizeAttrValue(attrs[k]) === normalizeAttrValue(val),
     );
   });
+
   if (exact) return exact;
 
-  // Si no hay exacta, buscar la que más atributos coincide
+  // Fallback: mayor número de coincidencias
   let best: ProductVariant | undefined;
   let bestScore = -1;
   for (const v of variants) {
     const attrs = getVisibleAttributes(v);
     const score = Object.entries(selection).filter(
-      ([k, val]) => String(attrs[k]) === String(val),
+      ([k, val]) => normalizeAttrValue(attrs[k]) === normalizeAttrValue(val),
     ).length;
     if (score > bestScore) {
       bestScore = score;
       best = v;
     }
   }
+
   return best ?? variants[0];
 }
 
 /**
- * Construye el sufijo de variante para mostrar en el título del carrito.
- * Usa los atributos visibles de la variante seleccionada.
- *
- * Ejemplo:
- *   baseTitle = "Cafe Capuchino"
- *   variant.attributes = { color: "Rojo", talla: "M" }
- *   → "Cafe Capuchino · Rojo · M"
- *
- * Si la variante no tiene atributos visibles, cae back al label de la variante.
- * Si es la variante default, devuelve solo el baseTitle.
+ * Determina si un color hex/rgb es claro u oscuro.
+ */
+export function isLightColor(color: string): boolean {
+  const hex = color.replace("#", "");
+  if (hex.length < 6) return true;
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+}
+
+/**
+ * Construye el título del carrito con los atributos visibles de la variante.
  */
 export function buildCartTitle(
   baseTitle: string,
@@ -121,14 +147,12 @@ export function buildCartTitle(
   if (!variant || variant.default) return baseTitle;
 
   const attrs = getVisibleAttributes(variant);
-  const attrValues = Object.values(attrs);
+  const attrValues = Object.values(attrs).map(normalizeAttrValue);
 
   if (attrValues.length > 0) {
-    return `${baseTitle} · ${attrValues.map(String).join(" · ")}`;
+    return `${baseTitle} · ${attrValues.join(" · ")}`;
   }
 
-  // Fallback: usar label si no hay attributes visibles
-  // y el label no duplica el baseTitle
   if (
     variant.label &&
     !variant.label.toLowerCase().includes(baseTitle.toLowerCase())
@@ -141,7 +165,6 @@ export function buildCartTitle(
 
 /**
  * Capitaliza la primera letra de un string.
- * Útil para mostrar claves de atributos como cabeceras.
  */
 export function capitalize(str: string): string {
   if (!str) return "";
@@ -149,25 +172,33 @@ export function capitalize(str: string): string {
 }
 
 /**
- * Dado el estado de selección actual (atributo → valor) y la lista de variantes,
- * determina si una combinación específica tiene stock.
- * Útil para deshabilitar valores de atributos sin stock.
+ * Determina si un valor de atributo está disponible dada la selección actual.
+ *
+ * FIX: el bug original usaba `attrs[k] === undefined || ...` lo que hacía que
+ * atributos ausentes se consideraran válidos, permitiendo combinaciones
+ * inexistentes (ej: "rojo/XL" cuando solo existe "rojo/L" y "amarillo/XL").
+ *
+ * Ahora se requiere que el atributo exista EN la variante y coincida.
+ * Además solo se considera válida una variante con stock > 0.
  */
 export function isAttributeValueAvailable(
   variants: ProductVariant[],
-  currentSelection: Record<string, string | number | boolean>,
+  currentSelection: Record<string, unknown>,
   attributeKey: string,
-  attributeValue: string | number | boolean,
+  attributeValue: unknown,
 ): boolean {
-  // Construir selección hipotética incluyendo este valor
   const hypothetical = { ...currentSelection, [attributeKey]: attributeValue };
 
-  // Buscar alguna variante que coincida con esa selección hipotética y tenga stock
   return variants.some((v) => {
+    // Solo variantes con stock
+    if ((v.stock ?? 0) <= 0) return false;
+
     const attrs = getVisibleAttributes(v);
-    const matches = Object.entries(hypothetical).every(
-      ([k, val]) => attrs[k] === undefined || String(attrs[k]) === String(val),
-    );
-    return matches && !v.agotado && (v.stock ?? 1) > 0;
+
+    return Object.entries(hypothetical).every(([k, val]) => {
+      // FIX: el atributo debe existir en la variante (no saltar si es undefined)
+      if (attrs[k] === undefined) return false;
+      return normalizeAttrValue(attrs[k]) === normalizeAttrValue(val);
+    });
   });
 }

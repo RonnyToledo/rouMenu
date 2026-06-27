@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
 import { AppState, EditInterface } from "@/types/InitialStatus";
+import { getStoreShell } from "@/lib/storeData";
 
 export async function GET(
   request: NextRequest,
@@ -23,15 +23,7 @@ export async function GET(
     return NextResponse.json({ error: "Editor key required" }, { status: 401 });
   }
 
-  const { data: storeOne, error } = await supabase.rpc(
-    "get_store_with_transform",
-    { tienda_slug: shop },
-  );
-
-  if (error) {
-    console.error("Error al obtener tienda:", error);
-    return NextResponse.json({ error: "URL is required" }, { status: 400 });
-  }
+  const storeOne = await getStoreShell(shop);
 
   if (!storeOne) {
     return NextResponse.json({ error: "Store not found" }, { status: 404 });
@@ -39,8 +31,7 @@ export async function GET(
 
   // Obtener el valor del editor (puede venir con distintos nombres según tu RPC)
   // Prueba varias convenciones por si cambia el shape
-  const editorValue =
-    (storeOne.Editor ?? storeOne.editor ?? storeOne.EditorId ?? null) + "";
+  const editorValue = `${storeOne.Editor ?? ""}`;
 
   if (!editorValue) {
     // Si no hay editor definido, denegar acceso (o decide policy distinta)

@@ -4,7 +4,7 @@ import React, { useContext } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import PhoneInput from "react-phone-input-2";
-import { CompraInterface } from "./CarritoPage";
+import { CompraInterface } from "@/types/interfaces_Cart";
 import { MapPin } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import style from "./style.module.css";

@@ -41,8 +41,8 @@ export default function HeroPremium() {
     products: store?.products?.length ?? 0,
     priceRange: (() => {
       const prices = (store?.products || [])
-        .map((p: { price: number }) => p.price)
-        .filter(Boolean);
+        .map((p) => p.selected_variant?.price)
+        .filter((price): price is number => typeof price === "number");
       if (!prices.length) return "—";
       return `${Math.min(...prices)} – ${Math.max(...prices)} ${
         store?.moneda?.find(

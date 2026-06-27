@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useContext } from "react";
+import { useMemo, useContext } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,6 @@ import { ArrowLeft, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { userContext } from "@/context/userContext";
 import { logoApp } from "@/lib/image";
-import { AgregadosInterface } from "@/types/InitialStatus";
 
 type EventRow = {
   event_id: number;
@@ -29,54 +28,64 @@ type EventRow = {
   sitio_stocks?: boolean;
 };
 
-interface Agregado {
-  id: string;
-  name: string;
-  cant: number;
-  price: number;
-}
-
 interface OrderItem {
+  key: string; // único por fila: productId + variantId o índice
   id: string;
   name: string;
-  title?: string;
-  nombre?: string;
+  variantLabel?: string;
   quantity: number;
-  Cant?: number;
-  cant?: number;
-  qty?: number;
   price: number;
   packing: number;
-  embalaje?: number;
-  precio?: number;
   image?: string;
-  imagen?: string;
   productId?: string;
-  agregados?: Agregado[];
   stock?: number;
 }
 
-interface ProductStock {
-  [productId: string]: number;
-}
-
 interface ParsedEventData {
-  code: { discount?: number | string; name: string };
-  pedido?: OrderItem[];
-  items?: OrderItem[];
+  code?: { discount?: number | string; name?: string };
+  pedido?: RawItem[];
+  items?: RawItem[];
   total?: number;
   moneda?: string;
   direccion?: string;
   lugar?: string;
   address?: string;
   phone?: string;
-  phonenumber?: string;
+  phonenumber?: string | number;
   pago?: string;
   payment?: string;
 }
 
+interface RawItem {
+  id?: string | number;
+  title?: string;
+  name?: string;
+  nombre?: string;
+  Cant?: number;
+  cant?: number;
+  quantity?: number;
+  qty?: number;
+  price?: number;
+  precio?: number;
+  embalaje?: number;
+  packing?: number;
+  image?: string;
+  imagen?: string;
+  productId?: string;
+  stock?: number;
+  selected_variant?: {
+    id?: string;
+    label?: string;
+    Cant?: number;
+    price?: number;
+    stock?: number;
+    image?: string;
+    attributes?: Record<string, string | number | boolean>;
+  };
+}
+
 function eventToOrderData(event: EventRow) {
-  const result = {
+  const empty = {
     items: [] as OrderItem[],
     total: 0,
     currency: undefined as string | undefined,
@@ -84,56 +93,94 @@ function eventToOrderData(event: EventRow) {
     phone: undefined as string | undefined,
     paymentMethod: undefined as string | undefined,
     discount: undefined as number | string | undefined,
+    customerName: undefined as string | undefined,
   };
-  if (!event.event_desc) return result;
+
+  if (!event.event_desc) return empty;
+
   try {
-    const parsed: ParsedEventData = JSON.parse(event.event_desc);
-    result.discount = parsed.code.discount;
-    result.currency = parsed.moneda;
-    result.address =
-      parsed.direccion ?? parsed.lugar ?? parsed.address ?? undefined;
-    result.phone =
-      String(parsed.phone ?? parsed.phonenumber ?? "").trim() || undefined;
-    result.paymentMethod = parsed.pago ?? parsed.payment ?? undefined;
+    const parsed: ParsedEventData =
+      typeof event.event_desc === "string"
+        ? JSON.parse(event.event_desc)
+        : event.event_desc;
+
     const totalValue = Number(parsed.total ?? 0);
-    result.total = !isNaN(totalValue) && totalValue > 0 ? totalValue : 0;
-    const itemsArray = parsed.pedido ?? parsed.items ?? [];
-    if (Array.isArray(itemsArray)) {
-      result.items = itemsArray
-        .map((item, index): OrderItem | null => {
-          if (!item || typeof item !== "object") return null;
-          const quantity =
-            Number(item.Cant ?? item.cant ?? item.quantity ?? item.qty ?? 0) ||
-            0;
-          const price = Number(item.price ?? item.precio ?? 0) || 0;
-          const name =
-            item.nombre ?? item.title ?? item.name ?? `Producto ${index + 1}`;
-          const agregados = Array.isArray(item.agregados)
-            ? item.agregados.map((agg: AgregadosInterface) => ({
-                id: agg.id,
-                name: agg.name,
-                cant: Number(agg.cant ?? 0) || 0,
-                price: Number(agg.price ?? 0) || 0,
-              }))
-            : [];
-          return {
-            id: item.productId ?? item.id ?? `item-${index}`,
-            name,
-            quantity,
-            price,
-            image: item.imagen ?? item.image ?? undefined,
-            productId: item.productId ?? item.id,
-            agregados,
-            stock: item.stock ?? 0,
-            packing: item.embalaje ?? 0,
-          };
-        })
-        .filter((item): item is OrderItem => item !== null);
-    }
-    return result;
+    const rawItems: RawItem[] = parsed.pedido ?? parsed.items ?? [];
+
+    const items: OrderItem[] = Array.isArray(rawItems)
+      ? rawItems
+          .map((item, index): OrderItem | null => {
+            if (!item || typeof item !== "object") return null;
+
+            // Cantidad: raíz primero (fix nuevo), luego dentro de selected_variant (pedidos viejos)
+            const quantity =
+              Number(
+                item.Cant ??
+                  item.selected_variant?.Cant ??
+                  item.cant ??
+                  item.quantity ??
+                  item.qty ??
+                  0,
+              ) || 0;
+
+            // Precio: usar el del raíz (ya viene convertido a moneda destino)
+            const price = Number(item.price ?? item.precio ?? 0) || 0;
+
+            // Nombre: title es el campo que viene del backend
+            const name =
+              item.title ?? item.name ?? item.nombre ?? `Producto ${index + 1}`;
+
+            // Variante no-default: enriquecer nombre con label
+            const variant = item.selected_variant;
+            const variantLabel = variant?.label ?? undefined;
+
+            // Imagen: preferir la de la variante si existe
+            const image =
+              variant?.image || item.image || item.imagen || undefined;
+
+            // Key único: productId + variantId si hay variante, si no productId + índice
+            const productId = String(item.productId ?? item.id ?? index);
+            const key = variant?.id
+              ? `${productId}-${variant.id}`
+              : `${productId}-${index}`;
+
+            return {
+              key,
+              id: productId,
+              name,
+              variantLabel,
+              quantity,
+              price,
+              packing: Number(item.embalaje ?? item.packing ?? 0) || 0,
+              image: image || undefined,
+              productId,
+              stock: Number(item.stock ?? 0) || 0,
+            };
+          })
+          .filter(
+            (item): item is OrderItem => item !== null && item.quantity > 0,
+          )
+      : [];
+
+    return {
+      items,
+      total: !isNaN(totalValue) && totalValue > 0 ? totalValue : 0,
+      currency: parsed.moneda,
+      address:
+        parsed.direccion && parsed.direccion !== ""
+          ? parsed.direccion
+          : parsed.lugar !== "Local" && parsed.lugar
+            ? parsed.lugar
+            : undefined,
+      phone:
+        String(parsed.phone ?? parsed.phonenumber ?? "").trim() || undefined,
+      paymentMethod: parsed.pago ?? parsed.payment ?? undefined,
+      discount: parsed.code?.discount,
+      customerName: event.nombre_event ?? undefined,
+    };
   } catch (error) {
     console.warn("Error parsing event_desc:", error);
-    return result;
+    return empty;
   }
 }
 
@@ -154,40 +201,29 @@ export default function EditOrderPage() {
   const router = useRouter();
   const { events } = useContext(userContext);
   const orderId = params.id_order as string;
+
   const event = useMemo(
     () => events.find((e) => e.event_id === parseInt(orderId)),
     [events, orderId],
   );
-
-  const [items] = useState<OrderItem[]>([]);
-  const [productStocks] = useState<ProductStock>({});
-  const [storeHasStockControl] = useState(false);
-  const [loadingStocks] = useState(false);
-
-  const getAvailableStock = (
-    productId: string,
-    currentQuantityInOrder: number = 0,
-  ) => {
-    const stockInDB = Number(productStocks[productId] ?? 0);
-    return Math.max(0, stockInDB + Number(currentQuantityInOrder ?? 0));
-  };
 
   const orderData = useMemo(
     () => (event ? eventToOrderData(event) : null),
     [event],
   );
 
-  const calculateTotal = () =>
-    items
-      .reduce((sum, item) => {
-        const itemTotal = (item.price + item.packing) * item.quantity;
-        const agregadosTotal = (item.agregados || []).reduce(
-          (aggSum, agg) => aggSum + (agg.price + item.packing) * agg.cant,
+  const items = useMemo(() => orderData?.items ?? [], [orderData]);
+
+  const calculatedTotal = useMemo(
+    () =>
+      items
+        .reduce(
+          (sum, item) => sum + (item.price + item.packing) * item.quantity,
           0,
-        );
-        return sum + itemTotal + agregadosTotal;
-      }, 0)
-      .toFixed(2);
+        )
+        .toFixed(2),
+    [items],
+  );
 
   if (!event) {
     return (
@@ -249,11 +285,11 @@ export default function EditOrderPage() {
                 Información del Pedido
               </h2>
               <div className="space-y-2 text-sm">
-                {orderData?.address && (
+                {orderData?.customerName && (
                   <div className="flex justify-between gap-2">
-                    <span className="text-muted-foreground">Dirección</span>
-                    <span className="font-medium text-foreground text-right">
-                      {orderData.address}
+                    <span className="text-muted-foreground">Cliente</span>
+                    <span className="font-medium text-foreground">
+                      {orderData.customerName}
                     </span>
                   </div>
                 )}
@@ -265,12 +301,20 @@ export default function EditOrderPage() {
                     </span>
                   </div>
                 )}
+                {orderData?.address && (
+                  <div className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">Dirección</span>
+                    <span className="font-medium text-foreground text-right">
+                      {orderData.address}
+                    </span>
+                  </div>
+                )}
                 {orderData?.paymentMethod && (
                   <div className="flex justify-between gap-2">
                     <span className="text-muted-foreground">
                       Método de Pago
                     </span>
-                    <span className="font-medium text-foreground">
+                    <span className="font-medium text-foreground capitalize">
                       {orderData.paymentMethod}
                     </span>
                   </div>
@@ -291,120 +335,49 @@ export default function EditOrderPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {items.map((item) => {
-                  const availableStock = getAvailableStock(
-                    item.id,
-                    item.quantity,
-                  );
-                  const isOutOfStock =
-                    storeHasStockControl && availableStock <= 0;
-
-                  return (
-                    <div key={item.id} className="space-y-2">
-                      {item.quantity > 0 && (
-                        <Card
-                          className={`border-border transition-all ${isOutOfStock ? "opacity-60" : ""} ${loadingStocks ? "grayscale-25" : ""}`}
-                        >
-                          <div className="p-4 flex items-center gap-3">
-                            <Image
-                              src={item.image || logoApp}
-                              alt={item.name}
-                              width={64}
-                              height={64}
-                              className="rounded-xl object-cover border border-border w-14 h-14 shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-sm font-medium text-foreground line-clamp-1 mb-0.5">
-                                {item.name}
-                              </h3>
-                              <p className="text-xs text-muted-foreground">
-                                ${item.price.toFixed(2)} por unidad
-                              </p>
-                              {storeHasStockControl && (
-                                <p
-                                  className={`text-xs mt-0.5 ${isOutOfStock ? "text-red-500" : "text-emerald-500"}`}
-                                >
-                                  {isOutOfStock
-                                    ? "Sin stock"
-                                    : `Stock: ${availableStock}`}
-                                </p>
-                              )}
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="text-sm font-semibold text-foreground">
-                                $
-                                {(
-                                  (item.price + item.packing) *
-                                  item.quantity
-                                ).toFixed(2)}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {item.quantity} un.
-                              </p>
-                              {item.packing > 0 && (
-                                <p className="text-xs text-muted-foreground">
-                                  +{item.packing} emb.
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </Card>
-                      )}
-
-                      {(item.agregados || []).map((agg) => {
-                        if (agg.cant === 0) return null;
-                        const aggStock = getAvailableStock(agg.id, agg.cant);
-                        const aggOutOfStock =
-                          storeHasStockControl && aggStock <= 0;
-                        return (
-                          <Card
-                            key={agg.id}
-                            className={`border-l-2 border-l-primary/40 border-border ${aggOutOfStock ? "opacity-60" : ""}`}
-                          >
-                            <div className="p-4 flex items-center gap-3">
-                              <Image
-                                src={item.image || logoApp}
-                                alt={agg.name}
-                                width={64}
-                                height={64}
-                                className="rounded-xl object-cover border border-border w-14 h-14 shrink-0"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-sm font-medium text-foreground line-clamp-1 mb-0.5">
-                                  {item.name} + {agg.name}
-                                </h3>
-                                <p className="text-xs text-muted-foreground">
-                                  ${agg.price.toFixed(2)} por unidad
-                                </p>
-                                {storeHasStockControl && (
-                                  <p
-                                    className={`text-xs mt-0.5 ${aggOutOfStock ? "text-red-500" : "text-emerald-500"}`}
-                                  >
-                                    {aggOutOfStock
-                                      ? "Sin stock"
-                                      : `Stock: ${aggStock}`}
-                                  </p>
-                                )}
-                              </div>
-                              <div className="text-right shrink-0">
-                                <p className="text-sm font-semibold text-foreground">
-                                  $
-                                  {(
-                                    (agg.price + item.packing) *
-                                    agg.cant
-                                  ).toFixed(2)}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {agg.cant} un.
-                                </p>
-                              </div>
-                            </div>
-                          </Card>
-                        );
-                      })}
+                {items.map((item, index) => (
+                  <Card key={index} className="border-border">
+                    <div className="p-4 flex items-center gap-3">
+                      <Image
+                        src={item.image || logoApp}
+                        alt={item.name}
+                        width={64}
+                        height={64}
+                        className="rounded-xl object-cover border border-border w-14 h-14 shrink-0"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-medium text-foreground line-clamp-1 mb-0.5">
+                          {item.name}
+                        </h3>
+                        {item.variantLabel && (
+                          <p className="text-xs text-muted-foreground mb-0.5">
+                            {item.variantLabel}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted-foreground">
+                          ${item.price.toFixed(2)} por unidad
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-semibold text-foreground">
+                          $
+                          {(
+                            (item.price + item.packing) *
+                            item.quantity
+                          ).toFixed(2)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.quantity} un.
+                        </p>
+                        {item.packing > 0 && (
+                          <p className="text-xs text-muted-foreground">
+                            +{item.packing.toFixed(2)} emb.
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  );
-                })}
+                  </Card>
+                ))}
               </div>
             )}
           </div>
@@ -416,7 +389,7 @@ export default function EditOrderPage() {
                 Total del pedido
               </span>
               <span className="font-serif text-3xl font-bold text-foreground">
-                ${calculateTotal()}
+                ${calculatedTotal}
                 {orderData?.currency && (
                   <span className="text-base font-normal text-muted-foreground ml-1.5">
                     {orderData.currency}
@@ -425,7 +398,7 @@ export default function EditOrderPage() {
               </span>
               {orderData?.discount ? (
                 <span className="text-xs text-muted-foreground">
-                  Descuento: ${orderData.discount}
+                  Descuento aplicado: {orderData.discount}%
                 </span>
               ) : null}
             </div>

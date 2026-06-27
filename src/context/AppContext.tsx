@@ -15,7 +15,6 @@ import { createClient } from "@/lib/supabase";
 import { User, Session } from "@supabase/supabase-js";
 import GoogleOneTap from "@/components/GeneralComponents/GoogleOneTap";
 import LoginPopover from "@/components/GeneralComponents/LoginPopover";
-import { ThemeProvider } from "next-themes";
 import { HomeContentData } from "@/types/HomeContentInterface";
 
 // ============== TIPOS ==============
@@ -263,20 +262,18 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
 
   return (
     <AppContext.Provider value={contextValue}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        {!user && <GoogleOneTap />}
+      {!user && <GoogleOneTap />}
 
-        {!user && (
-          <LoginPopover
-            isOpen={isLoginOpen}
-            onClose={closeLoginPopover}
-            redirectTo={pathname ?? "/"}
-            message={loginMessage}
-          />
-        )}
+      {!user && (
+        <LoginPopover
+          isOpen={isLoginOpen}
+          onClose={closeLoginPopover}
+          redirectTo={pathname ?? "/"}
+          message={loginMessage}
+        />
+      )}
 
-        <main>{children}</main>
-      </ThemeProvider>
+      <main>{children}</main>
     </AppContext.Provider>
   );
 }

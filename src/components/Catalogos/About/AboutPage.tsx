@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Mail, Tag, Phone, Info, Share2 } from "lucide-react";
+import { MapPin, Mail, Tag, Phone, Info } from "lucide-react";
 import { MyContext } from "@/context/MyContext";
 import Image from "next/image";
 import React, { useContext, useState, useMemo, useCallback, memo } from "react";
@@ -13,9 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { format } from "@formkit/tempo";
 import PreviewRatingGeneral from "../General/PreviewRatingGeneral";
 import { useAuth } from "@/context/AppContext";
-import { logoApp } from "@/lib/image";
 import { IconSelect, SelectUser } from "../General/Footer";
-import ShareButton from "@/components/myUI/buttonShare";
+import HeroGlobal from "../home/Hero/HeroGlobal";
 
 export default function AboutPage() {
   const { store } = useContext(MyContext);
@@ -57,56 +56,38 @@ export default function AboutPage() {
   const activeStar = ratingHover || ratingSelect;
 
   return (
-    <div>
-      <div className="min-h-screen bg-background transition-colors duration-300">
-        <div className="h-16" />
-        <div className="container mx-auto px-4 py-6 max-w-4xl pb-8">
-          {/* Profile Section */}
-          <section className="mb-6">
-            <div className="flex flex-col items-center mb-6">
-              <div className="w-36 h-36 rounded-full overflow-hidden border-2 border-border mb-3">
-                <Image
-                  height={160}
-                  width={160}
-                  src={store.urlPoster || logoApp}
-                  alt={store.name || ""}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Perfil público.</p>
-            </div>
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      {/* ── HERO ── */}
+      <HeroGlobal expand />
 
-            <InfoCard
-              icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
-            >
-              <p className="text-sm font-semibold text-foreground">
-                {store.name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Nombre de la tienda
-              </p>
-            </InfoCard>
+      {/* ── INFO CARDS ── */}
+      <section className="px-6 pb-10 space-y-3">
+        {/* Store name */}
+        <LabeledCard
+          icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
+          label="Nombre de la tienda"
+          value={store.name}
+        />
 
-            {store.history && (
-              <InfoCard
-                icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
-              >
-                <p className="text-sm text-foreground mb-0.5 line-clamp-3">
-                  {store.history}
-                </p>
-                <p className="text-xs text-muted-foreground">Sobre nosotros</p>
-              </InfoCard>
-            )}
+        {/* History */}
+        {store.history && (
+          <LabeledCard
+            icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
+            label="Sobre nosotros"
+            value={store.history}
+            clamp
+          />
+        )}
 
-            {mapCenter && (
-              <InfoCard
-                icon={
-                  <MapPin className="w-4 h-4 text-muted-foreground mt-0.5" />
-                }
-              >
-                <div className="rounded-xl overflow-hidden mb-2">
+        {/* Map */}
+        {mapCenter && (
+          <div className="bg-background border border-border rounded-xl p-5 shadow-sm">
+            <div className="flex items-start gap-3">
+              <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="rounded-xl overflow-hidden">
                   <Map
-                    height={280}
+                    height={220}
                     defaultCenter={mapCenter}
                     mouseEvents={false}
                     touchEvents={false}
@@ -115,234 +96,264 @@ export default function AboutPage() {
                     <Marker width={50} anchor={mapCenter} />
                   </Map>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {store?.direccion},
-                </p>
+                <p className="text-sm text-foreground">{store?.direccion}</p>
                 <p className="text-xs text-muted-foreground">
                   {store.municipio}, {store.Provincia}
                 </p>
-              </InfoCard>
-            )}
-
-            <InfoCard
-              icon={<Clock className="w-4 h-4 text-muted-foreground mt-0.5" />}
-            >
-              <div className="space-y-2 mb-1">
-                <HorariosComponent
-                  groupedHorarios={groupedHorarios}
-                  horario={store.horario || []}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Horario comercial</p>
-            </InfoCard>
-
-            {store.email && (
-              <InfoCard
-                icon={<Mail className="w-4 h-4 text-muted-foreground mt-0.5" />}
-              >
-                <p className="text-sm text-primary hover:opacity-75 transition-opacity">
-                  {store.email}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Correo electrónico
-                </p>
-              </InfoCard>
-            )}
-
-            {store.tipo && (
-              <InfoCard
-                icon={<Tag className="w-4 h-4 text-muted-foreground mt-0.5" />}
-              >
-                <p className="text-sm text-foreground mb-0.5">{store.tipo}</p>
-                <p className="text-xs text-muted-foreground">Categoría</p>
-              </InfoCard>
-            )}
-
-            <InfoCard
-              icon={<Share2 className="w-4 h-4 text-muted-foreground mt-0.5" />}
-            >
-              <ShareButton
-                title={store.name}
-                text={store.parrrafo}
-                url={`https://roumenu.vercel.app/t/${store.sitioweb}`}
-                className="p-0 text-sm text-foreground"
-              >
-                Compartir Perfil
-              </ShareButton>
-            </InfoCard>
-          </section>
-
-          {/* Rating Section */}
-          <section className="mb-6">
-            <div className="bg-secondary/50 border border-border rounded-2xl p-5 space-y-4">
-              <h3 className="font-serif text-base font-semibold text-foreground">
-                Califica este catálogo
-              </h3>
-              <div className="flex justify-center gap-2">
-                {[1, 2, 3, 4, 5].map((starValue) => (
-                  <button
-                    key={starValue}
-                    onClick={() => handleStarClick(starValue)}
-                    onMouseEnter={() => setRatingHover(starValue)}
-                    onMouseLeave={() => setRatingHover(0)}
-                    className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:bg-primary/10 transition-colors group"
-                    type="button"
-                  >
-                    <Star
-                      className={`w-5 h-5 transition-colors ${
-                        starValue <= activeStar
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-muted-foreground/40 group-hover:text-amber-400"
-                      }`}
-                    />
-                  </button>
-                ))}
               </div>
             </div>
-          </section>
+          </div>
+        )}
 
-          {/* Reviews Section */}
-          <section className="mb-6">
-            <div className="bg-secondary/50 border border-border rounded-2xl p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-serif text-base font-semibold text-foreground">
-                  Reseñas
-                </h3>
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-background border border-border">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-xs font-semibold text-foreground">
-                    {store.comentTienda.promedio.toFixed(1)}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({store.comentTienda.total})
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {store.comentTienda.data.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border-b border-border last:border-0 pb-3 last:pb-0"
-                  >
-                    <div className="flex items-start justify-between mb-1.5">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">
-                          {review.user.name}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`w-3 h-3 ${
-                                  star <= review.star
-                                    ? "fill-amber-400 text-amber-400"
-                                    : "text-muted-foreground/30"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-xs text-muted-foreground">
-                            {format(review.created_at, "short")}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    {review.cmt && (
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                        {review.cmt}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <Link
-                href={`/t/${store.sitioweb}/about/ratings`}
-                className="w-full py-2.5 rounded-xl border border-border bg-background hover:bg-secondary transition-colors flex items-center justify-center gap-2 text-sm font-medium text-foreground"
-              >
-                <span>Ver todas las reseñas</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
+        {/* Schedule */}
+        <div className="bg-background border border-border rounded-xl p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <Clock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <HorariosComponent
+                groupedHorarios={groupedHorarios}
+                horario={store.horario || []}
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                Horario comercial
+              </p>
             </div>
-          </section>
-
-          {/* Social Media */}
-          {store.redes.length > 0 && (
-            <section className="mb-6">
-              <h3 className="font-serif text-base font-semibold text-foreground mb-3 px-1">
-                Facebook e Instagram
-              </h3>
-              <div className="bg-secondary/50 border border-border rounded-2xl p-4">
-                <div className="flex flex-col gap-3">
-                  {store.redes.map((red, idx) => (
-                    <div className="flex items-center gap-3" key={idx}>
-                      <IconSelect
-                        iconName={red.tipo}
-                        className="w-4 h-4 text-muted-foreground"
-                      />
-                      <Link
-                        href={red.url}
-                        className="text-sm text-primary hover:opacity-75 transition-opacity"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {SelectUser(red.tipo, red.user)}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Contact Info */}
-          <section className="mb-6">
-            <h3 className="font-serif text-base font-semibold text-foreground mb-3 px-1">
-              Info. y número de teléfono
-            </h3>
-            <div className="space-y-2">
-              <InfoCard
-                icon={<Info className="w-4 h-4 text-muted-foreground mt-0.5" />}
-              >
-                <p className="text-sm text-foreground mb-0.5 line-clamp-5">
-                  {store.parrrafo || "..."}
-                </p>
-                <p className="text-xs text-muted-foreground">Información</p>
-              </InfoCard>
-              <InfoCard
-                icon={
-                  <Phone className="w-4 h-4 text-muted-foreground mt-0.5" />
-                }
-              >
-                <p className="text-sm text-foreground mb-0.5">+{store.cell}</p>
-                <p className="text-xs text-muted-foreground">
-                  Número de teléfono
-                </p>
-              </InfoCard>
-            </div>
-          </section>
+          </div>
         </div>
 
-        <Separator className="bg-border" />
-        <footer className="p-4 border-t border-border">
-          <Link
-            className="text-sm text-muted-foreground flex flex-col justify-center items-center gap-2"
-            href="https://rouadmin.vercel.app"
-          >
-            <Image
-              src={logoAdmin}
-              alt={store.name || ""}
-              width={120}
-              height={120}
-              className="rounded-full w-24 h-24 object-cover opacity-80"
+        {/* Email */}
+        {store.email && (
+          <LabeledCard
+            icon={<Mail className="w-4 h-4 text-muted-foreground mt-0.5" />}
+            label="Correo electrónico"
+            value={store.email}
+            isLink={`mailto:${store.email}`}
+          />
+        )}
+
+        {/* Phone */}
+        <LabeledCard
+          icon={<Phone className="w-4 h-4 text-muted-foreground mt-0.5" />}
+          label="Número de teléfono"
+          value={`+${store.cell}`}
+          isLink={`tel:+${store.cell}`}
+        />
+
+        {/* Category */}
+        {store.tipo && (
+          <LabeledCard
+            icon={<Tag className="w-4 h-4 text-muted-foreground mt-0.5" />}
+            label="Categoría"
+            value={store.tipo}
+          />
+        )}
+      </section>
+
+      {/* ── REVIEWS ── */}
+      <section className="px-6 py-12 bg-secondary/30">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <h3 className="font-serif text-2xl mb-2 text-foreground">
+            Experiencias de Clientes
+          </h3>
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <span className="font-semibold text-amber-500">
+              {store.comentTienda.promedio.toFixed(1)}
+            </span>
+            <div className="flex gap-0.5">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star
+                  key={s}
+                  className={`w-4 h-4 ${
+                    s <= Math.round(store.comentTienda.promedio)
+                      ? "fill-amber-400 text-amber-400"
+                      : "text-muted-foreground/30"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Basado en {store.comentTienda.total} reseñas
+          </p>
+        </div>
+
+        {/* Review list */}
+        <div className="space-y-4 mb-8">
+          {store.comentTienda.data.map((review) => (
+            <div
+              key={review.id}
+              className="bg-background border border-border rounded-xl p-5 shadow-sm"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-medium text-sm text-foreground">
+                    {review.user.name}
+                  </p>
+                  <div className="flex gap-0.5 mt-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-3 h-3 ${
+                          s <= review.star
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  {format(review.created_at, "short")}
+                </span>
+              </div>
+              {review.cmt && (
+                <p className="text-xs italic text-muted-foreground leading-relaxed line-clamp-3 mt-2">
+                  {`"${review.cmt}"`}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Ver todas */}
+        <Link
+          href={`/t/${store.sitioweb}/about/ratings`}
+          className="w-full py-4 border border-border rounded-xl text-xs font-medium uppercase tracking-widest hover:bg-background transition-colors flex items-center justify-center gap-2 text-foreground"
+        >
+          Ver todas las reseñas
+          <ChevronRight className="w-4 h-4" />
+        </Link>
+
+        {/* Rate CTA */}
+        <div className="mt-12 text-center">
+          <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-widest">
+            ¿Te gusta nuestro catálogo?
+          </p>
+          <div className="flex justify-center gap-3">
+            {[1, 2, 3, 4, 5].map((starValue) => (
+              <button
+                key={starValue}
+                onClick={() => handleStarClick(starValue)}
+                onMouseEnter={() => setRatingHover(starValue)}
+                onMouseLeave={() => setRatingHover(0)}
+                className="w-10 h-10 rounded-full border border-border bg-background flex items-center justify-center hover:bg-primary/10 transition-colors"
+                type="button"
+              >
+                <Star
+                  className={`w-5 h-5 transition-colors ${
+                    starValue <= activeStar
+                      ? "fill-amber-400 text-amber-400"
+                      : "text-muted-foreground/30 hover:text-amber-400"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── REDES SOCIALES ── */}
+      {store.redes.length > 0 && (
+        <section className="px-6 py-10">
+          <h3 className="font-serif text-2xl mb-6 text-foreground">
+            Redes Sociales
+          </h3>
+          <div className="space-y-3">
+            {store.redes.map((red, idx) => (
+              <div
+                key={idx}
+                className="bg-secondary/50 border border-border rounded-xl p-4 flex items-center gap-3"
+              >
+                <div className="w-9 h-9 rounded-full bg-background border border-border flex items-center justify-center shrink-0">
+                  <IconSelect
+                    iconName={red.tipo}
+                    className="w-4 h-4 text-muted-foreground"
+                  />
+                </div>
+                <Link
+                  href={red.url}
+                  className="text-sm text-primary hover:opacity-75 transition-opacity"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {SelectUser(red.tipo, red.user)}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── CONTACTO ── */}
+      <section className="px-6 py-10">
+        <h3 className="font-serif text-2xl mb-6 text-foreground">
+          Información de Contacto
+        </h3>
+
+        <div className="grid grid-cols-1 gap-5">
+          {/* Ubicación */}
+          <ContactRow
+            icon={<MapPin className="w-5 h-5 opacity-60" />}
+            label="Ubicación & Servicios"
+            value={`${store.municipio}, ${store.Provincia}. Envíos a domicilio disponibles.`}
+          />
+
+          {/* Teléfono */}
+          <ContactRow
+            icon={<Phone className="w-5 h-5 opacity-60" />}
+            label="Teléfono"
+            value={`+${store.cell}`}
+            href={`tel:+${store.cell}`}
+          />
+
+          {/* Email */}
+          {store.email && (
+            <ContactRow
+              icon={<Mail className="w-5 h-5 opacity-60" />}
+              label="Email"
+              value={store.email}
+              href={`mailto:${store.email}`}
             />
-            Ir al panel de administración
-          </Link>
-        </footer>
-        <Separator className="bg-border" />
-      </div>
+          )}
+        </div>
+      </section>
+
+      <Separator className="bg-border" />
+
+      {/* ── FOOTER ── */}
+      <footer className="py-12 px-6 text-center bg-background border-t border-border">
+        <div className="mb-6 flex justify-center">
+          <div className="w-12 h-12 bg-foreground text-background rounded-lg flex items-center justify-center font-serif text-xl italic">
+            {(store.name || "SP").slice(0, 2).toUpperCase()}
+          </div>
+        </div>
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-8">
+          © {new Date().getFullYear()} {store.name}. Todos los derechos
+          reservados.
+        </p>
+        <Link
+          href="https://rouadmin.vercel.app"
+          className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors flex flex-col items-center gap-3"
+        >
+          <Image
+            src={logoAdmin}
+            alt={store.name || ""}
+            width={48}
+            height={48}
+            className="rounded-full w-12 h-12 object-cover opacity-70"
+          />
+          Ir al panel de administración
+        </Link>
+        <div className="mt-8 flex justify-center items-center gap-2">
+          <span className="text-[10px] text-muted-foreground/40">
+            Powered by
+          </span>
+          <span className="font-bold text-xs tracking-tighter opacity-30">
+            ROUMENU
+          </span>
+        </div>
+      </footer>
 
       <PreviewRatingGeneral
         reviewOpen={reviewOpen}
@@ -353,89 +364,144 @@ export default function AboutPage() {
   );
 }
 
-const InfoCard = memo(function InfoCard({
+/* ── Sub-components ── */
+
+const LabeledCard = memo(function LabeledCard({
   icon,
-  children,
+  label,
+  value,
+  clamp,
+  isLink,
 }: {
   icon: React.ReactNode;
-  children: React.ReactNode;
+  label: string;
+  value?: string | null;
+  clamp?: boolean;
+  isLink?: string;
 }) {
+  if (!value) return null;
   return (
-    <div className="bg-secondary/50 border border-border rounded-xl p-3.5 mb-2">
+    <div className="bg-background border border-border rounded-xl p-5 shadow-sm">
       <div className="flex items-start gap-3">
-        {icon}
-        <div className="flex-1">{children}</div>
+        <div className="shrink-0">{icon}</div>
+        <div className="flex-1">
+          {isLink ? (
+            <a
+              href={isLink}
+              className={`text-sm text-primary hover:opacity-75 transition-opacity ${clamp ? "line-clamp-3" : ""}`}
+            >
+              {value}
+            </a>
+          ) : (
+            <p
+              className={`text-sm text-foreground ${clamp ? "line-clamp-3" : ""}`}
+            >
+              {value}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground mt-1">{label}</p>
+        </div>
       </div>
     </div>
   );
 });
 
+const ContactRow = memo(function ContactRow({
+  icon,
+  label,
+  value,
+  href,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  href?: string;
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="w-10 h-10 flex items-center justify-center bg-secondary rounded-full shrink-0">
+        {icon}
+      </div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
+          {label}
+        </p>
+        {href ? (
+          <a
+            href={href}
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
+            {value}
+          </a>
+        ) : (
+          <p className="text-sm text-muted-foreground">{value}</p>
+        )}
+      </div>
+    </div>
+  );
+});
+
+/* ── Schedule helpers (sin cambios) ── */
+
+interface TurnoHorario {
+  id?: number | string;
+  open: boolean;
+  apertura?: string | null;
+  cierre?: string | null;
+  es_24h?: boolean;
+  cruza_medianoche?: boolean;
+}
+
 interface HorarioGroup {
   dias: string[];
-  apertura: string;
-  cierre: string;
+  turnos: TurnoHorario[];
+}
+
+function normalizarTurno(turno: TurnoHorario) {
+  if (!turno.open) return "closed";
+  if (turno.es_24h) return "24h";
+  const ap = turno.apertura ?? "";
+  const ci = turno.cierre ?? "";
+  return `${ap}-${ci}-${turno.cruza_medianoche ? 1 : 0}`;
 }
 
 function agruparHorarios(horarios: ScheduleInterface[]): HorarioGroup[] {
-  if (!horarios || horarios.length === 0) return [];
-  const grouped: HorarioGroup[] = [];
-  let currentGroup: HorarioGroup = {
-    dias: [horarios[0].dia],
-    apertura: horarios[0].apertura,
-    cierre: horarios[0].cierre,
-  };
-  for (let i = 1; i < horarios.length; i++) {
-    const hor = horarios[i];
-    const prev = horarios[i - 1];
-    if (hor.apertura === prev.apertura && hor.cierre === prev.cierre) {
-      currentGroup.dias.push(hor.dia);
+  if (!horarios?.length) return [];
+  const groups: HorarioGroup[] = [];
+  let current: HorarioGroup | null = null;
+  let currentKey = "";
+
+  for (const dia of horarios) {
+    const turnos = (dia.turnos ?? []).filter((t) => t.open);
+    const key =
+      turnos.length === 0 ? "closed" : turnos.map(normalizarTurno).join("|");
+
+    if (current && key === currentKey) {
+      current.dias.push(dia.dia);
     } else {
-      grouped.push(currentGroup);
-      currentGroup = {
-        dias: [hor.dia],
-        apertura: hor.apertura,
-        cierre: hor.cierre,
-      };
+      if (current) groups.push(current);
+      current = { dias: [dia.dia], turnos };
+      currentKey = key;
     }
   }
-  grouped.push(currentGroup);
-  return grouped;
-}
 
-const TIME_OPTIONS: Intl.DateTimeFormatOptions = {
-  hour: "numeric",
-  minute: "2-digit",
-  hour12: true,
-};
-
-function formatearHorario(apertura: string, cierre: string): string {
-  try {
-    const aperturaDate = new Date(apertura);
-    const cierreDate = new Date(cierre);
-    const isAbierto24h =
-      (aperturaDate.getHours() === 0 && cierreDate.getHours() === 0) ||
-      aperturaDate.getDate() + 1 === cierreDate.getDate();
-    if (isAbierto24h) return "Abierto 24 horas";
-    const isCerrado =
-      aperturaDate.getHours() === cierreDate.getHours() &&
-      aperturaDate.getDate() === cierreDate.getDate();
-    if (isCerrado) return "Cerrado";
-    const aperturaStr = aperturaDate
-      .toLocaleTimeString("es-ES", TIME_OPTIONS)
-      .toLowerCase();
-    const cierreStr = cierreDate
-      .toLocaleTimeString("es-ES", TIME_OPTIONS)
-      .toLowerCase();
-    return `${aperturaStr} – ${cierreStr}`;
-  } catch {
-    return "Horario no disponible";
-  }
+  if (current) groups.push(current);
+  return groups;
 }
 
 function formatearDias(dias: string[]): string {
   if (dias.length === 0) return "";
   if (dias.length === 1) return dias[0];
   return `De ${dias[0]} a ${dias[dias.length - 1]}`;
+}
+
+function formatearTurno(turno: TurnoHorario): string {
+  if (!turno.open) return "Cerrado";
+  if (turno.es_24h) return "24 horas";
+  if (!turno.apertura || !turno.cierre) return "Sin horario";
+  const ap = turno.apertura.slice(0, 5);
+  const ci = turno.cierre.slice(0, 5);
+  return `${ap} - ${ci}${turno.cruza_medianoche ? " (+1 día)" : ""}`;
 }
 
 const HorariosComponent = memo(function HorariosComponent({
@@ -445,7 +511,7 @@ const HorariosComponent = memo(function HorariosComponent({
   groupedHorarios: HorarioGroup[];
   horario: ScheduleInterface[];
 }) {
-  if (!horario || horario.length === 0) {
+  if (!horario?.length) {
     return (
       <div className="flex items-center gap-2 text-muted-foreground">
         <Clock className="w-3.5 h-3.5" />
@@ -453,16 +519,19 @@ const HorariosComponent = memo(function HorariosComponent({
       </div>
     );
   }
+
   return (
-    <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+    <div className="space-y-2">
       {groupedHorarios.map((group, index) => (
-        <div key={index} className="flex justify-between items-center">
+        <div key={index} className="flex justify-between items-start gap-3">
           <span className="text-sm text-foreground">
             {formatearDias(group.dias)}
           </span>
-          <span className="text-xs text-muted-foreground">
-            {formatearHorario(group.apertura, group.cierre)}
-          </span>
+          <div className="text-xs text-muted-foreground text-right">
+            {group.turnos.length > 0
+              ? group.turnos.map(formatearTurno).join(" · ")
+              : "Cerrado"}
+          </div>
         </div>
       ))}
     </div>

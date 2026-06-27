@@ -2,7 +2,6 @@ import typography from "@tailwindcss/typography";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: false,
   content: [
     "./pages/**/*.{js,jsx}",
     "./components/**/*.{js,jsx}",
@@ -26,6 +25,7 @@ module.exports = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        product: "var(--bg-product)",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

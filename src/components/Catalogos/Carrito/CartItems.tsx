@@ -1,6 +1,6 @@
 "use client";
 import { MyContext } from "@/context/MyContext";
-import { Product } from "@/types/InitialStatus";
+import { Product, ProductVariant } from "@/types/InitialStatus";
 import React, { useContext, useCallback, memo, useMemo } from "react";
 import Image from "next/image";
 import { smartRound } from "@/functions/precios";
@@ -11,6 +11,11 @@ import { motion, AnimatePresence, easeOut } from "framer-motion";
 import { Props } from "./CodeDiscount";
 import { cartKey } from "@/reducer/reducerGeneral";
 import { buildCartTitle } from "@/lib/variantUtils";
+import {
+  discountLabel,
+  getApplicableDiscount,
+  repriceVariantForQuantity,
+} from "@/lib/discountUtils";
 
 const trashVariants = {
   initial: { opacity: 0, scale: 0.8, rotate: -45 },
@@ -39,7 +44,7 @@ export default function CartItems({ compra }: Props) {
 
   return (
     <div id="cart-items" className="px-2 grid mb-4">
-      {compra.pedido.map((item) => {
+      {compra.pedido.map((item: Product) => {
         // Título con atributos: "Cafe Capuchino · Rojo · M"
         const displayTitle = buildCartTitle(
           item.title || "",
@@ -48,50 +53,31 @@ export default function CartItems({ compra }: Props) {
 
         return (
           <div key={cartKey(item)}>
-            {item.Cant > 0 && (
+            {(item.selected_variant?.Cant || 0) > 0 && (
               <CartItemRow
                 item={{ ...item, title: displayTitle }}
-                cantidad={item.Cant}
-                price={smartRound(item.price || 0)}
+                cantidad={item.selected_variant?.Cant || 0}
+                price={smartRound(item.selected_variant?.price || 0)}
                 onIncrement={() =>
-                  handleToCart({ ...item, Cant: (item.Cant || 0) + 1 })
+                  handleToCart({
+                    ...item,
+                    selected_variant: repriceVariantForQuantity(
+                      item.selected_variant,
+                      (item.selected_variant?.Cant || 0) + 1,
+                    ) as ProductVariant,
+                  })
                 }
                 onDecrement={() =>
-                  handleToCart({ ...item, Cant: (item.Cant || 0) - 1 })
+                  handleToCart({
+                    ...item,
+                    selected_variant: repriceVariantForQuantity(
+                      item.selected_variant,
+                      (item.selected_variant?.Cant || 0) - 1,
+                    ) as ProductVariant,
+                  })
                 }
               />
             )}
-            {item.agregados
-              .filter((agg) => agg.cant > 0)
-              .map((agg) => (
-                <CartItemRow
-                  key={`${cartKey(item)}-agg-${agg.id}`}
-                  item={{ ...item, title: `${displayTitle}-${agg.name}` }}
-                  cantidad={agg.cant}
-                  price={smartRound(agg.price || 0)}
-                  onIncrement={() =>
-                    handleToCart({
-                      ...item,
-                      agregados: item.agregados.map((obj) =>
-                        obj.id === agg.id
-                          ? { ...obj, cant: obj.cant + 1 }
-                          : obj,
-                      ),
-                    })
-                  }
-                  onDecrement={() =>
-                    handleToCart({
-                      ...item,
-                      agregados: item.agregados.map((obj) =>
-                        obj.id === agg.id
-                          ? { ...obj, cant: obj.cant - 1 }
-                          : obj,
-                      ),
-                    })
-                  }
-                  stockLimit={(item.stock || 0) - (item.Cant || 0)}
-                />
-              ))}
           </div>
         );
       })}
@@ -123,11 +109,16 @@ const CartItemRow = memo(function CartItemRow({
     [store.moneda],
   );
 
-  const stockTop = stockLimit !== undefined ? stockLimit : item.stock || 0;
+  const stockTop =
+    stockLimit !== undefined ? stockLimit : item.selected_variant?.stock || 0;
   const isAtStockLimit = store.stocks && cantidad >= stockTop;
+  const activeDiscount = useMemo(
+    () => getApplicableDiscount(item.selected_variant, cantidad),
+    [item.selected_variant, cantidad],
+  );
 
   // Imagen: preferir la de la variante activa
-  const itemImage = item.selected_variant?.image || item.image || logoApp;
+  const itemImage = item.selected_variant?.image || logoApp;
 
   return (
     <div className="space-y-1">
@@ -145,6 +136,11 @@ const CartItemRow = memo(function CartItemRow({
           </h4>
           <p className="text-xs text-muted-foreground mt-0.5">
             ${price} {moneda}
+            {activeDiscount && (
+              <span className="ml-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                · {discountLabel(activeDiscount)}
+              </span>
+            )}
           </p>
         </div>
 
@@ -207,9 +203,9 @@ const CartItemRow = memo(function CartItemRow({
         </div>
       </div>
 
-      {item.embalaje > 0 && (
+      {(item.selected_variant?.embalaje || 0) > 0 && (
         <p className="text-[10px] text-muted-foreground px-2">
-          Embalaje P/U: {item.embalaje}
+          Embalaje P/U: {item.selected_variant?.embalaje}
         </p>
       )}
     </div>

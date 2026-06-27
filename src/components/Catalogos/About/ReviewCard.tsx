@@ -4,7 +4,14 @@ import React, { useState, useCallback, useMemo, memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Review } from "./CommentPage";
-import { Star, MessageCircle, Send, Loader } from "lucide-react";
+import {
+  Star,
+  MessageCircle,
+  Send,
+  Loader,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,6 +50,46 @@ function formatDate(dateString: string): string {
   });
 }
 
+function StarRating({ star }: { star: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          className={`w-3 h-3 ${
+            i <= star
+              ? "fill-amber-400 text-amber-400"
+              : "fill-muted text-muted-foreground/30"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function getRatingVariant(star: number): {
+  badgeClass: string;
+  label: string;
+} {
+  if (star >= 4)
+    return {
+      badgeClass:
+        "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800",
+      label: "Positivo",
+    };
+  if (star === 3)
+    return {
+      badgeClass:
+        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
+      label: "Neutro",
+    };
+  return {
+    badgeClass:
+      "bg-red-50 text-red-700 border-red-200 dark:bg-red-950 dark:text-red-300 dark:border-red-800",
+    label: "Negativo",
+  };
+}
+
 export const ReviewCard = memo(function ReviewCard({
   created_at,
   star,
@@ -76,6 +123,7 @@ export const ReviewCard = memo(function ReviewCard({
   );
 
   const formattedDate = useMemo(() => formatDate(created_at), [created_at]);
+  const { badgeClass } = useMemo(() => getRatingVariant(star), [star]);
 
   const handleSubmitReply = useCallback(async () => {
     if (!replyText.trim()) return;
@@ -118,16 +166,18 @@ export const ReviewCard = memo(function ReviewCard({
   const avatarSrc =
     user.image || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`;
 
+  const replyCount = replies?.length ?? 0;
+
   return (
     <Card
-      className={`border-border shadow-sm transition-all hover:shadow-md gap-2 ${
-        reply ? "py-3" : "py-4"
+      className={`border-border shadow-sm transition-all hover:shadow-md hover:border-border/80 gap-2 ${
+        reply ? "py-3 bg-secondary/30" : "py-4"
       }`}
     >
       <CardHeader className="pb-0">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <Avatar className="w-9 h-9 border border-border">
+            <Avatar className="w-9 h-9 border border-border shrink-0">
               <AvatarImage src={avatarSrc} />
               <AvatarFallback className="bg-secondary text-foreground text-xs font-semibold">
                 {initials}
@@ -142,15 +192,16 @@ export const ReviewCard = memo(function ReviewCard({
               </p>
             </div>
           </div>
-          {/* Rating badge — rounded-full coherente con el sistema */}
+
           {!reply && star > 0 && (
-            <Badge
-              variant="secondary"
-              className="rounded-full gap-1 border border-border text-xs px-2"
-            >
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-foreground">{star}</span>
-            </Badge>
+            <div className="flex flex-col items-end gap-1">
+              <StarRating star={star} />
+              <Badge
+                className={`rounded-full text-[10px] px-2 py-0 h-4 border font-medium ${badgeClass}`}
+              >
+                {star}/5
+              </Badge>
+            </div>
           )}
         </div>
       </CardHeader>
@@ -162,8 +213,8 @@ export const ReviewCard = memo(function ReviewCard({
       )}
 
       {!reply && (
-        <CardFooter className="flex flex-col pt-0">
-          <div className="flex gap-1 pb-2">
+        <CardFooter className="flex flex-col pt-0 gap-0">
+          <div className="flex items-center gap-1 pb-2 w-full">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button
@@ -181,7 +232,7 @@ export const ReviewCard = memo(function ReviewCard({
                     Responder a {user.name}
                   </DialogTitle>
                   <DialogDescription className="text-muted-foreground text-sm">
-                    Escribe tu respuesta al comentario de {user.name}
+                    Tu respuesta será visible para todos los clientes
                   </DialogDescription>
                 </DialogHeader>
                 <Textarea
@@ -214,22 +265,27 @@ export const ReviewCard = memo(function ReviewCard({
               </DialogContent>
             </Dialog>
 
-            {replies && replies.length > 0 && (
+            {replyCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={toggleReplies}
                 className="rounded-full gap-1.5 text-xs text-muted-foreground hover:text-foreground h-8 px-3"
               >
-                {showReplies ? "Ocultar" : "Ver"} {replies.length}{" "}
-                {replies.length === 1 ? "respuesta" : "respuestas"}
+                {showReplies ? (
+                  <ChevronUp className="w-3 h-3" />
+                ) : (
+                  <ChevronDown className="w-3 h-3" />
+                )}
+                {showReplies ? "Ocultar" : "Ver"}{" "}
+                {replyCount === 1 ? "1 respuesta" : `${replyCount} respuestas`}
               </Button>
             )}
           </div>
 
-          {showReplies && replies && replies.length > 0 && (
-            <div className="w-full space-y-1 pl-2 border-l border-border">
-              {replies.map((r) => (
+          {showReplies && replyCount > 0 && (
+            <div className="w-full space-y-2 pl-3 border-l-2 border-border/50 mt-1">
+              {replies!.map((r) => (
                 <ReviewCard
                   key={r.id ?? `${r.user_id}-${r.created_at}`}
                   {...r}

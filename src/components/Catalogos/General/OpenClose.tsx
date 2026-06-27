@@ -1,26 +1,33 @@
+"use client";
+
 import React from "react";
 import { ScheduleInterface } from "@/types/InitialStatus";
 import {
-  IsOpenStoreInteface,
-  estadoApertura,
+  isOpenNow,
   estadoCierre,
+  estadoApertura,
+  isOpen24HoursToday,
 } from "@/functions/time";
 import { cn } from "@/lib/utils";
 import RelativeTime from "@/components/GeneralComponents/DateTime";
 
 export default function OpenClose({
   newHorario,
-  open,
   className,
 }: {
   newHorario: ScheduleInterface[];
-  open: IsOpenStoreInteface;
+  open?: unknown; // mantenido por compatibilidad, ya no se usa
   className?: string;
 }) {
+  const abierto = isOpenNow(newHorario);
+  const es24h = isOpen24HoursToday(newHorario);
+
   return (
     <div className={cn("text-muted-foreground text-[9px]", className)}>
-      {open?.open ? (
-        estadoCierre(newHorario) ? (
+      {abierto ? (
+        es24h ? (
+          "24 horas"
+        ) : estadoCierre(newHorario) ? (
           <>
             Cierra <RelativeTime datetime={estadoCierre(newHorario)} />
           </>
@@ -32,7 +39,7 @@ export default function OpenClose({
           Abre <RelativeTime datetime={estadoApertura(newHorario)} />
         </>
       ) : (
-        "24 horas"
+        "Cerrado"
       )}
     </div>
   );

@@ -18,15 +18,10 @@ function trimToLength(s = "", max = 155) {
   return (lastSpace > 20 ? cut.slice(0, lastSpace) : cut).trim() + "...";
 }
 
-/**
- * buildProductMetadata
- * - shop: sitioweb
- * - productId: productId en la tabla Products
- */
 export async function buildProductMetadata(
   shop: string,
   productId: string,
-  opts?: BuildOpts
+  opts?: BuildOpts,
 ): Promise<Metadata & { jsonLd?: unknown }> {
   const siteName = opts?.siteName ?? "rouMenu";
   const canonicalBase = (
@@ -46,7 +41,7 @@ export async function buildProductMetadata(
   }
 
   try {
-    // Traer solo campos necesarios
+    // 1. Tienda
     const { data: store, error: errStore } = await supabase
       .from("Sitios")
       .select("name, urlPoster")
@@ -55,10 +50,24 @@ export async function buildProductMetadata(
 
     if (errStore) throw errStore;
 
+    // 2. Producto + variantes + moneda
     const { data: product, error: errProd } = await supabase
       .from("Products")
       .select(
-        "productId,title,descripcion,image,price,default_moneda,stock,monedas(*)"
+        `
+        productId,
+        title,
+        descripcion,
+        default_moneda,
+        monedas(*),
+        product_variants (
+          price,
+          old_price,
+          stock,
+          image,
+          default_variant
+        )
+      `,
       )
       .eq("productId", productId)
       .single();
@@ -67,11 +76,27 @@ export async function buildProductMetadata(
     if (!product) {
       return {
         title: `${siteName} — Producto no encontrado`,
-        description: `No se encontró el producto solicitado.`,
+        description: "No se encontró el producto solicitado.",
       } as Metadata;
     }
 
-    // --- Normalizar datos recibidos ---
+    // 3. Elegir variante para metadata:
+    //    default con stock → cualquiera con stock → default sin stock → primera
+    const variants = (product.product_variants ?? []) as Array<{
+      price: number | null;
+      old_price: number | null;
+      stock: number;
+      image: string | null;
+      default_variant: boolean;
+    }>;
+
+    const selectedVariant =
+      variants.find((v) => v.default_variant && v.stock > 0) ??
+      variants.find((v) => v.stock > 0) ??
+      variants.find((v) => v.default_variant) ??
+      variants[0];
+
+    // 4. Normalizar
     const productTitle = (product.title ?? "").trim();
     const storeName = (store?.name ?? "").trim() || shop;
     const rawTitle = `${productTitle} — ${storeName} | ${siteName}`;
@@ -83,24 +108,23 @@ export async function buildProductMetadata(
     const description =
       trimToLength(
         product.descripcion ?? `${productTitle} en ${storeName}.`,
-        maxDescLength
+        maxDescLength,
       ) || `${siteName} — productos y catálogos.`;
 
-    const image = product.image ?? store?.urlPoster ?? imageFallback;
+    const image = selectedVariant?.image ?? store?.urlPoster ?? imageFallback;
+    const price = selectedVariant?.price ?? null;
+    const stock = selectedVariant?.stock ?? 0;
     const canonical = `${canonicalBase}/t/${encodeURIComponent(shop)}/producto/${encodeURIComponent(productId)}`;
 
-    // --- Obtener currency robustamente ---
-    // monedas puede venir como objeto o array; soportamos ambos casos.
+    // 5. Currency
     let currencyCode: string | undefined;
     try {
       const m = product.monedas as unknown;
       if (Array.isArray(m) && m.length > 0) {
         const arr = m as Array<Record<string, unknown>>;
-        const found = arr.find((x) => {
-          if (!x) return false;
-          const maybeDefecto = (x as { defecto?: boolean }).defecto;
-          return Boolean(maybeDefecto);
-        });
+        const found = arr.find((x) =>
+          Boolean((x as { defecto?: boolean }).defecto),
+        );
         const selected = (found ?? arr[0]) as
           | Record<string, unknown>
           | undefined;
@@ -110,29 +134,21 @@ export async function buildProductMetadata(
         const obj = m as Record<string, unknown>;
         currencyCode = typeof obj.nombre === "string" ? obj.nombre : undefined;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+    } catch {
       currencyCode = undefined;
     }
-    // Fallback: si tienes `default_moneda` + tabla monedas separada, ideal mapear fuera de aquí.
-    if (!currencyCode && product.default_moneda) {
-      // intenta usar default_moneda como código si ya está allí; si no, fallback USD
-      currencyCode = String(product.default_moneda);
-    }
-    // Si currencyCode es una id numérica (ej. "18"), mejor fallback a USD:
+
     if (!currencyCode || /^\d+$/.test(currencyCode)) currencyCode = "USD";
 
-    // --- Availability mapping simple ---
-    // Si stock > 0 => InStock; si stock === 0 => OutOfStock; si null => UnknownAvailability
-    const stockNum = Number(product.stock ?? 0);
+    // 6. Schema availability
     const schemaAvailability =
-      stockNum > 0
+      stock > 0
         ? "https://schema.org/InStock"
-        : stockNum === 0
+        : stock === 0
           ? "https://schema.org/OutOfStock"
           : undefined;
 
-    // --- OpenGraph (usar 'website' o 'article'; Next valida los tipos permitidos) ---
+    // 7. OpenGraph + Twitter
     const openGraph = {
       title,
       description,
@@ -146,11 +162,10 @@ export async function buildProductMetadata(
           alt: `${productTitle} — ${storeName}`,
         },
       ],
-      type: "website" as const, // <= evita invalid OpenGraph type errors en Next
+      type: "website" as const,
       locale: "es_ES",
     };
 
-    // --- Twitter card ---
     const twitter = {
       card: "summary_large_image",
       title,
@@ -158,7 +173,7 @@ export async function buildProductMetadata(
       images: [image],
     };
 
-    // --- JSON-LD Product schema (para inyectar en <head>) ---
+    // 8. JSON-LD
     const productJsonLd: Record<string, unknown> = {
       "@context": "https://schema.org/",
       "@type": "Product",
@@ -166,24 +181,19 @@ export async function buildProductMetadata(
       image: [image],
       description,
       sku: product.productId ?? undefined,
-      brand: {
-        "@type": "Organization",
-        name: storeName,
-      },
+      brand: { "@type": "Organization", name: storeName },
     };
 
-    if (product.price != null) {
+    if (price != null) {
       productJsonLd.offers = {
         "@type": "Offer",
         url: canonical,
-        price: String(product.price),
-        priceCurrency: currencyCode ?? "USD",
+        price: String(price),
+        priceCurrency: currencyCode,
         availability: schemaAvailability,
-        // bestPrice: puedes añadir priceValidUntil si lo posees
       };
     }
 
-    // Retornamos Metadata + jsonLd para que la página lo inyecte
     return {
       title,
       description,

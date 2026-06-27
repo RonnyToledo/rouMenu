@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Filter,
   MessageCircle,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ export default function CommentsPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const fetchComments = useCallback(
     async (currentPage: number, filterParam: string, UUID: string) => {
@@ -81,6 +83,7 @@ export default function CommentsPage() {
 
         if (data) {
           setReviews(ReordenateData(data, store));
+          setTotalCount(count ?? 0);
           setTotalPages(Math.ceil((count ?? 0) / PAGE_SIZE));
         }
       } catch (err) {
@@ -98,9 +101,22 @@ export default function CommentsPage() {
     }
   }, [page, filter, store.UUID, fetchComments]);
 
+  // Reset to page 1 when filter changes
+  const handleFilterChange = useCallback((value: string) => {
+    setFilter(value as TabsType);
+    setPage(1);
+  }, []);
+
   const avgRating = useMemo(() => {
     if (reviews.length === 0) return 0;
     return reviews.reduce((sum, rev) => sum + rev.star, 0) / reviews.length;
+  }, [reviews]);
+
+  const positivePercent = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return Math.round(
+      (reviews.filter((r) => r.star >= 4).length / reviews.length) * 100,
+    );
   }, [reviews]);
 
   const handlePrevPage = useCallback(
@@ -117,6 +133,7 @@ export default function CommentsPage() {
       <div className="h-16" />
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
         <div className="space-y-0.5">
           <h1 className="font-serif text-xl font-bold text-foreground">
             Comentarios y Reseñas
@@ -127,13 +144,13 @@ export default function CommentsPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Card className="border-border shadow-sm">
             <CardContent className="pt-4 pb-3">
               <div className="flex flex-col items-center gap-1.5">
                 <MessageCircle className="w-4 h-4 text-muted-foreground" />
                 <p className="text-2xl font-bold text-foreground">
-                  {reviews.length}
+                  {totalCount}
                 </p>
                 <p className="text-xs text-muted-foreground">Total</p>
               </div>
@@ -150,6 +167,17 @@ export default function CommentsPage() {
               </div>
             </CardContent>
           </Card>
+          <Card className="border-border shadow-sm">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex flex-col items-center gap-1.5">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <p className="text-2xl font-bold text-foreground">
+                  {positivePercent}%
+                </p>
+                <p className="text-xs text-muted-foreground">Positivos</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Filters */}
@@ -160,7 +188,7 @@ export default function CommentsPage() {
               Filtrar por:
             </span>
           </div>
-          <Tabs value={filter} onValueChange={(v) => setFilter(v as TabsType)}>
+          <Tabs value={filter} onValueChange={handleFilterChange}>
             <TabsList className="rounded-full">
               <TabsTrigger value="all" className="rounded-full text-xs">
                 Todos
@@ -191,17 +219,19 @@ export default function CommentsPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mb-4">
-              <MessageCircle className="w-6 h-6 text-muted-foreground" />
+          !loading && (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center mb-4">
+                <MessageCircle className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
+                No hay comentarios
+              </h3>
+              <p className="text-sm text-muted-foreground text-center max-w-xs">
+                No se encontraron comentarios con los filtros seleccionados
+              </p>
             </div>
-            <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
-              No hay comentarios
-            </h3>
-            <p className="text-sm text-muted-foreground text-center max-w-xs">
-              No se encontraron comentarios con los filtros seleccionados
-            </p>
-          </div>
+          )
         )}
 
         {/* Pagination */}

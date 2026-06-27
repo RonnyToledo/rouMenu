@@ -1,152 +1,150 @@
 "use client";
 import React, { ReactNode, useEffect, useState } from "react";
 import type { IconType } from "react-icons/lib";
-import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import Link from "next/link";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { HiMiniBars3BottomRight } from "react-icons/hi2";
-import { logoApp } from "@/lib/image";
-import { usePathname, useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { useApp } from "@/context/AppContext";
-import { FaHome, FaInfo } from "react-icons/fa";
-import { RiCustomerServiceFill } from "react-icons/ri";
-import { MdBook, MdContactPage } from "react-icons/md";
 
-export const cardsinfo = [
-  { path: "/", name: "Inicio", descripcion: "Ir a Inicio", icon: FaHome },
-  {
-    path: "/info",
-    name: "Info",
-    descripcion: "Conoce más acerca de RouMenu",
-    icon: FaInfo,
-  },
-  {
-    path: "/services",
-    name: "Servicios",
-    descripcion: "Ventajas al usar RouMenu",
-    icon: RiCustomerServiceFill,
-  },
-  {
-    path: "/blog",
-    name: "Blog",
-    descripcion: "Consejos y novedades",
-    icon: MdBook,
-  },
-  {
-    path: "/contact",
-    name: "Contacto",
-    descripcion: "Contáctenos ante dudas o nuevas ideas",
-    icon: MdContactPage,
-  },
-];
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+/* ─── design tokens (override as needed) ───────────────── */
+const T = {
+  bg: "#0D0D0D", // ink black — page background
+  card: "#161616", // slightly lifted surface
+  line: "#242424", // border / divider
+  cream: "#FFF8F0", // warm cream text / surfaces
+  red: "#C84B31", // brand coral-red
+  gold: "#E8A838", // accent gold
+  muted: "rgba(255,248,240,0.38)",
+  dim: "rgba(255,248,240,0.15)",
+};
 
 export default function Header({ children }: { children: ReactNode }) {
-  const { generalData } = useApp();
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
-  const [search, setSearch] = useState("");
-  const [open, setOpen] = useState(false);
-
   useEffect(() => {
-    if (pathname !== "/buscar" && !search) return;
-    const id = setTimeout(() => {
-      const url = `/buscar${search ? `?buscar=${encodeURIComponent(search)}` : ""}`;
-      router.replace(url);
-    }, 300);
-    return () => clearTimeout(id);
-  }, [search, pathname, router]);
+    const h = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", h);
+    return () => window.removeEventListener("scroll", h);
+  }, []);
+
+  const navLinks = [
+    { href: "/", label: "Inicio" },
+    { href: "/catalogs", label: "Catálogos" },
+    { href: "/services", label: "Servicios" },
+    { href: "/blog", label: "Blog" },
+    { href: "/contact", label: "Contacto" },
+  ];
 
   return (
-    <div id="header-home">
-      {!pathname.includes("/t/") && (
-        <div className="sticky top-0 flex items-center bg-background/90 backdrop-blur-lg border-b border-border p-2 gap-2 justify-between z-50 transition-colors">
-          <div className=" rounded-full flex items-center gap-2 w-full max-w-3xl mx-auto px-2 border border-border">
-            <Avatar className="w-9 h-9 shrink-0">
-              <AvatarFallback className=" text-muted-foreground text-xs font-medium">
-                {"RouMenu".charAt(0)}
-              </AvatarFallback>
-              <AvatarImage src={logoApp} alt="RouMenu" />
-            </Avatar>
-
-            {pathname !== "/buscar" ? (
-              <Link
-                href="/buscar"
-                className="w-full flex items-center min-w-40 h-9"
+    <>
+      {!pathname.includes("/t/") ? (
+        <nav
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 100,
+            background: scrolled
+              ? "rgba(13,13,13,0.96)"
+              : "rgba(13,13,13,0.85)",
+            backdropFilter: "blur(20px)",
+            borderBottom: `1px solid ${scrolled ? T.line : "transparent"}`,
+            transition: "background 0.3s, border-color 0.3s",
+            padding: "0 20px",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 680,
+              margin: "0 auto",
+              height: 56,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+            }}
+          >
+            {/* logo */}
+            <Link
+              href="/"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                textDecoration: "none",
+              }}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke={T.red}
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <div className="flex flex-col text-left">
-                  <span className="text-[10px]  leading-none">Buscar en</span>
-                  <span className="text-sm  leading-none mt-0.5">RouMenu</span>
-                </div>
-              </Link>
-            ) : (
-              <Input
-                placeholder={`Buscar "${generalData.random_title?.toLowerCase() ?? ""}"`}
-                onChange={(e) => setSearch(e.target.value)}
-                value={search}
-                className="flex-1 h-9 border-none bg-transparent text-sm placeholder:text-muted-foreground focus:ring-0 focus:outline-none px-2"
-              />
-            )}
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+              <span
+                style={{
+                  fontFamily: "Georgia, serif",
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: T.cream,
+                }}
+              >
+                Rou<span style={{ color: T.red }}>Menu</span>
+              </span>
+            </Link>
 
-            {["/info", "/blog", "/contact", "/services", "/"].some((r) =>
-              pathname.startsWith(r),
-            ) ? (
-              <Drawer open={open} onOpenChange={setOpen}>
-                <DrawerTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full w-8 h-8 shrink-0"
-                  >
-                    <HiMiniBars3BottomRight className="w-5 h-5 " />
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <div className="mx-auto w-full max-w-sm p-4">
-                    <DrawerHeader>
-                      <DrawerTitle className="font-serif">rouMenu</DrawerTitle>
-                      <DrawerDescription className="text-muted-foreground text-sm">
-                        Explora y descubre catálogos con mayor facilidad
-                      </DrawerDescription>
-                    </DrawerHeader>
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      {cardsinfo
-                        .filter((obj) => obj.path !== "/info")
-                        .map((card, index) =>
-                          card.path === pathname ? (
-                            <CardDrawerActive
-                              key={`Active_${index}`}
-                              card={card}
-                              onClick={() => setOpen(false)}
-                            />
-                          ) : (
-                            <CardDrawer
-                              key={`No_active_${index}`}
-                              card={card}
-                              onClick={() => setOpen(false)}
-                            />
-                          ),
-                        )}
-                    </div>
-                  </div>
-                </DrawerContent>
-              </Drawer>
-            ) : (
-              <div />
-            )}
+            {/* desktop nav */}
+            <div className="hidden">
+              {navLinks.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  style={{
+                    fontSize: 13,
+                    color: T.muted,
+                    textDecoration: "none",
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    transition: "color 0.15s, background 0.15s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = T.cream;
+                    e.currentTarget.style.background = "rgba(255,248,240,0.07)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = T.muted;
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              <Link
+                href="https://rouadmin.vercel.app/createAccount"
+                style={{
+                  marginLeft: 8,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  padding: "8px 18px",
+                  borderRadius: 999,
+                  background: T.red,
+                  color: T.cream,
+                  textDecoration: "none",
+                }}
+              >
+                Crear catálogo
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        </nav>
+      ) : null}
       {children}
-    </div>
+    </>
   );
 }
 

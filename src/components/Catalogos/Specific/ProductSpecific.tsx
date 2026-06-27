@@ -1,4 +1,5 @@
 "use client";
+
 import React, {
   useContext,
   useEffect,
@@ -9,13 +10,15 @@ import React, {
 } from "react";
 import Image from "next/image";
 import { MyContext } from "@/context/MyContext";
-import { Product as ProductInterface } from "@/types/InitialStatus";
+import {
+  Product as ProductInterface,
+  ProductVariant,
+  InfoSections,
+} from "@/types/InitialStatus";
 import { logoApp } from "@/lib/image";
-import { Button } from "@/components/ui/button";
 import RatingSection from "./RatingSection";
 import { notFound, useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Star, Minus, Plus, ShoppingCart, Check } from "lucide-react";
+import { Star, Minus, Plus, Check, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -27,8 +30,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import ShareButton from "@/components/myUI/buttonShare";
 import ClipboardProduct from "@/components/myUI/clipboardProduct";
-import { Card } from "@/components/ui/card";
-import { isNewProduct } from "../home/ProductGrid";
+import { isNewProduct } from "../home/ProductUI/Product-Grid";
 import { HomeIcon } from "lucide-react";
 import {
   groupVariantsByAttribute,
@@ -37,15 +39,173 @@ import {
   buildCartTitle,
   capitalize,
   getVisibleAttributes,
+  isLightColor,
+  normalizeAttrValue,
+  extractColorHex,
 } from "@/lib/variantUtils";
+import ProductSuggestions from "./ProductSuggestions";
+import { buildSuggestions } from "@/lib/combosUtils";
+import StockAlertButton from "@/functions/StockAlertButton";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 
-export default function Product({ id }: { id: string }) {
+// ─── Mapa de iconos (string → componente) ────────────────────────────────────
+// Mismo mapa que InfoSectionsEditor para consistencia
+import {
+  FileText,
+  Beaker,
+  Zap,
+  Leaf,
+  Info,
+  AlertTriangle,
+  Package,
+} from "lucide-react";
+
+const ICON_MAP: Record<
+  string,
+  React.FC<{ size?: number; className?: string }>
+> = {
+  FileText,
+  Beaker,
+  Zap,
+  Leaf,
+  Info,
+  Star,
+  AlertTriangle,
+  Package,
+};
+
+function SectionIcon({
+  name,
+  size = 16,
+  className,
+}: {
+  name?: string;
+  size?: number;
+  className?: string;
+}) {
+  const Comp = ICON_MAP[name ?? ""] ?? Info;
+  return <Comp size={size} className={className} />;
+}
+
+// ─── isColorLight ─────────────────────────────────────────────────────────────
+function isColorLight(hexColor: string): boolean {
+  if (!hexColor || hexColor === "#171717") return false;
+  const hex = hexColor.replace("#", "");
+  const rgb = parseInt(hex, 16);
+  const r = ((rgb >> 16) & 255) / 255;
+  const g = ((rgb >> 8) & 255) / 255;
+  const b = (rgb & 255) / 255;
+  const toLinear = (c: number) =>
+    c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const luminance =
+    0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  return luminance > 0.45;
+}
+
+// ─── InfoSectionDrawer ────────────────────────────────────────────────────────
+function InfoSectionDrawer({ section }: { section: InfoSections }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center justify-between px-4 py-3.5
+          border border-border rounded-2xl
+          hover:bg-secondary/40 active:bg-secondary/70
+          transition-colors text-left group  "
+      >
+        <div className="flex items-center gap-3">
+          {section.icon && (
+            <div className="w-7 h-7 rounded-lg bg-product/10 text-product flex items-center justify-center shrink-0">
+              <SectionIcon name={section.icon} size={14} />
+            </div>
+          )}
+          <span className="text-[14px] font-medium text-foreground leading-tight">
+            {section.label}
+          </span>
+        </div>
+        <ChevronRight
+          size={16}
+          className="text-muted-foreground group-hover:translate-x-0.5 transition-transform shrink-0"
+        />
+      </button>
+
+      <Drawer open={open} onOpenChange={setOpen}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-lg px-5 pb-8 pt-2">
+            <DrawerHeader className="px-0 pb-4">
+              <div className="flex items-center gap-3">
+                {section.icon && (
+                  <div className="w-9 h-9 rounded-xl bg-product/10 text-product flex items-center justify-center shrink-0">
+                    <SectionIcon name={section.icon} size={18} />
+                  </div>
+                )}
+                <DrawerTitle className="text-lg font-semibold text-foreground flex-1">
+                  {section.label}
+                </DrawerTitle>
+                <DrawerDescription />
+
+                {/* ── Botón copiar ── */}
+                <ClipboardProduct
+                  mode="section"
+                  title={section.label ?? ""}
+                  descripcion={section.content ?? ""}
+                  className="text-muted-foreground text-sm p-1.5!"
+                />
+              </div>
+            </DrawerHeader>
+
+            <div className="text-[14px] text-foreground/80 leading-relaxed whitespace-pre-line max-h-[calc(100vh/2)] overflow-y-auto">
+              {section.content || (
+                <span className="text-muted-foreground italic">
+                  Sin contenido disponible.
+                </span>
+              )}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+}
+
+// ─── InfoSectionsList ─────────────────────────────────────────────────────────
+// Agrupa todas las secciones en un contenedor con borde, como en la imagen
+function InfoSectionsList({ sections }: { sections: InfoSections[] }) {
+  if (!sections || sections.length === 0) return null;
+  return (
+    <div className=" space-y-1 overflow-hidden bg-card">
+      {sections.map((section, idx) => (
+        <InfoSectionDrawer key={section.id ?? idx} section={section} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+export default function ProductDetailsPage({
+  id,
+  initialProductData,
+  color,
+}: {
+  id: string;
+  initialProductData: ProductInterface;
+  color: string;
+}) {
   const { store, dispatchStore } = useContext(MyContext);
   const router = useRouter();
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
+  const mainRef = useRef<HTMLDivElement>(null);
 
-  // Solo productos base para navegación swipe/teclado
   const baseProducts = useMemo(
     () =>
       store.products.filter(
@@ -55,95 +215,83 @@ export default function Product({ id }: { id: string }) {
   );
 
   const initialProduct = useMemo(
-    () => store.products.find((obj) => obj.productId === id),
-    [store.products, id],
+    () =>
+      initialProductData ?? store.products.find((obj) => obj.productId === id),
+    [initialProductData, store.products, id],
   );
 
-  useEffect(() => {
-    if (!initialProduct) notFound();
-  }, [initialProduct]);
-
-  // Variantes visibles del producto
   const visibleVariants = useMemo(() => {
     if (!initialProduct?.variants) return [];
     return initialProduct.variants.filter((v) => v.visible !== false);
   }, [initialProduct]);
 
-  // Hay variantes reales si hay más de una variante visible
   const hasRealVariants = visibleVariants.length > 1;
 
-  // Atributos agrupados: { "color": ["Rojo","Azul"], "talla": ["M","L"] }
   const groupedAttributes = useMemo(
     () => groupVariantsByAttribute(visibleVariants),
     [visibleVariants],
   );
+  // DESPUÉS
+  const [attrSelection, setAttrSelection] = useState<Record<string, unknown>>(
+    () => {
+      const defaultVariant =
+        // 1. variante default con stock
+        visibleVariants.find((v) => v.default && (v.stock ?? 0) > 0) ??
+        // 2. variante default_variant con stock
+        visibleVariants.find((v) => v.default_variant && (v.stock ?? 0) > 0) ??
+        // 3. cualquier variante con stock
+        visibleVariants.find((v) => (v.stock ?? 0) > 0) ??
+        // 4. fallback: default sin importar stock (comportamiento anterior)
+        visibleVariants.find((v) => v.default) ??
+        visibleVariants.find((v) => v.default_variant) ??
+        visibleVariants[0];
+      return defaultVariant ? getVisibleAttributes(defaultVariant) : {};
+    },
+  );
 
-  // Estado de selección por atributo: { "color": "Rojo", "talla": "M" }
-  const [attrSelection, setAttrSelection] = useState<
-    Record<string, string | number | boolean>
-  >(() => {
-    const defaultVariant =
-      visibleVariants.find((v) => v.default) ?? visibleVariants[0];
-    return defaultVariant ? getVisibleAttributes(defaultVariant) : {};
-  });
-
-  // Variante activa según la selección de atributos
   const activeVariant = useMemo(
     () =>
       hasRealVariants
         ? findVariantByAttributes(visibleVariants, attrSelection)
-        : (visibleVariants.find((v) => v.default) ?? visibleVariants[0]),
+        : (visibleVariants.find((v) => v.default) ??
+          visibleVariants.find((v) => v.default_variant) ??
+          visibleVariants[0]),
     [hasRealVariants, visibleVariants, attrSelection],
   );
 
   const initialCount = useMemo(() => {
     if (!initialProduct) return 0;
-    const totalAgregados =
-      initialProduct.agregados?.reduce(
-        (sum, agg) => sum + (agg.cant || 0),
-        0,
-      ) || 0;
-    if (totalAgregados > 0) return 0;
-    const effectiveStock = activeVariant?.stock ?? initialProduct.stock ?? 0;
-    const effectiveCant = initialProduct.Cant || 0;
+    const effectiveStock =
+      activeVariant?.stock ?? initialProduct.selected_variant?.stock ?? 0;
+    const effectiveCant = initialProduct.selected_variant?.Cant || 0;
     return effectiveStock - effectiveCant > 1 ? 1 : 0;
   }, [initialProduct, activeVariant]);
 
   const [countAddCart, setCountAddCart] = useState<number>(initialCount);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [displayedImage, setDisplayedImage] = useState<string | undefined>(
-    initialProduct?.image || logoApp,
-  );
 
-  // Derive product from initialProduct and activeVariant
   const product = useMemo(() => {
     if (!initialProduct || !activeVariant) return initialProduct;
-    const images = activeVariant.images?.length
-      ? activeVariant.images
-      : initialProduct.imagesecondary;
     return {
       ...initialProduct,
-      price: activeVariant.price ?? initialProduct.price,
-      oldPrice: activeVariant.oldPrice ?? initialProduct.oldPrice,
-      stock: activeVariant.stock ?? initialProduct.stock,
-      image: (displayedImage || activeVariant.image) ?? initialProduct.image,
-      imagesecondary: images,
+      price: activeVariant.price ?? initialProduct.selected_variant?.price,
+      oldPrice:
+        activeVariant.oldPrice ?? initialProduct.selected_variant?.oldPrice,
+      stock: activeVariant.stock ?? initialProduct.selected_variant?.stock,
+      image: activeVariant.image ?? initialProduct.selected_variant?.image,
       selected_variant: activeVariant,
     };
-  }, [initialProduct, activeVariant, displayedImage]);
+  }, [initialProduct, activeVariant]);
+  console.log(product);
 
-  // Reset count when activeVariant changes using key prop or conditional logic
   useEffect(() => {
-    setCountAddCart(0);
-  }, [activeVariant?.id]);
+    setCountAddCart(initialCount);
+  }, [initialCount]);
 
-  const handleAttrChange = useCallback(
-    (key: string, value: string | number | boolean) => {
-      setAttrSelection((prev) => ({ ...prev, [key]: value }));
-    },
-    [],
-  );
+  const handleAttrChange = useCallback((key: string, value: unknown) => {
+    setAttrSelection((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   const handleToCart = (productToCart: ProductInterface) => {
     setIsAddingToCart(true);
@@ -158,12 +306,12 @@ export default function Product({ id }: { id: string }) {
     window.scrollTo(0, 0);
   }, []);
 
-  const handleSwipeStart = (e: React.TouchEvent<HTMLDivElement>): void => {
+  const handleSwipeStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
   };
 
-  const handleSwipeEnd = (e: React.TouchEvent<HTMLDivElement>): void => {
+  const handleSwipeEnd = (e: React.TouchEvent<HTMLDivElement>) => {
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
     if (Math.abs(deltaX) > 65 && Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -188,7 +336,7 @@ export default function Product({ id }: { id: string }) {
   );
 
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent): void => {
+    const handleKeyPress = (event: KeyboardEvent) => {
       if (event.key === "ArrowLeft") navigateToProduct("previous");
       else if (event.key === "ArrowRight") navigateToProduct("next");
     };
@@ -196,12 +344,18 @@ export default function Product({ id }: { id: string }) {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [navigateToProduct]);
 
+  useEffect(() => {
+    if (mainRef.current && color) {
+      mainRef.current.style.setProperty("--product-color", color);
+    }
+  }, [color]);
+
   const links = useMemo(
     () => [
       { name: "Inicio", link: `/t/${store.sitioweb}` },
       {
         name:
-          store?.categorias.find((obj) => obj.id == product?.caja)?.name || "",
+          store?.categorias.find((obj) => obj.id === product?.caja)?.name || "",
         link: `/t/${store.sitioweb}/category/${product?.caja}`,
       },
       {
@@ -221,7 +375,7 @@ export default function Product({ id }: { id: string }) {
   const tags = useMemo(
     () =>
       [
-        !product?.stock && "Agotado",
+        !product?.selected_variant?.stock && "Agotado",
         product?.favorito && "Top",
         isNewProduct(product?.creado) && "Nuevo",
         ...(product?.caracteristicas || []),
@@ -229,33 +383,59 @@ export default function Product({ id }: { id: string }) {
         .flat()
         .filter(Boolean),
     [
-      product?.stock,
+      product?.selected_variant?.stock,
       product?.favorito,
       product?.creado,
       product?.caracteristicas,
     ],
   );
 
-  if (!product) return null;
+  if (!product) notFound();
 
-  const effectivePrice = activeVariant?.price ?? product.price ?? 0;
-  const effectiveOldPrice = activeVariant?.oldPrice ?? product.oldPrice ?? 0;
-  const effectiveStock = activeVariant?.stock ?? product.stock ?? 0;
-  const availableStock = effectiveStock - (product.Cant || 0);
+  const effectivePrice =
+    activeVariant?.price ?? product.selected_variant?.price ?? 0;
+  const effectiveOldPrice =
+    activeVariant?.oldPrice ?? product.selected_variant?.oldPrice ?? 0;
+  const effectiveStock =
+    activeVariant?.stock ?? product.selected_variant?.stock ?? 0;
+  const availableStock = effectiveStock - (product.selected_variant?.Cant || 0);
   const cartTitle = buildCartTitle(product.title || "", activeVariant);
+  const currentCurrency =
+    store.moneda.find((m) => m.id === product.default_moneda)?.nombre || "";
+  const suggestions = useMemo(
+    () => buildSuggestions(initialProduct, store.products),
+    [initialProduct, store.products],
+  );
+  const discountPct =
+    effectiveOldPrice > effectivePrice
+      ? Math.round(
+          ((effectiveOldPrice - effectivePrice) / effectiveOldPrice) * 100,
+        )
+      : null;
+
+  // info_sections normalizadas (solo las que tienen contenido o label)
+  const infoSections = useMemo(
+    () => (product.info_sections ?? []).filter((s) => s.label || s.content),
+    [product.info_sections],
+  );
 
   return (
-    <main className="flex flex-col items-start min-h-dvh">
-      {/* Image section */}
-      <div className="flex flex-col gap-1 w-full">
+    <main
+      ref={mainRef}
+      className="eclipse-body flex flex-col items-start min-h-dvh"
+      style={{ color: isColorLight(color) ? "#000" : "inherit" }}
+    >
+      {/* ── Hero image ──────────────────────────────────────────── */}
+      <div className="w-full">
         <AnimatePresence mode="wait">
           <motion.div
-            key={product.image}
+            key={product.selected_variant?.image}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="relative rounded-b-2xl overflow-hidden aspect-square"
+            className="relative overflow-hidden rounded-xl m-2"
+            style={{ aspectRatio: "1 / 1" }}
             onTouchStart={handleSwipeStart}
             onTouchEnd={handleSwipeEnd}
           >
@@ -263,16 +443,22 @@ export default function Product({ id }: { id: string }) {
               width={800}
               height={800}
               alt={product.title || "Producto"}
-              className="w-full h-full object-cover rounded-b-4xl"
-              src={product.image || store.urlPoster || logoApp}
-              style={{ filter: effectiveStock ? "initial" : "grayscale(1)" }}
+              className="w-full h-full object-cover"
+              src={
+                product.selected_variant?.image || store.urlPoster || logoApp
+              }
+              style={{
+                filter: effectiveStock
+                  ? "initial"
+                  : "grayscale(1) opacity(0.65)",
+              }}
               onError={() => {
                 dispatchStore({
                   type: "Add",
                   payload: {
                     ...store,
                     products: store.products.map((prod) =>
-                      product.productId == prod.productId
+                      product.productId === prod.productId
                         ? { ...prod, image: "" }
                         : prod,
                     ),
@@ -280,427 +466,366 @@ export default function Product({ id }: { id: string }) {
                 });
               }}
             />
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-[rgba(44,26,14,0.35)] via-transparent to-transparent" />
+            <div className="absolute bottom-4 left-4">
+              {effectiveStock ? (
+                <StockPill inStock />
+              ) : (
+                <StockPill inStock={false} />
+              )}
+            </div>
+            <div className="absolute bottom-4 right-4 flex gap-1.5">
+              {[0, 1, 2].map((d) => (
+                <div
+                  key={d}
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    background:
+                      d === 1 ? "var(--eca)" : "rgba(255,255,255,0.4)",
+                  }}
+                />
+              ))}
+            </div>
           </motion.div>
         </AnimatePresence>
-
-        {(product.imagesecondary || []).length > 0 && (
-          <div className="grid grid-cols-3 gap-1.5 px-3 py-2">
-            {(product.imagesecondary || []).map((image, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setDisplayedImage(image);
-                }}
-                className="aspect-square rounded-xl overflow-hidden border-2 border-border hover:border-primary/50 opacity-75 hover:opacity-100 transition-all duration-200"
-              >
-                <Image
-                  width={150}
-                  height={150}
-                  src={image || logoApp}
-                  alt={`${product.title} vista ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 gap-1 px-4 py-2">
-        <BreadCrumpParent list={links} />
-
-        <div className="space-y-3">
-          {/* Rating & Actions */}
-          <div className="flex items-center justify-between">
+      {/* ── Content ─────────────────────────────────────────────── */}
+      <div className="w-full max-w-7xl mx-auto px-4 py-4 space-y-3">
+        {/* Breadcrumbs + rating */}
+        <div className="flex justify-between gap-2">
+          <ProductBreadcrumbs items={links} />
+          <div className="flex items-center">
             <Link
               href={`/t/${store.sitioweb}/producto/${product.productId}/coment`}
-              className="flex items-center gap-1.5 hover:opacity-75 transition-opacity"
+              className="flex items-center gap-1.5 hover:opacity-70 transition-opacity"
             >
               <div className="flex gap-0.5">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${
+                    className={`w-3.5 h-3.5 ${
                       i < Math.floor(product.coment.promedio || 0)
                         ? "fill-amber-400 text-amber-400"
-                        : "text-muted-foreground/30"
+                        : "text-product"
                     }`}
                   />
                 ))}
               </div>
-              <span className="text-xs text-muted-foreground">
-                {product.coment.promedio} ({product.coment.total} reseñas)
-              </span>
             </Link>
-            <div className="flex gap-1">
-              <ClipboardProduct
-                title={cartTitle}
-                descripcion={product.descripcion || ""}
-                url={product.image || logoApp}
-                price={effectivePrice}
-                oldPrice={effectiveOldPrice}
-                className="p-0 m-0"
-              />
-              <ShareButton
-                title={cartTitle}
-                text={product.descripcion}
-                url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
-              />
-            </div>
           </div>
+        </div>
 
-          {/* Price & Stock */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-3xl font-bold text-foreground">
-                ${effectivePrice}{" "}
-                <span className="text-base font-medium text-muted-foreground">
-                  {store.moneda.find((m) => m.id === product.default_moneda)
-                    ?.nombre || ""}
+        {/* Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag, idx) => (
+              <EclipseTag key={idx}>{String(tag)}</EclipseTag>
+            ))}
+          </div>
+        )}
+
+        {/* Price block */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-end gap-3">
+            <span className="eclipse-title text-[32px] font-bold leading-none">
+              ${effectivePrice}
+            </span>
+            <span className="text-sm mb-1">{currentCurrency}</span>
+            {effectiveOldPrice > effectivePrice && (
+              <>
+                <span className="text-sm text-rose-500 line-through mb-1">
+                  ${effectiveOldPrice}
                 </span>
-              </p>
-              {effectiveOldPrice > effectivePrice && (
-                <>
-                  <p className="text-base text-muted-foreground line-through">
-                    ${effectiveOldPrice}
-                  </p>
-                  <Badge
-                    variant="destructive"
-                    className="animate-pulse rounded-full text-xs"
-                  >
-                    {Math.round(
-                      ((effectiveOldPrice - effectivePrice) /
-                        effectiveOldPrice) *
-                        100,
-                    )}
-                    % OFF
-                  </Badge>
-                </>
-              )}
-            </div>
-            {effectiveStock ? (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  En stock
+                <span className="mb-1 text-[10px] font-semibold bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full animate-pulse">
+                  -{discountPct}% OFF
                 </span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/10 border border-red-500/20">
-                <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
-                <span className="text-xs font-medium text-red-600 dark:text-red-400">
-                  Off Stock
-                </span>
-              </div>
+              </>
             )}
           </div>
-
-          {/* Tags */}
-          {(tags || []).length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {(tags || []).map((tag, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="rounded-full text-xs px-2.5 border border-border"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* ── Selector de variantes por grupos de atributos ───────────── */}
-          {hasRealVariants && Object.keys(groupedAttributes).length > 0 && (
-            <div className="space-y-3 pt-1">
-              {Object.entries(groupedAttributes).map(([attrKey, values]) => (
-                <div key={attrKey} className="space-y-1.5">
-                  {/* Cabecera: "Color · Rojo" */}
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="text-sm font-medium text-foreground">
-                      {capitalize(attrKey)}
-                    </h3>
-                    {attrSelection[attrKey] !== undefined && (
-                      <span className="text-xs text-muted-foreground">
-                        · {String(attrSelection[attrKey])}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Pills de valores */}
-                  <div className="flex flex-wrap gap-2">
-                    {values.map((val) => {
-                      const isSelected =
-                        String(attrSelection[attrKey]) === String(val);
-                      const isAvailable = isAttributeValueAvailable(
-                        visibleVariants,
-                        attrSelection,
-                        attrKey,
-                        val,
-                      );
-                      return (
-                        <button
-                          key={String(val)}
-                          onClick={() => handleAttrChange(attrKey, val)}
-                          disabled={!isAvailable}
-                          className={[
-                            "px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200",
-                            isSelected
-                              ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                              : "border-border bg-secondary text-foreground hover:border-primary/50",
-                            !isAvailable
-                              ? "opacity-35 cursor-not-allowed line-through"
-                              : "",
-                          ].join(" ")}
-                        >
-                          {String(val)}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-
-              {/* Aviso de precio ajustado */}
-              {activeVariant &&
-                !activeVariant.default &&
-                activeVariant.price != null &&
-                activeVariant.price !== initialProduct?.price && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Precio ajustado según la variante seleccionada
-                  </p>
-                )}
-            </div>
-          )}
-
-          {/* Packaging */}
-          {(product.embalaje || 0) > 0 && (
-            <Card className="px-4 py-3 border-border shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-foreground mb-0.5">
-                    Embalaje
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    ${product.embalaje.toFixed(2)}{" "}
-                    {store.moneda.find((m) => m.id === product.default_moneda)
-                      ?.nombre || ""}
-                  </p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* Extras */}
-          {(product.agregados || []).length > 0 && (
-            <div className="space-y-1.5">
-              <div>
-                <h3 className="text-sm font-medium text-foreground">Extras</h3>
-                <p className="text-xs text-muted-foreground">
-                  Agregados para su encargo
-                </p>
-              </div>
-              {product.agregados.map((extra) => (
-                <Card
-                  key={extra.id}
-                  className="px-4 py-3 border-border shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-foreground">
-                        {extra.name}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        ${extra.price.toFixed(2)}{" "}
-                        {store.moneda.find(
-                          (m) => m.id === product.default_moneda,
-                        )?.nombre || ""}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {extra.cant > 0 && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              const updatedProduct = {
-                                ...product,
-                                agregados: product.agregados.map((obj) =>
-                                  obj.id === extra.id
-                                    ? { ...obj, cant: obj.cant - 1 }
-                                    : obj,
-                                ),
-                              };
-                              dispatchStore({
-                                type: "Add",
-                                payload: {
-                                  ...store,
-                                  products: store.products.map((prod) =>
-                                    prod.productId === product.productId
-                                      ? updatedProduct
-                                      : prod,
-                                  ),
-                                },
-                              });
-                            }}
-                            className="h-8 w-8 rounded-full border border-border"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </Button>
-                          <Badge
-                            variant="outline"
-                            className="rounded-full px-2.5 text-xs border-border min-w-7 text-center"
-                          >
-                            {extra.cant}
-                          </Badge>
-                        </>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const updatedProduct = {
-                            ...product,
-                            agregados: product.agregados.map((obj) =>
-                              obj.id === extra.id
-                                ? { ...obj, cant: obj.cant + 1 }
-                                : obj,
-                            ),
-                          };
-                          dispatchStore({
-                            type: "Add",
-                            payload: {
-                              ...store,
-                              products: store.products.map((prod) =>
-                                prod.productId === product.productId
-                                  ? updatedProduct
-                                  : prod,
-                              ),
-                            },
-                          });
-                        }}
-                        className="h-8 w-8 rounded-full border border-border"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-              <p className="text-xs text-muted-foreground/70 text-center">
-                *El extra es el producto con el agregado incluido
-              </p>
-            </div>
-          )}
-
-          {/* Quantity */}
-          <div className="flex items-center justify-center gap-4 py-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={countAddCart === 0}
-              onClick={() => setCountAddCart(countAddCart - 1)}
-              className="h-10 w-10 rounded-full border border-border bg-secondary hover:bg-muted transition-colors"
-            >
-              <Minus className="w-4 h-4" />
-            </Button>
-            <span className="text-2xl font-semibold text-foreground w-12 text-center">
-              {countAddCart}
-            </span>
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={store.stocks && countAddCart >= availableStock}
-              onClick={() => setCountAddCart(countAddCart + 1)}
-              className="h-10 w-10 rounded-full border border-border bg-secondary hover:bg-muted transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-2">
-            <Button
-              disabled={availableStock < countAddCart || countAddCart === 0}
-              onClick={() => {
-                handleToCart({
-                  ...product,
-                  price: effectivePrice,
-                  oldPrice: effectiveOldPrice,
-                  stock: effectiveStock,
-                  image: activeVariant?.image ?? product.image,
-                  selected_variant: activeVariant ?? product.selected_variant,
-                  Cant: (product.Cant || 0) + countAddCart,
-                });
-              }}
-              className={`w-full h-12 text-base font-semibold rounded-full transition-all duration-300 gap-2 active:scale-[0.98] ${
-                showSuccess
-                  ? "bg-emerald-600 hover:bg-emerald-700"
-                  : "hover:opacity-90"
-              } ${isAddingToCart ? "scale-95" : ""}`}
-            >
-              {isAddingToCart ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                  Agregando...
-                </>
-              ) : showSuccess ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  ¡Agregado al carrito!
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="w-4 h-4" />
-                  Agregar al carrito · $
-                  {(
-                    (effectivePrice + (product.embalaje || 0)) * countAddCart +
-                    (product.agregados.reduce(
-                      (sum, agg) =>
-                        (sum =
-                          sum +
-                          (agg.price + (product.embalaje || 0)) * agg.cant),
-                      0,
-                    ) || 0)
-                  ).toFixed(2)}
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full h-12 rounded-full font-semibold transition-all duration-200 active:scale-[0.98]"
-              onClick={() => router.push(`/t/${store.sitioweb}/carrito`)}
-            >
-              Comprar ahora
-            </Button>
-          </div>
-
-          {/* Description */}
-          {product.descripcion ? (
-            <div className="pt-3 border-t border-border">
-              <h3 className="text-sm font-semibold text-foreground mb-1.5">
-                Descripción
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
-                {product.descripcion}
-              </p>
-            </div>
-          ) : null}
-
-          {/* Ratings */}
-          <div className="pt-4 border-t border-border">
-            <RatingSection
-              specific={product.productId || id}
-              sitioweb={store.sitioweb || ""}
+          <div className="flex gap-1">
+            <ClipboardProduct
+              title={cartTitle}
+              descripcion={product.descripcion || ""}
+              url={product.selected_variant?.image || logoApp}
+              price={effectivePrice}
+              oldPrice={effectiveOldPrice}
+            />
+            <ShareButton
+              title={cartTitle}
+              text={product.descripcion}
+              url={`https://roumenu.vercel.app/t/${store.sitioweb}/producto/${id}`}
             />
           </div>
         </div>
+
+        {/* Variants */}
+        {hasRealVariants && Object.keys(groupedAttributes).length > 0 && (
+          <div className="space-y-4 pt-1">
+            {Object.entries(groupedAttributes).map(([attrKey, values]) => (
+              <div key={attrKey} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-widest">
+                    {capitalize(attrKey)}
+                  </span>
+                  {attrSelection[attrKey] !== undefined && (
+                    <span className="text-[11px] font-medium">
+                      {normalizeAttrValue(attrSelection[attrKey])}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {values.map((val) => {
+                    const isSelected =
+                      normalizeAttrValue(attrSelection[attrKey]) ===
+                      normalizeAttrValue(val);
+                    const isAvailable = isAttributeValueAvailable(
+                      visibleVariants,
+                      attrSelection,
+                      attrKey,
+                      val,
+                    );
+                    if (attrKey === "color") {
+                      const colorHex = extractColorHex(val);
+                      const colorName = normalizeAttrValue(val);
+                      const light = isLightColor(colorHex);
+                      return (
+                        <button
+                          key={colorName}
+                          onClick={() => handleAttrChange(attrKey, val)}
+                          disabled={!isAvailable}
+                          title={colorName}
+                          className={[
+                            "w-9 h-9 rounded-full transition-all duration-200 relative flex items-center justify-center",
+                            isSelected
+                              ? "ring-2 ring-offset-2 scale-110 border-2 border-white"
+                              : "border-2 border-transparent hover:scale-105",
+                            !isAvailable ? "opacity-30 cursor-not-allowed" : "",
+                          ].join(" ")}
+                          style={{ backgroundColor: colorHex }}
+                        >
+                          {!isAvailable && (
+                            <span className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full">
+                              <span className="block w-full h-px bg-foreground/60 rotate-45" />
+                            </span>
+                          )}
+                          {isSelected && (
+                            <Check
+                              className="w-3.5 h-3.5 drop-shadow"
+                              style={{ color: light ? "#000" : "#fff" }}
+                            />
+                          )}
+                        </button>
+                      );
+                    }
+                    return (
+                      <button
+                        key={String(val)}
+                        onClick={() => handleAttrChange(attrKey, val)}
+                        disabled={!isAvailable}
+                        className={[
+                          "px-4 py-1.5 rounded-full text-[12px] font-medium border transition-all duration-200",
+                          isSelected
+                            ? "text-white shadow-sm bg-slate-800"
+                            : "border-product",
+                          !isAvailable
+                            ? "opacity-30 cursor-not-allowed line-through"
+                            : "",
+                        ].join(" ")}
+                      >
+                        {normalizeAttrValue(val)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Embalaje */}
+        {(product.selected_variant?.embalaje || 0) > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 rounded-[14px] border border-[rgba(44,26,14,0.1)]">
+            <div>
+              <p className="text-[12px] font-semibold">Embalaje incluido</p>
+              <p className="text-[11px]">
+                ${product.selected_variant?.embalaje.toFixed(2)}{" "}
+                {currentCurrency}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+              <Check className="w-4 h-4 text-emerald-600" />
+            </div>
+          </div>
+        )}
+
+        {/* ── Extract (texto corto visible) ─────────────────────── */}
+        {product.descripcion && (
+          <p className="text-[13px] text-muted-foreground leading-relaxed line-clamp-2">
+            {product.descripcion}
+          </p>
+        )}
+
+        {/* ── Info sections como lista de drawers ───────────────── */}
+        <InfoSectionsList sections={infoSections} />
+
+        {/* Rating + sugerencias */}
+        <div className="pt-4 border-t border-[rgba(44,26,14,0.1)]">
+          <RatingSection
+            specific={product.productId || id}
+            sitioweb={store.sitioweb || ""}
+            productData={product}
+          />
+          <ProductSuggestions
+            products={suggestions}
+            sitioweb={store.sitioweb || ""}
+            currentCurrency={currentCurrency}
+            title={
+              (initialProduct?.combos?.length ?? 0) > 0
+                ? "Queda bien con..."
+                : "También te puede gustar"
+            }
+          />
+        </div>
       </div>
+
+      {/* ── CTA sticky ───────────────────────────────────────────── */}
+      {effectiveStock > 0 ? (
+        <div className="sticky px-2 bg-linear-to-t from-white from-60% to-transparent bottom-0 gap-2 py-0.5 flex w-full">
+          <div className="flex items-center justify-center gap-1 ">
+            <EclipseQtyButton
+              onClick={() => setCountAddCart((c) => c - 1)}
+              disabled={countAddCart === 0}
+              icon={<Minus className="w-4 h-4" />}
+            />
+            <span className="eclipse-title text-xl font-bold w-10 text-center">
+              {countAddCart}
+            </span>
+            <EclipseQtyButton
+              onClick={() => setCountAddCart((c) => c + 1)}
+              disabled={!!store.stocks && countAddCart >= availableStock}
+              icon={<Plus className="w-4 h-4" />}
+            />
+          </div>
+          <button
+            type="button"
+            disabled={availableStock < countAddCart || countAddCart === 0}
+            onClick={() => {
+              handleToCart({
+                ...product,
+                selected_variant: {
+                  ...activeVariant,
+                  Cant: countAddCart,
+                } as ProductVariant,
+              });
+            }}
+            className={[
+              "bg-product w-full h-13 rounded-full text-[14px] font-semibold transition-all duration-300",
+              "flex items-center justify-center gap-2.5 active:scale-[0.98]",
+              showSuccess
+                ? "bg-emerald-600 text-white"
+                : isColorLight(color)
+                  ? "text-black"
+                  : "text-white",
+              isAddingToCart ? "scale-95 opacity-80" : "",
+              availableStock < countAddCart || countAddCart === 0
+                ? "opacity-40 cursor-not-allowed"
+                : "",
+            ].join(" ")}
+          >
+            {isAddingToCart ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Agregando...
+              </>
+            ) : showSuccess ? (
+              <>
+                <Check className="w-4 h-4" />
+                ¡Agregado!
+              </>
+            ) : (
+              <>
+                Agregar al carrito
+                <br />$
+                {(
+                  (effectivePrice + (product.selected_variant?.embalaje || 0)) *
+                  countAddCart
+                ).toFixed(2)}
+              </>
+            )}
+          </button>
+        </div>
+      ) : (
+        <StockAlertButton
+          productId={product.productId}
+          variantId={product.selected_variant.id}
+          variant="full"
+        />
+      )}
     </main>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function StockPill({ inStock }: { inStock: boolean }) {
+  return (
+    <div
+      className={[
+        "flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-lg text-[11px] font-medium border border-slate-100",
+        inStock
+          ? "bg-product/30 text-slate-100"
+          : "bg-neutral-900/70 text-neutral-400",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "w-1.5 h-1.5 rounded-full animate-pulse",
+          inStock ? "bg-product-400" : "bg-neutral-500",
+        ].join(" ")}
+      />
+      {inStock ? "En stock" : "Agotado"}
+    </div>
+  );
+}
+
+function EclipseTag({ children }: { children: string }) {
+  const colorMap: Record<string, string> = {
+    Agotado: "bg-neutral-200 text-neutral-500",
+    Top: "bg-amber-100 text-amber-700",
+    Nuevo: "bg-rose-100 text-rose-600",
+  };
+  const cls = colorMap[children] ?? "bg-product/20";
+  return (
+    <span className={`text-[10px] font-medium px-3 py-0.5 rounded-full ${cls}`}>
+      {children}
+    </span>
+  );
+}
+
+function EclipseQtyButton({
+  onClick,
+  disabled,
+  icon,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  icon: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={[
+        "w-10 h-10 rounded-full flex items-center justify-center border transition-all duration-200",
+        "border-[rgba(44,26,14,0.2)]",
+        "active:scale-90",
+        disabled ? "opacity-30 cursor-not-allowed" : "",
+      ].join(" ")}
+    >
+      {icon}
+    </button>
   );
 }
 
@@ -709,17 +834,20 @@ interface BreadcrumbInterface {
   link: string;
 }
 
-function BreadCrumpParent({ list }: { list: BreadcrumbInterface[] }) {
+function ProductBreadcrumbs({ items }: { items: BreadcrumbInterface[] }) {
   return (
     <Breadcrumb>
       <BreadcrumbList>
-        {list.map((item, index) => (
-          <div key={`Bread-${index}`} className="flex items-center">
+        {items.map((item, index) => (
+          <div
+            key={`Bread-${index}`}
+            className="flex items-center w-1/3 max-w-fit"
+          >
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link
                   href={item.link}
-                  className="max-w-28 line-clamp-1 text-xs"
+                  className="max-w-28 line-clamp-1 text-[11px] hover:transition-colors"
                 >
                   {item.name === "Inicio" ? (
                     <HomeIcon className="w-3.5 h-3.5" />

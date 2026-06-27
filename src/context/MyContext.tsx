@@ -32,6 +32,8 @@ import {
 import Header from "@/components/Catalogos/General/Header";
 import { SheetProvider } from "@/components/Catalogos/General/SheetComponent";
 import { supabase } from "@/lib/supabase";
+import { LoadingScreen } from "@/components/Catalogos/General/LoadingScreen";
+import { decodeShareCart } from "@/lib/shareCart";
 
 interface ContextType {
   store: AppState;
@@ -46,17 +48,24 @@ export const MyContext = createContext<ContextType>({
 interface MyProviderProps {
   children: ReactNode;
   storeSSD: AppState;
+  color: string;
 }
 
-export default function MyProvider({ children, storeSSD }: MyProviderProps) {
+export default function MyProvider({
+  children,
+  storeSSD,
+  color,
+}: MyProviderProps) {
   const storeArreglado = storeSSD ?? initialState;
   const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const afiliate = searchParams.get("afiliate");
+  const raw = searchParams.get("cart");
+  const generalRef = useRef<HTMLDivElement>(null);
 
-  // Rastrear si ya procesamos el afiliado
   const afiliateProcessedRef = useRef(false);
 
   const [store, dispatchStore] = useReducer(reducerStore, {
@@ -68,12 +77,46 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     setMounted(true);
   }, []);
 
-  // Sincronizar con storeSSD cuando cambie (SSR → client hydration)
+  useEffect(() => {
+    // Aplicar color a través de la prop "color" (preferencia sobre store.color)
+    const colorToApply = color || store.color;
+    if (colorToApply) {
+      document.documentElement.style.setProperty("--primary", colorToApply);
+    }
+  }, [color, store.color]);
+
   useEffect(() => {
     dispatchStore({ type: "Add", payload: storeSSD });
   }, [storeSSD]);
 
-  // Procesar código de afiliado de la URL SOLO UNA VEZ
+  useEffect(() => {
+    if (!mounted) return;
+    if (!store.sitioweb) return;
+
+    if (!raw) return;
+
+    const items = decodeShareCart(raw);
+    if (!items || items.length === 0) return;
+
+    // Construir un array de Product "parciales" que mergeCartDataWithProducts
+    // sabrá fusionar con el catálogo real del store.
+    // Solo necesitamos productId, variantId (en selected_variant.id) y Cant.
+    const sharedProducts = items.map((item) => ({
+      productId: item.id,
+      selected_variant: item.vid
+        ? { id: item.vid, Cant: item.qty }
+        : { Cant: item.qty },
+    }));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dispatchStore({ type: "HydrateCart", payload: sharedProducts as any });
+
+    // Limpiar el parámetro de la URL sin recargar la página
+    const url = new URL(window.location.href);
+    url.searchParams.delete("cart");
+    window.history.replaceState({}, "", url.toString());
+  }, [mounted, raw, store.sitioweb, storeSSD]); // ← NO incluir searchParams en deps para que corra solo una vez
+
   useEffect(() => {
     if (!mounted) return;
     if (!afiliate || afiliateProcessedRef.current || !storeSSD?.sitioweb)
@@ -104,12 +147,11 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
       });
 
       PostViewCode(codeFound.id);
-    }, 2000); // ⏱️ 2 segundos
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [mounted, afiliate, storeSSD?.sitioweb, storeSSD?.codeDiscount]);
 
-  // Cargar carrito desde IndexedDB
   useEffect(() => {
     if (!store.sitioweb) return;
 
@@ -142,32 +184,37 @@ export default function MyProvider({ children, storeSSD }: MyProviderProps) {
     };
   }, [store.sitioweb]);
 
-  // Memoizar el contexto para evitar re-renders innecesarios
   const contextValue = useMemo(() => ({ store, dispatchStore }), [store]);
 
-  // Aplicar color primario via CSS variable
-  useEffect(() => {
-    if (store.color) {
-      document.documentElement.style.setProperty("--primary", store.color);
-    }
-  }, [store.color]);
-
   const isSearchPage = pathname.includes("/search");
+  // Mostrar loading screen hasta que onLoadComplete se llame
+  if (!ready) {
+    return (
+      <LoadingScreen
+        comments={store.comentTienda.data}
+        loadingDuration={6000}
+        onLoadComplete={() => setReady(true)}
+      />
+    );
+  }
+
   return (
     <MyContext.Provider value={contextValue}>
-      <SheetProvider>
-        {!isSearchPage ? <Header /> : null}
-        <SitioRealtime uuid={store.UUID || ""} />
-        <div className={!isSearchPage ? "-translate-y-16" : ""}>{children}</div>
-        {store.compraUUID ? (
-          <EditPurchaseDialog dispatchStore={dispatchStore} router={router} />
-        ) : null}
-      </SheetProvider>
+      <div ref={generalRef}>
+        <SheetProvider>
+          {!isSearchPage ? <Header /> : null}
+          <SitioRealtime uuid={store.UUID || ""} />
+          {children}
+
+          {store.compraUUID ? (
+            <EditPurchaseDialog dispatchStore={dispatchStore} router={router} />
+          ) : null}
+        </SheetProvider>
+      </div>
     </MyContext.Provider>
   );
 }
 
-// Componente extraído para evitar re-renders del árbol principal
 function EditPurchaseDialog({
   dispatchStore,
   router,
@@ -211,7 +258,6 @@ function EditPurchaseDialog({
   );
 }
 
-// Helper para obtener afiliado guardado (solo client-side)
 function getAfiliate(shopName: string): string {
   if (typeof window === "undefined" || !shopName) return "";
   try {
@@ -222,7 +268,6 @@ function getAfiliate(shopName: string): string {
   }
 }
 
-// Registrar vista del código de afiliado
 async function PostViewCode(id: number) {
   try {
     const { error } = await supabase.rpc("rpc_increment_visit_by_id", {

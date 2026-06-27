@@ -1,6 +1,6 @@
 import React from "react";
-import HomepagePage from "@/components/Explore/Home/HomePAgeNew";
+import HomepageRedesign from "@/components/Explore/Home/HomepageRedesign";
 
 export default function CatalogExplorer() {
-  return <HomepagePage />;
+  return <HomepageRedesign />;
 }

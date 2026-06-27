@@ -37,7 +37,7 @@ export default function AboutMePage() {
   }, [store.domicilio, store.act_tf]);
 
   const stockCount = useMemo(
-    () => store.products.filter((p) => p.stock).length,
+    () => store.products.filter((p) => p.selected_variant?.stock).length,
     [store.products],
   );
 

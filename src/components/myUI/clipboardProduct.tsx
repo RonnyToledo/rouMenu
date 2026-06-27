@@ -5,43 +5,74 @@ import { Button } from "../ui/button";
 import { RxClipboardCopy } from "react-icons/rx";
 import { cn } from "@/lib/utils";
 
+// ─── Props ────────────────────────────────────────────────────────────────────
+
+type ProductMode = {
+  mode?: "product";
+  title: string;
+  descripcion: string;
+  url?: string;
+  price: number;
+  oldPrice: number;
+};
+
+type SectionMode = {
+  mode: "section";
+  title: string; // section.label
+  descripcion: string; // section.content
+  url?: never;
+  price?: never;
+  oldPrice?: never;
+};
+
+type ClipboardProductProps = (ProductMode | SectionMode) & {
+  children?: React.ReactNode;
+  className?: string;
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function ClipboardProduct({
+  mode = "product",
   title,
-  url,
   descripcion,
+  url,
   price,
   oldPrice,
   className,
   children,
-}: {
-  url: string | undefined;
-  title: string;
-  descripcion: string;
-  price: number;
-  oldPrice: number;
-  children?: React.ReactNode;
-  className?: string;
-}) {
+}: ClipboardProductProps) {
   const [busy, setBusy] = useState(false);
 
-  async function copyImageWithTextAsPng(): Promise<{
+  function buildText(): string {
+    if (mode === "section") {
+      return [title, descripcion].filter(Boolean).join("\n\n");
+    }
+
+    let text = `${title}\n`;
+    text += `Precio: $${Number(price).toFixed(2)}`;
+    if ((oldPrice ?? 0) > (price ?? 0)) {
+      text += ` ~~$${Number(oldPrice).toFixed(2)}~~`;
+    }
+    text += `\n`;
+    if (descripcion) {
+      text += `Descripción:\n${descripcion}\n`;
+    }
+    return text;
+  }
+
+  async function copyToClipboard(): Promise<{
     title: string;
     description: string;
   }> {
     setBusy(true);
-    let text = `${title}\n`;
-    text += `Precio: $${Number(price).toFixed(2)} `;
-    if (oldPrice > price) {
-      text += `$~${Number(oldPrice).toFixed(2)}~`;
-    }
-    text += `\n`;
-    if (descripcion) {
-      text += `Descripcion:\n${descripcion}\n`;
-    }
+    const text = buildText();
+
     try {
-      if (url && url !== undefined) {
+      if (mode === "product" && url) {
         const res = await fetch(url);
         const originalBlob = await res.blob();
+
         const pngBlob: Blob = await new Promise<Blob>((resolve, reject) => {
           const img = new window.Image();
           img.crossOrigin = "anonymous";
@@ -59,31 +90,26 @@ export default function ClipboardProduct({
           img.src = URL.createObjectURL(originalBlob);
         });
 
-        const item = new ClipboardItem({
-          "image/png": pngBlob,
-          "text/plain": new Blob([text], { type: "text/plain" }),
-        });
-
-        return {
-          title: "Información Copiada",
-          description:
-            "La información del producto ha sido copiada al portapapeles.",
-        };
-
-        await navigator.clipboard.write([item]);
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "image/png": pngBlob,
+            "text/plain": new Blob([text], { type: "text/plain" }),
+          }),
+        ]);
       } else {
-        const item = new ClipboardItem({
-          "text/plain": new Blob([text], { type: "text/plain" }),
-        });
-        await navigator.clipboard.write([item]);
-        return {
-          title: "Información Copiada",
-          description:
-            "La información del producto ha sido copiada al portapapeles.",
-        };
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/plain": new Blob([text], { type: "text/plain" }),
+          }),
+        ]);
       }
+
+      return {
+        title: "Información Copiada",
+        description: "La información ha sido copiada al portapapeles.",
+      };
     } catch (err) {
-      console.error("Error en copyImageWithTextAsPng:", err);
+      console.error("Error en copyToClipboard:", err);
       return {
         title: "Error",
         description: "Error copiando información",
@@ -92,14 +118,15 @@ export default function ClipboardProduct({
       setBusy(false);
     }
   }
-  async function CopyBoard() {
-    sileo.promise(copyImageWithTextAsPng(), {
-      loading: { title: "Loading..." },
+
+  function handleClick() {
+    sileo.promise(copyToClipboard(), {
+      loading: { title: "Copiando..." },
       success: (data) => ({
-        title: data?.title || "Información Copiada",
+        title: data?.title ?? "Información Copiada",
         description:
-          data?.description ||
-          "La información del producto ha sido copiada al portapapeles.",
+          data?.description ??
+          "La información ha sido copiada al portapapeles.",
       }),
       error: () => ({
         title: "Error",
@@ -107,22 +134,21 @@ export default function ClipboardProduct({
       }),
     });
   }
+
   return (
-    <div>
-      <Button
-        type="button"
-        variant={"ghost"}
-        className={cn(
-          "text-(--text-gold) hover:underline flex items-center text-lg",
-          className,
-        )}
-        onClick={CopyBoard}
-        disabled={busy}
-        aria-disabled={busy}
-        aria-live="polite"
-      >
-        {children ?? <RxClipboardCopy />}
-      </Button>
-    </div>
+    <Button
+      type="button"
+      variant="ghost"
+      className={cn(
+        "text-product bg-radial from-product/20 to-transparent hover:underline flex items-center text-lg p-2! rounded-full",
+        className,
+      )}
+      onClick={handleClick}
+      disabled={busy}
+      aria-disabled={busy}
+      aria-live="polite"
+    >
+      {children ?? <RxClipboardCopy />}
+    </Button>
   );
 }

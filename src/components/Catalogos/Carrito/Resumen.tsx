@@ -4,7 +4,7 @@ import React, { useContext, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Truck, Loader } from "lucide-react";
-import { CompraInterface } from "./CarritoPage";
+import { CompraInterface } from "@/types/interfaces_Cart";
 import { Button } from "@/components/ui/button";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import { smartRound } from "@/functions/precios";
@@ -25,22 +25,18 @@ export default function Resumen({
 
   const subtotal = useMemo(() => {
     return compra.pedido.reduce((total, item) => {
-      const productLine = ((item.price || 0) + item.embalaje) * item.Cant;
-      const agregadosLine =
-        item.agregados?.reduce(
-          (sum, agg) => sum + (agg.price + item.embalaje) * agg.cant,
-          0,
-        ) || 0;
-      return total + productLine + agregadosLine;
+      const productLine =
+        ((item.selected_variant?.price || 0) +
+          (item.selected_variant?.embalaje || 0)) *
+        (item.selected_variant?.Cant || 0);
+
+      return total + productLine;
     }, 0);
   }, [compra.pedido]);
 
   const totalItems = useMemo(() => {
     return store.products.reduce(
-      (total, item) =>
-        total +
-        item.Cant +
-        (item.agregados?.reduce((sum, agg) => sum + agg.cant, 0) || 0),
+      (total, item) => total + (item.selected_variant?.Cant || 0),
       0,
     );
   }, [store.products]);
@@ -68,6 +64,14 @@ export default function Resumen({
             <span>Subtotal ({totalItems} productos)</span>
             <span className="text-foreground">${subtotal.toFixed(2)}</span>
           </div>
+
+          {compra.pedido.some(
+            (p) => (p.selected_variant?.quantity_discounts?.length ?? 0) > 0,
+          ) && (
+            <div className="flex justify-between text-emerald-600 dark:text-emerald-400 text-xs">
+              <span>✓ Descuentos por cantidad aplicados</span>
+            </div>
+          )}
 
           {compra.code.discount > 0 && (
             <div className="flex justify-between text-emerald-600 dark:text-emerald-400">

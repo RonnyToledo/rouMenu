@@ -24,7 +24,6 @@ export interface ProductItem {
   avg_star: number;
   cnt_comments: number;
   score: number;
-  has_variants: boolean;
   store_sitioweb: string;
   store_uuid: string;
   store_name: string;

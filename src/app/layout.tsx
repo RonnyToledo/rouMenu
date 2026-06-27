@@ -13,8 +13,9 @@ import Script from "next/script";
 import { buildSiteMetadata } from "@/lib/siteMeta";
 import { AppProvider } from "@/context/AppContext";
 import { findItemUrlByName } from "@/lib/items";
-import { ThemeProvider } from "@/components/theme-provider";
 import { HomeContentData } from "@/types/HomeContentInterface";
+import { NotificationWrapper } from "@/components/NotificationWrapper";
+import { PushNotificationInitializer } from "@/components/PushNotificationInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,7 +54,6 @@ export default async function RootLayout({
   // newData será AppState ya resuelto
   const newData = await modifyData(data);
   const GA_ID = process.env.NEXT_PUBLIC_GOOGLE_ANALITYCS;
-
   return (
     <html lang="es">
       <Head>
@@ -77,20 +77,26 @@ export default async function RootLayout({
         `}
       </Script>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="light">
-          <div className="flex justify-center bg-linear-to-br from-slate-50 to-slate-300 dark:from-slate-900 dark:to-slate-800 transition-colors duration-500">
-            <div className="max-w-md w-full bg-white dark:bg-slate-950 shadow-xl/30 min-h-dvh transition-colors duration-500">
-              <AppProvider storeSSD={newData}>
-                <Header>
-                  {children}
-                  <Toaster position="top-center" />
-                </Header>
-              </AppProvider>
-            </div>
+        <div className="flex justify-center bg-linear-to-br from-slate-50 to-slate-300 transition-colors duration-500">
+          <div className="max-w-md w-full bg-white shadow-xl/30 min-h-dvh transition-colors duration-500">
+            <AppProvider storeSSD={newData}>
+              {/* Inicializa Web Push Notifications en background */}
+              <PushNotificationInitializer autoRequest={false} debug={false} />
+
+              {/* Sistema de notificaciones del navegador */}
+              <NotificationWrapper
+                autoRequestPermission={false}
+                enableAutoMonitoring={false}
+              />
+              <Header>
+                {children}
+                <Toaster position="top-center" />
+              </Header>
+            </AppProvider>
           </div>
-          <GoogleAnalytics gaId={GA_ID || ""} />
-          <Analytics />
-        </ThemeProvider>
+        </div>
+        <GoogleAnalytics gaId={GA_ID || ""} />
+        <Analytics />
       </body>
     </html>
   );

@@ -21,7 +21,7 @@ import { IoIosHome } from "react-icons/io";
 import { FaBalanceScale } from "react-icons/fa";
 import { useAuth } from "@/context/AppContext";
 import { Separator } from "@/components/ui/separator";
-import { ExtraerCategorias } from "@/functions/extraerCategoriass";
+import { getCategoriesWithProducts } from "@/lib/catalog/categorySelectors";
 import { BsFileEarmarkPostFill } from "react-icons/bs";
 import { User, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -152,7 +152,7 @@ function MenuScreen({ isMenuOpen, setIsMenuOpen }: MenuScreenProps) {
 
   return (
     <div
-      className="absolute inset-0 bg-secondary/90 backdrop-blur-xl transition-all duration-300"
+      className="absolute inset-0 bg-secondary/90 backdrop-blur-lg transition-all duration-300"
       style={{
         opacity: isMenuOpen ? 1 : 0,
         pointerEvents: isMenuOpen ? "auto" : "none",
@@ -274,24 +274,26 @@ function CategoriesView({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const siteWeb = store.sitioweb;
+  const homePath = `/t/${siteWeb}`;
 
   const handleCategoryClick = useCallback(
     (category: Categoria) => {
-      if (category.subtienda || pathname !== `/t/${store?.sitioweb}`) {
-        router.push(`/t/${store?.sitioweb}/category/${category.id}`);
+      if (category.subtienda || pathname !== homePath) {
+        router.push(`/t/${siteWeb}/category/${category.id}`);
         onClose();
       } else {
-        if (pathname === `/t/${store?.sitioweb}`) {
+        if (pathname === homePath) {
           ScrollTo(category.id);
           onClose();
         } else {
-          router.push(`/t/${store?.sitioweb}`);
+          router.push(homePath);
           onClose();
           setTimeout(() => ScrollTo(category.id), 100);
         }
       }
     },
-    [store?.sitioweb, pathname, router, onClose],
+    [homePath, onClose, pathname, router, siteWeb],
   );
 
   return (
@@ -311,7 +313,7 @@ function CategoriesView({
         }}
       />
       <Separator className="bg-border my-1" />
-      {ExtraerCategorias(store?.categorias, store.products).map(
+      {getCategoriesWithProducts(store?.categorias, store.products).map(
         (category: Categoria) => (
           <ListSheet
             key={category.id}

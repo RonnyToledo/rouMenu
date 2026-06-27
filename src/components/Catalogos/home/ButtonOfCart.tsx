@@ -1,15 +1,15 @@
 "use client";
-import React, { useCallback, useContext, useState, useMemo, memo } from "react";
+import React, { useCallback, useContext, useMemo, memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { TbShoppingCartPlus, TbShoppingCartMinus } from "react-icons/tb";
 import { motion, AnimatePresence } from "framer-motion";
 import { MyContext } from "@/context/MyContext";
-import { Button } from "@/components/ui/button";
 import { Product } from "@/types/InitialStatus";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { ScrollTo } from "@/functions/ScrollTo";
 import { cartKey } from "@/reducer/reducerGeneral";
-
+import { repriceVariantForQuantity } from "@/lib/discountUtils";
+import { cn } from "@/lib/utils";
 // Variantes de animación fuera del componente (se crean solo una vez)
 const slideVariants = {
   initial: { opacity: 0, width: 0 },
@@ -42,19 +42,18 @@ export const ButtonOfCart = memo(function ButtonOfCart({
   variant = "default",
 }: ButtonOfCartProps) {
   const { store, dispatchStore } = useContext(MyContext);
-  const [slideOpen, setSlideOpen] = useState(false);
 
   // Buscar la cantidad real de este producto+variante en el store
-  // usando cartKey para distinguir variantes del mismo producto
   const productInStore = useMemo(() => {
     const key = cartKey(product);
     return store.products.find((p) => cartKey(p) === key);
   }, [store.products, product]);
 
-  const productCant = productInStore?.Cant ?? product.Cant ?? 0;
-  const productStock = product.selected_variant?.stock ?? product.stock ?? 0;
+  const productCant = productInStore?.selected_variant?.Cant ?? 0;
+  const productStock = product.selected_variant?.stock ?? 0;
 
-  // Memoizar valores calculados
+  const slideOpen = productCant > 0;
+
   const isDisabled = useMemo(
     () => store.stocks && productCant >= productStock,
     [store.stocks, productCant, productStock],
@@ -62,29 +61,37 @@ export const ButtonOfCart = memo(function ButtonOfCart({
 
   const isLastItem = productCant === 1;
 
-  // Handlers optimizados
   const handleIncrement = useCallback(() => {
     ScrollTo(product.productId, 120);
     dispatchStore({
       type: "AddCart",
-      payload: JSON.stringify({ ...product, Cant: productCant + 1 }),
+      payload: JSON.stringify({
+        ...product,
+        selected_variant: repriceVariantForQuantity(
+          product.selected_variant,
+          productCant + 1,
+        ),
+      }),
     });
-    setSlideOpen(true);
   }, [dispatchStore, product, productCant]);
 
   const handleDecrement = useCallback(() => {
     const newCant = productCant - 1;
     dispatchStore({
       type: "AddCart",
-      payload: JSON.stringify({ ...product, Cant: newCant }),
+      payload: JSON.stringify({
+        ...product,
+        selected_variant: repriceVariantForQuantity(
+          product.selected_variant,
+          newCant,
+        ),
+      }),
     });
-    if (newCant <= 0) setSlideOpen(false);
   }, [dispatchStore, product, productCant]);
 
-  // Clases memoizadas
   const containerClasses = useMemo(
     () =>
-      `absolute flex items-center justify-end rounded-full right-0 overflow-hidden z-1 ${
+      `absolute flex items-center justify-end rounded-[9px] right-0 overflow-hidden z-1 ${
         variant === "default" ? "bg-primary" : ""
       }`,
     [variant],
@@ -102,11 +109,13 @@ export const ButtonOfCart = memo(function ButtonOfCart({
             exit="exit"
             transition={transition}
           >
-            <Button
-              size="icon"
+            <button
               type="button"
-              variant={variant}
-              className="size-8 flex justify-center items-center rounded-full"
+              className={cn(
+                "w-8 h-8 rounded-[9px] flex items-center justify-center shrink-0",
+                "bg-primary text-white transition-colors duration-200",
+                "hover:bg-primary/90",
+              )}
               onClick={handleDecrement}
               disabled={productCant === 0}
               aria-label={
@@ -123,7 +132,7 @@ export const ButtonOfCart = memo(function ButtonOfCart({
                     exit="exit"
                     className="inline-flex"
                   >
-                    <FaRegTrashCan aria-hidden="true" />
+                    <FaRegTrashCan aria-hidden="true" className="w-4 h-4" />
                   </motion.span>
                 ) : (
                   <motion.span
@@ -135,36 +144,41 @@ export const ButtonOfCart = memo(function ButtonOfCart({
                     className="inline-flex"
                   >
                     <TbShoppingCartMinus
-                      className="size-4"
+                      className="w-4 h-4"
                       aria-hidden="true"
                     />
                   </motion.span>
                 )}
               </AnimatePresence>
-            </Button>
-            <div className="flex items-center justify-center">
-              <Badge variant={variant} aria-label={`Cantidad: ${productCant}`}>
+            </button>
+            <div className="flex items-center justify-center bg-primary">
+              <Badge
+                className="bg-primary"
+                aria-label={`Cantidad: ${productCant}`}
+              >
                 {productCant}
               </Badge>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-      <Button
-        size="icon"
+      <button
         type="button"
-        variant={variant}
         disabled={isDisabled}
-        className="size-8 flex justify-center items-center rounded-full"
+        className={cn(
+          "w-8 h-8 rounded-[9px] flex items-center justify-center shrink-0",
+          "bg-primary text-white transition-colors duration-200",
+          "hover:bg-primary/90",
+        )}
         onClick={handleIncrement}
         aria-label="Añadir al carrito"
       >
         {!slideOpen && productCant > 0 ? (
           productCant
         ) : (
-          <TbShoppingCartPlus className="size-5" aria-hidden="true" />
+          <TbShoppingCartPlus className="w-4 h-4" aria-hidden="true" />
         )}
-      </Button>
+      </button>
     </motion.div>
   );
 });

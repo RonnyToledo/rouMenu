@@ -1,12 +1,12 @@
 // reducerGeneral.ts
-import {
-  StarDistribution,
-  AppState,
-  Product,
-  AgregadosInterface,
-} from "@/types/InitialStatus";
+import { StarDistribution, AppState, Product } from "@/types/InitialStatus";
 import { smartRound } from "@/functions/precios";
 import { sileo } from "sileo";
+import {
+  convertQuantityDiscount,
+  repriceVariantForQuantity,
+} from "@/lib/discountUtils";
+import { roundToNearestFive } from "@/lib/pricing/currency";
 
 import { saveCartToIDB, clearCartFromIDB } from "@/lib/indexedDBCart";
 
@@ -43,13 +43,39 @@ export type AppAction =
  *   - sin variante extra:           "productId"
  *   - con variante no-default:      "productId:variantId"
  */
+/**
+ * Determina si una variante es la "default" del producto.
+ * Cubre todos los campos que el backend puede usar para indicarlo:
+ *   - selected_variant.default === true
+ *   - selected_variant.default_variant === true
+ *   - selected_variant.attributes.es_default === true
+ *   - selected_variant.attributes.tipo === "default"
+ */
+export function isDefaultVariant(
+  sv: Product["selected_variant"] | undefined | null,
+): boolean {
+  if (!sv?.id) return true; // sin variante → default
+  if (sv.default === true) return true;
+  if (sv.default_variant === true) return true;
+
+  type VariantAttributes = {
+    attributes?: {
+      es_default?: boolean;
+      tipo?: string;
+    };
+  };
+
+  const attrs = (sv as VariantAttributes).attributes;
+  if (attrs?.es_default === true) return true;
+  if (attrs?.tipo === "default") return true;
+  return false;
+}
+
 export function cartKey(
   product: Pick<Product, "productId" | "selected_variant">,
 ): string {
-  const variantId = product.selected_variant?.id;
-  const isDefault = !variantId || product.selected_variant?.default === true;
-  if (isDefault) return product.productId;
-  return `${product.productId}:${variantId}`;
+  if (isDefaultVariant(product.selected_variant)) return product.productId;
+  return `${product.productId}:${product.selected_variant!.id}`;
 }
 
 // ─── mergeCartDataWithProducts ───────────────────────────────────────────────
@@ -81,24 +107,21 @@ function mergeCartDataWithProducts(
     if (baseSaved) {
       const updatedProduct = { ...product };
 
-      // Restaurar cantidad respetando stock
-      if (baseSaved.Cant) {
-        updatedProduct.Cant =
-          (product.stock || 0) < baseSaved.Cant
-            ? product.stock || 0
-            : baseSaved.Cant;
-      }
-
-      // Restaurar cantidades de agregados
-      if (baseSaved.agregados && product.agregados) {
-        updatedProduct.agregados = product.agregados.map((agregado) => {
-          const savedAgregado = baseSaved.agregados.find(
-            (saved) => saved.id === agregado.id,
-          );
-          return savedAgregado
-            ? { ...agregado, cant: savedAgregado.cant }
-            : agregado;
-        });
+      // ✅ Leer Cant desde top-level primero (así lo guarda persistCartIDB)
+      const savedCant = baseSaved.selected_variant?.Cant ?? 0;
+      if (savedCant > 0 && updatedProduct.selected_variant) {
+        const mergedVariant = {
+          ...updatedProduct.selected_variant,
+          ...baseSaved.selected_variant,
+          Cant:
+            (product.selected_variant?.stock || 0) < savedCant
+              ? product.selected_variant?.stock || 0
+              : savedCant,
+        };
+        updatedProduct.selected_variant = repriceVariantForQuantity(
+          mergedVariant,
+          mergedVariant.Cant ?? 0,
+        )!;
       }
 
       result.push(updatedProduct);
@@ -107,31 +130,36 @@ function mergeCartDataWithProducts(
     }
 
     // Buscar items de variantes no-default para este producto
-    // (entries cuya key tiene formato "productId:variantId")
     for (const [key, saved] of savedMap.entries()) {
       if (
         key.startsWith(`${product.productId}:`) &&
         saved.selected_variant &&
-        !saved.selected_variant.default
+        !isDefaultVariant(saved.selected_variant)
       ) {
         // Reconstruir el producto con la variante guardada
         const variant = saved.selected_variant;
-        const stock = variant.stock ?? product.stock ?? 0;
+        const stock = variant.stock ?? product.selected_variant?.stock ?? 0;
         const restoredCant =
-          stock < (saved.Cant || 0) ? stock : saved.Cant || 0;
+          stock < (saved.selected_variant?.Cant || 0)
+            ? stock
+            : saved.selected_variant?.Cant || 0;
 
         if (restoredCant > 0) {
+          const restoredVariant = repriceVariantForQuantity(
+            {
+              ...variant,
+              price: variant.price ?? 0,
+              oldPrice: variant.oldPrice ?? 0,
+              stock: variant.stock ?? 0,
+              image: variant.image ?? "",
+            },
+            restoredCant,
+          );
+
           result.push({
             ...product,
             // Datos de la variante
-            price: variant.price ?? product.price,
-            oldPrice: variant.oldPrice ?? product.oldPrice,
-            stock: variant.stock ?? product.stock,
-            image: variant.image ?? product.image,
-            selected_variant: variant,
-            Cant: restoredCant,
-            // Limpiar agregados para la entrada de variante
-            agregados: product.agregados.map((a) => ({ ...a, cant: 0 })),
+            selected_variant: restoredVariant!,
           });
         }
       }
@@ -154,46 +182,36 @@ export function persistCartIDB(
   try {
     const productsToSave = products
       .filter((product) => {
-        const hasProductQuantity = product.Cant && product.Cant > 0;
-        const hasAgregadosWithQuantity = product.agregados?.some(
-          (a: AgregadosInterface) => a.cant && a.cant > 0,
-        );
-        return hasProductQuantity || hasAgregadosWithQuantity;
+        const hasProductQuantity =
+          product.selected_variant?.Cant && product.selected_variant.Cant > 0;
+
+        return hasProductQuantity;
       })
       .map((product) => {
         const productToSave: {
           productId: string;
           Cant?: number;
-          agregados?: AgregadosInterface[];
           variantId?: string;
           selected_variant?: Product["selected_variant"];
         } = {
           productId: product.productId,
         };
 
-        if (product.Cant && product.Cant > 0) {
-          productToSave.Cant = product.Cant;
-        }
-
-        // Guardar info de variante si existe y no es la default
-        if (product.selected_variant?.id && !product.selected_variant.default) {
-          productToSave.variantId = product.selected_variant.id;
+        if (
+          product.selected_variant?.Cant &&
+          product.selected_variant.Cant > 0
+        ) {
+          productToSave.Cant = product.selected_variant.Cant;
+          // ✅ Siempre guardar selected_variant completo para poder restaurar Cant
           productToSave.selected_variant = product.selected_variant;
         }
 
-        if (product.agregados?.length) {
-          const agregadosWithQuantity = product.agregados
-            .filter((a: AgregadosInterface) => a.cant && a.cant > 0)
-            .map((a: AgregadosInterface) => ({
-              id: a.id,
-              cant: a.cant,
-              price: a.price,
-              name: a.name,
-            }));
-
-          if (agregadosWithQuantity.length > 0) {
-            productToSave.agregados = agregadosWithQuantity;
-          }
+        if (
+          product.selected_variant?.id &&
+          !isDefaultVariant(product.selected_variant)
+        ) {
+          productToSave.variantId = product.selected_variant.id;
+          // selected_variant ya fue asignado arriba
         }
 
         return productToSave;
@@ -216,7 +234,6 @@ export function persistCartIDB(
 // ─── reducerStore ────────────────────────────────────────────────────────────
 
 export function reducerStore(state: AppState, action: AppAction): AppState {
-  console.info(action.type);
   switch (action.type) {
     case "Add":
       return { ...state, ...action.payload };
@@ -259,9 +276,11 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
 
       // Si la cantidad llega a 0 y es una variante no-default, eliminar la entrada
       updatedProducts = updatedProducts.filter((p) => {
-        const isNonDefaultVariant =
-          p.selected_variant && !p.selected_variant.default;
-        if (isNonDefaultVariant && (p.Cant ?? 0) <= 0) return false;
+        if (
+          !isDefaultVariant(p.selected_variant) &&
+          (p.selected_variant?.Cant ?? 0) <= 0
+        )
+          return false;
         return true;
       });
 
@@ -350,9 +369,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
         ...state,
         envios: (state.envios ?? []).map((env) => ({
           ...env,
-          precio: smartRound(
-            redondearAMultiploDe5((env.precio ?? 0) * envFactor),
-          ),
+          precio: smartRound(roundToNearestFive((env.precio ?? 0) * envFactor)),
         })),
         moneda: (state.moneda || []).map((obj) => ({
           ...obj,
@@ -362,44 +379,62 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
           const monedaOrigen = monedaMap[p.default_moneda] ?? oldDefault;
           const valorOrigen = Number(monedaOrigen?.valor ?? 1) || 1;
           const factor = valorOrigen / valorNew;
+          const convertVariant = (variant: Product["selected_variant"]) =>
+            variant
+              ? {
+                  ...variant,
+                  basePrice:
+                    variant.basePrice != null
+                      ? smartRound(
+                          roundToNearestFive(
+                            (variant.basePrice ?? 0) * factor,
+                          ),
+                        )
+                      : undefined,
+                  price:
+                    variant.price != null
+                      ? smartRound(
+                          roundToNearestFive((variant.price ?? 0) * factor),
+                        )
+                      : undefined,
+                  oldPrice:
+                    variant.oldPrice != null
+                      ? smartRound(
+                          roundToNearestFive(
+                            (variant.oldPrice ?? 0) * factor,
+                          ),
+                        )
+                      : undefined,
+                  priceCompra:
+                    variant.priceCompra != null
+                      ? smartRound(
+                          roundToNearestFive(
+                            (variant.priceCompra ?? 0) * factor,
+                          ),
+                        )
+                      : undefined,
+                  embalaje:
+                    variant.embalaje != null
+                      ? smartRound(
+                          roundToNearestFive(
+                            (variant.embalaje ?? 0) * factor,
+                          ),
+                        )
+                      : 0,
+                  quantity_discounts:
+                    variant.quantity_discounts?.map((rule) =>
+                      convertQuantityDiscount(rule, factor),
+                    ) ?? [],
+                }
+              : variant;
 
-          // También convertir el precio de selected_variant si existe
-          const updatedVariant = p.selected_variant
-            ? {
-                ...p.selected_variant,
-                price:
-                  p.selected_variant.price != null
-                    ? smartRound(
-                        redondearAMultiploDe5(
-                          (p.selected_variant.price ?? 0) * factor,
-                        ),
-                      )
-                    : undefined,
-                oldPrice:
-                  p.selected_variant.oldPrice != null
-                    ? smartRound(
-                        redondearAMultiploDe5(
-                          (p.selected_variant.oldPrice ?? 0) * factor,
-                        ),
-                      )
-                    : undefined,
-              }
-            : p.selected_variant;
+          const updatedVariant = convertVariant(p.selected_variant);
 
           return {
             ...p,
-            price: smartRound(redondearAMultiploDe5((p.price ?? 0) * factor)),
-            embalaje: smartRound(
-              redondearAMultiploDe5((p.embalaje ?? 0) * factor),
-            ),
             default_moneda: newDefault.id,
+            variants: (p.variants || []).map((variant) => convertVariant(variant)!),
             selected_variant: updatedVariant,
-            agregados: (p.agregados ?? []).map((obj) => ({
-              ...obj,
-              price: smartRound(
-                redondearAMultiploDe5((obj.price ?? 0) * factor),
-              ),
-            })),
           };
         }),
       };
@@ -413,17 +448,13 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
 
         // Eliminar entradas de variantes no-default; restablecer Cant en todas
         const updatedProducts = state.products
-          .filter(
-            (p) => !p.selected_variant || p.selected_variant.default === true,
-          )
+          .filter((p) => isDefaultVariant(p.selected_variant))
           .map((p) => ({
             ...p,
-            stock:
-              (p.stock || 0) -
-              p.Cant -
-              p.agregados.reduce((sum, agg) => sum + agg.cant, 0),
+            selected_variant: p.selected_variant
+              ? { ...p.selected_variant, Cant: 0 }
+              : p.selected_variant,
             Cant: 0,
-            agregados: p.agregados.map((agg) => ({ ...agg, cant: 0 })),
           }));
 
         return { ...state, products: updatedProducts };
@@ -447,10 +478,4 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
   }
 }
 
-export function redondearAMultiploDe5(valor: number): number {
-  if (valor < 5) {
-    return parseFloat(valor.toFixed(6));
-  } else {
-    return Math.round(valor / 5) * 5;
-  }
-}
+export const redondearAMultiploDe5 = roundToNearestFive;

@@ -42,7 +42,7 @@ export default function PreviewRatingGeneral({
       if (!rating.nombre) throw new Error("No existe el campo de nombre");
 
       const res = await axios.post(
-        `/api/tienda/${store}/coment`,
+        `/api/tienda/${store.sitioweb || ""}/coment`,
         {
           comentario: { cmt: rating.description, star: rating.selectedRating },
           uid: store.UUID,
@@ -65,7 +65,7 @@ export default function PreviewRatingGeneral({
   };
 
   const closeReview = useCallback(() => onClose(), [onClose]);
-  console.log(user);
+
   return (
     <Rating
       rating={rating}

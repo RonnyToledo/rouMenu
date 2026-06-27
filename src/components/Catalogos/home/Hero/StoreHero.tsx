@@ -39,7 +39,7 @@ export default function StoreHero() {
 
       {/* Info card flotante */}
       <div className="px-4 -mt-6 relative z-10 pb-4">
-        <div className="bg-background/85 backdrop-blur-xl border border-border rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-background/85 backdrop-blur-lg border border-border rounded-2xl shadow-sm overflow-hidden">
           {/* Fila superior: ubicación + rating */}
           <div className="flex items-center justify-between gap-2 flex-wrap px-4 pt-3 pb-2 border-b border-border">
             <Link

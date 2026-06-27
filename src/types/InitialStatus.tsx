@@ -1,73 +1,111 @@
+export const DIA_NOMBRES = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miercoles",
+  "Jueves",
+  "Viernes",
+  "Sabado",
+] as const;
+
+export type DiaNombre = (typeof DIA_NOMBRES)[number];
+
+export interface QuantityDiscount {
+  id: number;
+  min_qty: number;
+  max_qty: number | null;
+  type: "percentage" | "fixed" | "quantity";
+  value: number;
+}
 export interface ProductVariant {
+  quantity_discounts?: QuantityDiscount[];
   id: string;
   label: string;
   image?: string | null;
-  images?: string[];
+  basePrice?: number | null;
   price?: number | null;
   oldPrice?: number | null;
+  priceCompra?: number | null;
   stock?: number | null;
-  agotado?: boolean;
   default?: boolean;
+  default_variant: boolean;
   visible?: boolean;
   orden?: number;
   sku?: string | null;
   attributes?: Record<string, string | number | boolean>;
   active?: boolean;
   created_at?: string;
+  Cant?: number;
+  embalaje: number;
   updated_at?: string;
 }
+export interface CombosInterface {
+  caja: string;
+  image: string;
+  price: number;
+  stock: number;
+  title: string;
+  venta: boolean;
+  old_price: number;
+  productId: string;
+}
+export interface Turno {
+  id: number;
+  open: boolean;
+  apertura: string; // "HH:MM:SS"
+  cierre: string; // "HH:MM:SS"
+  es_24h: boolean;
+  cruza_medianoche: boolean;
+}
 
+export interface ScheduleInterface {
+  dia: DiaNombre;
+  fecha: string; // "YYYY-MM-DD"
+  turnos: Turno[];
+}
+
+export interface EstadoHorario {
+  abierto: boolean;
+  es_24h: boolean;
+  cierra_en_minutos: number | null;
+  abre_en_minutos: number | null;
+  proximo_cierre: string | null; // "HH:MM"
+  proxima_apertura: string | null; // "HH:MM"
+}
+export interface InfoSections {
+  content?: string;
+  id?: string;
+  label?: string;
+  // El icono se guarda como nombre de string (ej: "FileText", "Beaker")
+  // y se resuelve a componente en el cliente con el mapa ICON_MAP
+  icon?: string;
+  order?: number;
+}
 export interface Product {
+  combos?: CombosInterface[];
   productId: string;
   title: string;
-  image?: string | null;
   creado: string;
   favorito?: boolean;
   descripcion?: string;
   default_moneda: number;
-  Cant: number;
   caja?: string;
   visible: boolean;
   comparar: boolean;
   caracteristicas: string[];
   id: number;
-  oldPrice: number;
-  price: number;
-  stock?: number;
-  agotado?: boolean;
-  priceCompra: number;
   order: number;
   storeId?: string;
   visitas: number;
   span?: boolean;
   coment: ComentGeneral;
-  imagesecondary: string[];
-  embalaje: number;
   venta: boolean;
-  /**
-   * true cuando el producto tiene variantes reales configuradas,
-   * false o ausente cuando solo tiene la variante default.
-   * (en el JSON del backend viene como boolean)
-   */
-  has_variants?: boolean;
-  /** Array de variantes del producto (viene del backend como "variants") */
-  variants?: ProductVariant[];
-  /** Variante actualmente seleccionada */
-  selected_variant?: ProductVariant;
-  agregados: AgregadosInterface[];
+  variants: ProductVariant[];
+  variants_count?: number;
+  selected_variant: ProductVariant;
+  info_sections?: InfoSections[];
 }
 
-export interface AgregadosInterface {
-  id: string;
-  name: string;
-  price: number;
-  cant: number;
-}
-export interface ScheduleInterface {
-  dia: string;
-  apertura: string;
-  cierre: string;
-}
 export interface Current {
   id: number;
   valor: number;
@@ -187,6 +225,7 @@ export interface AppState {
   envios?: Sends[];
   font: string;
   horario?: ScheduleInterface[];
+  estadoHorario?: EstadoHorario;
   id: number;
   insta: string;
   local: boolean;
@@ -246,38 +285,17 @@ export const initialState: AppState = {
   horario: [
     {
       dia: "Domingo",
-      cierre: "2025-08-04T00:00:00Z",
-      apertura: "2025-08-03T00:00:00Z",
-    },
-    {
-      dia: "Lunes",
-      cierre: "2025-08-05T00:00:00Z",
-      apertura: "2025-08-04T00:00:00Z",
-    },
-    {
-      dia: "Martes",
-      cierre: "2025-08-06T00:00:00Z",
-      apertura: "2025-08-05T00:00:00Z",
-    },
-    {
-      dia: "Miercoles",
-      cierre: "2025-08-07T00:00:00Z",
-      apertura: "2025-08-06T00:00:00Z",
-    },
-    {
-      dia: "Jueves",
-      cierre: "2025-08-08T00:00:00Z",
-      apertura: "2025-08-07T00:00:00Z",
-    },
-    {
-      dia: "Viernes",
-      cierre: "2025-08-09T00:00:00Z",
-      apertura: "2025-08-08T00:00:00Z",
-    },
-    {
-      dia: "Sabado",
-      cierre: "2025-08-10T00:00:00Z",
-      apertura: "2025-08-09T00:00:00Z",
+      fecha: new Date().toISOString().split("T")[0], // "YYYY-MM-DD"
+      turnos: [
+        {
+          id: 1,
+          apertura: "09:00:00",
+          cierre: "18:00:00",
+          es_24h: false,
+          cruza_medianoche: false,
+          open: false,
+        },
+      ],
     },
   ],
   name: "",

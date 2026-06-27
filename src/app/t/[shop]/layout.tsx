@@ -1,11 +1,13 @@
 import React from "react";
 import MyProvider from "@/context/MyContext";
-import { AppState } from "@/types/InitialStatus";
-import { supabase } from "@/lib/supabase";
+import { AppState, ProductVariant } from "@/types/InitialStatus";
 import { notFound } from "next/navigation";
 import Unavailable from "@/components/Catalogos/General/Unavailable";
 import { Metadata } from "next";
 import { buildShopMetadata } from "@/lib/shopMeta";
+import { getStoreShell } from "@/lib/storeData";
+import { ColorExtracted } from "./producto/[id]/page";
+import { ShopMonitoringWrapper } from "@/components/ShopMonitoringWrapper";
 
 export async function generateMetadata({
   params,
@@ -26,30 +28,24 @@ export default async function RootLayout({
   params: Promise<{ shop: string }>;
 }) {
   const { shop } = await params;
-  const { data: storeOne, error } = await supabase.rpc(
-    "get_store_with_transform",
-    { tienda_slug: shop },
-  );
-
-  if (error) {
-    console.error("Error al obtener tienda:", error);
-    notFound();
-  } else {
-    console.info("Store OK");
-  }
-  let store = transformData(storeOne);
-  if (typeof storeOne.edit == "string") {
-    store = transformData({ ...storeOne, edit: JSON.parse(storeOne.edit) });
-  }
+  const storeOne = await getStoreShell(shop);
+  if (!storeOne) notFound();
+  const store = transformData(storeOne);
   if (!store.sitioweb) {
     console.info("Tienda no encontrada, redirigiendo a notFound");
     notFound();
   }
 
-  if (!storeOne.active) return <Unavailable />;
+  if (!store.active) return <Unavailable />;
+
+  const extractedColor = await ColorExtracted(
+    store?.urlPoster || store.banner || "",
+  );
   return (
     <div>
-      <MyProvider storeSSD={store}>
+      <MyProvider storeSSD={store} color={extractedColor}>
+        {/* Monitoreo de carritos para notificaciones de pedidos pendientes */}
+        <ShopMonitoringWrapper shop={shop} store={store} />
         <div className="min-h-[80vh]">{children}</div>
       </MyProvider>
     </div>
@@ -69,7 +65,15 @@ function transformData(store: AppState): AppState {
     products:
       store.products?.map((obj) => ({
         ...obj,
-        Cant: 0,
+        selected_variant: {
+          ...obj.selected_variant,
+          Cant: 0,
+          id: String(obj.selected_variant?.id ?? ""),
+        } as ProductVariant,
+        variants: (obj.variants ?? []).map((variant) => ({
+          ...variant,
+          Cant: 0,
+        })),
         comparar: false,
       })) ?? [],
     envios:

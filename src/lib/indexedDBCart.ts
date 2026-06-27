@@ -3,17 +3,9 @@
 
 import { ProductVariant } from "@/types/InitialStatus";
 
-export type SavedAgregado = {
-  id: string;
-  cant: number;
-  price?: number;
-  name?: string;
-};
-
 export type SavedProduct = {
   productId: string;
   Cant?: number;
-  agregados?: SavedAgregado[];
   /** ID de la variante seleccionada (solo si no es la default) */
   variantId?: string;
   /** Objeto completo de la variante (para restaurar precio, stock, imagen, etc.) */
@@ -53,18 +45,10 @@ function openDB(): Promise<IDBDatabase> {
 }
 
 function normalizeSavedProduct(p: SavedProduct): SavedProduct {
-  const agregadosNormalized =
-    p.agregados?.map((a) => ({
-      id: String(a.id),
-      cant: Number(a?.cant ?? 0),
-      price: a?.price,
-      name: a?.name,
-    })) ?? [];
-
   return {
     productId: String(p.productId),
     Cant: p.Cant !== undefined ? Number(p.Cant) : undefined,
-    agregados: agregadosNormalized,
+
     // Preservar datos de variante tal como están (ya son serializables)
     ...(p.variantId ? { variantId: p.variantId } : {}),
     ...(p.selected_variant ? { selected_variant: p.selected_variant } : {}),

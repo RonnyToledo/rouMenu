@@ -1,4 +1,5 @@
 import { AppState, Current, Product } from "@/types/InitialStatus";
+import { convertAndRoundCurrency } from "@/lib/pricing/currency";
 
 /**
  * Devuelve el total final (number) convertido a la moneda defecto del store.
@@ -22,54 +23,29 @@ export function getTotalFinal(store: AppState, products: Product[]) {
     {},
   );
 
-  const convertAndRound = (
-    amount: number,
-    valorSrc: number,
-    valorDst: number,
-  ) => {
-    const a = Number(amount ?? 0);
-    if (!isFinite(a)) return 0;
-    const vs = Number(valorSrc ?? 1) || 1;
-    const vd = Number(valorDst ?? 1) || 1;
-    if (vd === 0) return 0;
-    const converted = (a * vs) / vd;
-    return smartRound(converted);
-  };
-
   let total = 0;
 
   for (const p of products || []) {
-    const qty = Number(p.Cant ?? 0);
-    const hasAggQty = (p.agregados ?? []).some((a) => (a.cant ?? 0) > 0);
-    if (qty === 0 && !hasAggQty) continue; // ignorar productos sin cantidad ni agregados
+    const qty = Number(p.selected_variant?.Cant ?? 0);
+
+    if (qty === 0) continue; // ignorar productos sin cantidad ni agregados
 
     const monedaOrigen = monedaMap[p.default_moneda as number] ?? target;
     const valorOrigen = Number(monedaOrigen?.valor ?? 1) || 1;
 
-    const priceConv = convertAndRound(p.price ?? 0, valorOrigen, valorTarget);
-    const embalajeConv = convertAndRound(
-      p.embalaje ?? 0,
+    const priceConv = convertAndRoundCurrency(
+      p.selected_variant?.price ?? 0,
+      valorOrigen,
+      valorTarget,
+    );
+    const embalajeConv = convertAndRoundCurrency(
+      p.selected_variant?.embalaje ?? 0,
       valorOrigen,
       valorTarget,
     );
 
     // total por el producto (precio + embalaje) * cantidad
     total += (priceConv + embalajeConv) * qty;
-
-    // agregados: (precio_agregado + embalaje_por_producto) * cantidad_agregado
-    const agregadosTotal = (p.agregados ?? []).reduce((sum, agg) => {
-      const aggQty = Number(agg.cant ?? 0);
-      if (aggQty <= 0) return sum;
-      const aggPriceConv = convertAndRound(
-        agg.price ?? 0,
-        valorOrigen,
-        valorTarget,
-      );
-      // si no quieres sumar embalaje dentro del agregado, quita + embalajeConv
-      return sum + (aggPriceConv + embalajeConv) * aggQty;
-    }, 0);
-
-    total += agregadosTotal;
   }
 
   return smartRound(total);

@@ -33,7 +33,7 @@ export async function buildShopMetadata(
     forceProperName?: boolean | null;
     imageFallback?: string;
     maxTitleLength?: number;
-  }
+  },
 ): Promise<Metadata> {
   const siteName = opts?.siteName ?? "rouMenu";
   const maxTitleLength = opts?.maxTitleLength ?? 60;

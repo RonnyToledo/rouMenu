@@ -2,7 +2,7 @@
 
 import React, { useState, useContext, useEffect, useMemo } from "react";
 import { Star } from "lucide-react";
-import { StarDistribution } from "@/types/InitialStatus";
+import { Product, StarDistribution } from "@/types/InitialStatus";
 import { MyContext } from "@/context/MyContext";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -14,9 +14,11 @@ import { initialState, Rating, RatingInterface } from "../About/RatingModal";
 
 export default function RatingSection({
   specific,
+  productData,
 }: {
   specific: string;
   sitioweb: string;
+  productData?: Product;
 }) {
   const { store, dispatchStore } = useContext(MyContext);
   const { user, requireAuth } = useAuth();
@@ -27,8 +29,9 @@ export default function RatingSection({
   }));
 
   const product = useMemo(
-    () => store.products.find((obj) => obj.productId == specific),
-    [store.products, specific],
+    () =>
+      productData ?? store.products.find((obj) => obj.productId == specific),
+    [productData, store.products, specific],
   );
 
   useEffect(() => {
@@ -48,7 +51,6 @@ export default function RatingSection({
       "Debes iniciar sesión para dejar una reseña",
     );
     if (!isAuthenticated) {
-      console.info("Usuario no autenticado, review cancelada");
       return;
     }
     setReviewOpen(true);
@@ -58,7 +60,7 @@ export default function RatingSection({
     if (!user?.id) return;
     try {
       const res = await axios.post(
-        `/api/tienda/${store}/product/${product?.productId || ""}/coment`,
+        `/api/tienda/${store.sitioweb || ""}/product/${product?.productId || ""}/coment`,
         {
           comentario: {
             cmt: rating.description,
@@ -159,14 +161,14 @@ export default function RatingSection({
                 <button
                   key={starValue}
                   onClick={() => handleStarClick(starValue)}
-                  className="w-10 h-10 rounded-full bg-secondary hover:bg-primary/10 flex items-center justify-center transition-colors group"
+                  className="w-10 h-10 rounded-full bg-radial from-product/20 to-transparent hover:bg-product/10 flex items-center justify-center transition-colors group"
                   aria-label={`Calificar con ${starValue} estrella${starValue > 1 ? "s" : ""}`}
                 >
                   <Star
                     className={`w-5 h-5 transition-colors ${
                       starValue <= rating.selectedRating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-muted-foreground/40 group-hover:text-amber-400 group-hover:fill-amber-400"
+                        ? " fill-product text-product"
+                        : "text-muted-foreground/40 group-hover:text-product group-hover:fill-product"
                     }`}
                   />
                 </button>
@@ -216,7 +218,7 @@ export function StarSpecifications({ datos }: { datos: StarDistribution }) {
             <span className="w-3 text-xs text-muted-foreground">{item}</span>
             <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden border border-border">
               <div
-                className="h-full bg-primary rounded-full transition-all duration-500"
+                className="h-full bg-product rounded-full transition-all duration-500"
                 style={{ width: `${porcentaje}%` }}
               />
             </div>

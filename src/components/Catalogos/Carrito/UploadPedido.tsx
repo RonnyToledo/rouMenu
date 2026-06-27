@@ -1,6 +1,7 @@
-// UploadPedido.ts
+"use client";
+
 import { supabase } from "@/lib/supabase";
-import type { UploadCompraInterface } from "./CarritoPage";
+import type { UploadCompraInterface } from "@/types/interfaces_Cart";
 
 interface PedidoItemMinimo {
   id: number;
@@ -10,15 +11,10 @@ interface PedidoItemMinimo {
   price: number;
   embalaje: number;
   priceCompra: number;
-  Cant: number;
   stock: number;
+  Cant: number;
   default_moneda: number;
   caja: string;
-  /**
-   * Datos de la variante seleccionada (solo si no es la default).
-   * Incluye attributes para que el negocio pueda leer
-   * qué combinación pidió el cliente: { color: "Rojo", talla: "M" }
-   */
   selected_variant?: {
     id: string;
     label: string;
@@ -27,17 +23,8 @@ interface PedidoItemMinimo {
     stock?: number | null;
     attributes?: Record<string, string | number | boolean>;
   };
-  agregados: AgregadoMinimo[];
 }
 
-interface AgregadoMinimo {
-  id: string;
-  name: string;
-  price: number;
-  cant: number;
-}
-
-// Claves internas que no aportan info al negocio
 const INTERNAL_ATTR_KEYS = new Set(["tipo", "es_default"]);
 
 function minimizarPedido(
@@ -46,7 +33,6 @@ function minimizarPedido(
   return pedido.map((p) => {
     const variant = p.selected_variant;
 
-    // Solo incluir variante si no es la default
     const variantMinimo =
       variant && !variant.default
         ? {
@@ -55,7 +41,6 @@ function minimizarPedido(
             price: variant.price,
             oldPrice: variant.oldPrice,
             stock: variant.stock,
-            // Filtrar claves internas de attributes antes de guardar
             ...(variant.attributes
               ? {
                   attributes: Object.fromEntries(
@@ -72,23 +57,15 @@ function minimizarPedido(
       id: p.id,
       productId: p.productId,
       title: p.title,
-      image: p.image || "",
-      price: p.price ?? 0,
-      embalaje: p.embalaje ?? 0,
-      priceCompra: p.priceCompra ?? 0,
-      Cant: p.Cant ?? 0,
-      stock: p.stock ?? 0,
+      image: p.selected_variant?.image || "",
+      price: p.selected_variant?.price ?? 0,
+      embalaje: p.selected_variant?.embalaje ?? 0,
+      priceCompra: p.selected_variant?.priceCompra ?? 0,
+      stock: p.selected_variant?.stock ?? 0,
+      Cant: p.selected_variant?.Cant ?? 0,
       default_moneda: p.default_moneda,
       caja: p.caja || "",
       ...(variantMinimo ? { selected_variant: variantMinimo } : {}),
-      agregados: (p.agregados ?? [])
-        .filter((a) => a.cant > 0)
-        .map((a) => ({
-          id: a.id,
-          name: a.name,
-          price: a.price ?? 0,
-          cant: a.cant,
-        })),
     };
   });
 }
@@ -124,7 +101,12 @@ export async function UploadPedido(dato: UploadCompraInterface) {
   };
 
   const { data, error } = await supabase.rpc("create_order_event", params);
-  if (error) throw new Error(error.message);
-  console.log(data);
+
+  console.error("Error al subir pedido:", error, data);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
   return data as { event_id: number; uid_venta: string };
 }

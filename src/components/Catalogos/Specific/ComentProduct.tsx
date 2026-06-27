@@ -1,12 +1,13 @@
 "use client";
 
-import { useContext, useEffect, useState, useCallback } from "react";
+import { useContext, useEffect, useState, useCallback, useMemo } from "react";
 import {
   Star,
   ChevronLeft,
   ChevronRight,
   Filter,
   MessageCircle,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,8 @@ const loadingStates = [
   { text: "Renderizando" },
 ];
 
+const PAGE_SIZE = 10;
+
 type tabsType = "all" | "positive" | "negative";
 
 export default function CommentsPage({ id }: { id: string }) {
@@ -34,19 +37,18 @@ export default function CommentsPage({ id }: { id: string }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-
-  const pageSize = 10;
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const fetchComments = useCallback(
     async (
       currentPage: number = 1,
-      filter: string = "all",
+      filterParam: string = "all",
       UUID: string,
     ): Promise<void> => {
       setLoading(true);
       try {
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize - 1;
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const end = start + PAGE_SIZE - 1;
 
         let query = supabase
           .from("coment")
@@ -55,9 +57,9 @@ export default function CommentsPage({ id }: { id: string }) {
           .order("created_at", { ascending: false })
           .range(start, end);
 
-        if (filter === "positive") {
+        if (filterParam === "positive") {
           query = query.gte("star", 3);
-        } else if (filter === "negative") {
+        } else if (filterParam === "negative") {
           query = query.lt("star", 2);
         }
 
@@ -66,7 +68,8 @@ export default function CommentsPage({ id }: { id: string }) {
         if (error) throw error;
         if (data) {
           setReviews(ReordenateData(data, store));
-          setTotalPages(Math.ceil((count ?? 0) / pageSize));
+          setTotalCount(count ?? 0);
+          setTotalPages(Math.ceil((count ?? 0) / PAGE_SIZE));
         }
       } catch (err) {
         console.error("Error al cargar comentarios:", err);
@@ -74,7 +77,7 @@ export default function CommentsPage({ id }: { id: string }) {
         setLoading(false);
       }
     },
-    [pageSize, store],
+    [store],
   );
 
   useEffect(() => {
@@ -83,13 +86,30 @@ export default function CommentsPage({ id }: { id: string }) {
     }
   }, [page, filter, id, fetchComments]);
 
+  // Reset to page 1 when filter changes
+  const handleFilterChange = useCallback((value: string) => {
+    setFilter(value as tabsType);
+    setPage(1);
+  }, []);
+
+  const avgRating = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return reviews.reduce((sum, rev) => rev.star + sum, 0) / reviews.length;
+  }, [reviews]);
+
+  const positivePercent = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return Math.round(
+      (reviews.filter((r) => r.star >= 4).length / reviews.length) * 100,
+    );
+  }, [reviews]);
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Espaciado para el header sticky (mismo h-16 del ProductHeader) */}
       <div className="h-16" />
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Header — tipografía alineada con ProductSpecific */}
+        {/* Header */}
         <div className="space-y-0.5">
           <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground">
             Comentarios y Reseñas
@@ -99,14 +119,14 @@ export default function CommentsPage({ id }: { id: string }) {
           </p>
         </div>
 
-        {/* Stats cards — misma altura compacta */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3">
           <Card className="border-border shadow-sm">
             <CardContent className="pt-4 pb-3">
               <div className="flex flex-col items-center gap-1.5">
                 <MessageCircle className="w-4 h-4 text-muted-foreground" />
                 <p className="text-2xl font-bold text-foreground">
-                  {reviews.length}
+                  {totalCount}
                 </p>
                 <p className="text-xs text-muted-foreground">Total</p>
               </div>
@@ -117,18 +137,26 @@ export default function CommentsPage({ id }: { id: string }) {
               <div className="flex flex-col items-center gap-1.5">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <p className="text-2xl font-bold text-foreground">
-                  {(
-                    reviews.reduce((sum, rev) => rev.star + sum, 0) /
-                      reviews.length || 0
-                  ).toFixed(1)}
+                  {avgRating.toFixed(1)}
                 </p>
                 <p className="text-xs text-muted-foreground">Promedio</p>
               </div>
             </CardContent>
           </Card>
+          <Card className="border-border shadow-sm">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex flex-col items-center gap-1.5">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <p className="text-2xl font-bold text-foreground">
+                  {positivePercent}%
+                </p>
+                <p className="text-xs text-muted-foreground">Positivos</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Filters — mismo bg-secondary / rounded del resto de la UI */}
+        {/* Filters */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-secondary/50 rounded-xl border border-border">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
@@ -136,10 +164,7 @@ export default function CommentsPage({ id }: { id: string }) {
               Filtrar por:
             </span>
           </div>
-          <Tabs
-            value={filter}
-            onValueChange={(value) => setFilter(value as tabsType)}
-          >
+          <Tabs value={filter} onValueChange={handleFilterChange}>
             <TabsList className="rounded-full">
               <TabsTrigger value="all" className="rounded-full text-xs">
                 Todos
@@ -175,20 +200,22 @@ export default function CommentsPage({ id }: { id: string }) {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 border border-border">
-              <MessageCircle className="w-6 h-6 text-muted-foreground" />
+          !loading && (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-14 h-14 rounded-full bg-secondary flex items-center justify-center mb-4 border border-border">
+                <MessageCircle className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
+                No hay comentarios
+              </h3>
+              <p className="text-sm text-muted-foreground text-center max-w-xs">
+                No se encontraron comentarios con los filtros seleccionados
+              </p>
             </div>
-            <h3 className="font-serif text-lg font-semibold text-foreground mb-1">
-              No hay comentarios
-            </h3>
-            <p className="text-sm text-muted-foreground text-center max-w-xs">
-              No se encontraron comentarios con los filtros seleccionados
-            </p>
-          </div>
+          )
         )}
 
-        {/* Pagination — mismos rounded-full buttons del header */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-xl border border-border">
             <Button

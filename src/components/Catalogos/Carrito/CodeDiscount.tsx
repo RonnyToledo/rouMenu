@@ -3,7 +3,7 @@ import React, { useContext, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MyContext } from "@/context/MyContext";
 import { Trash2, Tag } from "lucide-react";
-import { CompraInterface } from "./CarritoPage";
+import { CompraInterface } from "@/types/interfaces_Cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { sileo } from "sileo";

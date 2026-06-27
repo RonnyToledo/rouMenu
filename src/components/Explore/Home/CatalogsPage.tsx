@@ -18,102 +18,90 @@ export default function CatalogsPage() {
   return (
     <>
       <div className="noise-overlay" aria-hidden="true" />
-      <main style={{ minHeight: "100vh", background: "#FFF8F0" }}>
-        {/* Page hero header */}
-        <div
-          className="relative py-16 px-5 overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(150deg, #FDF8F2 0%, #FFF5EC 50%, #FEF0E4 100%)",
-          }}
-        >
-          {/* Warm orb */}
+
+      <main className="min-h-screen bg-[#0D0D0D]">
+        {/* ── Hero header ────────────────────────────────── */}
+        <div className="relative overflow-hidden border-b border-[#242424] pt-20 pb-14 px-5">
+          {/* grid texture */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-30"
+            style={{
+              backgroundImage:
+                "linear-gradient(#242424 1px, transparent 1px), linear-gradient(90deg, #242424 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
+            }}
+          />
+          {/* red glow */}
           <div
             className="absolute pointer-events-none"
             style={{
-              width: "600px",
-              height: "300px",
-              top: "-80px",
+              width: 520,
+              height: 520,
+              top: -200,
               left: "50%",
               transform: "translateX(-50%)",
               background:
-                "radial-gradient(circle, rgba(200,75,49,0.08) 0%, transparent 70%)",
-              filter: "blur(60px)",
-            }}
-          />
-          {/* Dot grid */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, rgba(160,100,50,0.09) 1px, transparent 1px)",
-              backgroundSize: "36px 36px",
+                "radial-gradient(circle, rgba(200,75,49,0.16) 0%, transparent 70%)",
+              filter: "blur(70px)",
             }}
           />
 
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-              <div>
-                <div
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-5"
-                  style={{
-                    background: "rgba(200,75,49,0.08)",
-                    border: "1px solid rgba(200,75,49,0.2)",
-                  }}
-                >
-                  <span
-                    className="w-2 h-2 rounded-full animate-pulse"
-                    style={{
-                      background: "#C84B31",
-                      boxShadow: "0 0 6px rgba(200,75,49,0.5)",
-                    }}
-                  />
-                  <span
-                    className="text-xs font-semibold tracking-widest uppercase"
-                    style={{ color: "#C84B31" }}
-                  >
-                    {total > 0
-                      ? `${total}+ Catálogos activos`
-                      : "Catálogos activos"}
-                  </span>
-                </div>
-
-                <h1
-                  className="font-display font-bold leading-none"
-                  style={{
-                    fontSize: "clamp(3rem, 7vw, 5.5rem)",
-                    lineHeight: "0.93",
-                    color: "#1A1208",
-                  }}
-                >
-                  Todos los
-                  <br />
-                  <span
-                    style={{
-                      background:
-                        "linear-gradient(135deg, #C84B31 0%, #E07840 45%, #E8A838 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      backgroundClip: "text",
-                    }}
-                  >
-                    Catálogos
-                  </span>
-                </h1>
-              </div>
-
-              <p
-                className="text-sm font-light max-w-xs leading-relaxed"
-                style={{ color: "rgba(90,55,20,0.65)" }}
+          <div className="relative z-10 max-w-2xl mx-auto">
+            {/* pill */}
+            <div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-7"
+              style={{
+                background: "rgba(200,75,49,0.1)",
+                border: "1px solid rgba(200,75,49,0.28)",
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{
+                  background: "#C84B31",
+                  boxShadow: "0 0 7px #C84B31",
+                }}
+              />
+              <span
+                className="text-[10px] font-bold tracking-[0.14em] uppercase"
+                style={{ color: "#C84B31" }}
               >
-                Explora, filtra y descubre los mejores catálogos del mercado.
-              </p>
+                {total > 0
+                  ? `${total}+ catálogos activos`
+                  : "Catálogos activos"}
+              </span>
             </div>
+
+            <h1
+              className="font-serif font-bold leading-[0.92] mb-5"
+              style={{ fontSize: "clamp(3rem, 9vw, 5rem)", color: "#FFF8F0" }}
+            >
+              Todos los
+              <br />
+              <span
+                style={{
+                  background:
+                    "linear-gradient(135deg, #C84B31 0%, #E07840 45%, #E8A838 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                Catálogos
+              </span>
+            </h1>
+
+            <p
+              className="text-sm font-light leading-relaxed max-w-xs"
+              style={{ color: "rgba(255,248,240,0.45)" }}
+            >
+              Explora, filtra y descubre los mejores catálogos del mercado.
+            </p>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="max-w-7xl mx-auto px-5 py-12">
+        {/* ── Content ────────────────────────────────────── */}
+        <div className="max-w-2xl mx-auto px-5 py-12">
           {spotlight.length > 0 && <FeaturedSpotlight spotlight={spotlight} />}
           <CatalogsGrid catalogs={catalogs} types={types} totalCount={total} />
         </div>

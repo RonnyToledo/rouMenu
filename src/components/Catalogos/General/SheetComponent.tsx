@@ -8,7 +8,7 @@ import React, {
   useMemo,
   createContext,
 } from "react";
-import { User } from "lucide-react";
+import { ShoppingBag, User } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -19,12 +19,17 @@ import {
 import { useAuth } from "@/context/AppContext";
 import Link from "next/link";
 import { MyContext } from "@/context/MyContext";
-import { MdCategory, MdCurrencyExchange, MdRateReview } from "react-icons/md";
+import {
+  MdCategory,
+  MdCurrencyExchange,
+  MdRateReview,
+  MdOutlineSupportAgent,
+} from "react-icons/md";
 import { IoStorefrontOutline, IoSearch } from "react-icons/io5";
 import { IoIosHome } from "react-icons/io";
 import { FaBalanceScale } from "react-icons/fa";
 import { Separator } from "@/components/ui/separator";
-import { ExtraerCategorias } from "@/functions/extraerCategoriass";
+import { getCategoriesWithProducts } from "@/lib/catalog/categorySelectors";
 import { BsFileEarmarkPostFill } from "react-icons/bs";
 import { MdTravelExplore } from "react-icons/md";
 import { useRouter, usePathname } from "next/navigation";
@@ -152,8 +157,10 @@ function SheetComponent({
     [closeSheet, dispatchStore],
   );
 
-  const homeItems = useMemo(
-    () => [
+  const homeItems = useMemo<
+    Array<{ name: string; icon: React.ReactNode; action: () => void }>
+  >(() => {
+    const baseItems = [
       {
         name: "Inicio",
         icon: <IoIosHome />,
@@ -176,6 +183,14 @@ function SheetComponent({
         action: () => setShowState("categories"),
       },
       {
+        name: "Comparar productos",
+        icon: <FaBalanceScale />,
+        action: () => {
+          router.push(`/t/${store.sitioweb}/comparar`);
+          closeSheet();
+        },
+      },
+      {
         name: "Moneda de Compra",
         icon: <MdCurrencyExchange />,
         action: () => setShowState("coins"),
@@ -185,15 +200,6 @@ function SheetComponent({
         icon: <MdRateReview />,
         action: () => {
           handleReviewAction();
-          closeSheet();
-        },
-      },
-      {
-        name: "Comparar productos",
-        icon: <FaBalanceScale />,
-        action: () => {
-          router.push(`/t/${store.sitioweb}/comparar`);
-          closeSheet();
         },
       },
       {
@@ -205,6 +211,16 @@ function SheetComponent({
         },
       },
       {
+        name: "Soporte y Ayuda",
+        icon: <MdOutlineSupportAgent />,
+        action: () => {
+          router.push(
+            `https://wa.me/${store?.cell}?text=Hola%20tengo%20una%20consulta%20sobre%20${store.sitioweb}`,
+          );
+          closeSheet();
+        },
+      },
+      {
         name: "Explorar más catálogos",
         icon: <MdTravelExplore />,
         action: () => {
@@ -212,10 +228,32 @@ function SheetComponent({
           closeSheet();
         },
       },
-    ],
-    [store.sitioweb, router, closeSheet, handleReviewAction, setShowState],
-  );
+    ];
 
+    return [
+      ...baseItems,
+      ...(user
+        ? [
+            {
+              name: "Ver Órdenes",
+              icon: <ShoppingBag />,
+              action: () => {
+                router.push(`/user/order`);
+                closeSheet();
+              },
+            },
+          ]
+        : []),
+    ];
+  }, [
+    store.sitioweb,
+    store.cell,
+    router,
+    closeSheet,
+    handleReviewAction,
+    setShowState,
+    user,
+  ]);
   const displayName = useMemo(() => {
     if (!isMounted || loading) return "Cargando...";
     return user?.user_metadata?.full_name?.split(" ")[0] || "Guest";
@@ -228,7 +266,7 @@ function SheetComponent({
   return (
     <>
       <Sheet onOpenChange={onOpenChange} open={isOpen}>
-        <SheetContent className="bg-secondary/95 backdrop-blur-xl border-border p-4 transition-colors duration-300">
+        <SheetContent className="bg-secondary/95 backdrop-blur-lg border-border p-4 transition-colors duration-300">
           <SheetHeader>
             <SheetTitle>
               <Link href="/user" className="flex items-center gap-2.5">
@@ -387,37 +425,45 @@ function CategoriesView({
   const [blinkingCategoryId, setBlinkingCategoryId] = useState<string | null>(
     null,
   );
+  const siteWeb = store.sitioweb;
+  const homePath = `/t/${siteWeb}`;
 
   useEffect(() => {
     if (highlightCategoryId !== null) {
       const el = document.getElementById(`category-${highlightCategoryId}`);
       if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-      setBlinkingCategoryId(highlightCategoryId);
+      const blinkId = highlightCategoryId;
+      const showTimer = setTimeout(() => {
+        setBlinkingCategoryId(blinkId);
+      }, 0);
       const t = setTimeout(() => {
         setBlinkingCategoryId(null);
         onHighlightComplete();
       }, 1000);
-      return () => clearTimeout(t);
+      return () => {
+        clearTimeout(showTimer);
+        clearTimeout(t);
+      };
     }
   }, [highlightCategoryId, onHighlightComplete]);
 
   const handleCategoryClick = useCallback(
     (category: Categoria) => {
-      if (category.subtienda || pathname !== `/t/${store?.sitioweb}`) {
-        router.push(`/t/${store?.sitioweb}/category/${category.id}`);
+      if (category.subtienda || pathname !== homePath) {
+        router.push(`/t/${siteWeb}/category/${category.id}`);
         onClose();
       } else {
-        if (pathname === `/t/${store?.sitioweb}`) {
+        if (pathname === homePath) {
           ScrollTo(category.id);
           onClose();
         } else {
-          router.push(`/t/${store?.sitioweb}`);
+          router.push(homePath);
           onClose();
           setTimeout(() => ScrollTo(category.id), 100);
         }
       }
     },
-    [store?.sitioweb, pathname, router, onClose],
+    [homePath, onClose, pathname, router, siteWeb],
   );
 
   return (
@@ -439,7 +485,7 @@ function CategoriesView({
         className="font-semibold"
       />
       <Separator className="bg-border my-1" />
-      {ExtraerCategorias(store?.categorias, store.products).map(
+      {getCategoriesWithProducts(store?.categorias, store.products).map(
         (category: Categoria) => (
           <ListSheet
             key={category.id}
