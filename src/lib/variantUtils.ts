@@ -31,14 +31,33 @@ export function extractColorHex(val: unknown): string {
 
 /**
  * Devuelve los atributos visibles de una variante (filtrando claves internas).
+ * Si la variante no tiene atributos visibles, devuelve un atributo derivado
+ * "variant_label" basado en el label de la variante para hacerla seleccionable.
  */
 export function getVisibleAttributes(
   variant: ProductVariant,
 ): Record<string, unknown> {
-  if (!variant.attributes) return {};
-  return Object.fromEntries(
+  // 🔥 Las variantes principales NO deben tener atributos visibles
+  if (variant.default_variant) {
+    return {};
+  }
+
+  if (!variant.attributes) {
+    if (variant.label) {
+      return { Producto: variant.label };
+    }
+    return {};
+  }
+
+  const attrs = Object.fromEntries(
     Object.entries(variant.attributes).filter(([k]) => !INTERNAL_KEYS.has(k)),
   );
+
+  if (Object.keys(attrs).length === 0 && variant.label) {
+    return { Producto: variant.label };
+  }
+
+  return attrs;
 }
 
 /**
@@ -63,6 +82,9 @@ export function getAttributeKeys(variants: ProductVariant[]): string[] {
  * Agrupa las variantes por atributo.
  * Devuelve un mapa: { "color": [{hex, name},...], "talla": ["M","L","XL"] }
  * Los valores son únicos (comparados por normalizeAttrValue) y en orden de aparición.
+ *
+ * Para variantes sin atributos visibles, crea automáticamente un atributo derivado
+ * "variant_label" basado en el label de la variante para hacerla seleccionable.
  */
 export function groupVariantsByAttribute(
   variants: ProductVariant[],
@@ -97,31 +119,13 @@ export function findVariantByAttributes(
   variants: ProductVariant[],
   selection: Record<string, unknown>,
 ): ProductVariant | undefined {
-  // Coincidencia exacta: todos los atributos visibles de la selección coinciden
-  const exact = variants.find((v) => {
+  return variants.find((v) => {
     const attrs = getVisibleAttributes(v);
     return Object.entries(selection).every(
-      ([k, val]) => normalizeAttrValue(attrs[k]) === normalizeAttrValue(val),
+      ([k, val]) =>
+        k in attrs && normalizeAttrValue(attrs[k]) === normalizeAttrValue(val),
     );
   });
-
-  if (exact) return exact;
-
-  // Fallback: mayor número de coincidencias
-  let best: ProductVariant | undefined;
-  let bestScore = -1;
-  for (const v of variants) {
-    const attrs = getVisibleAttributes(v);
-    const score = Object.entries(selection).filter(
-      ([k, val]) => normalizeAttrValue(attrs[k]) === normalizeAttrValue(val),
-    ).length;
-    if (score > bestScore) {
-      bestScore = score;
-      best = v;
-    }
-  }
-
-  return best ?? variants[0];
 }
 
 /**
@@ -183,22 +187,27 @@ export function capitalize(str: string): string {
  */
 export function isAttributeValueAvailable(
   variants: ProductVariant[],
-  currentSelection: Record<string, unknown>,
-  attributeKey: string,
-  attributeValue: unknown,
+  selection: Record<string, unknown>,
+  key: string,
+  value: unknown,
 ): boolean {
-  const hypothetical = { ...currentSelection, [attributeKey]: attributeValue };
+  const nextSelection = {
+    ...selection,
+    [key]: value,
+  };
 
   return variants.some((v) => {
-    // Solo variantes con stock
     if ((v.stock ?? 0) <= 0) return false;
 
     const attrs = getVisibleAttributes(v);
 
-    return Object.entries(hypothetical).every(([k, val]) => {
-      // FIX: el atributo debe existir en la variante (no saltar si es undefined)
-      if (attrs[k] === undefined) return false;
-      return normalizeAttrValue(attrs[k]) === normalizeAttrValue(val);
-    });
+    for (const [k, val] of Object.entries(nextSelection)) {
+      if (!(k in attrs)) continue;
+
+      if (normalizeAttrValue(attrs[k]) !== normalizeAttrValue(val))
+        return false;
+    }
+
+    return true;
   });
 }

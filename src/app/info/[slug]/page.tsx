@@ -1,7 +1,7 @@
 import React from "react";
-import { DynamicPageContent } from "@/components/Explore/Info/dynamic-page-content";
+import { DynamicPageContent } from "@/components/home_UI/Info/dynamic-page-content";
 import adminCatalogData from "@/components/Explore/Info/json/data.json";
-import { DataInterface } from "@/components/Explore/Info/json/interfaceTsx";
+import { DataInterface } from "@/components/home_UI/Info/json/interfaceTsx";
 
 import { Metadata } from "next";
 import { buildSiteMetadata } from "@/lib/siteMeta";

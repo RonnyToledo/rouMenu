@@ -29,7 +29,7 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts",
-    "src/components/Catalogos/General/Hours-TIme.jsx"
+    "src/components/catalogo_UI/General/Hours-TIme.jsx"
   ],
   "exclude": ["node_modules"]
 }

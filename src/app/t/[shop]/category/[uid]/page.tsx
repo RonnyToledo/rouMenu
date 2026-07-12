@@ -1,4 +1,4 @@
-import Category from "@/components/Catalogos/Categorias/Category";
+import Category from "@/components/catalogo_UI/Categorias/Category";
 import React from "react";
 
 export default async function page({

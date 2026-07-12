@@ -77,12 +77,12 @@ export default function StockAlertButton({
       >
         {done ? (
           <>
-            <CheckIcon className="w-4 h-4 text-emerald-500" />
+            <CheckIcon className="size-4 text-emerald-500" />
             Ya te avisamos cuando vuelva
           </>
         ) : (
           <>
-            <BellIcon className="w-4 h-4" />
+            <BellIcon className="size-4" />
             Avisarme cuando haya stock
           </>
         )}
@@ -93,7 +93,7 @@ export default function StockAlertButton({
         type="button"
         aria-label="Avisarme cuando haya stock"
         className={cn(
-          "w-8 h-8 rounded-[9px] flex items-center justify-center shrink-0",
+          "size-7 rounded-md flex items-center justify-center shrink-0",
           "border transition-colors duration-200",
           done
             ? "bg-emerald-50 border-emerald-200 text-emerald-600"
@@ -101,9 +101,9 @@ export default function StockAlertButton({
         )}
       >
         {done ? (
-          <CheckIcon className="w-4 h-4" />
+          <CheckIcon className="size-4" />
         ) : (
-          <BellIcon className="w-4 h-4" />
+          <BellIcon className="size-4" />
         )}
       </button>
     );
@@ -122,7 +122,7 @@ export default function StockAlertButton({
         <div className="flex flex-col gap-3">
           <div className="flex items-start gap-3">
             <div className="mt-0.5 w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-              <BellRingIcon className="w-4 h-4 text-amber-600" />
+              <BellRingIcon className="size-4 text-amber-600" />
             </div>
             <div>
               <p className="text-sm font-medium leading-snug">

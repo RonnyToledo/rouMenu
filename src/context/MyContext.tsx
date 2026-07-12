@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { reducerStore, AppAction } from "@/reducer/reducerGeneral";
 import { AppState, initialState, Product } from "../types/InitialStatus";
-import SitioRealtime from "@/components/Catalogos/General/RealTime";
+import SitioRealtime from "@/components/catalogo_UI/General/RealTime";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sileo } from "sileo";
 import { Pencil } from "lucide-react";
@@ -29,10 +29,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import Header from "@/components/Catalogos/General/Header";
-import { SheetProvider } from "@/components/Catalogos/General/SheetComponent";
+import Header from "@/components/catalogo_UI/General/Header";
+import { SheetProvider } from "@/components/catalogo_UI/General/SheetComponent";
 import { supabase } from "@/lib/supabase";
-import { LoadingScreen } from "@/components/Catalogos/General/LoadingScreen";
+import { LoadingScreen } from "@/components/catalogo_UI/General/LoadingScreen";
 import { decodeShareCart } from "@/lib/shareCart";
 
 interface ContextType {

@@ -1,5 +1,5 @@
 import React from "react";
-import SearchPage from "@/components/Catalogos/Search/SearchPage";
+import SearchPage from "@/components/catalogo_UI/Search/SearchPage";
 import { Metadata } from "next";
 import { buildShopMetadata } from "@/lib/shopMeta";
 

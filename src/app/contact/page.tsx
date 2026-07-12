@@ -1,4 +1,4 @@
-import ContactoPage from "@/components/Explore/Contacto/Contacto";
+import ContactoPage from "@/components/home_UI/Contacto/Contacto";
 import React from "react";
 
 import { Metadata } from "next";

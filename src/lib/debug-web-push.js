@@ -11,11 +11,11 @@
 
 (async function debugWebPush() {
   console.clear();
-  console.log(
+  console.debug(
     "%c🔍 INICIANDO DEBUGGING WEB PUSH",
     "font-size: 16px; font-weight: bold; color: #0066cc;",
   );
-  console.log("%c" + "=".repeat(50), "color: #0066cc;");
+  console.debug("%c" + "=".repeat(50), "color: #0066cc;");
 
   const results = {
     tests: [],
@@ -23,7 +23,7 @@
   };
 
   // Test 1: Verificar soporte del navegador
-  console.log(
+  console.debug(
     "\n%c✓ Test 1: Soporte del Navegador",
     "font-weight: bold; color: #333;",
   );
@@ -49,22 +49,22 @@
   }
 
   // Test 2: Service Worker Registrado
-  console.log(
+  console.debug(
     "\n%c✓ Test 2: Service Worker",
     "font-weight: bold; color: #333;",
   );
   let swRegistration = null;
   try {
     const registrations = await navigator.serviceWorker.getRegistrations();
-    console.log(`Encontrados ${registrations.length} Service Worker(s)`);
+    console.debug(`Encontrados ${registrations.length} Service Worker(s)`);
     registrations.forEach((reg, idx) => {
-      console.log(
+      console.debug(
         `  [${idx}] Scope: ${reg.scope}, Estado: ${reg.active ? "✓ Activo" : "⚠️ Inactivo"}`,
       );
     });
 
     swRegistration = await navigator.serviceWorker.ready;
-    console.log("%c✓ Service Worker está listo", "color: green;");
+    console.debug("%c✓ Service Worker está listo", "color: green;");
     results.tests.push({
       name: "Service Worker",
       passed: true,
@@ -84,12 +84,12 @@
   }
 
   // Test 3: Permiso de Notificaciones
-  console.log(
+  console.debug(
     "\n%c✓ Test 3: Permiso de Notificaciones",
     "font-weight: bold; color: #333;",
   );
   const permission = Notification.permission;
-  console.log(
+  console.debug(
     `Estado del permiso: %c${permission.toUpperCase()}`,
     permission === "granted"
       ? "color: green; font-weight: bold;"
@@ -109,11 +109,11 @@
       "%c⚠️ AVISO: Las notificaciones están bloqueadas por el usuario",
       "color: orange; font-weight: bold;",
     );
-    console.log("Para desbloquear:");
-    console.log(
+    console.debug("Para desbloquear:");
+    console.debug(
       "  1. Chrome/Edge: DevTools → Application → Manifest → Clear site data",
     );
-    console.log(
+    console.debug(
       "  2. Firefox: Preferences → Privacy → Permissions → Busca tu dominio → Delete",
     );
   } else if (permission === "default") {
@@ -121,7 +121,7 @@
   }
 
   // Test 4: Suscripción Push
-  console.log(
+  console.debug(
     "\n%c✓ Test 4: Suscripción Push",
     "font-weight: bold; color: #333;",
   );
@@ -130,15 +130,15 @@
     if (swRegistration) {
       subscription = await swRegistration.pushManager.getSubscription();
       if (subscription) {
-        console.log(
+        console.debug(
           "%c✓ Usuario SUSCRITO a Push",
           "color: green; font-weight: bold;",
         );
-        console.log(
+        console.debug(
           "Endpoint:",
           subscription.endpoint.substring(0, 50) + "...",
         );
-        console.log("Keys disponibles:", !!subscription.keys);
+        console.debug("Keys disponibles:", !!subscription.keys);
         results.tests.push({
           name: "Push Subscription",
           passed: true,
@@ -173,21 +173,21 @@
   }
 
   // Test 5: VAPID Keys
-  console.log("\n%c✓ Test 5: VAPID Keys", "font-weight: bold; color: #333;");
+  console.debug("\n%c✓ Test 5: VAPID Keys", "font-weight: bold; color: #333;");
   const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const hasVapid = !!vapidPublic;
 
   if (hasVapid) {
-    console.log("%c✓ VAPID Public Key configurada", "color: green;");
-    console.log("Key:", vapidPublic.substring(0, 30) + "...");
+    console.debug("%c✓ VAPID Public Key configurada", "color: green;");
+    console.debug("Key:", vapidPublic.substring(0, 30) + "...");
   } else {
     console.error(
       "%c❌ VAPID Public Key NO configurada",
       "color: red; font-weight: bold;",
     );
-    console.log("Debes agregar a .env.local:");
-    console.log("  NEXT_PUBLIC_VAPID_PUBLIC_KEY=...");
-    console.log("  VAPID_PRIVATE_KEY=...");
+    console.debug("Debes agregar a .env.local:");
+    console.debug("  NEXT_PUBLIC_VAPID_PUBLIC_KEY=...");
+    console.debug("  VAPID_PRIVATE_KEY=...");
   }
 
   results.tests.push({
@@ -197,7 +197,7 @@
   });
 
   // Test 6: Verificar BD (Supabase)
-  console.log(
+  console.debug(
     "\n%c✓ Test 6: Verificación en BD",
     "font-weight: bold; color: #333;",
   );
@@ -216,7 +216,7 @@
       });
     } else if (response.ok) {
       const data = await response.json();
-      console.log("%c✓ Suscripciones en BD:", "color: green;", data);
+      console.debug("%c✓ Suscripciones en BD:", "color: green;", data);
       results.tests.push({
         name: "Database Check",
         passed: true,
@@ -231,7 +231,7 @@
       });
     }
   } catch (error) {
-    console.log("ℹ️ No se pudo verificar BD (endpoint no disponible)");
+    console.debug("ℹ️ No se pudo verificar BD (endpoint no disponible)");
     results.tests.push({
       name: "Database Check",
       passed: null,
@@ -240,12 +240,12 @@
   }
 
   // Test 7: Intentar enviar una notificación de prueba
-  console.log(
+  console.debug(
     "\n%c✓ Test 7: Prueba de Notificación",
     "font-weight: bold; color: #333;",
   );
   if (permission === "granted" && subscription) {
-    console.log("Intentando enviar notificación de prueba...");
+    console.debug("Intentando enviar notificación de prueba...");
     try {
       const response = await fetch("/api/send-push", {
         method: "POST",
@@ -259,8 +259,8 @@
 
       const data = await response.json();
       if (response.ok) {
-        console.log("%c✓ Notificación enviada:", "color: green;", data);
-        console.log("👁️ Deberías ver una notificación en tu pantalla");
+        console.debug("%c✓ Notificación enviada:", "color: green;", data);
+        console.debug("👁️ Deberías ver una notificación en tu pantalla");
         results.tests.push({
           name: "Push Test",
           passed: true,
@@ -290,8 +290,8 @@
   }
 
   // Resumen Final
-  console.log("\n%c" + "=".repeat(50), "color: #0066cc;");
-  console.log(
+  console.debug("\n%c" + "=".repeat(50), "color: #0066cc;");
+  console.debug(
     "%c📊 RESUMEN DE TESTS",
     "font-size: 14px; font-weight: bold; color: #0066cc;",
   );
@@ -300,12 +300,12 @@
   const failed = results.tests.filter((t) => t.passed === false).length;
   const skipped = results.tests.filter((t) => t.passed === null).length;
 
-  console.log(`✓ Pasados: ${passed}`);
-  console.log(`❌ Fallidos: ${failed}`);
-  console.log(`⊘ Omitidos: ${skipped}`);
+  console.debug(`✓ Pasados: ${passed}`);
+  console.debug(`❌ Fallidos: ${failed}`);
+  console.debug(`⊘ Omitidos: ${skipped}`);
 
   // Tabla de resultados
-  console.log("\n%cResultados por Test:", "font-weight: bold;");
+  console.debug("\n%cResultados por Test:", "font-weight: bold;");
   console.table(
     results.tests.map((t) => ({
       Test: t.name,
@@ -320,39 +320,41 @@
   );
 
   // Recomendaciones
-  console.log(
+  console.debug(
     "\n%c💡 RECOMENDACIONES",
     "font-size: 12px; font-weight: bold; color: #006600;",
   );
 
   if (failed === 0 && passed > 4) {
-    console.log(
+    console.debug(
       "%c✓ TODO PARECE ESTAR BIEN",
       "color: green; font-weight: bold;",
     );
-    console.log("Si aún no recibe notificaciones con el navegador cerrado:");
-    console.log("  1. Cierra COMPLETAMENTE el navegador (no solo la pestaña)");
-    console.log("  2. Espera 10 segundos");
-    console.log("  3. Reabre el navegador");
-    console.log("  4. El Service Worker debe persistir en background");
+    console.debug("Si aún no recibe notificaciones con el navegador cerrado:");
+    console.debug(
+      "  1. Cierra COMPLETAMENTE el navegador (no solo la pestaña)",
+    );
+    console.debug("  2. Espera 10 segundos");
+    console.debug("  3. Reabre el navegador");
+    console.debug("  4. El Service Worker debe persistir en background");
   } else {
-    console.log(
+    console.debug(
       "%c⚠️ Hay problemas a resolver:",
       "color: orange; font-weight: bold;",
     );
     results.tests.forEach((t) => {
       if (t.passed === false) {
-        console.log(`  • ${t.name}: ${t.error || "Fallo"}`);
+        console.debug(`  • ${t.name}: ${t.error || "Fallo"}`);
       }
     });
   }
 
-  console.log(
+  console.debug(
     "\n%cℹ️ Full Results (para compartir con soporte):",
     "color: #666; font-style: italic;",
   );
-  console.log(JSON.stringify(results, null, 2));
+  console.debug(JSON.stringify(results, null, 2));
 
   window.webPushDebugResults = results;
-  console.log("\n💾 Resultados guardados en: window.webPushDebugResults");
+  console.debug("\n💾 Resultados guardados en: window.webPushDebugResults");
 })();

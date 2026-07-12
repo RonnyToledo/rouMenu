@@ -1,5 +1,5 @@
 import React from "react";
-import CarritoPage from "@/components/Catalogos/Carrito/CarritoPage";
+import CarritoPage from "@/components/catalogo_UI/Carrito/CarritoPage";
 import { Metadata } from "next";
 import { buildShopMetadata } from "@/lib/shopMeta";
 

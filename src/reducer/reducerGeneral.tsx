@@ -21,7 +21,6 @@ export type AppAction =
   | { type: "AddComparar"; payload: string }
   | { type: "Loader"; payload: number }
   | { type: "Search"; payload: string }
-  | { type: "Top"; payload: string }
   | { type: "animateCart"; payload: boolean }
   | { type: "balanceMode"; payload: boolean }
   | { type: "SetPurchaseUuid"; payload: string }
@@ -386,9 +385,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
                   basePrice:
                     variant.basePrice != null
                       ? smartRound(
-                          roundToNearestFive(
-                            (variant.basePrice ?? 0) * factor,
-                          ),
+                          roundToNearestFive((variant.basePrice ?? 0) * factor),
                         )
                       : undefined,
                   price:
@@ -400,9 +397,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
                   oldPrice:
                     variant.oldPrice != null
                       ? smartRound(
-                          roundToNearestFive(
-                            (variant.oldPrice ?? 0) * factor,
-                          ),
+                          roundToNearestFive((variant.oldPrice ?? 0) * factor),
                         )
                       : undefined,
                   priceCompra:
@@ -416,9 +411,7 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
                   embalaje:
                     variant.embalaje != null
                       ? smartRound(
-                          roundToNearestFive(
-                            (variant.embalaje ?? 0) * factor,
-                          ),
+                          roundToNearestFive((variant.embalaje ?? 0) * factor),
                         )
                       : 0,
                   quantity_discounts:
@@ -433,7 +426,9 @@ export function reducerStore(state: AppState, action: AppAction): AppState {
           return {
             ...p,
             default_moneda: newDefault.id,
-            variants: (p.variants || []).map((variant) => convertVariant(variant)!),
+            variants: (p.variants || []).map(
+              (variant) => convertVariant(variant)!,
+            ),
             selected_variant: updatedVariant,
           };
         }),

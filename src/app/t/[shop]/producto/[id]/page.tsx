@@ -1,5 +1,5 @@
 import React from "react";
-import Product from "@/components/Catalogos/Specific/ProductSpecific";
+import Product from "@/components/catalogo_UI/Specific/ProductSpecific";
 import { getProductDetail } from "@/lib/storeData";
 import { notFound } from "next/navigation";
 import axios from "axios";

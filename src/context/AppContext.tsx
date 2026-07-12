@@ -206,27 +206,54 @@ export function AppProvider({ children, storeSSD }: AppProviderProps) {
   }, []);
 
   const smartBack = useCallback(() => {
-    const getBasePath = (path: string) => path.split("?")[0];
+    // Extrae la "familia" de una ruta dinámica: todo menos el último segmento.
+    // /t/shop/producto/slug-abc  →  /t/shop/producto
+    // /t/shop/search?q=x        →  /t/shop/search   (sin query)
+    // /t/shop                   →  /t/shop
+    const getRouteFamily = (path: string) => {
+      const base = path.split("?")[0];
+      const segments = base.split("/").filter(Boolean);
+      // Si tiene más de 2 segmentos (/t/shop/...) recortamos el último slug
+      return segments.length > 2
+        ? "/" + segments.slice(0, -1).join("/")
+        : "/" + segments.join("/");
+    };
 
-    for (let i = record.length - 2; i >= 0; i--) {
-      const candidateBase = getBasePath(record[i].path);
+    const currentFamily = getRouteFamily(pathname);
 
-      if (/^\/t\/[^/]+\/producto\/[^/]+/.test(candidateBase)) continue;
+    // Conjunto de familias ya "quemadas" — empezamos con la familia actual
+    // para nunca volver a un slug hermano del punto de partida.
+    const burnedFamilies = new Set<string>([currentFamily]);
 
-      if (/^\/t\/[^/]+\/search/.test(candidateBase)) {
-        const isConsecutive = record
-          .slice(i + 1)
-          .some((r) => getBasePath(r.path) === candidateBase);
-        if (isConsecutive) continue;
+    for (let i = record.length - 1; i >= 0; i--) {
+      const entry = record[i];
+      const entryFamily = getRouteFamily(entry.path);
+
+      if (burnedFamilies.has(entryFamily)) {
+        // Esta familia ya fue visitada en el camino de regreso → quemar y seguir
+        burnedFamilies.add(entryFamily);
+        continue;
       }
 
-      router.push(record[i].path);
+      // Destino válido
+      router.push(entry.path);
       return;
     }
 
-    const lastShop = record.at(-1)?.shop;
-    router.push(lastShop ? `/t/${lastShop}` : "/");
-  }, [record, router]);
+    // Sin destino válido en el historial
+    // ¿Estamos dentro de una tienda pero NO en su raíz?
+    const shopMatch = pathname.match(/^\/t\/([^/]+)/);
+    if (shopMatch) {
+      const shopRoot = `/t/${shopMatch[1]}`;
+      if (pathname !== shopRoot) {
+        router.push(shopRoot);
+        return;
+      }
+    }
+
+    // Fallback absoluto
+    router.push("/");
+  }, [record, router, pathname]);
 
   // ============== CONTEXT VALUE ==============
 

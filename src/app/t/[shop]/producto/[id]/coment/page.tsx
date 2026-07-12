@@ -1,5 +1,5 @@
 import React from "react";
-import CommentsPage from "@/components/Catalogos/Specific/ComentProduct";
+import CommentsPage from "@/components/catalogo_UI/Specific/ComentProduct";
 export default async function page({
   params,
 }: {

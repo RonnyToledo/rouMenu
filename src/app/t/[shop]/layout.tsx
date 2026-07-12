@@ -2,7 +2,7 @@ import React from "react";
 import MyProvider from "@/context/MyContext";
 import { AppState, ProductVariant } from "@/types/InitialStatus";
 import { notFound } from "next/navigation";
-import Unavailable from "@/components/Catalogos/General/Unavailable";
+import Unavailable from "@/components/catalogo_UI/General/Unavailable";
 import { Metadata } from "next";
 import { buildShopMetadata } from "@/lib/shopMeta";
 import { getStoreShell } from "@/lib/storeData";

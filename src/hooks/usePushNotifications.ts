@@ -21,9 +21,7 @@ export function usePushNotifications(options: PushOptions = {}) {
     useState<NotificationPermission>("default");
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  const logRef = useRef((msg: string, data?: unknown) => {
-    if (debug) console.log(`[Push] ${msg}`, data ?? "");
-  });
+  const logRef = useRef((msg: string, data?: unknown) => {});
   const log = logRef.current;
 
   /**

@@ -1,4 +1,4 @@
-import AllCategoryShowcase from "@/components/Catalogos/Categorias/AllCAtegory";
+import AllCategoryShowcase from "@/components/catalogo_UI/Categorias/AllCAtegory";
 import React from "react";
 
 export default function page() {

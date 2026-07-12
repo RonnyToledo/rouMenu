@@ -1,4 +1,4 @@
-import { Review } from "@/components/Catalogos/About/CommentPage";
+import { Review } from "@/components/catalogo_UI/About/CommentPage";
 import { AppState } from "@/types/InitialStatus";
 
 export function ReordenateData(data: Review[], store: AppState) {

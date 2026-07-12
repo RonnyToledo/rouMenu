@@ -123,7 +123,6 @@ self.addEventListener("push", (event) => {
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
-    console.log("[SW] ✓ Notificación mostrada:", title, "-", body);
   } catch (error) {
     console.error("[SW] ❌ Error procesando push:", error.message);
   }

@@ -1,5 +1,5 @@
 import React from "react";
-import BusquedaPage from "@/components/Explore/Search/SearchPage";
+import BusquedaPage from "@/components/home_UI/Search/SearchPage";
 
 import { Metadata } from "next";
 import { buildSiteMetadata } from "@/lib/siteMeta";

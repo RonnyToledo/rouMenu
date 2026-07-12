@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     const who = user ? `usuario ${user.id}` : `tienda ${shopKey}`;
-    console.log(`[subscribe-push] ✓ Suscripción guardada para ${who}`);
+    console.info(`[subscribe-push] ✓ Suscripción guardada para ${who}`);
 
     return NextResponse.json(
       { success: true, message: "Suscripción guardada" },

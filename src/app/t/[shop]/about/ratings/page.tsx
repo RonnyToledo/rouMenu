@@ -1,5 +1,5 @@
 import React from "react";
-import CommentPage from "@/components/Catalogos/About/CommentPage";
+import CommentPage from "@/components/catalogo_UI/About/CommentPage";
 
 import { Metadata } from "next";
 import { buildShopMetadata } from "@/lib/shopMeta";

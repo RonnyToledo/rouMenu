@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "sileo";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Head from "next/head";
-import Header from "@/components/Explore/Home/Header";
+import Header from "@/components/home_UI/Home/Header";
 import { createClient } from "@/lib/supabase";
 import { logoApp } from "@/lib/image";
 import { Analytics } from "@vercel/analytics/next";
@@ -104,14 +104,14 @@ export default async function RootLayout({
 
 // 1) renombrado y tipado correcto: devuelve Promise<HomeContentData>
 async function modifyData(data: HomeContentData): Promise<HomeContentData> {
-  if (!data?.top_provinces || !Array.isArray(data.top_provinces)) return data;
+  if (!data?.top_municipios || !Array.isArray(data.top_municipios)) return data;
 
   const top_provinces_with_image = await Promise.all(
-    data.top_provinces.map(async (prov) => {
-      const image = await findItemUrlByName(prov.provincia ?? "");
+    data.top_municipios.map(async (prov) => {
+      const image = await findItemUrlByName(prov.municipio ?? "");
       return { ...prov, image: image || logoApp }; // coincide con types.app.ts
     }),
   );
 
-  return { ...data, top_provinces: top_provinces_with_image };
+  return { ...data, top_municipios: top_provinces_with_image };
 }

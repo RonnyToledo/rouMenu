@@ -1,7 +1,7 @@
 // utils/flatten.ts
 
 import { FlatItem } from "./types";
-import { ContectDataInterace } from "@/components/Explore/Info/json/interfaceTsx";
+import { ContectDataInterace } from "@/components/home_UI/Info/json/interfaceTsx";
 
 /**
  * flattenSections
@@ -11,7 +11,7 @@ import { ContectDataInterace } from "@/components/Explore/Info/json/interfaceTsx
  */
 export function flattenSections(
   data: ContectDataInterace[],
-  opts: { basePath?: string; includeNoSlug?: boolean } = {}
+  opts: { basePath?: string; includeNoSlug?: boolean } = {},
 ): FlatItem[] {
   const basePath = opts.basePath?.replace(/\/+$/, "") ?? ""; // eliminar slash final
   const includeNoSlug = !!opts.includeNoSlug;
@@ -28,7 +28,7 @@ export function flattenSections(
   function walk(
     nodes: ContectDataInterace[],
     parentSlugs: string[],
-    level: number
+    level: number,
   ) {
     for (const node of nodes) {
       // determinar slug usable

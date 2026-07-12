@@ -34,7 +34,7 @@ export async function POST() {
       );
     }
 
-    console.log(`✓ Suscripción eliminada para usuario: ${user.id}`);
+    console.info(`✓ Suscripción eliminada para usuario: ${user.id}`);
 
     return NextResponse.json(
       { success: true, message: "Desuscrito de Web Push" },

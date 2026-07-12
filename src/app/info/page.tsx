@@ -1,5 +1,5 @@
 import React from "react";
-import HomePage from "@/components/Explore/Info/admin-catalog-content";
+import HomePage from "@/components/home_UI/Info/admin-catalog-content";
 
 import { Metadata } from "next";
 import { buildSiteMetadata } from "@/lib/siteMeta";
